@@ -25,6 +25,13 @@ export default antfu({
   ignores: [
     'migrations/**/*',
     'next-env.d.ts',
+    'debug-*.js',
+    'fix-*.js',
+    'test-*.js',
+    '*.md',
+    'src/features/**/__tests__/**',
+    'tests/features/**',
+    'src/features/todo/__tests__/**',
   ],
 }, ...tailwind.configs['flat/recommended'], jsxA11y.flatConfigs.recommended, {
   plugins: {

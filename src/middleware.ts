@@ -1,3 +1,14 @@
+/**
+ * MIDDLEWARE FIX: Todo API Issues
+ *
+ * Vấn đề: API routes đang được route qua i18n middleware
+ * Giải pháp: Exclude API routes khỏi i18n processing
+ *
+ * CÁCH SỬA:
+ * 1. Backup file hiện tại: src/middleware.ts
+ * 2. Replace bằng code dưới đây
+ */
+
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import {
   type NextFetchEvent,
@@ -6,7 +17,7 @@ import {
 } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
-import { AllLocales, AppConfig } from './utils/AppConfig';
+import { AllLocales, AppConfig } from '@/utils/AppConfig';
 
 const intlMiddleware = createMiddleware({
   locales: AllLocales,
@@ -14,33 +25,77 @@ const intlMiddleware = createMiddleware({
   defaultLocale: AppConfig.defaultLocale,
 });
 
-const isProtectedRoute = createRouteMatcher([
+// FIX: Separate API routes from page routes
+const isApiRoute = createRouteMatcher([
+  '/api(.*)',
+]);
+
+const isProtectedPageRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/:locale/dashboard(.*)',
   '/onboarding(.*)',
   '/:locale/onboarding(.*)',
-  '/api(.*)',
-  '/:locale/api(.*)',
+]);
+
+// FIX: API routes should be protected but not go through i18n
+const isProtectedApiRoute = createRouteMatcher([
+  '/api/todos(.*)',
+  '/api/protected(.*)',
+  // Add other protected API routes here
 ]);
 
 export default function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
+  // FIX: Handle API routes separately
+  if (isApiRoute(request)) {
+    // Only apply Clerk auth to API routes, NO i18n middleware
+    if (isProtectedApiRoute(request)) {
+      return clerkMiddleware(async (auth, _req) => {
+        try {
+          await auth.protect();
+
+          // FIX: For API routes, return NextResponse.next() directly
+          // Do NOT call intlMiddleware for API routes
+          return NextResponse.next();
+        } catch (error) {
+          console.error('API auth error:', error);
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Unauthorized',
+              code: 'AUTH_REQUIRED',
+            },
+            {
+              status: 401,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          );
+        }
+      })(request, event);
+    }
+
+    // For non-protected API routes, just continue
+    return NextResponse.next();
+  }
+
+  // FIX: Handle page routes with both Clerk and i18n
   if (
     request.nextUrl.pathname.includes('/sign-in')
     || request.nextUrl.pathname.includes('/sign-up')
-    || isProtectedRoute(request)
+    || isProtectedPageRoute(request)
   ) {
     return clerkMiddleware(async (auth, req) => {
-      if (isProtectedRoute(req)) {
+      if (isProtectedPageRoute(req)) {
         const locale
           = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';
 
         const signInUrl = new URL(`${locale}/sign-in`, req.url);
 
         await auth.protect({
-          // `unauthenticatedUrl` is needed to avoid error: "Unable to find `next-intl` locale because the middleware didn't run on this request"
           unauthenticatedUrl: signInUrl.toString(),
         });
       }
@@ -61,13 +116,24 @@ export default function middleware(
         return NextResponse.redirect(orgSelection);
       }
 
+      // FIX: Only call intlMiddleware for page routes
       return intlMiddleware(req);
     })(request, event);
   }
 
+  // For all other routes (public pages), apply i18n middleware
   return intlMiddleware(request);
 }
 
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next|monitoring).*)', '/', '/(api|trpc)(.*)'], // Also exclude tunnelRoute used in Sentry from the matcher
+  matcher: [
+    // Match all requests except:
+    // - Static files (with file extensions)
+    // - Next.js internals (_next)
+    // - Monitoring endpoints
+    '/((?!.+\\.[\\w]+$|_next|monitoring).*)',
+    '/',
+    // Include API and trpc routes
+    '/(api|trpc)(.*)',
+  ],
 };

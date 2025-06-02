@@ -162,5 +162,40 @@
     "message_title": "Message",
     "message_description": "Entrez un message détaillé pour votre todo.",
     "submit_button": "Envoyer"
+  },
+  "todo": {
+    "pageTitle": "Todos",
+    "pageDescription": "Gérez vos todos et restez organisé",
+    "createNew": "Créer Todo",
+    "create": "Créer Todo",
+    "edit": "Modifier Todo",
+    "delete": "Supprimer",
+    "noTodos": "Aucun todo trouvé. Créez votre premier todo pour commencer !",
+    "searchPlaceholder": "Rechercher des todos...",
+    "resetFilters": "Réinitialiser les filtres",
+    "form": {
+      "title": "Titre",
+      "titlePlaceholder": "Entrez le titre du todo",
+      "message": "Message",
+      "messagePlaceholder": "Entrez la description du todo",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "save": "Enregistrer Todo",
+      "cancel": "Annuler"
+    },
+    "sort": {
+      "createdAt": "Date de création",
+      "updatedAt": "Date de modification",
+      "title": "Titre"
+    }
+  },
+  "error": {
+    "fetchTodos": "Échec de récupération des todos",
+    "createTodo": "Échec de création du todo",
+    "updateTodo": "Échec de mise à jour du todo",
+    "deleteTodo": "Échec de suppression du todo"
+  },
+  "pagination": {
+    "page": "Page"
   }
 }
