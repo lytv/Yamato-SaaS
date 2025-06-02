@@ -29,9 +29,9 @@ export default antfu({
     'fix-*.js',
     'test-*.js',
     '*.md',
+    '.serena/**/*',
     'src/features/**/__tests__/**',
     'tests/features/**',
-    'src/features/todo/__tests__/**',
   ],
 }, ...tailwind.configs['flat/recommended'], jsxA11y.flatConfigs.recommended, {
   plugins: {

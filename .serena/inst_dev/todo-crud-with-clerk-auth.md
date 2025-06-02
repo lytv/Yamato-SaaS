@@ -72,14 +72,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { userId, orgId } = auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Use userId for personal todos, orgId for organization todos
   const ownerId = orgId || userId;
-  
+
   // Drizzle query here...
 }
 ```
@@ -116,10 +116,10 @@ export async function GET(request: NextRequest) {
 #### Zod Schemas:
 ```typescript
 // Schemas sẽ implement:
-- CreateTodoSchema
+-CreateTodoSchema
 - UpdateTodoSchema
 - TodoListParamsSchema
-- TodoIdSchema
+- TodoIdSchema;
 ```
 
 ## 🎨 GIAI ĐOẠN 3: FRONTEND FEATURES
@@ -236,7 +236,7 @@ import { useTranslations } from 'next-intl';
 
 export function TodoComponent() {
   const t = useTranslations('todo');
-  
+
   return <h1>{t('title')}</h1>;
 }
 ```

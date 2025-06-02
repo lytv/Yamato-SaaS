@@ -12,11 +12,11 @@
 ### 1. Error Handling Enhancement
 ```typescript
 // Add specific error codes for better client handling
-return NextResponse.json({ 
+return NextResponse.json({
   success: false,
   error: 'Todo not found',
   code: 'TODO_NOT_FOUND', // Specific error code
-  details: { id } 
+  details: { id }
 }, { status: 404 });
 ```
 
@@ -24,8 +24,8 @@ return NextResponse.json({
 ```typescript
 // Use cursor-based pagination for better performance
 const getTodosByOwner = async (
-  ownerId: string, 
-  cursor: number | null, 
+  ownerId: string,
+  cursor: number | null,
   limit: number = 10
 ) => {
   return db.select().from(todoSchema)
@@ -45,9 +45,8 @@ const { mutate: updateTodo } = useMutation({
   onMutate: async (newTodo) => {
     await queryClient.cancelQueries(['todos']);
     const previousTodos = queryClient.getQueryData(['todos']);
-    queryClient.setQueryData(['todos'], (old: Todo[]) => 
-      old.map(todo => todo.id === newTodo.id ? newTodo : todo)
-    );
+    queryClient.setQueryData(['todos'], (old: Todo[]) =>
+      old.map(todo => todo.id === newTodo.id ? newTodo : todo));
     return { previousTodos };
   },
   onError: (err, newTodo, context) => {
@@ -67,7 +66,7 @@ const { mutate: updateTodo } = useMutation({
  */
 export const createTodo = async (data: CreateTodoInput): Promise<Todo> => {
   // ...implementation
-}
+};
 ```
 
 ## ⚠️ Critical Considerations
@@ -108,10 +107,10 @@ const sanitizeTodo = (todo: Todo) => ({
 ### 1. Audit Logging
 ```typescript
 // In API routes, log important operations
-console.audit(`Todo created`, { 
-  id: newTodo.id, 
-  ownerId, 
-  user: userId 
+console.audit(`Todo created`, {
+  id: newTodo.id,
+  ownerId,
+  user: userId
 });
 ```
 
@@ -122,7 +121,7 @@ const dbStatus = await db.execute(sql`SELECT 1`);
 return {
   db: dbStatus ? 'healthy' : 'down'
   // ...other stats
-}
+};
 ```
 
 ### 3. Rate Limiting
@@ -137,7 +136,9 @@ const limiter = rateLimit({
 
 export async function POST(request: NextRequest) {
   const { isRateLimited } = await limiter.check(request);
-  if (isRateLimited) return new Response('Too many requests', { status: 429 });
+  if (isRateLimited) {
+    return new Response('Too many requests', { status: 429 });
+  }
   // ...handler logic
 }
 ```

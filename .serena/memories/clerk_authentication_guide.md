@@ -88,9 +88,10 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 Mở file `src/app/layout.tsx` và cập nhật như sau:
 
 ```tsx
+import './globals.css';
+
 import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
-import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -172,8 +173,8 @@ import { SignIn } from '@clerk/nextjs';
 
 export default function SignInPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-4 bg-white rounded shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded bg-white p-4 shadow-md">
         <SignIn
           path="/sign-in"
           routing="path"
@@ -197,8 +198,8 @@ import { SignUp } from '@clerk/nextjs';
 
 export default function SignUpPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-4 bg-white rounded shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded bg-white p-4 shadow-md">
         <SignUp
           path="/sign-up"
           routing="path"
@@ -218,45 +219,47 @@ Tạo file `src/components/Navbar.tsx`:
 ```tsx
 'use client';
 
-import { UserButton, useAuth } from '@clerk/nextjs';
+import { useAuth, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
 export default function Navbar() {
   const { isLoaded, userId } = useAuth();
 
   return (
-    <nav className="flex justify-between items-center py-4 px-6 bg-white shadow">
+    <nav className="flex items-center justify-between bg-white px-6 py-4 shadow">
       <div>
         <Link href="/" className="text-xl font-bold">
           My App
         </Link>
       </div>
-      
+
       <div className="flex items-center gap-4">
         <Link href="/" className="hover:text-blue-600">
           Home
         </Link>
-        
-        {isLoaded && userId ? (
-          <>
-            <Link href="/dashboard" className="hover:text-blue-600">
-              Dashboard
-            </Link>
-            <UserButton afterSignOutUrl="/" />
-          </>
-        ) : (
-          <>
-            <Link href="/sign-in" className="hover:text-blue-600">
-              Sign In
-            </Link>
-            <Link 
-              href="/sign-up"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Sign Up
-            </Link>
-          </>
-        )}
+
+        {isLoaded && userId
+          ? (
+              <>
+                <Link href="/dashboard" className="hover:text-blue-600">
+                  Dashboard
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            )
+          : (
+              <>
+                <Link href="/sign-in" className="hover:text-blue-600">
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
       </div>
     </nav>
   );
@@ -267,10 +270,12 @@ Bây giờ, thêm Navbar vào layout:
 
 ```tsx
 // src/app/layout.tsx
+import './globals.css';
+
 import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
+
 import Navbar from '@/components/Navbar';
-import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -289,7 +294,7 @@ export default function RootLayout({
       <html lang="en">
         <body className={inter.className}>
           <Navbar />
-          <main className="container mx-auto py-6 px-4">{children}</main>
+          <main className="container mx-auto px-4 py-6">{children}</main>
         </body>
       </html>
     </ClerkProvider>
@@ -318,12 +323,19 @@ export default function ProfileClient() {
   return (
     <div>
       <h1>Hồ sơ người dùng</h1>
-      <p>Xin chào, {user.firstName}!</p>
-      <p>Email: {user.primaryEmailAddress?.emailAddress}</p>
-      <img 
-        src={user.imageUrl} 
+      <p>
+        Xin chào,
+        {user.firstName}
+        !
+      </p>
+      <p>
+        Email:
+        {user.primaryEmailAddress?.emailAddress}
+      </p>
+      <img
+        src={user.imageUrl}
         alt={`${user.firstName}'s avatar`}
-        className="w-20 h-20 rounded-full" 
+        className="size-20 rounded-full"
       />
     </div>
   );
@@ -346,9 +358,20 @@ export default async function ProfileServer() {
   return (
     <div>
       <h1>Hồ sơ người dùng (Server Component)</h1>
-      <p>ID: {userId}</p>
-      <p>Tên: {user.firstName} {user.lastName}</p>
-      <p>Email: {user.emailAddresses[0]?.emailAddress}</p>
+      <p>
+        ID:
+        {userId}
+      </p>
+      <p>
+        Tên:
+        {user.firstName}
+        {' '}
+        {user.lastName}
+      </p>
+      <p>
+        Email:
+        {user.emailAddresses[0]?.emailAddress}
+      </p>
     </div>
   );
 }
@@ -364,19 +387,23 @@ import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
   const { userId } = auth();
-  
+
   if (!userId) {
     redirect('/sign-in');
   }
-  
+
   const user = await currentUser();
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <div className="bg-white p-6 rounded shadow">
+      <h1 className="mb-4 text-2xl font-bold">Dashboard</h1>
+      <div className="rounded bg-white p-6 shadow">
         <p className="mb-2">
-          <span className="font-semibold">Xin chào, {user?.firstName}!</span>
+          <span className="font-semibold">
+            Xin chào,
+            {user?.firstName}
+            !
+          </span>
         </p>
         <p>
           Bạn đã đăng nhập thành công vào ứng dụng.
@@ -401,13 +428,13 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const { userId } = auth();
-  
+
   if (!userId) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
-  
+
   const user = await currentUser();
-  
+
   return NextResponse.json({
     id: user?.id,
     firstName: user?.firstName,
@@ -423,8 +450,8 @@ export async function GET() {
 ```tsx
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
 
 export default function UserProfile() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -437,11 +464,11 @@ export default function UserProfile() {
       const fetchUserData = async () => {
         try {
           const response = await fetch('/api/protected/user');
-          
+
           if (!response.ok) {
             throw new Error('Failed to fetch user data');
           }
-          
+
           const data = await response.json();
           setUserData(data);
         } catch (err) {
@@ -464,7 +491,12 @@ export default function UserProfile() {
   }
 
   if (error) {
-    return <div>Lỗi: {error}</div>;
+    return (
+      <div>
+        Lỗi:
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -472,13 +504,24 @@ export default function UserProfile() {
       <h2>Thông tin người dùng</h2>
       {userData && (
         <div>
-          <p>ID: {userData.id}</p>
-          <p>Tên: {userData.firstName} {userData.lastName}</p>
-          <p>Email: {userData.email}</p>
-          <img 
-            src={userData.imageUrl} 
-            alt="Avatar" 
-            className="w-20 h-20 rounded-full"
+          <p>
+            ID:
+            {userData.id}
+          </p>
+          <p>
+            Tên:
+            {userData.firstName}
+            {' '}
+            {userData.lastName}
+          </p>
+          <p>
+            Email:
+            {userData.email}
+          </p>
+          <img
+            src={userData.imageUrl}
+            alt="Avatar"
+            className="size-20 rounded-full"
           />
         </div>
       )}
@@ -501,9 +544,9 @@ import { dark } from '@clerk/themes';
 
 export default function CustomSignIn() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-4 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Đăng nhập</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded bg-white p-4 shadow-md">
+        <h1 className="mb-4 text-center text-2xl font-bold">Đăng nhập</h1>
         <SignIn
           path="/sign-in"
           routing="path"
@@ -512,7 +555,7 @@ export default function CustomSignIn() {
           appearance={{
             baseTheme: dark,
             elements: {
-              formButtonPrimary: 
+              formButtonPrimary:
                 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',
               card: 'bg-white',
               headerTitle: 'text-gray-900',
@@ -545,11 +588,13 @@ Clerk hỗ trợ đa ngôn ngữ, cho phép bạn cung cấp trải nghiệm ng�
 
 ```tsx
 // src/app/layout.tsx
-import { ClerkProvider } from '@clerk/nextjs';
-import { enUS, viVN } from '@clerk/localizations';
-import { Inter } from 'next/font/google';
-import Navbar from '@/components/Navbar';
 import './globals.css';
+
+import { enUS, viVN } from '@clerk/localizations';
+import { ClerkProvider } from '@clerk/nextjs';
+import { Inter } from 'next/font/google';
+
+import Navbar from '@/components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -566,7 +611,7 @@ export default function RootLayout({
   // Xác định ngôn ngữ dựa trên các tham số
   // Ví dụ: có thể lấy từ cookie, local storage, hoặc tham số URL
   const locale = 'vi'; // Hoặc 'en' cho tiếng Anh
-  
+
   // Chọn gói bản địa hóa tương ứng
   const localization = locale === 'vi' ? viVN : enUS;
 
@@ -575,7 +620,7 @@ export default function RootLayout({
       <html lang={locale}>
         <body className={inter.className}>
           <Navbar />
-          <main className="container mx-auto py-6 px-4">{children}</main>
+          <main className="container mx-auto px-4 py-6">{children}</main>
         </body>
       </html>
     </ClerkProvider>
@@ -603,8 +648,8 @@ import { OrganizationProfile } from '@clerk/nextjs';
 
 export default function OrganizationProfilePage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-3xl p-4 bg-white rounded shadow-md">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-3xl rounded bg-white p-4 shadow-md">
         <OrganizationProfile
           path="/organization-profile"
           routing="path"
@@ -678,14 +723,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { userId, sessionClaims } = getAuth(request);
-  
+
   if (!userId) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
-  
+
   // sessionClaims chứa thông tin từ JWT token
   // Có thể được sử dụng để xác thực với dịch vụ bên thứ ba
-  
+
   return NextResponse.json({
     userId,
     sessionClaims,
@@ -701,7 +746,7 @@ export async function GET(request: NextRequest) {
 
 **Giải pháp**: Kiểm tra kết nối internet và đảm bảo rằng biến môi trường `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` và `CLERK_SECRET_KEY` đã được cấu hình đúng.
 
-### 2. Lỗi "Clerk: Failed to resolve environment" 
+### 2. Lỗi "Clerk: Failed to resolve environment"
 
 **Vấn đề**: Bạn gặp lỗi "Clerk: Failed to resolve environment" khi chạy ứng dụng.
 
@@ -717,7 +762,7 @@ export async function GET(request: NextRequest) {
 
 **Vấn đề**: Middleware không hoạt động đúng, routes không được bảo vệ.
 
-**Giải pháp**: 
+**Giải pháp**:
 - Đảm bảo file `middleware.ts` được đặt đúng vị trí (thư mục gốc của `src` hoặc thư mục gốc dự án)
 - Kiểm tra cấu hình `matcher` trong `middleware.ts`
 - Đảm bảo rằng bạn đang sử dụng `auth().protect()` cho routes cần bảo vệ
