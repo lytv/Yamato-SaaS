@@ -11,7 +11,7 @@
     "clean": "rimraf .next out coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check-types": "tsc --noEmit --pretty",
+    "check-types": "tsc --project tsconfig.build.json --noEmit --pretty",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "commit": "cz",

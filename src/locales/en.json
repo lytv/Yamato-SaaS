@@ -89,6 +89,7 @@
   "DashboardLayout": {
     "home": "Home",
     "todos": "Todos",
+    "products": "Products",
     "members": "Members",
     "billing": "Billing",
     "settings": "Settings"
@@ -197,5 +198,45 @@
   },
   "pagination": {
     "page": "Page"
+  },
+  "product": {
+    "pageTitle": "Products",
+    "pageDescription": "Manage your products and inventory",
+    "createNew": "Create Product",
+    "create": "Create Product",
+    "edit": "Edit Product",
+    "delete": "Delete",
+    "noProducts": "No products found. Create your first product to get started!",
+    "searchPlaceholder": "Search products...",
+    "resetFilters": "Reset Filters",
+    "form": {
+      "productCode": "Product Code",
+      "productCodePlaceholder": "e.g., PROD-001",
+      "productName": "Product Name",
+      "productNamePlaceholder": "Enter product name",
+      "category": "Category",
+      "categoryPlaceholder": "e.g., Electronics, Software",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes about the product...",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "save": "Save Product",
+      "cancel": "Cancel",
+      "reset": "Reset"
+    },
+    "sort": {
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "productName": "Product Name",
+      "productCode": "Product Code"
+    },
+    "table": {
+      "productCode": "Product Code",
+      "productName": "Product Name",
+      "category": "Category",
+      "created": "Created",
+      "updated": "Updated",
+      "actions": "Actions"
+    }
   }
 }

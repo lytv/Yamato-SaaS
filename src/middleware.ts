@@ -40,6 +40,7 @@ const isProtectedPageRoute = createRouteMatcher([
 // FIX: API routes should be protected but not go through i18n
 const isProtectedApiRoute = createRouteMatcher([
   '/api/todos(.*)',
+  '/api/products(.*)', // ✅ CRITICAL: Add products API routes
   '/api/protected(.*)',
   // Add other protected API routes here
 ]);

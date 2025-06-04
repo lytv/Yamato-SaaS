@@ -89,6 +89,7 @@
   "DashboardLayout": {
     "home": "Accueil",
     "todos": "Todos",
+    "products": "Produits",
     "members": "Membres",
     "billing": "Facturation",
     "settings": "Réglages"
@@ -197,5 +198,45 @@
   },
   "pagination": {
     "page": "Page"
+  },
+  "product": {
+    "pageTitle": "Produits",
+    "pageDescription": "Gérez vos produits et votre inventaire",
+    "createNew": "Créer Produit",
+    "create": "Créer Produit",
+    "edit": "Modifier Produit",
+    "delete": "Supprimer",
+    "noProducts": "Aucun produit trouvé. Créez votre premier produit pour commencer !",
+    "searchPlaceholder": "Rechercher des produits...",
+    "resetFilters": "Réinitialiser les filtres",
+    "form": {
+      "productCode": "Code Produit",
+      "productCodePlaceholder": "ex., PROD-001",
+      "productName": "Nom du Produit",
+      "productNamePlaceholder": "Entrez le nom du produit",
+      "category": "Catégorie",
+      "categoryPlaceholder": "ex., Électronique, Logiciel",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes supplémentaires sur le produit...",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "save": "Enregistrer Produit",
+      "cancel": "Annuler",
+      "reset": "Réinitialiser"
+    },
+    "sort": {
+      "createdAt": "Date de création",
+      "updatedAt": "Date de modification",
+      "productName": "Nom du Produit",
+      "productCode": "Code Produit"
+    },
+    "table": {
+      "productCode": "Code Produit",
+      "productName": "Nom du Produit",
+      "category": "Catégorie",
+      "created": "Créé",
+      "updated": "Modifié",
+      "actions": "Actions"
+    }
   }
 }

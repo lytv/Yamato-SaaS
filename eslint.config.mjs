@@ -63,6 +63,16 @@ export default antfu({
   ],
   ...playwright.configs['flat/recommended'],
 }, {
+  files: [
+    '**/debug-products/**',
+    '**/api/debug-*/**',
+    '**/debug-*.ts',
+    '**/debug-*.js',
+  ],
+  rules: {
+    'no-console': 'off', // Allow console statements in debug files
+  },
+}, {
   rules: {
     'import/order': 'off', // Avoid conflicts with `simple-import-sort` plugin
     'sort-imports': 'off', // Avoid conflicts with `simple-import-sort` plugin

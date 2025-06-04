@@ -55,3 +55,25 @@ export const todoSchema = pgTable('todo', {
     .notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
+
+export const productSchema = pgTable('product', {
+  id: serial('id').primaryKey(), // STT - Số thứ tự tự động tăng
+  ownerId: text('owner_id').notNull(), // Chủ sở hữu
+  productCode: text('product_code').notNull(), // Mã Hàng
+  productName: text('product_name').notNull(), // Tên Hàng
+  notes: text('notes'), // Ghi Chú (có thể để trống)
+  category: text('category'), // Phân Nhóm (có thể để trống)
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    // Index để tìm kiếm nhanh theo mã hàng và owner
+    productCodeOwnerIdx: uniqueIndex('product_code_owner_idx').on(
+      table.productCode,
+      table.ownerId,
+    ),
+  };
+});
