@@ -90,6 +90,7 @@
     "home": "Home",
     "todos": "Todos",
     "products": "Products",
+    "production_steps": "Production Steps",
     "members": "Members",
     "billing": "Billing",
     "settings": "Settings"
@@ -237,6 +238,58 @@
       "created": "Created",
       "updated": "Updated",
       "actions": "Actions"
+    }
+  },
+  "productionStep": {
+    "pageTitle": "Production Steps",
+    "pageDescription": "Manage your production steps and workflow",
+    "createNew": "Create Production Step",
+    "create": "Create Production Step",
+    "edit": "Edit Production Step",
+    "delete": "Delete",
+    "noProductionSteps": "No production steps found. Create your first production step to get started!",
+    "searchPlaceholder": "Search production steps...",
+    "resetFilters": "Reset Filters",
+    "form": {
+      "stepCode": "Step Code",
+      "stepCodePlaceholder": "e.g., CD61",
+      "stepName": "Step Name",
+      "stepNamePlaceholder": "e.g., Ủi túi lớn",
+      "filmSequence": "Film Sequence",
+      "filmSequencePlaceholder": "e.g., 61",
+      "stepGroup": "Step Group",
+      "stepGroupPlaceholder": "e.g., Group A",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "save": "Save Production Step",
+      "cancel": "Cancel",
+      "reset": "Reset"
+    },
+    "sort": {
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "stepName": "Step Name",
+      "stepCode": "Step Code",
+      "filmSequence": "Film Sequence"
+    },
+    "table": {
+      "stepCode": "Step Code",
+      "stepName": "Step Name",
+      "filmSequence": "Film Sequence",
+      "stepGroup": "Step Group",
+      "created": "Created",
+      "updated": "Updated",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "create": "Create Production Step",
+      "update": "Update Production Step",
+      "cancel": "Cancel",
+      "reset": "Reset"
     }
   }
 }

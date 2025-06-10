@@ -77,3 +77,25 @@ export const productSchema = pgTable('product', {
     ),
   };
 });
+
+export const productionStepSchema = pgTable('production_step', {
+  id: serial('id').primaryKey(), // STT - Auto-incrementing
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+  stepCode: text('step_code').notNull(), // Mã Công Đoạn
+  stepName: text('step_name').notNull(), // Tên Công Đoạn
+  filmSequence: text('film_sequence'), // Phim Tát - optional
+  stepGroup: text('step_group'), // Phân Nhóm - optional
+  notes: text('notes'), // Ghi chú - optional
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    stepCodeOwnerIdx: uniqueIndex('step_code_owner_idx').on(
+      table.stepCode,
+      table.ownerId,
+    ),
+  };
+});

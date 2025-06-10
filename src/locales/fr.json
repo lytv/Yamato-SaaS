@@ -90,6 +90,7 @@
     "home": "Accueil",
     "todos": "Todos",
     "products": "Produits",
+    "production_steps": "Étapes de Production",
     "members": "Membres",
     "billing": "Facturation",
     "settings": "Réglages"
@@ -237,6 +238,58 @@
       "created": "Créé",
       "updated": "Modifié",
       "actions": "Actions"
+    }
+  },
+  "productionStep": {
+    "pageTitle": "Étapes de Production",
+    "pageDescription": "Gérez vos étapes de production et flux de travail",
+    "createNew": "Créer Étape de Production",
+    "create": "Créer Étape de Production",
+    "edit": "Modifier Étape de Production",
+    "delete": "Supprimer",
+    "noProductionSteps": "Aucune étape de production trouvée. Créez votre première étape pour commencer !",
+    "searchPlaceholder": "Rechercher des étapes de production...",
+    "resetFilters": "Réinitialiser les filtres",
+    "form": {
+      "stepCode": "Code d'Étape",
+      "stepCodePlaceholder": "ex., CD61",
+      "stepName": "Nom de l'Étape",
+      "stepNamePlaceholder": "ex., Ủi túi lớn",
+      "filmSequence": "Séquence de Film",
+      "filmSequencePlaceholder": "ex., 61",
+      "stepGroup": "Groupe d'Étape",
+      "stepGroupPlaceholder": "ex., Groupe A",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes supplémentaires...",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "save": "Enregistrer Étape de Production",
+      "cancel": "Annuler",
+      "reset": "Réinitialiser"
+    },
+    "sort": {
+      "createdAt": "Date de création",
+      "updatedAt": "Date de modification",
+      "stepName": "Nom de l'Étape",
+      "stepCode": "Code d'Étape",
+      "filmSequence": "Séquence de Film"
+    },
+    "table": {
+      "stepCode": "Code d'Étape",
+      "stepName": "Nom de l'Étape",
+      "filmSequence": "Séquence de Film",
+      "stepGroup": "Groupe d'Étape",
+      "created": "Créé",
+      "updated": "Modifié",
+      "actions": "Actions"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "create": "Créer Étape de Production",
+      "update": "Mettre à jour Étape de Production",
+      "cancel": "Annuler",
+      "reset": "Réinitialiser"
     }
   }
 }
