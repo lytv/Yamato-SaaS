@@ -5,7 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { Download } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { ProductSkeleton } from '@/features/product/ProductSkeleton';
@@ -13,7 +13,10 @@ import { useProductExport } from '@/hooks/useProductExport';
 import { useProductFilters } from '@/hooks/useProductFilters';
 import { useProductMutations } from '@/hooks/useProductMutations';
 import { useProducts } from '@/hooks/useProducts';
+import type { ImportResult } from '@/types/import';
 import type { Product } from '@/types/product';
+
+import { ProductImportModal } from './ProductImportModal';
 
 type ProductListProps = {
   onEdit: (product: Product) => void;
@@ -24,6 +27,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
   const { userId, orgId } = useAuth();
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const {
     search,
@@ -49,6 +53,15 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
 
   const { deleteProduct, isDeleting } = useProductMutations();
   const { exportProducts, isExporting, exportError, clearError } = useProductExport();
+
+  // Handle import success
+  const handleImportSuccess = (_result: ImportResult) => {
+    // Refresh product list
+    refresh();
+
+    // The modal will show the success/error details,
+    // so we don't need additional user notification here
+  };
 
   // Format date for display
   const formatDate = (dateString: string | Date): string => {
@@ -214,6 +227,17 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
           >
             <Download className="mr-2 size-4" />
             {isExporting ? 'Exporting...' : 'Export'}
+          </button>
+
+          {/* Import Button */}
+          <button
+            type="button"
+            onClick={() => setImportModalOpen(true)}
+            aria-label="Import products from Excel"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <Upload className="mr-2 size-4" />
+            Import
           </button>
 
           {/* Clear Search */}
@@ -397,6 +421,13 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
           </div>
         </div>
       )}
+
+      {/* Import Modal */}
+      <ProductImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 }

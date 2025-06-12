@@ -166,3 +166,18 @@ export type ProductExportParams = z.infer<typeof productExportParamsSchema>;
 export function validateProductExportParams(data: unknown): ProductExportParams {
   return productExportParamsSchema.parse(data);
 }
+
+// ✅ Import-specific validation that reuses existing schemas
+export const importProductRowSchema = z.object({
+  productCode: productFormSchema.shape.productCode,
+  productName: productFormSchema.shape.productName,
+  category: productFormSchema.shape.category.optional(),
+  notes: productFormSchema.shape.notes.optional(),
+  rowNumber: z.number().int().positive(),
+});
+
+export type ImportProductRow = z.infer<typeof importProductRowSchema>;
+
+export function validateImportProductRow(data: unknown): ImportProductRow {
+  return importProductRowSchema.parse(data);
+}

@@ -209,9 +209,36 @@
     "create": "Create Product",
     "edit": "Edit Product",
     "delete": "Delete",
+    "importButton": "Import",
+    "export": "Export",
     "noProducts": "No products found. Create your first product to get started!",
     "searchPlaceholder": "Search products...",
     "resetFilters": "Reset Filters",
+    "importing": "Importing...",
+    "exporting": "Exporting...",
+    "import": {
+      "title": "Import Products from Excel",
+      "selectFile": "Select Excel File (.xlsx)",
+      "selectedFile": "Selected: {fileName} ({fileSize} MB)",
+      "button": "Import Products",
+      "cancel": "Cancel",
+      "close": "Close",
+      "results": {
+        "title": "Import Results",
+        "totalRows": "Total rows processed: {count}",
+        "successCount": "Successfully created: {count}",
+        "errorCount": "Failed: {count}",
+        "errorsTitle": "Errors:",
+        "moreErrors": "... and {count} more errors"
+      },
+      "errors": {
+        "noFile": "Please select a file",
+        "fileTooLarge": "File too large (max 10MB)",
+        "invalidFileType": "Invalid file type. Only .xlsx and .xls files are allowed",
+        "parseError": "Failed to parse Excel file",
+        "importFailed": "Import failed"
+      }
+    },
     "form": {
       "productCode": "Product Code",
       "productCodePlaceholder": "e.g., PROD-001",
