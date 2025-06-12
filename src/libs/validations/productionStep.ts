@@ -154,3 +154,30 @@ export function validateUpdateProductionStep(data: unknown): UpdateProductionSte
 export function validateProductionStepId(data: unknown): ProductionStepIdRequest {
   return productionStepIdSchema.parse(data);
 }
+
+// ✅ ProductionStep export validation schema (extends list params but removes pagination)
+export const productionStepExportParamsSchema = z.object({
+  // ✅ Same search validation as list params
+  search: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) => val || undefined)
+    .pipe(z.string().trim().max(255).optional()),
+
+  // ✅ Same sort validation as list params
+  sortBy: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) =>
+      val && ['createdAt', 'updatedAt', 'stepName', 'stepCode', 'filmSequence'].includes(val) ? val : 'createdAt',
+    ),
+
+  sortOrder: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) =>
+      val && ['asc', 'desc'].includes(val) ? val : 'desc',
+    ),
+});
+
+// ✅ Type export from export schema
+export type ProductionStepExportParams = z.infer<typeof productionStepExportParamsSchema>;
+
+// ✅ Export validation helper function
+export function validateProductionStepExportParams(data: unknown): ProductionStepExportParams {
+  return productionStepExportParamsSchema.parse(data);
+}
