@@ -33,12 +33,21 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 label: t('todos'),
               },
               {
-                href: '/dashboard/products',
-                label: t('products'),
-              },
-              {
-                href: '/dashboard/production-steps',
-                label: t('production_steps'),
+                label: t('product'),
+                submenu: [
+                  {
+                    href: '/dashboard/products',
+                    label: t('products'),
+                  },
+                  {
+                    href: '/dashboard/production-steps',
+                    label: t('production_steps'),
+                  },
+                  {
+                    href: '/dashboard/production-step-details',
+                    label: t('production_step_details'),
+                  },
+                ],
               },
               {
                 href: '/dashboard/organization-profile/organization-members',

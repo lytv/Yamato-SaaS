@@ -17,11 +17,17 @@ import { Separator } from '@/components/ui/separator';
 import { Logo } from '@/templates/Logo';
 import { getI18nPath } from '@/utils/Helpers';
 
-export const DashboardHeader = (props: {
-  menu: {
+type MenuItem = {
+  href?: string;
+  label: string;
+  submenu?: {
     href: string;
     label: string;
   }[];
+};
+
+export const DashboardHeader = (props: {
+  menu: MenuItem[];
 }) => {
   const locale = useLocale();
 
@@ -63,8 +69,28 @@ export const DashboardHeader = (props: {
         <nav className="ml-3 max-lg:hidden">
           <ul className="flex flex-row items-center gap-x-3 text-lg font-medium [&_a:hover]:opacity-100 [&_a]:opacity-75">
             {props.menu.map(item => (
-              <li key={item.href}>
-                <ActiveLink href={item.href}>{item.label}</ActiveLink>
+              <li key={item.href || item.label}>
+                {item.submenu
+                  ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="flex items-center gap-1 opacity-75 hover:opacity-100 focus:opacity-100 focus:outline-none">
+                          {item.label}
+                          <svg className="size-4 fill-current transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z" />
+                          </svg>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {item.submenu.map(subitem => (
+                            <DropdownMenuItem key={subitem.href} asChild>
+                              <Link href={subitem.href}>{subitem.label}</Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )
+                  : (
+                      <ActiveLink href={item.href!}>{item.label}</ActiveLink>
+                    )}
               </li>
             ))}
           </ul>
@@ -80,11 +106,21 @@ export const DashboardHeader = (props: {
                   <ToggleMenuButton />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {props.menu.map(item => (
-                    <DropdownMenuItem key={item.href} asChild>
-                      <Link href={item.href}>{item.label}</Link>
-                    </DropdownMenuItem>
-                  ))}
+                  {props.menu.flatMap(item =>
+                    item.submenu
+                      ? item.submenu.map(subitem => (
+                        <DropdownMenuItem key={subitem.href} asChild>
+                          <Link href={subitem.href}>{subitem.label}</Link>
+                        </DropdownMenuItem>
+                      ))
+                      : item.href
+                        ? [
+                            <DropdownMenuItem key={item.href} asChild>
+                              <Link href={item.href}>{item.label}</Link>
+                            </DropdownMenuItem>,
+                          ]
+                        : [],
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

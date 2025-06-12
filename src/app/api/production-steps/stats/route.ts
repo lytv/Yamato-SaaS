@@ -14,6 +14,9 @@ import type {
   ProductionStepStatsResponse,
 } from '@/types/productionStep';
 
+// Force dynamic rendering due to auth() usage
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/production-steps/stats - Get production step statistics for dashboard
  */

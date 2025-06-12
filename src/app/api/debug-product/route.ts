@@ -9,6 +9,9 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering due to auth() usage
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/debug-product - Debug authentication and environment
  */

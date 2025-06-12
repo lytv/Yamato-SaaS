@@ -89,8 +89,10 @@
   "DashboardLayout": {
     "home": "Home",
     "todos": "Todos",
+    "product": "Product",
     "products": "Products",
     "production_steps": "Production Steps",
+    "production_step_details": "Production Step Details",
     "members": "Members",
     "billing": "Billing",
     "settings": "Settings"

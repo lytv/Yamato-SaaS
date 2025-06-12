@@ -14,6 +14,9 @@ import type {
   ProductStatsResponse,
 } from '@/types/product';
 
+// Force dynamic rendering due to auth() usage
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/products/stats - Get product statistics for dashboard
  */

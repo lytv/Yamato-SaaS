@@ -14,6 +14,9 @@ import type {
   TodoStatsResponse,
 } from '@/types/todo';
 
+// Force dynamic rendering due to auth() usage
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/todos/stats - Get todo statistics for dashboard
  */
