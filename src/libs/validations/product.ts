@@ -139,3 +139,30 @@ export function validateUpdateProduct(data: unknown): UpdateProductRequest {
 export function validateProductId(data: unknown): ProductIdRequest {
   return productIdSchema.parse(data);
 }
+
+// ✅ Product export validation schema (extends list params but removes pagination)
+export const productExportParamsSchema = z.object({
+  // ✅ Same search validation as list params
+  search: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) => val || undefined)
+    .pipe(z.string().trim().max(255).optional()),
+
+  // ✅ Same sort validation as list params
+  sortBy: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) =>
+      val && ['createdAt', 'updatedAt', 'productName', 'productCode'].includes(val) ? val : 'createdAt',
+    ),
+
+  sortOrder: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) =>
+      val && ['asc', 'desc'].includes(val) ? val : 'desc',
+    ),
+});
+
+// ✅ Type export from export schema
+export type ProductExportParams = z.infer<typeof productExportParamsSchema>;
+
+// ✅ Export validation helper function
+export function validateProductExportParams(data: unknown): ProductExportParams {
+  return productExportParamsSchema.parse(data);
+}

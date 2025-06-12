@@ -5,9 +5,11 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
+import { Download } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { ProductSkeleton } from '@/features/product/ProductSkeleton';
+import { useProductExport } from '@/hooks/useProductExport';
 import { useProductFilters } from '@/hooks/useProductFilters';
 import { useProductMutations } from '@/hooks/useProductMutations';
 import { useProducts } from '@/hooks/useProducts';
@@ -46,6 +48,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
   });
 
   const { deleteProduct, isDeleting } = useProductMutations();
+  const { exportProducts, isExporting, exportError, clearError } = useProductExport();
 
   // Format date for display
   const formatDate = (dateString: string | Date): string => {
@@ -98,6 +101,21 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
   // Handle sort order toggle
   const handleSortOrderToggle = (): void => {
     handleSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  // Handle export products
+  const handleExportProducts = async (): Promise<void> => {
+    try {
+      await exportProducts({
+        search,
+        sortBy,
+        sortOrder,
+      });
+      clearError(); // Clear any previous errors
+    } catch (err) {
+      // Error is already handled in the hook
+      console.error('Export failed:', err);
+    }
   };
 
   // Loading state
@@ -186,6 +204,18 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
             </button>
           </div>
 
+          {/* Export Button */}
+          <button
+            type="button"
+            onClick={handleExportProducts}
+            disabled={isExporting || products.length === 0}
+            aria-label="Export products to Excel"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="mr-2 size-4" />
+            {isExporting ? 'Exporting...' : 'Export'}
+          </button>
+
           {/* Clear Search */}
           {search && (
             <button
@@ -199,6 +229,24 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
           )}
         </div>
       </div>
+
+      {/* Export Error Display */}
+      {exportError && (
+        <div className="rounded-md bg-red-50 p-4">
+          <div className="text-sm text-red-800">
+            Export failed:
+            {' '}
+            {exportError}
+            <button
+              type="button"
+              onClick={clearError}
+              className="ml-2 underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search Results Info */}
       {search && (

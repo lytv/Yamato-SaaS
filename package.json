@@ -60,6 +60,7 @@
     "sharp": "^0.33.5",
     "stripe": "^16.12.0",
     "tailwind-merge": "^2.5.4",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -89,7 +90,7 @@
     "@testing-library/jest-dom": "^6.6.1",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
-    "@types/node": "^22.7.6",
+    "@types/node": "^22.15.31",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.11",
     "@vitejs/plugin-react": "^4.3.2",
