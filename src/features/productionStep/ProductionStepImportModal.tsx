@@ -1,25 +1,18 @@
-/**
- * ProductImportModal Component
- * Single-step modal following ProductModal pattern
- * Handles Excel file upload and product import
- */
-
 import React, { useState } from 'react';
 
-import { useProductImport } from '@/hooks/useProductImport';
-import type { ImportResult } from '@/types/import';
+import { useProductionStepImport } from '@/hooks/useProductionStepImport';
+import type { ImportProductionStepResult } from '@/types/import';
 
-type ProductImportModalProps = {
+type ProductionStepImportModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (result: ImportResult) => void;
+  onSuccess: (result: ImportProductionStepResult) => void;
 };
 
-export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImportModalProps) {
+export function ProductionStepImportModal({ isOpen, onClose, onSuccess }: ProductionStepImportModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { importProducts, isImporting, importError, importResult, clearError, clearResult } = useProductImport();
+  const { importProductionSteps, isImporting, importError, importResult, clearError, clearResult } = useProductionStepImport();
 
-  // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -29,27 +22,27 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
     }
   };
 
-  // Handle import
   const handleImport = async () => {
     if (!selectedFile) {
       return;
     }
-
     try {
-      const result = await importProducts(selectedFile);
+      const result = await importProductionSteps(selectedFile);
       onSuccess(result);
-      // Keep modal open to show results
     } catch {
-      // Error is handled by hook, no need for local error variable
+      // Error handled by hook
     }
   };
 
-  // Handle close
   const handleClose = () => {
     setSelectedFile(null);
     clearError();
     clearResult();
     onClose();
+  };
+
+  const handleBackdropClick = () => {
+    handleClose();
   };
 
   if (!isOpen) {
@@ -70,13 +63,13 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
           aria-label="Close modal"
           tabIndex={0}
           className="absolute right-4 top-4 z-10 rounded bg-gray-200 px-2 py-1 text-gray-700 hover:bg-gray-300 focus:outline-none"
-          onClick={handleClose}
+          onClick={handleBackdropClick}
         >
           ×
         </button>
         <div className="p-6">
           <h2 id="import-modal-title" className="mb-4 text-xl font-semibold">
-            Import Products from Excel
+            Import Production Steps from Excel
           </h2>
 
           {/* File Upload Section */}
@@ -133,8 +126,6 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                   </p>
                 )}
               </div>
-
-              {/* Error Details */}
               {importResult.errors.length > 0 && (
                 <div className="mt-3">
                   <h4 className="mb-2 text-sm font-medium text-gray-900">Errors:</h4>
@@ -174,7 +165,6 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
             >
               {importResult ? 'Close' : 'Cancel'}
             </button>
-
             {!importResult && (
               <button
                 type="button"
@@ -182,7 +172,7 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                 disabled={!selectedFile || isImporting}
                 className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {isImporting ? 'Importing...' : 'Import Products'}
+                {isImporting ? 'Importing...' : 'Import Production Steps'}
               </button>
             )}
           </div>

@@ -181,3 +181,45 @@ export type ProductionStepExportParams = z.infer<typeof productionStepExportPara
 export function validateProductionStepExportParams(data: unknown): ProductionStepExportParams {
   return productionStepExportParamsSchema.parse(data);
 }
+
+// ✅ ProductionStep import validation schema
+export const importProductionStepRowSchema = z.object({
+  stepCode: z.string()
+    .trim()
+    .min(1, 'Step code is required')
+    .max(50, 'Step code must be 50 characters or less')
+    .regex(/^[\w-]+$/, 'Step code can only contain letters, numbers, underscores and dashes'),
+
+  stepName: z.string()
+    .trim()
+    .min(1, 'Step name is required')
+    .max(200, 'Step name must be 200 characters or less'),
+
+  filmSequence: z.string()
+    .trim()
+    .max(50, 'Film sequence must be 50 characters or less')
+    .optional()
+    .or(z.literal('')),
+
+  stepGroup: z.string()
+    .trim()
+    .max(100, 'Step group must be 100 characters or less')
+    .optional()
+    .or(z.literal('')),
+
+  notes: z.string()
+    .trim()
+    .max(1000, 'Notes must be 1000 characters or less')
+    .optional()
+    .or(z.literal('')),
+
+  rowNumber: z.number(),
+});
+
+// ✅ Type export from import schema
+export type ImportProductionStepRow = z.infer<typeof importProductionStepRowSchema>;
+
+// ✅ Import validation helper function
+export function validateImportProductionStepRow(data: unknown): ImportProductionStepRow {
+  return importProductionStepRowSchema.parse(data);
+}

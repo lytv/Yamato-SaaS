@@ -28,6 +28,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const {
     search,
@@ -46,7 +47,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
     search,
     sortBy,
     sortOrder,
-    page: 1,
+    page,
     limit: 10,
     ownerId,
   });
@@ -370,14 +371,33 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
         </table>
       </div>
 
-      {/* Load More Button */}
-      {pagination?.hasMore && (
-        <div className="text-center">
+      {/* Pagination Controls */}
+      {pagination && (
+        <div className="mt-4 flex items-center justify-center gap-2">
           <button
             type="button"
-            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            aria-label="Previous page"
           >
-            Load more
+            Prev
+          </button>
+          <span className="text-sm text-gray-700">
+            Page
+            {' '}
+            {pagination.page}
+            {' / '}
+            {Math.max(1, Math.ceil(pagination.total / pagination.limit))}
+          </span>
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            onClick={() => setPage(p => (pagination.hasMore ? p + 1 : p))}
+            disabled={!pagination.hasMore}
+            aria-label="Next page"
+          >
+            Next
           </button>
         </div>
       )}

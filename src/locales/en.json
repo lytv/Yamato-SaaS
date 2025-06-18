@@ -320,5 +320,54 @@
       "cancel": "Cancel",
       "reset": "Reset"
     }
+  },
+  "productionStepDetail": {
+    "bulkAdd": {
+      "title": "🗂️ Bulk Add Production Step Details",
+      "productsSelection": "Products Selection",
+      "searchProducts": "🔍 Search products...",
+      "categoryFilter": "🏷️ Category Filter ▼",
+      "selectAllProducts": "Select All Products (this page)",
+      "stepsSelection": "Steps Selection",
+      "searchSteps": "🔍 Search steps...",
+      "groupFilter": "🏷️ Group Filter ▼",
+      "selectAllSteps": "Select All Steps (this page)",
+      "assignmentConfig": "🎯 Assignment Configuration",
+      "preview": "📊 Preview:",
+      "products": "Products",
+      "steps": "Steps",
+      "assignments": "Assignments",
+      "back": "← Back to Production Step Details",
+      "cancel": "Cancel",
+      "reset": "Reset",
+      "createAssignments": "Create Assignments"
+    }
+  },
+  "MultiAssignConfigForm": {
+    "sequenceStart": "Sequence Start",
+    "autoIncrement": "Auto-increment sequence for each product",
+    "factoryPrice": "Factory Price",
+    "calculatedPrice": "Calculated Price",
+    "quantityLimit1": "Quantity Limit 1",
+    "quantityLimit2": "Quantity Limit 2",
+    "isFinalStep": "Is final step",
+    "isVtStep": "Is material step",
+    "isParkingStep": "Is storage step"
+  },
+  "MultiAssignProgress": {
+    "chunk": "Chunk",
+    "created": "Created",
+    "skipped": "Skipped",
+    "failed": "Failed",
+    "doneSummary": "Bulk assign completed! Total: {total}, Created: {created}, Skipped: {skipped}, Failed: {failed}",
+    "error": "An error occurred during bulk assign. Please try again or check error details."
+  },
+  "MultiAssignPreview": {
+    "totalCombinations": "Total combinations:",
+    "conflictWarning": "Warning: {count} combination(s) already exist",
+    "productLabel": "Product",
+    "stepLabel": "Step",
+    "otherConflicts": "...and {count} other combinations",
+    "allConflicted": "All combinations already exist. Cannot create new."
   }
 }

@@ -1,0 +1,37 @@
+name: Multi-Agent System CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+      - name: Run tests
+        run: |
+          make test-unit
+          make test-integration
+      - name: Check coverage
+        run: make coverage
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Security scan
+        uses: aquasecurity/trivy-action@master
+      - name: API key rotation check
+        run: python scripts/check_api_keys.py
+
+  deploy:
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to staging
+        run: make deploy-staging

@@ -35,9 +35,7 @@ export async function fetchProducts(params: ProductListParamsWithOwner): Promise
   if (params.sortOrder) {
     searchParams.set('sortOrder', params.sortOrder);
   }
-  if (params.ownerId) {
-    searchParams.set('ownerId', params.ownerId);
-  }
+  // Note: ownerId is handled by auth in API route, not sent as query param
 
   const response = await fetch(`/api/products?${searchParams.toString()}`);
 

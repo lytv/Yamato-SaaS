@@ -5,12 +5,22 @@
  */
 
 import type { Product } from './product';
+import type { ProductionStep } from './productionStep';
 
 // Simplified types following existing patterns
 export type ImportProductData = {
   productCode: string;
   productName: string;
   category?: string;
+  notes?: string;
+  rowNumber: number;
+};
+
+export type ImportProductionStepData = {
+  stepCode: string;
+  stepName: string;
+  filmSequence?: string;
+  stepGroup?: string;
   notes?: string;
   rowNumber: number;
 };
@@ -30,8 +40,22 @@ export type ImportResult = {
   errors: ImportError[];
 };
 
+export type ImportProductionStepResult = {
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  createdProductionSteps: ProductionStep[];
+  errors: ImportError[];
+};
+
 export type ImportValidationResult = {
   isValid: boolean;
   errors: ImportError[];
   validProducts: ImportProductData[];
+};
+
+export type ImportProductionStepValidationResult = {
+  isValid: boolean;
+  errors: ImportError[];
+  validProducts: ImportProductionStepData[];
 };

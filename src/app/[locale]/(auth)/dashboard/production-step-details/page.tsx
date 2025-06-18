@@ -128,14 +128,6 @@ export default function ProductionStepDetailsPage(): JSX.Element {
     });
   };
 
-  const handleEditProductionStepDetail = (productionStepDetail: ProductionStepDetail) => {
-    setModal({
-      isOpen: true,
-      mode: 'edit',
-      productionStepDetail,
-    });
-  };
-
   const handleCloseModal = () => {
     setModal({
       isOpen: false,
@@ -144,10 +136,6 @@ export default function ProductionStepDetailsPage(): JSX.Element {
   };
 
   const handleSuccess = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const handleDeleteSuccess = (_productionStepDetail: ProductionStepDetail) => {
     setRefreshKey(prev => prev + 1);
   };
 
@@ -165,7 +153,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
             </p>
           </div>
 
-          <div className="mt-3 sm:ml-4 sm:mt-0">
+          <div className="mt-3 flex gap-2 sm:ml-4 sm:mt-0">
             <Button
               onClick={handleCreateProductionStepDetail}
               disabled={isCreating}
@@ -174,6 +162,15 @@ export default function ProductionStepDetailsPage(): JSX.Element {
             >
               {isMobile ? 'Add Detail' : 'Add Production Step Detail'}
             </Button>
+            <a href="/dashboard/production-step-details/multi-assign">
+              <Button
+                variant="outline"
+                size={isMobile ? 'sm' : 'default'}
+                className="w-full sm:w-auto"
+              >
+                {isMobile ? 'Bulk Add' : 'Bulk Add Production Step Details'}
+              </Button>
+            </a>
           </div>
         </div>
       </div>
@@ -182,8 +179,6 @@ export default function ProductionStepDetailsPage(): JSX.Element {
       <div className="space-y-6">
         <ProductionStepDetailList
           key={refreshKey}
-          onEdit={handleEditProductionStepDetail}
-          onDelete={handleDeleteSuccess}
         />
       </div>
 

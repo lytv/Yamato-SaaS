@@ -5,7 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ProductionStepDetailSkeleton } from '@/features/productionStepDetail/ProductionStepDetailSkeleton';
 import { useProductionStepDetailFilters } from '@/hooks/useProductionStepDetailFilters';
@@ -13,17 +13,13 @@ import { useProductionStepDetailMutations } from '@/hooks/useProductionStepDetai
 import { useProductionStepDetails } from '@/hooks/useProductionStepDetails';
 import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { useProducts } from '@/hooks/useProducts';
-import type { ProductionStepDetail } from '@/types/productionStepDetail';
 
-type ProductionStepDetailListProps = {
-  onEdit: (productionStepDetail: ProductionStepDetail) => void;
-  onDelete: (productionStepDetail: ProductionStepDetail) => void;
-};
-
-export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDetailListProps): JSX.Element {
+export function ProductionStepDetailList(): JSX.Element {
   const { userId, orgId } = useAuth();
-  const [deleteConfirmDetail, setDeleteConfirmDetail] = useState<ProductionStepDetail | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     search,
@@ -48,7 +44,7 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
     sortOrder,
     productId,
     productionStepId,
-    page: 1,
+    page,
     limit: 10,
     ownerId,
   });
@@ -81,37 +77,16 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
     return `$${price}`;
   };
 
-  // Handle delete confirmation
-  const handleDeleteClick = (productionStepDetail: ProductionStepDetail): void => {
-    setDeleteConfirmDetail(productionStepDetail);
-    setDeleteError(null);
-  };
-
-  // Handle delete confirmation
-  const handleDeleteConfirm = async (): Promise<void> => {
-    if (!deleteConfirmDetail) {
-      return;
-    }
-
-    try {
-      await deleteProductionStepDetail(deleteConfirmDetail.id);
-      onDelete(deleteConfirmDetail);
-      setDeleteConfirmDetail(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete production step detail';
-      setDeleteError(errorMessage);
-    }
-  };
-
-  // Handle delete cancel
-  const handleDeleteCancel = (): void => {
-    setDeleteConfirmDetail(null);
-    setDeleteError(null);
-  };
-
-  // Handle search input change
+  // Handle search input change chỉ update state
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    handleSearchChange(event.target.value);
+    setSearchInput(event.target.value);
+  };
+
+  // Khi nhấn Enter mới trigger search
+  const handleSearchInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (event.key === 'Enter') {
+      handleSearchChange(searchInput);
+    }
   };
 
   // Handle sort field change
@@ -134,6 +109,48 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
   const handleProductionStepFilterChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     const value = event.target.value;
     handleProductionStepIdChange(value === '' ? undefined : Number(value));
+  };
+
+  // Khi search thay đổi từ hook, đồng bộ lại input
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // Xử lý chọn tất cả
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(productionStepDetails.map(d => d.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  // Xử lý chọn từng dòng
+  const handleSelectRow = (id: number) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  // Xử lý xóa nhiều dòng
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSelected = async () => {
+    for (const id of selectedIds) {
+      try {
+        await deleteProductionStepDetail(id);
+      } catch {}
+    }
+    setSelectedIds([]);
+    refresh();
+    setShowDeleteConfirm(false);
+  };
+
+  const cancelDeleteSelected = () => {
+    setShowDeleteConfirm(false);
   };
 
   // Loading state
@@ -185,8 +202,9 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
             <input
               type="text"
               placeholder="Search production step details..."
-              value={search}
+              value={searchInput}
               onChange={handleSearchInputChange}
+              onKeyDown={handleSearchInputKeyDown}
               aria-label="Search production step details"
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
@@ -328,7 +346,6 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
           <span>
             {' '}
             • Page
-            {' '}
             {pagination.page}
           </span>
         )}
@@ -336,9 +353,33 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
 
       {/* Production Step Details Table */}
       <div className="overflow-hidden bg-white shadow sm:rounded-md">
+        {/* Nút xóa hàng loạt */}
+        {selectedIds.length > 0 && (
+          <div className="p-2">
+            <button
+              type="button"
+              className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              onClick={handleDeleteSelected}
+              disabled={isDeleting}
+            >
+              Delete Selected (
+              {selectedIds.length}
+              )
+            </button>
+          </div>
+        )}
         <table role="table" className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              {/* Checkbox chọn tất cả */}
+              <th className="px-2 py-3">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === productionStepDetails.length && productionStepDetails.length > 0}
+                  onChange={handleSelectAll}
+                  aria-label="Select all rows"
+                />
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Product
               </th>
@@ -372,6 +413,15 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
 
               return (
                 <tr key={detail.id} className="hover:bg-gray-50">
+                  {/* Checkbox chọn từng dòng */}
+                  <td className="px-2 py-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(detail.id)}
+                      onChange={() => handleSelectRow(detail.id)}
+                      aria-label={`Select row ${detail.id}`}
+                    />
+                  </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                     {product
                       ? (
@@ -440,16 +490,12 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
                     <div className="flex space-x-2">
                       <button
                         type="button"
-                        onClick={() => onEdit(detail)}
-                        disabled={isDeleting}
                         className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteClick(detail)}
-                        disabled={isDeleting}
                         className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Delete
@@ -463,49 +509,50 @@ export function ProductionStepDetailList({ onEdit, onDelete }: ProductionStepDet
         </table>
       </div>
 
-      {/* Load More Button */}
-      {pagination?.hasMore && (
-        <div className="text-center">
+      {/* Pagination Controls */}
+      {pagination && (
+        <div className="mt-4 flex items-center justify-center gap-2">
           <button
             type="button"
-            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            aria-label="Previous page"
           >
-            Load more
+            Prev
+          </button>
+          <span className="text-sm text-gray-700">
+            Page
+            {' '}
+            {pagination.page}
+            {' / '}
+            {Math.max(1, Math.ceil(pagination.total / pagination.limit))}
+          </span>
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            onClick={() => setPage(p => (pagination.hasMore ? p + 1 : p))}
+            disabled={!pagination.hasMore}
+            aria-label="Next page"
+          >
+            Next
           </button>
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      {deleteConfirmDetail && (
-        <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-gray-600/50">
-          <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  Are you sure you want to delete this production step detail assignment? This action cannot be undone.
-                </p>
-                {deleteError && (
-                  <div className="mt-2 text-sm text-red-600">{deleteError}</div>
-                )}
-              </div>
-              <div className="flex justify-center space-x-3 px-4 py-3">
-                <button
-                  type="button"
-                  onClick={handleDeleteCancel}
-                  className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteConfirm}
-                  disabled={isDeleting}
-                  className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
+      {/* Add confirmation modal for delete */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="rounded bg-white p-6 shadow-xl">
+            <div className="mb-4 text-lg font-semibold">
+              Are you sure you want to delete
+              {selectedIds.length}
+              {' '}
+              selected rows?
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button type="button" onClick={cancelDeleteSelected} className="rounded border px-4 py-2">Cancel</button>
+              <button type="button" onClick={confirmDeleteSelected} className="rounded bg-red-600 px-4 py-2 text-white">Delete</button>
             </div>
           </div>
         </div>
