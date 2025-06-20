@@ -47,6 +47,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/production-step-details',
                     label: t('production_step_details'),
                   },
+                  {
+                    href: '/dashboard/product-step-crosstab',
+                    label: t('product_step_crosstab'),
+                  },
                 ],
               },
               {

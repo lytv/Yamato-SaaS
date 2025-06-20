@@ -8,7 +8,7 @@ import type {
   Product,
   ProductErrorResponse,
   ProductFormData,
-  ProductListParamsWithOwner,
+  ProductListParams,
   ProductResponse,
   ProductsResponse,
   UpdateProductInput,
@@ -17,34 +17,29 @@ import type {
 /**
  * Fetch paginated products list
  */
-export async function fetchProducts(params: ProductListParamsWithOwner): Promise<ProductsResponse> {
-  const searchParams = new URLSearchParams();
+export async function fetchProducts(
+  params: ProductListParams,
+): Promise<ProductsResponse | ProductErrorResponse> {
+  const definedParams: Record<string, string> = {};
 
-  if (params.page) {
-    searchParams.set('page', params.page.toString());
-  }
-  if (params.limit) {
-    searchParams.set('limit', params.limit.toString());
-  }
-  if (params.search) {
-    searchParams.set('search', params.search);
-  }
-  if (params.sortBy) {
-    searchParams.set('sortBy', params.sortBy);
-  }
-  if (params.sortOrder) {
-    searchParams.set('sortOrder', params.sortOrder);
-  }
-  // Note: ownerId is handled by auth in API route, not sent as query param
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      definedParams[key] = String(value);
+    }
+  });
 
-  const response = await fetch(`/api/products?${searchParams.toString()}`);
+  const queryParams = new URLSearchParams(definedParams);
 
-  if (!response.ok) {
-    const error: ProductErrorResponse = await response.json();
-    throw new Error(error.error || 'Failed to fetch products');
+  try {
+    const response = await fetch(`/api/products?${queryParams.toString()}`);
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error',
+      code: 'NETWORK_ERROR',
+    };
   }
-
-  return response.json();
 }
 
 /**

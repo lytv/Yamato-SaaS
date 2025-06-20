@@ -4,7 +4,7 @@
  * Testing page layout, modal functionality, CRUD operations, and user interactions
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,6 +13,7 @@ import { useProductFilters } from '@/hooks/useProductFilters';
 import { useProductMutations } from '@/hooks/useProductMutations';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types/product';
+import { render } from '@/utils/test-utils';
 
 // Mock hooks
 vi.mock('@/hooks/useProducts', () => ({
@@ -27,14 +28,9 @@ vi.mock('@/hooks/useProductFilters', () => ({
   useProductFilters: vi.fn(),
 }));
 
-// Mock next-intl
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string, options?: { default?: string }) =>
-    options?.default || key,
-}));
-
 // Mock Clerk useAuth
 vi.mock('@clerk/nextjs', () => ({
+  ClerkProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   useAuth: vi.fn(() => ({
     userId: 'user_123',
     orgId: 'org_456',
@@ -149,7 +145,7 @@ describe('Products Dashboard Page', () => {
       render(<ProductsPage />);
 
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: /create product/i })).toBeInTheDocument();
@@ -161,11 +157,11 @@ describe('Products Dashboard Page', () => {
 
       // Open modal
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       // Close modal
       const closeButton = screen.getByLabelText(/close/i);
-      await user.click(closeButton);
+      await user.click(closeButton!);
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -176,11 +172,11 @@ describe('Products Dashboard Page', () => {
 
       // Open modal
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       // Click backdrop
       const backdrop = screen.getByTestId('modal-backdrop');
-      await user.click(backdrop);
+      await user.click(backdrop!);
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -190,7 +186,7 @@ describe('Products Dashboard Page', () => {
       render(<ProductsPage />);
 
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       expect(screen.getByLabelText(/product code/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/product name/i)).toBeInTheDocument();
@@ -204,7 +200,7 @@ describe('Products Dashboard Page', () => {
       render(<ProductsPage />);
 
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
-      await user.click(editButtons[0]);
+      await user.click(editButtons[0]!);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: /edit product/i })).toBeInTheDocument();
@@ -215,7 +211,7 @@ describe('Products Dashboard Page', () => {
       render(<ProductsPage />);
 
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
-      await user.click(editButtons[0]);
+      await user.click(editButtons[0]!);
 
       expect(screen.getByDisplayValue('PROD-001')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Test Product 1')).toBeInTheDocument();
@@ -241,11 +237,11 @@ describe('Products Dashboard Page', () => {
 
       // Open edit modal
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
-      await user.click(editButtons[0]);
+      await user.click(editButtons[0]!);
 
       // Submit form
       const updateButton = screen.getByRole('button', { name: /update product/i });
-      await user.click(updateButton);
+      await user.click(updateButton!);
 
       await waitFor(() => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -282,11 +278,11 @@ describe('Products Dashboard Page', () => {
 
       // Open create modal
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       // Submit form
       const submitButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(submitButton);
+      await user.click(submitButton!);
 
       await waitFor(() => {
         expect(mockRefresh).toHaveBeenCalled();
@@ -321,11 +317,11 @@ describe('Products Dashboard Page', () => {
 
       // Click delete button
       const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-      await user.click(deleteButtons[0]);
+      await user.click(deleteButtons[0]!);
 
       // Confirm delete
       const confirmButton = screen.getByRole('button', { name: /confirm delete/i });
-      await user.click(confirmButton);
+      await user.click(confirmButton!);
 
       await waitFor(() => {
         expect(mockRefresh).toHaveBeenCalled();
@@ -404,7 +400,7 @@ describe('Products Dashboard Page', () => {
 
       // Open create modal
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
@@ -445,7 +441,7 @@ describe('Products Dashboard Page', () => {
 
       // Open modal
       const createButton = screen.getByRole('button', { name: /create product/i });
-      await user.click(createButton);
+      await user.click(createButton!);
 
       // Focus should be trapped in modal
       const modal = screen.getByRole('dialog');

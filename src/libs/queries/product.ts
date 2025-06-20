@@ -46,7 +46,15 @@ export async function createProduct(data: CreateProductInput): Promise<ProductDb
  * @returns Promise resolving to array of products
  */
 export async function getProductsByOwner(params: ProductListParamsWithOwner): Promise<ProductDb[]> {
-  const { ownerId, page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = params;
+  const {
+    ownerId,
+    page = 1,
+    limit = 10,
+    search,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    showAll = false,
+  } = params;
   const offset = (page - 1) * limit;
 
   // Build where conditions
@@ -72,14 +80,18 @@ export async function getProductsByOwner(params: ProductListParamsWithOwner): Pr
   const sortColumn = productSchema[sortBy];
   const orderBy = sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn);
 
-  // Execute query with all conditions
-  return await db
+  const query = db
     .select()
     .from(productSchema)
     .where(whereConditions)
-    .orderBy(orderBy)
-    .limit(limit)
-    .offset(offset);
+    .orderBy(orderBy);
+
+  if (showAll) {
+    return await query;
+  }
+
+  // Execute query with all conditions
+  return await query.limit(limit).offset(offset);
 }
 
 /**
@@ -323,13 +335,21 @@ export async function getPaginatedProducts(params: ProductListParamsWithOwner): 
     hasMore: boolean;
   };
 }> {
-  const page = params.page ?? 1;
-  const limit = params.limit ?? 10;
+  const products = await getProductsByOwner(params);
+  const total = await getProductsCount(params.ownerId, params.search);
+  const { page = 1, limit = 10, showAll = false } = params;
 
-  const [products, total] = await Promise.all([
-    getProductsByOwner(params),
-    getProductsCount(params.ownerId, params.search),
-  ]);
+  if (showAll) {
+    return {
+      products,
+      pagination: {
+        page: 1,
+        limit: total,
+        total,
+        hasMore: false,
+      },
+    };
+  }
 
   return {
     products,

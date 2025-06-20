@@ -88,14 +88,15 @@
   },
   "DashboardLayout": {
     "home": "Accueil",
-    "todos": "Todos",
+    "todos": "Tâches",
     "product": "Produit",
     "products": "Produits",
     "production_steps": "Étapes de Production",
     "production_step_details": "Détails des Étapes de Production",
+    "product_step_crosstab": "Tableau Croisé",
     "members": "Membres",
     "billing": "Facturation",
-    "settings": "Réglages"
+    "settings": "Paramètres"
   },
   "Dashboard": {
     "meta_title": "Tableau de bord du SaaS Template",
@@ -114,7 +115,7 @@
     "title_bar_description": "Afficher et gérer votre profil utilisateur"
   },
   "OrganizationProfile": {
-    "title_bar": "Gestion de l’organisation",
+    "title_bar": "Gestion de l'organisation",
     "title_bar_description": "Gérer votre organisation"
   },
   "Billing": {
@@ -168,7 +169,7 @@
     "submit_button": "Envoyer"
   },
   "todo": {
-    "pageTitle": "Todos",
+    "pageTitle": "Tâches",
     "pageDescription": "Gérez vos todos et restez organisé",
     "createNew": "Créer Todo",
     "create": "Créer Todo",
@@ -192,6 +193,13 @@
       "updatedAt": "Date de modification",
       "title": "Titre"
     }
+  },
+  "production_step_detail": {
+    "title": "Détails des Étapes de Production"
+  },
+  "ProductStepCrosstab": {
+    "title": "Tableau Croisé des Étapes de Production",
+    "description": "Visualiser et analyser les données de prix des étapes de production."
   },
   "error": {
     "fetchTodos": "Échec de récupération des todos",
@@ -293,5 +301,8 @@
       "cancel": "Annuler",
       "reset": "Réinitialiser"
     }
+  },
+  "product_step_crosstab": {
+    "title": "Tableau Croisé des Étapes de Production"
   }
 }

@@ -101,3 +101,6 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
   }
 }
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';

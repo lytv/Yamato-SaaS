@@ -8,7 +8,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { fetchProducts } from '@/libs/api/products';
-import type { Product, ProductListParams, ProductsResponse } from '@/types/product';
+import type {
+  Product,
+  ProductListParamsWithOwner,
+  ProductsResponse,
+} from '@/types/product';
 
 type ProductsState = {
   products: Product[];
@@ -21,28 +25,33 @@ type ProductsReturn = ProductsState & {
   refresh: () => void;
 };
 
-const DEFAULT_PARAMS: Required<Omit<ProductListParams, 'search'>> & { search?: string } = {
+const DEFAULT_PARAMS: Required<
+  Omit<ProductListParamsWithOwner, 'search' | 'ownerId' | 'showAll'>
+> &
+Pick<ProductListParamsWithOwner, 'search' | 'showAll'> = {
   page: 1,
   limit: 10,
   sortBy: 'createdAt',
   sortOrder: 'desc',
+  search: undefined,
+  showAll: false,
 };
 
-export function useProducts(params?: ProductListParams & { ownerId?: string }): ProductsReturn {
+export function useProducts({
+  search = DEFAULT_PARAMS.search,
+  sortBy = DEFAULT_PARAMS.sortBy,
+  sortOrder = DEFAULT_PARAMS.sortOrder,
+  page = DEFAULT_PARAMS.page,
+  limit = DEFAULT_PARAMS.limit,
+  ownerId,
+  showAll = DEFAULT_PARAMS.showAll,
+}: ProductListParamsWithOwner): ProductsReturn {
   const [state, setState] = useState<ProductsState>({
     products: [],
     pagination: null,
     isLoading: false,
     error: null,
   });
-
-  // ✅ Extract primitive values to prevent infinite loops (critical fix from todos)
-  const page = params?.page ?? DEFAULT_PARAMS.page;
-  const limit = params?.limit ?? DEFAULT_PARAMS.limit;
-  const search = params?.search ?? DEFAULT_PARAMS.search;
-  const sortBy = params?.sortBy ?? DEFAULT_PARAMS.sortBy;
-  const sortOrder = params?.sortOrder ?? DEFAULT_PARAMS.sortOrder;
-  const ownerId = params?.ownerId ?? '';
 
   const fetchData = useCallback(async () => {
     if (!ownerId) {
@@ -54,16 +63,31 @@ export function useProducts(params?: ProductListParams & { ownerId?: string }): 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // ✅ Build params from primitives (not object reference)
-      const effectiveParams = { page, limit, search, sortBy, sortOrder, ownerId };
-      const response = await fetchProducts(effectiveParams);
-
-      setState({
-        products: [...response.data],
-        pagination: response.pagination || null,
-        isLoading: false,
-        error: null,
+      const result = await fetchProducts({
+        search,
+        sortBy,
+        sortOrder,
+        page,
+        limit,
+        showAll,
       });
+
+      if (result.success) {
+        setState({
+          products: [...result.data],
+          pagination: result.pagination || null,
+          isLoading: false,
+          error: null,
+        });
+      } else {
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: result.error,
+          products: [],
+          pagination: null,
+        }));
+      }
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -73,7 +97,7 @@ export function useProducts(params?: ProductListParams & { ownerId?: string }): 
         pagination: null,
       }));
     }
-  }, [page, limit, search, sortBy, sortOrder, ownerId]); // ✅ Primitive dependencies only
+  }, [search, sortBy, sortOrder, page, limit, showAll, ownerId]);
 
   const refresh = useCallback(() => {
     fetchData();

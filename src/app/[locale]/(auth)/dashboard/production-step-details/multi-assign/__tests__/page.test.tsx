@@ -4,16 +4,20 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
+import { describe, vi } from 'vitest';
 
 import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { useProducts } from '@/hooks/useProducts';
+import { render } from '@/utils/test-utils';
 
 import MultiAssignPage from '../page';
 
 // Mock the hooks
-vi.mock('@clerk/nextjs');
+vi.mock('@clerk/nextjs', () => ({
+  ClerkProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useAuth: vi.fn(),
+}));
 vi.mock('@/hooks/useProducts');
 vi.mock('@/hooks/useProductionSteps');
 
@@ -77,7 +81,7 @@ describe('MultiAssignPage', () => {
 
       mockUseProductionSteps.mockReturnValue({
         productionSteps: [
-          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
+          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', filmSequence: '1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
         ],
         pagination: { page: 1, limit: 10, total: 1, hasMore: false },
         isLoading: false,
@@ -279,7 +283,7 @@ describe('MultiAssignPage', () => {
 
       mockUseProductionSteps.mockReturnValue({
         productionSteps: [
-          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
+          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', filmSequence: '1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
         ],
         pagination: { page: 1, limit: 10, total: 1, hasMore: false },
         isLoading: false,
@@ -351,7 +355,7 @@ describe('MultiAssignPage', () => {
 
       mockUseProductionSteps.mockReturnValue({
         productionSteps: [
-          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
+          { id: 1, ownerId: 'org_456', stepCode: 'STEP-001', stepName: 'Step 1', filmSequence: '1', stepGroup: 'Group A', notes: '', createdAt: new Date(), updatedAt: new Date() },
         ],
         pagination: { page: 1, limit: 10, total: 1, hasMore: false },
         isLoading: false,

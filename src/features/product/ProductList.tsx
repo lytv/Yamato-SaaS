@@ -29,6 +29,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
 
   const {
     search,
@@ -47,9 +48,10 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
     search,
     sortBy,
     sortOrder,
-    page,
+    page: showAll ? 1 : page,
     limit: 10,
     ownerId,
+    showAll,
   });
 
   const { deleteProduct, isDeleting } = useProductMutations();
@@ -176,8 +178,8 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
     <div className="space-y-6">
       {/* Search and Filter Controls */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div className="max-w-lg flex-1">
-          <div className="relative">
+        <div className="flex flex-1 items-center space-x-4">
+          <div className="relative max-w-lg flex-1">
             <input
               type="text"
               placeholder="Search products..."
@@ -186,6 +188,18 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
               aria-label="Search products"
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
+          </div>
+          <div className="flex items-center space-x-2 pt-5">
+            <input
+              type="checkbox"
+              id="showAll"
+              checked={showAll}
+              onChange={e => setShowAll(e.target.checked)}
+              className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
+              Show All
+            </label>
           </div>
         </div>
 
@@ -303,7 +317,7 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
       </div>
 
       {/* Products Table */}
-      <div className="overflow-hidden bg-white shadow sm:rounded-md">
+      <div className="overflow-x-auto">
         <table role="table" className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -371,34 +385,40 @@ export function ProductList({ onEdit, onDelete }: ProductListProps): JSX.Element
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      {pagination && (
-        <div className="mt-4 flex items-center justify-center gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            aria-label="Previous page"
-          >
-            Prev
-          </button>
-          <span className="text-sm text-gray-700">
-            Page
-            {' '}
-            {pagination.page}
-            {' / '}
-            {Math.max(1, Math.ceil(pagination.total / pagination.limit))}
-          </span>
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            onClick={() => setPage(p => (pagination.hasMore ? p + 1 : p))}
-            disabled={!pagination.hasMore}
-            aria-label="Next page"
-          >
-            Next
-          </button>
+      {/* Pagination */}
+      {!showAll && pagination && pagination.total > 0 && (
+        <div className="mt-6 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Showing
+              {' '}
+              {products.length}
+              {' '}
+              of
+              {' '}
+              {pagination.total}
+              {' '}
+              products
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setPage(page - 1)}
+              disabled={page <= 1}
+              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage(page + 1)}
+              disabled={!pagination?.hasMore}
+              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

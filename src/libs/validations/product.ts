@@ -45,6 +45,8 @@ export const productListParamsSchema = z.object({
     .transform((val: string | undefined | null) =>
       val && ['asc', 'desc'].includes(val) ? val : 'desc',
     ),
+
+  showAll: z.boolean().optional().default(false),
 });
 
 // ✅ Form validation with business rules and input sanitization

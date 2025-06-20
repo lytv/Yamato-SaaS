@@ -29,6 +29,7 @@ export type ProductListParams = {
   readonly search?: string;
   readonly sortBy?: 'createdAt' | 'updatedAt' | 'productName' | 'productCode';
   readonly sortOrder?: 'asc' | 'desc';
+  readonly showAll?: boolean;
 };
 
 // ✅ Internal type for queries (WITH ownerId for database operations)

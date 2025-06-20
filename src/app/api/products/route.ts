@@ -35,6 +35,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       search: searchParams.get('search') || undefined,
       sortBy: searchParams.get('sortBy') || undefined,
       sortOrder: searchParams.get('sortOrder') || undefined,
+      showAll: searchParams.get('showAll') === 'true',
     };
 
     // ✅ Validation with proper error handling
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       sortBy: validatedParams.sortBy as ProductListParams['sortBy'],
       sortOrder: validatedParams.sortOrder as ProductListParams['sortOrder'],
       ownerId: orgId || userId,
+      showAll: validatedParams.showAll,
     };
 
     const result = await getPaginatedProducts(paramsWithOwner);
