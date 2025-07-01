@@ -91,6 +91,7 @@
     "todos": "Todos",
     "product": "Product",
     "products": "Products",
+    "productsubs": "Product Subs",
     "production_steps": "Production Steps",
     "production_step_details": "Production Step Details",
     "product_step_crosstab": "Product Step Crosstab",
@@ -421,5 +422,10 @@
     "deleteConfirmation": "Are you sure you want to delete this note?",
     "deleteSuccess": "Note deleted successfully",
     "deleteError": "Failed to delete note"
+  },
+  "productsub": {
+    "pageTitle": "Product Subs",
+    "pageDescription": "Manage your product subs and inventory",
+    "createNew": "Create Product Sub"
   }
 }

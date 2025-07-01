@@ -9,8 +9,8 @@
  * This will create Tasks entity with all advanced features
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+const { existsSync, mkdirSync, readFileSync, writeFileSync } = require('node:fs');
+const { join } = require('node:path');
 
 type FieldConfig = {
   name: string;
@@ -92,6 +92,39 @@ const tasksConfig: EntityConfig = {
       label: 'Status',
       excelColumn: 'Status',
     },
+  ],
+  features: {
+    pagination: true,
+    search: true,
+    sorting: true,
+    stats: true,
+    excelImport: true,
+    excelExport: true,
+    uniqueCode: true,
+    batchOperations: true,
+  },
+  uiType: 'table',
+};
+
+// ProductSub configuration based on Schema.ts
+const productSubConfig: EntityConfig = {
+  entityName: 'ProductSub',
+  entityNameLower: 'productsub',
+  entityNamePlural: 'productsubs',
+  tableName: 'product_sub',
+  codeField: 'productSubCode',
+  nameField: 'productSubDetail',
+  fields: [
+    { name: 'productSubCode', type: 'string', required: true, unique: true, maxLength: 50, label: 'Product Sub Code', excelColumn: 'Product Sub Code' },
+    { name: 'productSubDetail', type: 'string', required: true, maxLength: 255, label: 'Product Sub Detail', excelColumn: 'Product Sub Detail' },
+    { name: 'subCategory', type: 'string', required: true, maxLength: 50, label: 'Sub Category', excelColumn: 'Sub Category' },
+    { name: 'colorCode', type: 'string', required: false, maxLength: 50, label: 'Color Code', excelColumn: 'Color Code' },
+    { name: 'barcode', type: 'string', required: false, maxLength: 100, label: 'Barcode', excelColumn: 'Barcode' },
+    { name: 'description', type: 'text', required: false, label: 'Description', excelColumn: 'Description' },
+    { name: 'note', type: 'text', required: false, label: 'Note', excelColumn: 'Note' },
+    { name: 'productId', type: 'number', required: true, label: 'Product ID', excelColumn: 'Product ID' },
+    { name: 'productCode', type: 'string', required: true, maxLength: 50, label: 'Product Code', excelColumn: 'Product Code' },
+    { name: 'ownerId', type: 'string', required: true, maxLength: 50, label: 'Owner ID', excelColumn: 'Owner ID' },
   ],
   features: {
     pagination: true,
@@ -278,14 +311,21 @@ function main() {
     process.exit(1);
   }
 
-  // You can customize this config or load from external file
-  const config = {
-    ...tasksConfig,
-    entityName: capitalizeFirst(entityName),
-    entityNameLower: entityName.toLowerCase(),
-    entityNamePlural: `${entityName.toLowerCase()}s`,
-    tableName: entityName.toLowerCase(),
-  };
+  // Chọn config phù hợp
+  let config: EntityConfig;
+  if (entityName.toLowerCase() === 'productsub') {
+    config = productSubConfig;
+  } else if (entityName.toLowerCase() === 'tasks' || entityName.toLowerCase() === 'task') {
+    config = tasksConfig;
+  } else {
+    config = {
+      ...tasksConfig,
+      entityName: capitalizeFirst(entityName),
+      entityNameLower: entityName.toLowerCase(),
+      entityNamePlural: `${entityName.toLowerCase()}s`,
+      tableName: entityName.toLowerCase(),
+    };
+  }
 
   console.log(`🚀 Generating ${config.entityName} entity with advanced features...`);
 
@@ -355,5 +395,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-
-export { type EntityConfig, type FieldConfig };

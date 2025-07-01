@@ -42,6 +42,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/todos(.*)',
   '/api/notes(.*)', // ✅ Add notes API routes
   '/api/products(.*)', // ✅ CRITICAL: Add products API routes
+  '/api/productsubs(.*)', // ✅ Add productsubs API routes
   '/api/production-steps(.*)', // ✅ CRITICAL: Add production steps API routes
   '/api/production-step-details(.*)', // ✅ CRITICAL: Add production step details API routes
   '/api/product-step-crosstab(.*)', // ✅ CRITICAL: Add crosstab API routes

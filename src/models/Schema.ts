@@ -190,6 +190,37 @@ export const productionStepDetailSchema = pgTable('production_step_detail', {
   ),
 }));
 
+export const processSchema = pgTable('process', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+
+  // Process Identity
+  processCode: text('process_code').notNull(), // CAT, MAY, THEU, DONG_GOI
+  processName: text('process_name').notNull(), // Cắt, May, Thêu, Đóng gói
+
+  // Process Classification
+  processCategory: text('process_category'), // production/quality/packaging
+  processType: text('process_type'), // manual/machine/hybrid
+  department: text('department'), // Department responsible
+
+  // Documentation
+  description: text('description'),
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    processCodeOwnerIdx: uniqueIndex('process_code_owner_idx').on(
+      table.processCode,
+      table.ownerId,
+    ),
+    processCategoryIdx: index('process_category_idx').on(table.processCategory),
+  };
+});
+
 export const workTableSchema = pgTable('work_table', {
   id: serial('id').primaryKey(),
   ownerId: text('owner_id').notNull(),

@@ -43,6 +43,13 @@
       "when": 1751284669788,
       "tag": "0005_redundant_silk_fever",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1751341666893,
+      "tag": "0006_easy_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

@@ -40,6 +40,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     label: t('products'),
                   },
                   {
+                    href: '/dashboard/productsubs',
+                    label: t('productsubs'),
+                  },
+                  {
                     href: '/dashboard/production-steps',
                     label: t('production_steps'),
                   },
