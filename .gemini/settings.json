@@ -1,0 +1,23 @@
+{
+  "theme": "GitHub",
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "serena": {
+      "command": "C:\\Users\\lyvtruong\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\uv.exe",
+      "args": [
+        "run",
+        "--directory",
+        "D:\\saas\\serena\\serena",
+        "serena-mcp-server",
+        "--project-file",
+        "D:\\saas\\AgentCoding\\V3\\Yamato-saas\\.serena\\project.yml"
+      ]
+    }
+  }
+}

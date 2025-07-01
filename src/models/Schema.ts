@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  date,
   decimal,
   index,
   integer,
@@ -58,6 +59,42 @@ export const todoSchema = pgTable('todo', {
     .$onUpdate(() => new Date())
     .notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export const noteSchema = pgTable('note', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  category: text('category'),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export const taskSchema = pgTable('task', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+  taskCode: text('task_code').notNull(),
+  taskName: text('task_name').notNull(),
+  description: text('description'),
+  priority: text('priority'),
+  status: text('status'),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    // Unique index for task code per owner
+    taskCodeOwnerIdx: uniqueIndex('task_code_owner_idx').on(
+      table.taskCode,
+      table.ownerId,
+    ),
+  };
 });
 
 export const productSchema = pgTable('product', {
@@ -152,3 +189,101 @@ export const productionStepDetailSchema = pgTable('production_step_detail', {
     table.sequenceNumber,
   ),
 }));
+
+export const workTableSchema = pgTable('work_table', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+  // Table Identity
+  tableCode: text('table_code').notNull(), // "1", "2", "K04", "K01"
+  tableName: text('table_name'), // Display name or category
+  tableDetail: text('table_detail'), // "Bàn 1", "Bàn 2"
+  // Table Classification
+  tableType: text('table_type'), // cutting/sewing/embroidery/packing
+  tableCategory: integer('table_category'), // 1,2,3,4... (from original TABLE_NAME)
+  // Capacity & Specifications
+  capacityPerDay: integer('capacity_per_day'),
+  capacityPerHour: integer('capacity_per_hour'),
+  tableSizeLength: decimal('table_size_length', { precision: 8, scale: 2 }),
+  tableSizeWidth: decimal('table_size_width', { precision: 8, scale: 2 }),
+  // Location & Assignment
+  locationCode: text('location_code'), // Physical location
+  department: text('department'), // Production department
+  assignedOperator: text('assigned_operator'), // Current operator
+  supervisor: text('supervisor'), // Responsible supervisor
+  // Operational Status
+  status: text('status').default('active'), // active/maintenance/offline/repair
+  availabilitySchedule: text('availability_schedule'), // Working hours/shifts
+  lastMaintenanceDate: date('last_maintenance_date'),
+  nextMaintenanceDate: date('next_maintenance_date'),
+  // Equipment Details
+  equipmentModel: text('equipment_model'),
+  installationDate: date('installation_date'),
+  warrantyExpiryDate: date('warranty_expiry_date'),
+  // Performance Metrics
+  utilizationRate: decimal('utilization_rate', { precision: 5, scale: 2 }),
+  efficiencyRating: decimal('efficiency_rating', { precision: 5, scale: 2 }),
+  totalProcessedUnits: integer('total_processed_units').default(0),
+  // Configuration & Notes
+  specialCapabilities: text('special_capabilities'),
+  limitations: text('limitations'),
+  note: text('note'),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    workTableCodeOwnerIdx: uniqueIndex('work_table_code_owner_idx').on(
+      table.tableCode,
+      table.ownerId,
+    ),
+    workTableTypeIdx: index('work_table_type_idx').on(table.tableType),
+    workTableStatusIdx: index('work_table_status_idx').on(table.status),
+    workTableCategoryIdx: index('work_table_category_idx').on(table.tableCategory),
+    workTableLocationIdx: index('work_table_location_idx').on(table.locationCode),
+  };
+});
+
+export const productSubSchema = pgTable('product_sub', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+
+  // Foreign Key
+  productId: integer('product_id')
+    .references(() => productSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+  productCode: text('product_code').notNull(), // Redundant for performance
+
+  // Sub-Product Identity
+  productSubCode: text('product_sub_code').notNull(), // NHA_01_CM, NHA_02_CO
+  productSubDetail: text('product_sub_detail').notNull(), // CÔNG MÀU, SUIREN KIMONO - TÍM
+
+  // Classification & Categorization
+  subCategory: text('sub_category').notNull(), // CM, CO
+  colorCode: text('color_code'), // MÀU, BẠC, TRẮNG, TÍM, HỒNG
+
+  // SKU & Inventory
+  barcode: text('barcode'),
+
+  // Documentation
+  description: text('description'),
+  note: text('note'),
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    productSubCodeOwnerIdx: uniqueIndex('product_sub_code_owner_idx').on(
+      table.productSubCode,
+      table.ownerId,
+    ),
+    productSubProductIdx: index('product_sub_product_idx').on(table.productId),
+    productSubCategoryIdx: index('product_sub_category_idx').on(table.subCategory),
+    productSubColorIdx: index('product_sub_color_idx').on(table.colorCode),
+    // Đã loại bỏ các index liên quan đến các trường bị xóa
+  };
+});

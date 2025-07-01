@@ -29,8 +29,8 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 label: t('home'),
               },
               {
-                href: '/dashboard/todos',
-                label: t('todos'),
+                href: '/dashboard/notes',
+                label: t('notes'),
               },
               {
                 label: t('product'),
@@ -52,6 +52,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     label: t('product_step_crosstab'),
                   },
                 ],
+              },
+              {
+                href: '/dashboard/work-tables',
+                label: 'Plan',
               },
               {
                 href: '/dashboard/organization-profile/organization-members',

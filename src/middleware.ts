@@ -40,10 +40,12 @@ const isProtectedPageRoute = createRouteMatcher([
 // FIX: API routes should be protected but not go through i18n
 const isProtectedApiRoute = createRouteMatcher([
   '/api/todos(.*)',
+  '/api/notes(.*)', // ✅ Add notes API routes
   '/api/products(.*)', // ✅ CRITICAL: Add products API routes
   '/api/production-steps(.*)', // ✅ CRITICAL: Add production steps API routes
   '/api/production-step-details(.*)', // ✅ CRITICAL: Add production step details API routes
   '/api/product-step-crosstab(.*)', // ✅ CRITICAL: Add crosstab API routes
+  '/api/work-tables(.*)', // ✅ Add work-tables API routes for Clerk protection
   '/api/protected(.*)',
   // Add other protected API routes here
 ]);
