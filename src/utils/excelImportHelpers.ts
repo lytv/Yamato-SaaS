@@ -11,7 +11,8 @@ import * as XLSX from 'xlsx';
 
 import { validateImportProductRow } from '@/libs/validations/product';
 import { validateImportProductionStepRow } from '@/libs/validations/productionStep';
-import type { ImportError, ImportProductData, ImportProductionStepData, ImportProductionStepValidationResult, ImportValidationResult } from '@/types/import';
+import { validateImportUserSyncRow } from '@/libs/validations/user_sync';
+import type { ImportError, ImportProductData, ImportProductionStepData, ImportProductionStepValidationResult, ImportUserSyncData, ImportUserSyncValidationResult, ImportValidationResult } from '@/types/import';
 
 /**
  * Parse Excel file buffer and extract product data
@@ -444,4 +445,299 @@ export function generateProductionStepImportTemplate(): Buffer {
     bookType: 'xlsx',
     compression: true,
   });
+}
+
+/**
+ * Parse Excel file buffer and extract user sync data
+ * @param buffer - Excel file buffer
+ * @returns Promise resolving to array of import user sync data
+ */
+export async function parseUserSyncExcelFile(buffer: Buffer): Promise<ImportUserSyncData[]> {
+  try {
+    // Read workbook from buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+
+    // Convert to JSON array
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+      throw new Error('Excel file contains no data');
+    }
+
+    // Extract headers from first row
+    const headers = rawData[0] as string[];
+    const expectedHeaders = ['User ID', 'Email', 'Full Name', 'Role', 'Organization Role', 'Active'];
+
+    // Validate headers
+    const hasRequiredHeaders = expectedHeaders.slice(0, 2).every(header =>
+      headers.some(h => h && h.toString().toLowerCase().trim() === header.toLowerCase()),
+    );
+
+    if (!hasRequiredHeaders) {
+      throw new Error('Excel file must contain headers: User ID, Email (other fields are optional)');
+    }
+
+    // Map header indices
+    const headerMap = {
+      userId: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'user id'),
+      email: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'email'),
+      fullName: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'full name'),
+      role: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'role'),
+      organizationRole: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'organization role'),
+      isActive: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'active'),
+    };
+
+    // Process data rows (skip header row)
+    const userSyncs: ImportUserSyncData[] = [];
+
+    for (let i = 1; i < rawData.length; i++) {
+      const row = rawData[i] as (string | number | undefined)[];
+      const rowNumber = i + 1; // Excel row number (1-based)
+
+      // Skip empty rows
+      if (!row || row.every(cell => !cell || cell.toString().trim() === '')) {
+        continue;
+      }
+
+      // Extract cell values
+      const userId = headerMap.userId >= 0 ? (row[headerMap.userId]?.toString().trim() || '') : '';
+      const email = headerMap.email >= 0 ? (row[headerMap.email]?.toString().trim() || '') : '';
+      const fullName = headerMap.fullName >= 0 ? (row[headerMap.fullName]?.toString().trim() || '') : '';
+      const role = headerMap.role >= 0 ? (row[headerMap.role]?.toString().trim() || '') : '';
+      const organizationRole = headerMap.organizationRole >= 0 ? (row[headerMap.organizationRole]?.toString().trim() || '') : '';
+      const isActiveStr = headerMap.isActive >= 0 ? (row[headerMap.isActive]?.toString().trim() || '') : '';
+      const isActive = isActiveStr.toLowerCase() === 'yes' || isActiveStr.toLowerCase() === 'true' || isActiveStr === '1';
+
+      // Create user sync data
+      const userSyncData: ImportUserSyncData = {
+        userId,
+        email,
+        fullName: fullName || undefined,
+        role: role || undefined,
+        organizationRole: organizationRole || undefined,
+        isActive,
+        rowNumber,
+      };
+
+      userSyncs.push(userSyncData);
+    }
+
+    return userSyncs;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse Excel file: ${error.message}`);
+    }
+    throw new Error('Failed to parse Excel file: Unknown error');
+  }
+}
+
+/**
+ * Validate imported user sync data using existing validation schemas
+ * @param data - Array of import user sync data
+ * @returns Validation result with valid user syncs and errors
+ */
+export function validateUserSyncImportData(data: ImportUserSyncData[]): ImportUserSyncValidationResult {
+  const validUserSyncs: ImportUserSyncData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No data found in Excel file', value: null }],
+      validUserSyncs: [],
+    };
+  }
+
+  // Check for maximum row limit
+  if (data.length > 1000) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'Maximum 1000 rows allowed', value: data.length }],
+      validUserSyncs: [],
+    };
+  }
+
+  // Track unique user IDs to detect duplicates within the file
+  const seenUserIds = new Set<string>();
+
+  for (const userSyncData of data) {
+    try {
+      // Validate using existing schema
+      const validated = validateImportUserSyncRow(userSyncData);
+
+      // Check for duplicate user IDs within the import file
+      if (seenUserIds.has(validated.userId.toLowerCase())) {
+        errors.push({
+          rowNumber: userSyncData.rowNumber,
+          field: 'userId',
+          message: 'Duplicate user ID within import file',
+          value: validated.userId,
+        });
+        continue;
+      }
+
+      seenUserIds.add(validated.userId.toLowerCase());
+      validUserSyncs.push(validated);
+    } catch (error) {
+      // Handle validation errors
+      if (error && typeof error === 'object' && 'issues' in error) {
+        // Zod validation error
+        const zodError = error as { issues: Array<{ path: string[]; message: string }> };
+        for (const issue of zodError.issues) {
+          errors.push({
+            rowNumber: userSyncData.rowNumber,
+            field: issue.path[0] || 'unknown',
+            message: issue.message,
+            value: userSyncData[issue.path[0] as keyof ImportUserSyncData],
+          });
+        }
+      } else {
+        // Generic error
+        const errorMessage = error instanceof Error ? error.message : 'Validation failed';
+        errors.push({
+          rowNumber: userSyncData.rowNumber,
+          field: 'general',
+          message: errorMessage,
+          value: userSyncData.userId,
+        });
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validUserSyncs,
+  };
+}
+
+export type ImportProcessData = {
+  processCode: string;
+  processName: string;
+  processCategory?: string;
+  description?: string;
+  rowNumber: number;
+};
+
+export function validateProcessImportData(data: ImportProcessData[]): { isValid: boolean; errors: ImportError[]; validProcesses: ImportProcessData[] } {
+  const validProcesses: ImportProcessData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No data found in Excel file', value: null }],
+      validProcesses: [],
+    };
+  }
+
+  // Check for maximum row limit
+  if (data.length > 1000) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'Maximum 1000 rows allowed', value: data.length }],
+      validProcesses: [],
+    };
+  }
+
+  const seenProcessCodes = new Set<string>();
+
+  for (const processData of data) {
+    // Validate required fields
+    if (!processData.processCode || !processData.processName) {
+      errors.push({
+        rowNumber: processData.rowNumber,
+        field: !processData.processCode ? 'processCode' : 'processName',
+        message: 'Required field missing',
+        value: !processData.processCode ? processData.processCode : processData.processName,
+      });
+      continue;
+    }
+    if (seenProcessCodes.has(processData.processCode.toLowerCase())) {
+      errors.push({
+        rowNumber: processData.rowNumber,
+        field: 'processCode',
+        message: 'Duplicate process code within import file',
+        value: processData.processCode,
+      });
+      continue;
+    }
+    seenProcessCodes.add(processData.processCode.toLowerCase());
+    validProcesses.push(processData);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validProcesses,
+  };
+}
+
+export async function parseProcessExcelFile(buffer: Buffer): Promise<ImportProcessData[]> {
+  try {
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+      throw new Error('Excel file contains no data');
+    }
+    const headers = rawData[0] as string[];
+    const expectedHeaders = ['Process Code', 'Process Name', 'Process Category', 'Description'];
+    const hasRequiredHeaders = expectedHeaders.slice(0, 2).every(header =>
+      headers.some(h => h && h.toString().toLowerCase().trim() === header.toLowerCase()),
+    );
+    if (!hasRequiredHeaders) {
+      throw new Error('Excel file must contain headers: Process Code, Process Name (others optional)');
+    }
+    const headerMap = {
+      processCode: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'process code'),
+      processName: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'process name'),
+      processCategory: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'process category'),
+      description: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'description'),
+    };
+    const processes: ImportProcessData[] = [];
+    for (let i = 1; i < rawData.length; i++) {
+      const row = rawData[i] as (string | number | undefined)[];
+      const rowNumber = i + 1;
+      if (!row || row.every(cell => !cell || cell.toString().trim() === '')) {
+        continue;
+      }
+      const processCode = headerMap.processCode >= 0 ? (row[headerMap.processCode]?.toString().trim() || '') : '';
+      const processName = headerMap.processName >= 0 ? (row[headerMap.processName]?.toString().trim() || '') : '';
+      const processCategory = headerMap.processCategory >= 0 ? (row[headerMap.processCategory]?.toString().trim() || '') : '';
+      const description = headerMap.description >= 0 ? (row[headerMap.description]?.toString().trim() || '') : '';
+      const processData: ImportProcessData = {
+        processCode,
+        processName,
+        processCategory: processCategory || undefined,
+        description: description || undefined,
+        rowNumber,
+      };
+      processes.push(processData);
+    }
+    return processes;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse Excel file: ${error.message}`);
+    }
+    throw new Error('Failed to parse Excel file: Unknown error');
+  }
 }

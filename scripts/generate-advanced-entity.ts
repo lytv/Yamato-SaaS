@@ -9,8 +9,8 @@
  * This will create Tasks entity with all advanced features
  */
 
-const { existsSync, mkdirSync, readFileSync, writeFileSync } = require('node:fs');
-const { join } = require('node:path');
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 type FieldConfig = {
   name: string;
@@ -125,6 +125,68 @@ const productSubConfig: EntityConfig = {
     { name: 'productId', type: 'number', required: true, label: 'Product ID', excelColumn: 'Product ID' },
     { name: 'productCode', type: 'string', required: true, maxLength: 50, label: 'Product Code', excelColumn: 'Product Code' },
     { name: 'ownerId', type: 'string', required: true, maxLength: 50, label: 'Owner ID', excelColumn: 'Owner ID' },
+  ],
+  features: {
+    pagination: true,
+    search: true,
+    sorting: true,
+    stats: true,
+    excelImport: true,
+    excelExport: true,
+    uniqueCode: true,
+    batchOperations: true,
+  },
+  uiType: 'table',
+};
+
+// Process configuration based on Schema.ts
+const processConfig: EntityConfig = {
+  entityName: 'Process',
+  entityNameLower: 'process',
+  entityNamePlural: 'processes',
+  tableName: 'process',
+  codeField: 'processCode',
+  nameField: 'processName',
+  fields: [
+    { name: 'processCode', type: 'string', required: true, unique: true, maxLength: 50, label: 'Process Code', excelColumn: 'Process Code' },
+    { name: 'processName', type: 'string', required: true, maxLength: 255, label: 'Process Name', excelColumn: 'Process Name' },
+    { name: 'processCategory', type: 'string', required: false, maxLength: 50, label: 'Process Category', excelColumn: 'Process Category' },
+    { name: 'processType', type: 'string', required: false, maxLength: 50, label: 'Process Type', excelColumn: 'Process Type' },
+    { name: 'department', type: 'string', required: false, maxLength: 50, label: 'Department', excelColumn: 'Department' },
+    { name: 'description', type: 'text', required: false, label: 'Description', excelColumn: 'Description' },
+    { name: 'ownerId', type: 'string', required: true, maxLength: 50, label: 'Owner ID', excelColumn: 'Owner ID' },
+  ],
+  features: {
+    pagination: true,
+    search: true,
+    sorting: true,
+    stats: true,
+    excelImport: true,
+    excelExport: true,
+    uniqueCode: true,
+    batchOperations: true,
+  },
+  uiType: 'table',
+};
+
+// UserSync configuration based on Schema.ts
+const userSyncConfig: EntityConfig = {
+  entityName: 'UserSync',
+  entityNameLower: 'user_sync',
+  entityNamePlural: 'user_syncs',
+  tableName: 'user_sync',
+  codeField: 'userId',
+  nameField: 'email',
+  fields: [
+    { name: 'userId', type: 'string', required: true, unique: true, maxLength: 50, label: 'User ID', excelColumn: 'User ID' },
+    { name: 'email', type: 'string', required: true, maxLength: 255, label: 'Email', excelColumn: 'Email' },
+    { name: 'fullName', type: 'string', required: false, maxLength: 255, label: 'Full Name', excelColumn: 'Full Name' },
+    { name: 'avatarUrl', type: 'string', required: false, maxLength: 255, label: 'Avatar URL', excelColumn: 'Avatar URL' },
+    { name: 'role', type: 'string', required: false, maxLength: 50, label: 'Role', excelColumn: 'Role' },
+    { name: 'organizationRole', type: 'string', required: false, maxLength: 50, label: 'Organization Role', excelColumn: 'Organization Role' },
+    { name: 'isActive', type: 'boolean', required: false, label: 'Is Active', excelColumn: 'Is Active' },
+    { name: 'createdAt', type: 'date', required: true, label: 'Created At', excelColumn: 'Created At' },
+    { name: 'updatedAt', type: 'date', required: true, label: 'Updated At', excelColumn: 'Updated At' },
   ],
   features: {
     pagination: true,
@@ -317,6 +379,10 @@ function main() {
     config = productSubConfig;
   } else if (entityName.toLowerCase() === 'tasks' || entityName.toLowerCase() === 'task') {
     config = tasksConfig;
+  } else if (entityName.toLowerCase() === 'process') {
+    config = processConfig;
+  } else if (entityName.toLowerCase() === 'user_sync' || entityName.toLowerCase() === 'usersync') {
+    config = userSyncConfig;
   } else {
     config = {
       ...tasksConfig,

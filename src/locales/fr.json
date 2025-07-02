@@ -1,42 +1,59 @@
 {
   "Index": {
-    "meta_title": "SaaS Template - Le template SaaS parfait pour construire et mettre à l'échelle votre entreprise en toute simplicité.",
-    "meta_description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec React, TypeScript, Shadcn UI et Tailwind CSS."
+    "meta_title": "Yamato ERP - Système de gestion intelligent pour la fabrication de vêtements",
+    "meta_description": "Solution SaaS complète pour la gestion de production textile, de la planification à la livraison. Optimisez les processus, réduisez les coûts, augmentez l'efficacité."
   },
   "Navbar": {
     "sign_in": "Se connecter",
     "sign_up": "S'inscrire",
     "product": "Produit",
-    "docs": "Docs",
+    "features": "Fonctionnalités",
+    "solutions": "Solutions",
+    "pricing": "Tarifs",
+    "docs": "Documentation",
     "blog": "Blog",
     "community": "Communauté",
-    "company": "Entreprise"
+    "company": "Entreprise",
+    "support": "Support",
+    "contact": "Contact",
+    "demo": "Voir démo"
   },
   "Hero": {
-    "follow_twitter": "Suivez @Ixartz sur Twitter",
-    "title": "Le parfait <important>SaaS template</important> pour construire et mettre à l'échelle votre entreprise en toute simplicité.",
-    "description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec React, TypeScript, Shadcn UI et Tailwind CSS.",
-    "primary_button": "Démarrer",
-    "secondary_button": "Mettez une étoile sur GitHub"
+    "follow_twitter": "Contacter Tien Phong Software",
+    "title": "Système de gestion <important>fabrication textile</important> intelligent",
+    "description": "Solution SaaS complète aidant les usines textiles et sous-traitants à gérer depuis les commandes, planification de production jusqu'au contrôle qualité. Optimisez les processus, réduisez les déchets, augmentez les profits.",
+    "primary_button": "Essai gratuit",
+    "secondary_button": "Voir démo produit"
   },
   "Sponsors": {
-    "title": "Sponsorisé par"
+    "title": "Pour les entreprises",
+    "factory_export": "Usine textile export",
+    "factory_contractor": "Fabrication sous-traitance",
+    "fashion_company": "Entreprise mode",
+    "sme_business": "PME Business",
+    "training_center": "Centre formation"
   },
   "Features": {
     "section_subtitle": "Fonctionnalités",
-    "section_title": "Débloquer le plein potentiel du SaaS Template",
-    "section_description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec React, TypeScript, Shadcn UI et Tailwind CSS.",
-    "feature1_title": "Node.js",
-    "feature2_title": "React",
-    "feature3_title": "Tailwind CSS",
-    "feature4_title": "TypeScript",
-    "feature5_title": "Shadcn UI",
-    "feature6_title": "ESLint",
-    "feature_description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec React, TypeScript, Shadcn UI et Tailwind CSS."
+    "section_title": "Solution complète pour l'industrie textile et sous-traitance",
+    "section_description": "Système de gestion intégré couvrant la planification de production, gestion des matières premières jusqu'au contrôle qualité et livraison.",
+    "feature1_title": "Gestion des commandes",
+    "feature1_description": "Suivi des commandes de réception à achèvement. Gestion informations clients, spécifications techniques, délais et progression.",
+    "feature2_title": "Planification production",
+    "feature2_description": "Planification intelligente production, allocation processus, machines et main-d'œuvre. Optimisation capacité et réduction temps d'attente.",
+    "feature3_title": "Gestion matières",
+    "feature3_description": "Gestion inventaire tissus et accessoires, contrôle niveaux stock. Calcul automatique besoins matériaux par commande et alertes rupture.",
+    "feature4_title": "Contrôle qualité",
+    "feature4_description": "Système QC/QA à chaque étape. Suivi défauts, rapports qualité et respect standards export.",
+    "feature5_title": "Gestion coûts",
+    "feature5_description": "Calcul précis coûts production par commande. Analyse rentabilité et optimisation stratégie prix.",
+    "feature6_title": "Rapports intelligents",
+    "feature6_description": "Tableau de bord suivi KPIs temps réel. Rapports performance production, analyse qualité et insights tendances business.",
+    "feature_description": "Solution SaaS complète pour industrie textile et sous-traitance."
   },
   "Pricing": {
     "section_subtitle": "Fonctionnalités",
-    "section_title": "Débloquer le plein potentiel du SaaS Template",
+    "section_title": "Débloquer le plein potentiel de Yamato ERP",
     "section_description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec React, TypeScript, Shadcn UI et Tailwind CSS.",
     "button_text": "Démarrer"
   },
@@ -67,13 +84,19 @@
   },
   "Footer": {
     "product": "Produit",
-    "docs": "Docs",
+    "docs": "Documentation",
     "blog": "Blog",
     "community": "Communauté",
     "company": "Entreprise",
+    "contact": "Contact",
+    "support": "Support",
     "terms_of_service": "Conditions d'utilisation",
     "privacy_policy": "Politique de confidentialité",
-    "designed_by": "Designé by <author></author>."
+    "designed_by": "Développé par <author>Tien Phong Software</author>.",
+    "company_info": "Tien Phong Software - Spécialisé dans le développement de solutions de gestion pour l'industrie textile",
+    "email": "ly.truong.dn@gmail.com",
+    "phone": "0905.666.770",
+    "address": "Vietnam"
   },
   "ProtectFallback": {
     "not_enough_permission": "Vous n'avez pas les permissions pour effectuer cette action"
@@ -95,13 +118,14 @@
     "production_steps": "Étapes de Production",
     "production_step_details": "Détails des Étapes de Production",
     "product_step_crosstab": "Tableau Croisé",
+    "processes": "Processus",
     "members": "Membres",
     "billing": "Facturation",
     "settings": "Paramètres"
   },
   "Dashboard": {
-    "meta_title": "Tableau de bord du SaaS Template",
-    "meta_description": "Un template gratuit et open-source de landing page pour votre entreprise SaaS, construit avec Next.js, TypeScript, Shadcn UI et Tailwind CSS."
+    "meta_title": "Tableau de bord Yamato ERP",
+    "meta_description": "Système de gestion complet pour l'industrie textile et manufacturière construit avec Next.js, TypeScript, Shadcn UI et Tailwind CSS."
   },
   "DashboardIndex": {
     "title_bar": "Tableau de bord",
@@ -305,5 +329,39 @@
   },
   "product_step_crosstab": {
     "title": "Tableau Croisé des Étapes de Production"
+  },
+  "process": {
+    "pageTitle": "Processus",
+    "pageDescription": "Gérez vos processus de production",
+    "createNew": "Créer un processus",
+    "create": "Créer un processus",
+    "edit": "Modifier le processus",
+    "delete": "Supprimer",
+    "noProcesses": "Aucun processus trouvé. Créez votre premier processus pour commencer !",
+    "searchPlaceholder": "Rechercher des processus...",
+    "resetFilters": "Réinitialiser les filtres",
+    "form": {
+      "processCode": "Code du processus",
+      "processCodePlaceholder": "Entrez le code du processus",
+      "processName": "Nom du processus",
+      "processNamePlaceholder": "Entrez le nom du processus",
+      "processCategory": "Catégorie du processus",
+      "processType": "Type de processus",
+      "department": "Département",
+      "description": "Description",
+      "creating": "Création...",
+      "updating": "Mise à jour...",
+      "save": "Enregistrer le processus",
+      "cancel": "Annuler"
+    },
+    "sort": {
+      "createdAt": "Date de création",
+      "updatedAt": "Date de modification",
+      "processCode": "Code du processus",
+      "processName": "Nom du processus"
+    },
+    "add_new": "Ajouter un nouveau processus",
+    "delete_success": "Processus supprimé avec succès.",
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer ce processus ?"
   }
 }

@@ -6,6 +6,7 @@
 
 import type { Product } from './product';
 import type { ProductionStep } from './productionStep';
+import type { UserSync } from './user_sync';
 
 // Simplified types following existing patterns
 export type ImportProductData = {
@@ -58,4 +59,28 @@ export type ImportProductionStepValidationResult = {
   isValid: boolean;
   errors: ImportError[];
   validProducts: ImportProductionStepData[];
+};
+
+export type ImportUserSyncData = {
+  userId: string;
+  email: string;
+  fullName?: string;
+  role?: string;
+  organizationRole?: string;
+  isActive?: boolean;
+  rowNumber: number;
+};
+
+export type ImportUserSyncResult = {
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  createdUserSyncs: UserSync[];
+  errors: ImportError[];
+};
+
+export type ImportUserSyncValidationResult = {
+  isValid: boolean;
+  errors: ImportError[];
+  validUserSyncs: ImportUserSyncData[];
 };

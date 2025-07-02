@@ -1,0 +1,74 @@
+{
+  "Index": {
+    "meta_title": "Yamato ERP - Hệ thống quản lý sản xuất may mặc và gia công thông minh",
+    "meta_description": "Giải pháp SaaS toàn diện cho quản lý sản xuất may mặc, từ lập kế hoạch đến giao hàng. Tối ưu hóa quy trình, giảm chi phí, tăng hiệu quả sản xuất."
+  },
+  "Navbar": {
+    "sign_in": "Đăng nhập",
+    "sign_up": "Đăng ký", 
+    "product": "Sản phẩm",
+    "features": "Tính năng",
+    "solutions": "Giải pháp",
+    "pricing": "Bảng giá",
+    "docs": "Tài liệu",
+    "blog": "Blog",
+    "community": "Cộng đồng",
+    "company": "Công ty",
+    "support": "Hỗ trợ",
+    "contact": "Liên hệ",
+    "demo": "Xem demo"
+  },
+  "Hero": {
+    "follow_twitter": "Liên hệ Tiên Phong Software",
+    "title": "Hệ thống quản lý <important>sản xuất may mặc</important> thông minh và hiệu quả",
+    "description": "Giải pháp SaaS toàn diện giúp các xưởng may, nhà máy gia công quản lý từ đơn hàng, kế hoạch sản xuất đến kiểm soát chất lượng. Tối ưu hóa quy trình, giảm lãng phí, tăng lợi nhuận.",
+    "primary_button": "Dùng thử miễn phí",
+    "secondary_button": "Xem demo sản phẩm"
+  },
+  "Sponsors": {
+    "title": "Dành cho các doanh nghiệp",
+    "factory_export": "Xưởng may xuất khẩu",
+    "factory_contractor": "Nhà máy gia công",
+    "fashion_company": "Công ty thời trang",
+    "sme_business": "Doanh nghiệp SME",
+    "training_center": "Trung tâm đào tạo"
+  },
+  "Features": {
+    "section_subtitle": "Tính năng",
+    "section_title": "Giải pháp toàn diện cho ngành may mặc và gia công",
+    "section_description": "Hệ thống quản lý tích hợp đầy đủ từ lập kế hoạch sản xuất, quản lý nguyên vật liệu đến kiểm soát chất lượng và giao hàng.",
+    "feature1_title": "Quản lý đơn hàng",
+    "feature1_description": "Theo dõi đơn hàng từ tiếp nhận đến hoàn thành. Quản lý thông tin khách hàng, spec kỹ thuật, timeline và tiến độ thực hiện.",
+    "feature2_title": "Kế hoạch sản xuất",
+    "feature2_description": "Lập kế hoạch sản xuất thông minh, phân bổ công đoạn, máy móc và nhân lực. Tối ưu hóa capacity và giảm thời gian chờ.",
+    "feature3_title": "Quản lý nguyên vật liệu",
+    "feature3_description": "Quản lý kho vải, phụ liệu, kiểm soát tồn kho. Tự động tính toán nhu cầu nguyên vật liệu theo đơn hàng và cảnh báo thiếu hụt.",
+    "feature4_title": "Kiểm soát chất lượng",
+    "feature4_description": "Hệ thống QC/QA tại từng công đoạn. Theo dõi lỗi, báo cáo chất lượng và đảm bảo tiêu chuẩn xuất khẩu.",
+    "feature5_title": "Quản lý chi phí",
+    "feature5_description": "Tính toán chi phí sản xuất chính xác theo từng đơn hàng. Phân tích lợi nhuận và tối ưu hóa pricing strategy.",
+    "feature6_title": "Báo cáo thông minh",
+    "feature6_description": "Dashboard theo dõi KPIs thời gian thực. Báo cáo hiệu suất sản xuất, chất lượng và phân tích xu hướng kinh doanh.",
+    "feature_description": "Giải pháp SaaS toàn diện cho ngành may mặc và gia công."
+  },
+  "Dashboard": {
+    "meta_title": "Yamato ERP Dashboard",
+    "meta_description": "Hệ thống quản lý toàn diện cho ngành may mặc và gia công với Next.js, TypeScript, Shadcn UI và Tailwind CSS."
+  },
+  "Footer": {
+    "product": "Sản phẩm",
+    "docs": "Tài liệu",
+    "blog": "Blog",
+    "community": "Cộng đồng",
+    "company": "Công ty",
+    "contact": "Liên hệ",
+    "support": "Hỗ trợ",
+    "terms_of_service": "Điều khoản dịch vụ",
+    "privacy_policy": "Chính sách bảo mật",
+    "designed_by": "Phát triển bởi <author>Tiên Phong Software</author>.",
+    "company_info": "Tiên Phong Software - Chuyên phát triển giải pháp quản lý cho ngành may mặc",
+    "email": "ly.truong.dn@gmail.com",
+    "phone": "0905.666.770",
+    "address": "Việt Nam"
+  }
+}

@@ -318,3 +318,19 @@ export const productSubSchema = pgTable('product_sub', {
     // Đã loại bỏ các index liên quan đến các trường bị xóa
   };
 });
+
+export const userSyncSchema = pgTable('user_sync', {
+  userId: text('user_id').primaryKey(), // ID từ Clerk
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+  email: text('email').notNull(),
+  fullName: text('full_name'),
+  avatarUrl: text('avatar_url'),
+  role: text('role').default('member'), // Vai trò của user (admin, member, viewer, ...)
+  organizationRole: text('organization_role'), // Vai trò trong tổ chức (nếu có)
+  isActive: boolean('is_active').default(true), // Trạng thái hoạt động
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});

@@ -1,42 +1,59 @@
 {
   "Index": {
-    "meta_title": "SaaS Template - The perfect SaaS template to build and scale your business with ease.",
-    "meta_description": "A free and open-source landing page template for your SaaS business, built with React, TypeScript, Shadcn UI, and Tailwind CSS."
+    "meta_title": "Yamato ERP - Smart Garment Manufacturing Management System",
+    "meta_description": "Comprehensive SaaS solution for garment production management, from planning to delivery. Optimize processes, reduce costs, increase production efficiency."
   },
   "Navbar": {
     "sign_in": "Sign In",
     "sign_up": "Sign Up",
     "product": "Product",
-    "docs": "Docs",
+    "features": "Features",
+    "solutions": "Solutions",
+    "pricing": "Pricing",
+    "docs": "Documentation",
     "blog": "Blog",
     "community": "Community",
-    "company": "Company"
+    "company": "Company",
+    "support": "Support",
+    "contact": "Contact",
+    "demo": "View Demo"
   },
   "Hero": {
-    "follow_twitter": "Follow @Ixartz on Twitter",
-    "title": "The perfect <important>SaaS template</important> to build and scale your business with ease.",
-    "description": "A free and open-source landing page template for your SaaS business, built with React, TypeScript, Shadcn UI, and Tailwind CSS.",
-    "primary_button": "Get Started",
-    "secondary_button": "Star on GitHub"
+    "follow_twitter": "Contact Tien Phong Software",
+    "title": "Smart <important>garment manufacturing</important> management system",
+    "description": "Comprehensive SaaS solution helping garment factories and contractors manage from orders, production planning to quality control. Optimize processes, reduce waste, increase profits.",
+    "primary_button": "Free Trial",
+    "secondary_button": "View Product Demo"
   },
   "Sponsors": {
-    "title": "Sponsored by"
+    "title": "For Businesses",
+    "factory_export": "Export Garment Factory",
+    "factory_contractor": "Contract Manufacturing",
+    "fashion_company": "Fashion Company",
+    "sme_business": "SME Business",
+    "training_center": "Training Center"
   },
   "Features": {
     "section_subtitle": "Features",
-    "section_title": "Unlock the Full Potential of the SaaS Template",
-    "section_description": "A free and open-source landing page template for your SaaS business, built with React, TypeScript, Shadcn UI, and Tailwind CSS.",
-    "feature1_title": "Node.js",
-    "feature2_title": "React",
-    "feature3_title": "Tailwind CSS",
-    "feature4_title": "TypeScript",
-    "feature5_title": "Shadcn UI",
-    "feature6_title": "ESLint",
-    "feature_description": "A free and open-source landing page template for your SaaS business, built with React, TypeScript, Shadcn UI, and Tailwind CSS."
+    "section_title": "Comprehensive solution for garment and contracting industry",
+    "section_description": "Integrated management system covering production planning, raw material management to quality control and delivery.",
+    "feature1_title": "Order Management",
+    "feature1_description": "Track orders from receipt to completion. Manage customer information, technical specs, timeline and progress.",
+    "feature2_title": "Production Planning",
+    "feature2_description": "Smart production planning, allocate processes, machinery and workforce. Optimize capacity and reduce waiting time.",
+    "feature3_title": "Material Management",
+    "feature3_description": "Manage fabric and accessory inventory, control stock levels. Automatically calculate material requirements by order and shortage alerts.",
+    "feature4_title": "Quality Control",
+    "feature4_description": "QC/QA system at each stage. Track defects, quality reports and ensure export standards.",
+    "feature5_title": "Cost Management", 
+    "feature5_description": "Accurate production cost calculation by order. Analyze profitability and optimize pricing strategy.",
+    "feature6_title": "Smart Reporting",
+    "feature6_description": "Real-time KPI tracking dashboard. Production performance reports, quality analysis and business trend insights.",
+    "feature_description": "Comprehensive SaaS solution for garment and contracting industry."
   },
   "Pricing": {
     "section_subtitle": "Features",
-    "section_title": "Unlock the Full Potential of the SaaS Template",
+    "section_title": "Unlock the Full Potential of Yamato ERP",
     "section_description": "A free and open-source landing page template for your SaaS business, built with React, TypeScript, Shadcn UI, and Tailwind CSS.",
     "button_text": "Get Started"
   },
@@ -67,13 +84,19 @@
   },
   "Footer": {
     "product": "Product",
-    "docs": "Docs",
+    "docs": "Documentation",
     "blog": "Blog",
     "community": "Community",
     "company": "Company",
-    "terms_of_service": "Terms Of Service",
+    "contact": "Contact",
+    "support": "Support",
+    "terms_of_service": "Terms of Service",
     "privacy_policy": "Privacy Policy",
-    "designed_by": "Designed by <author></author>."
+    "designed_by": "Developed by <author>Tien Phong Software</author>.",
+    "company_info": "Tien Phong Software - Specialized in developing management solutions for garment industry",
+    "email": "ly.truong.dn@gmail.com",
+    "phone": "0905.666.770",
+    "address": "Vietnam"
   },
   "ProtectFallback": {
     "not_enough_permission": "You do not have the permissions to perform this action"
@@ -95,14 +118,16 @@
     "production_steps": "Production Steps",
     "production_step_details": "Production Step Details",
     "product_step_crosstab": "Product Step Crosstab",
+    "processes": "Processes",
+    "user_syncs": "User Syncs",
     "members": "Members",
     "billing": "Billing",
     "settings": "Settings",
     "notes": "Notes"
   },
   "Dashboard": {
-    "meta_title": "SaaS Template Dashboard",
-    "meta_description": "A free and open-source landing page template for your SaaS business, built with Next.js, TypeScript, Shadcn UI, and Tailwind CSS."
+    "meta_title": "Yamato ERP Dashboard",
+    "meta_description": "Comprehensive management system for garment and manufacturing industry built with Next.js, TypeScript, Shadcn UI and Tailwind CSS."
   },
   "DashboardIndex": {
     "title_bar": "Dashboard",
@@ -427,5 +452,77 @@
     "pageTitle": "Product Subs",
     "pageDescription": "Manage your product subs and inventory",
     "createNew": "Create Product Sub"
+  },
+  "process": {
+    "pageTitle": "Processes",
+    "pageDescription": "Manage your production processes",
+    "createNew": "Create Process",
+    "create": "Create Process",
+    "edit": "Edit Process",
+    "delete": "Delete",
+    "noProcesses": "No processes found. Create your first process to get started!",
+    "searchPlaceholder": "Search processes...",
+    "resetFilters": "Reset Filters",
+    "form": {
+      "processCode": "Process Code",
+      "processCodePlaceholder": "Enter process code",
+      "processName": "Process Name",
+      "processNamePlaceholder": "Enter process name",
+      "processCategory": "Process Category",
+      "processType": "Process Type",
+      "department": "Department",
+      "description": "Description",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "save": "Save Process",
+      "cancel": "Cancel"
+    },
+    "sort": {
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "processCode": "Process Code",
+      "processName": "Process Name"
+    },
+    "add_new": "Add a new process",
+    "delete_success": "Process deleted successfully.",
+    "deleteConfirmation": "Are you sure you want to delete this process?"
+  },
+  "user_sync": {
+    "pageTitle": "User Syncs",
+    "pageDescription": "Manage your user syncs and integration status",
+    "createNew": "Create User Sync",
+    "edit": "Edit User Sync",
+    "delete": "Delete",
+    "noUserSyncs": "No user syncs found. Create your first user sync to get started!",
+    "searchPlaceholder": "Search user syncs...",
+    "resetFilters": "Reset Filters",
+    "form": {
+      "userId": "User ID",
+      "userIdPlaceholder": "Enter user ID",
+      "email": "Email",
+      "emailPlaceholder": "Enter email",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter full name",
+      "avatarUrl": "Avatar URL",
+      "avatarUrlPlaceholder": "Enter avatar URL",
+      "role": "Role",
+      "rolePlaceholder": "Enter role",
+      "organizationRole": "Organization Role",
+      "organizationRolePlaceholder": "Enter organization role",
+      "isActive": "Is Active",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "save": "Save User Sync",
+      "cancel": "Cancel"
+    },
+    "sort": {
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "email": "Email"
+    },
+    "add_new": "Add a new user sync",
+    "delete_success": "User sync deleted successfully."
   }
 }

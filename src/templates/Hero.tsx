@@ -1,4 +1,3 @@
-import { GitHubLogoIcon, TwitterLogoIcon } from '@radix-ui/react-icons';
 import { useTranslations } from 'next-intl';
 
 import { badgeVariants } from '@/components/ui/badgeVariants';
@@ -15,11 +14,14 @@ export const Hero = () => {
         banner={(
           <a
             className={badgeVariants()}
-            href="https://twitter.com/ixartz"
+            href="mailto:ly.truong.dn@gmail.com"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <TwitterLogoIcon className="mr-1 size-5" />
+            <svg className="mr-1 size-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
             {' '}
             {t('follow_twitter')}
           </a>
@@ -36,16 +38,18 @@ export const Hero = () => {
           <>
             <a
               className={buttonVariants({ size: 'lg' })}
-              href="https://github.com/ixartz/SaaS-Boilerplate"
+              href="/sign-up"
             >
               {t('primary_button')}
             </a>
 
             <a
               className={buttonVariants({ variant: 'outline', size: 'lg' })}
-              href="https://github.com/ixartz/SaaS-Boilerplate"
+              href="/dashboard"
             >
-              <GitHubLogoIcon className="mr-2 size-5" />
+              <svg className="mr-2 size-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+              </svg>
               {t('secondary_button')}
             </a>
           </>

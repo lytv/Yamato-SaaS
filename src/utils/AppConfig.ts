@@ -4,15 +4,19 @@ const localePrefix = 'as-needed' as const;
 
 // FIXME: Update this configuration file based on your project information
 export const AppConfig = {
-  name: 'SaaS Template',
+  name: 'Yamato ERP',
   locales: [
+    {
+      id: 'vn',
+      name: 'Tiếng Việt',
+    },
     {
       id: 'en',
       name: 'English',
     },
     { id: 'fr', name: 'Français' },
   ],
-  defaultLocale: 'en',
+  defaultLocale: 'vn',
   localePrefix,
 };
 

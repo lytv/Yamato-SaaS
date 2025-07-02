@@ -50,6 +50,27 @@
       "when": 1751341666893,
       "tag": "0006_easy_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1751355643467,
+      "tag": "0007_oval_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1751423102285,
+      "tag": "0008_lazy_callisto",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1751432796389,
+      "tag": "0009_burly_blindfold",
+      "breakpoints": true
     }
   ]
 }

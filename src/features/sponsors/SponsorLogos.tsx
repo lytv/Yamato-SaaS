@@ -1,105 +1,57 @@
 /* eslint-disable react-dom/no-unsafe-target-blank */
-import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import { LogoCloud } from '@/features/landing/LogoCloud';
 
-export const SponsorLogos = () => (
-  <LogoCloud text="Sponsored by">
-    <a
-      href="https://clerk.com?utm_source=github&utm_medium=sponsorship&utm_campaign=nextjs-boilerplate"
-      target="_blank"
-      rel="noopener"
-    >
-      <Image
-        src="/assets/images/clerk-logo-dark.png"
-        alt="Clerk logo dark"
-        className="dark:hidden"
-        width="128"
-        height="37"
-      />
-      <Image
-        src="/assets/images/clerk-logo-white.png"
-        alt="Clerk logo light"
-        className="hidden dark:block"
-        width="128"
-        height="37"
-      />
-    </a>
+export const SponsorLogos = () => {
+  const t = useTranslations('Sponsors');
+  
+  return (
+    <LogoCloud text={t('title')}>
+      <div className="flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-center">{t('factory_export')}</span>
+      </div>
 
-    <a
-      href="https://l.crowdin.com/next-js"
-      target="_blank"
-      rel="noopener"
-    >
-      <Image
-        src="/assets/images/crowdin-dark.png"
-        alt="Crowdin logo dark"
-        className="dark:hidden"
-        width="128"
-        height="26"
-      />
-      <Image
-        src="/assets/images/crowdin-white.png"
-        alt="Crowdin logo light"
-        className="hidden dark:block"
-        width="128"
-        height="26"
-      />
-    </a>
+      <div className="flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 21h18l-9-18L3 21zM12 6l6 13H6l6-13z"/>
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-center">{t('factory_contractor')}</span>
+      </div>
 
-    <a
-      href="https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy25q1-nextjs&utm_content=github-banner-nextjsboilerplate-logo"
-      target="_blank"
-      rel="noopener"
-    >
-      <Image
-        src="/assets/images/sentry-dark.png"
-        alt="Sentry logo dark"
-        className="dark:hidden"
-        width="128"
-        height="38"
-      />
-      <Image
-        src="/assets/images/sentry-white.png"
-        alt="Sentry logo light"
-        className="hidden dark:block"
-        width="128"
-        height="38"
-      />
-    </a>
+      <div className="flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 7h-2V6a3 3 0 0 0-3-3H10a3 3 0 0 0-3 3v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM9 6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1H9V6zm9 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-center">{t('fashion_company')}</span>
+      </div>
 
-    <a
-      href="https://launch.arcjet.com/Q6eLbRE"
-      target="_blank"
-      rel="noopener"
-    >
-      <Image
-        src="/assets/images/arcjet-light.svg"
-        alt="Arcjet logo dark"
-        className="dark:hidden"
-        width="128"
-        height="38"
-      />
-      <Image
-        src="/assets/images/arcjet-dark.svg"
-        alt="Arcjet logo light"
-        className="hidden dark:block"
-        width="128"
-        height="38"
-      />
-    </a>
+      <div className="flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-center">{t('sme_business')}</span>
+      </div>
 
-    <a
-      href="https://nextjs-boilerplate.com/pro-saas-starter-kit"
-      target="_blank"
-      rel="noopener"
-    >
-      <Image
-        src="/assets/images/nextjs-boilerplate-saas.png"
-        alt="Nextjs SaaS Boilerplate"
-        width="128"
-        height="30"
-      />
-    </a>
-  </LogoCloud>
-);
+      <div className="flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-center">{t('training_center')}</span>
+      </div>
+    </LogoCloud>
+  );
+};

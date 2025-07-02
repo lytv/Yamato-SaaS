@@ -47,7 +47,10 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/production-step-details(.*)', // ✅ CRITICAL: Add production step details API routes
   '/api/product-step-crosstab(.*)', // ✅ CRITICAL: Add crosstab API routes
   '/api/work-tables(.*)', // ✅ Add work-tables API routes for Clerk protection
+  '/api/processes(.*)', // ✅ Add processes API routes
+  '/api/user_syncs(.*)', // ✅ Add user_syncs API routes
   '/api/protected(.*)',
+  '/api/organization-profile/sync-users', // Bảo vệ API đồng bộ user
   // Add other protected API routes here
 ]);
 
