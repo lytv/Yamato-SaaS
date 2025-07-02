@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/lytv/Yamato-SaaS/compare/v1.1.0...v1.1.1) (2025-07-02)
+
+
+### Bug Fixes
+
+* đồng bộ schema, type, xoá test, fix build, sạch typescript error ([db08313](https://github.com/lytv/Yamato-SaaS/commit/db083137460c99df2e53e3385cb071b4903dd0f7))
+
 # [1.1.0](https://github.com/lytv/Yamato-SaaS/compare/v1.0.0...v1.1.0) (2025-07-01)
 
 
