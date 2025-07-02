@@ -5,7 +5,7 @@
   },
   "Navbar": {
     "sign_in": "Đăng nhập",
-    "sign_up": "Đăng ký", 
+    "sign_up": "Đăng ký",
     "product": "Sản phẩm",
     "features": "Tính năng",
     "solutions": "Giải pháp",
@@ -70,5 +70,68 @@
     "email": "ly.truong.dn@gmail.com",
     "phone": "0905.666.770",
     "address": "Việt Nam"
+  },
+  "ProtectFallback": {
+    "not_enough_permission": "Bạn không có quyền thực hiện hành động này"
+  },
+  "SignIn": {
+    "meta_title": "Đăng nhập",
+    "meta_description": "Đăng nhập tài khoản của bạn dễ dàng và nhanh chóng."
+  },
+  "SignUp": {
+    "meta_title": "Đăng ký",
+    "meta_description": "Tạo tài khoản mới một cách đơn giản và thuận tiện."
+  },
+  "DashboardLayout": {
+    "home": "Trang chủ",
+    "todos": "Việc cần làm",
+    "product": "Sản phẩm",
+    "products": "Danh sách sản phẩm",
+    "productsubs": "Sản phẩm phụ",
+    "production_steps": "Công đoạn sản xuất",
+    "production_step_details": "Chi tiết công đoạn",
+    "product_step_crosstab": "Bảng chéo sản phẩm-công đoạn",
+    "processes": "Quy trình",
+    "user_syncs": "Đồng bộ người dùng",
+    "members": "Thành viên",
+    "billing": "Thanh toán",
+    "settings": "Cài đặt",
+    "notes": "Ghi chú"
+  },
+  "DashboardIndex": {
+    "title_bar": "Bảng điều khiển",
+    "title_bar_description": "Chào mừng bạn đến với bảng điều khiển",
+    "message_state_title": "Bắt đầu ngay",
+    "message_state_description": "Bạn có thể tuỳ chỉnh trang này tại <code>dashboard/page.tsx</code>",
+    "message_state_button": "Star trên GitHub",
+    "message_state_alternative": "Muốn nhiều tính năng hơn? Thử <url></url>."
+  },
+  "UserProfile": {
+    "title_bar": "Hồ sơ người dùng",
+    "title_bar_description": "Xem và quản lý hồ sơ cá nhân"
+  },
+  "OrganizationProfile": {
+    "title_bar": "Quản lý tổ chức",
+    "title_bar_description": "Quản lý tổ chức của bạn"
+  },
+  "Billing": {
+    "title_bar": "Thanh toán",
+    "title_bar_description": "Quản lý gói dịch vụ và thanh toán",
+    "current_section_title": "Gói hiện tại",
+    "current_section_description": "Điều chỉnh gói dịch vụ phù hợp nhu cầu",
+    "manage_subscription_button": "Quản lý đăng ký"
+  },
+  "BillingOptions": {
+    "current_plan": "Gói hiện tại",
+    "upgrade_plan": "Bắt đầu ngay"
+  },
+  "CheckoutConfirmation": {
+    "title_bar": "Xác nhận thanh toán",
+    "message_state_title": "Thanh toán thành công",
+    "message_state_description": "Thanh toán của bạn đã được xử lý thành công. Cảm ơn bạn!",
+    "message_state_button": "Quay lại trang thanh toán"
+  },
+  "DataTable": {
+    "no_results": "Không có kết quả."
   }
 }
