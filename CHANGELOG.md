@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/lytv/Yamato-SaaS/compare/v1.1.3...v1.1.4) (2025-07-03)
+
+
+### Bug Fixes
+
+* update plan module fixes documentation ([08d5053](https://github.com/lytv/Yamato-SaaS/commit/08d5053213d8bfe7928689280a092d676a0a959f))
+
 ## [1.1.3](https://github.com/lytv/Yamato-SaaS/compare/v1.1.2...v1.1.3) (2025-07-03)
 
 
