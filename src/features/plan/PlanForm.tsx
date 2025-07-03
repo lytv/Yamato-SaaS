@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlanMutations } from '@/hooks/usePlanMutations';
 import { planFormSchema } from '@/libs/validations/plan';
 import type { Plan, PlanFormData } from '@/types/plan';
@@ -43,7 +44,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           planEndDate: plan.planEndDate || undefined,
           approvedBy: plan.approvedBy || '',
           approvedAt: plan.approvedAt || undefined,
-          note: plan.note || ''
+          note: plan.note || '',
         }
       : {
           planCode: '',
@@ -57,7 +58,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           planEndDate: undefined,
           approvedBy: '',
           approvedAt: undefined,
-          note: ''
+          note: '',
         },
     mode: 'onChange',
   });
@@ -102,319 +103,326 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
         </div>
       )}
 
-      {/* Plan Code Field */}
-      <div>
-        <label
-          htmlFor="planCode"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan Code *
-        </label>
-        <input
-          id="planCode"
-          type="text"
-          {...register('planCode')}
-          aria-required="true"
-          aria-describedby={errors.planCode ? 'planCode-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planCode ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Plan Code"
-        />
-        {errors.planCode && (
-          <p id="planCode-error" className="mt-2 text-sm text-red-600">
-            {errors.planCode.message}
-          </p>
-        )}
-      </div>
+      <Tabs defaultValue="required" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="required">Required Fields</TabsTrigger>
+          <TabsTrigger value="dates">Dates</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
+        </TabsList>
 
-      {/* Plan Name Field */}
-      <div>
-        <label
-          htmlFor="planName"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan Name *
-        </label>
-        <input
-          id="planName"
-          type="text"
-          {...register('planName')}
-          aria-required="true"
-          aria-describedby={errors.planName ? 'planName-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planName ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Plan Name"
-        />
-        {errors.planName && (
-          <p id="planName-error" className="mt-2 text-sm text-red-600">
-            {errors.planName.message}
-          </p>
-        )}
-      </div>
+        {/* Tab 1: Required Fields */}
+        <TabsContent value="required" className="space-y-4">
+          {/* Plan Code Field */}
+          <div>
+            <label
+              htmlFor="planCode"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan Code *
+            </label>
+            <input
+              id="planCode"
+              type="text"
+              {...register('planCode')}
+              aria-required="true"
+              aria-describedby={errors.planCode ? 'planCode-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planCode ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Plan Code"
+            />
+            {errors.planCode && (
+              <p id="planCode-error" className="mt-2 text-sm text-red-600">
+                {errors.planCode.message}
+              </p>
+            )}
+          </div>
 
-      {/* Plan Year Field */}
-      <div>
-        <label
-          htmlFor="planYear"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan Year *
-        </label>
-        <input
-          id="planYear"
-          type="number"
-          {...register('planYear', { valueAsNumber: true })}
-          aria-required="true"
-          aria-describedby={errors.planYear ? 'planYear-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planYear ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Plan Year"
-        />
-        {errors.planYear && (
-          <p id="planYear-error" className="mt-2 text-sm text-red-600">
-            {errors.planYear.message}
-          </p>
-        )}
-      </div>
+          {/* Plan Name Field */}
+          <div>
+            <label
+              htmlFor="planName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan Name *
+            </label>
+            <input
+              id="planName"
+              type="text"
+              {...register('planName')}
+              aria-required="true"
+              aria-describedby={errors.planName ? 'planName-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planName ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Plan Name"
+            />
+            {errors.planName && (
+              <p id="planName-error" className="mt-2 text-sm text-red-600">
+                {errors.planName.message}
+              </p>
+            )}
+          </div>
 
-      {/* Plan Month Field */}
-      <div>
-        <label
-          htmlFor="planMonth"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan Month *
-        </label>
-        <input
-          id="planMonth"
-          type="number"
-          {...register('planMonth', { valueAsNumber: true })}
-          aria-required="true"
-          aria-describedby={errors.planMonth ? 'planMonth-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planMonth ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Plan Month"
-        />
-        {errors.planMonth && (
-          <p id="planMonth-error" className="mt-2 text-sm text-red-600">
-            {errors.planMonth.message}
-          </p>
-        )}
-      </div>
+          {/* Plan Year Field */}
+          <div>
+            <label
+              htmlFor="planYear"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan Year *
+            </label>
+            <input
+              id="planYear"
+              type="number"
+              {...register('planYear', { valueAsNumber: true })}
+              aria-required="true"
+              aria-describedby={errors.planYear ? 'planYear-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planYear ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Plan Year"
+            />
+            {errors.planYear && (
+              <p id="planYear-error" className="mt-2 text-sm text-red-600">
+                {errors.planYear.message}
+              </p>
+            )}
+          </div>
 
-      {/* Total Target Quantity Field */}
-      <div>
-        <label
-          htmlFor="totalTargetQuantity"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Total Target Quantity
-        </label>
-        <input
-          id="totalTargetQuantity"
-          type="number"
-          {...register('totalTargetQuantity', { valueAsNumber: true })}
-          
-          aria-describedby={errors.totalTargetQuantity ? 'totalTargetQuantity-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.totalTargetQuantity ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Total Target Quantity"
-        />
-        {errors.totalTargetQuantity && (
-          <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600">
-            {errors.totalTargetQuantity.message}
-          </p>
-        )}
-      </div>
+          {/* Plan Month Field */}
+          <div>
+            <label
+              htmlFor="planMonth"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan Month *
+            </label>
+            <input
+              id="planMonth"
+              type="number"
+              {...register('planMonth', { valueAsNumber: true })}
+              aria-required="true"
+              aria-describedby={errors.planMonth ? 'planMonth-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planMonth ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Plan Month"
+            />
+            {errors.planMonth && (
+              <p id="planMonth-error" className="mt-2 text-sm text-red-600">
+                {errors.planMonth.message}
+              </p>
+            )}
+          </div>
 
-      {/* Total Actual Quantity Field */}
-      <div>
-        <label
-          htmlFor="totalActualQuantity"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Total Actual Quantity
-        </label>
-        <input
-          id="totalActualQuantity"
-          type="number"
-          {...register('totalActualQuantity', { valueAsNumber: true })}
-          
-          aria-describedby={errors.totalActualQuantity ? 'totalActualQuantity-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.totalActualQuantity ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Total Actual Quantity"
-        />
-        {errors.totalActualQuantity && (
-          <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600">
-            {errors.totalActualQuantity.message}
-          </p>
-        )}
-      </div>
+          {/* Total Target Quantity Field */}
+          <div>
+            <label
+              htmlFor="totalTargetQuantity"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Total Target Quantity
+            </label>
+            <input
+              id="totalTargetQuantity"
+              type="number"
+              {...register('totalTargetQuantity', { valueAsNumber: true })}
+              aria-describedby={errors.totalTargetQuantity ? 'totalTargetQuantity-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.totalTargetQuantity ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Total Target Quantity"
+            />
+            {errors.totalTargetQuantity && (
+              <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600">
+                {errors.totalTargetQuantity.message}
+              </p>
+            )}
+          </div>
 
-      {/* Status Field */}
-      <div>
-        <label
-          htmlFor="status"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Status
-        </label>
-        <input
-          id="status"
-          type="text"
-          {...register('status')}
-          
-          aria-describedby={errors.status ? 'status-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.status ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Status"
-        />
-        {errors.status && (
-          <p id="status-error" className="mt-2 text-sm text-red-600">
-            {errors.status.message}
-          </p>
-        )}
-      </div>
+          {/* Total Actual Quantity Field */}
+          <div>
+            <label
+              htmlFor="totalActualQuantity"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Total Actual Quantity
+            </label>
+            <input
+              id="totalActualQuantity"
+              type="number"
+              {...register('totalActualQuantity', { valueAsNumber: true })}
+              aria-describedby={errors.totalActualQuantity ? 'totalActualQuantity-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.totalActualQuantity ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Total Actual Quantity"
+            />
+            {errors.totalActualQuantity && (
+              <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600">
+                {errors.totalActualQuantity.message}
+              </p>
+            )}
+          </div>
 
-      {/* Plan Start Date Field */}
-      <div>
-        <label
-          htmlFor="planStartDate"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan Start Date
-        </label>
-        <input
-          id="planStartDate"
-          type="date"
-          {...register('planStartDate')}
-          
-          aria-describedby={errors.planStartDate ? 'planStartDate-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planStartDate ? 'border-red-300' : ''
-          }`}
-          placeholder=""
-        />
-        {errors.planStartDate && (
-          <p id="planStartDate-error" className="mt-2 text-sm text-red-600">
-            {errors.planStartDate.message}
-          </p>
-        )}
-      </div>
+          {/* Status Field */}
+          <div>
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Status
+            </label>
+            <input
+              id="status"
+              type="text"
+              {...register('status')}
+              aria-describedby={errors.status ? 'status-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.status ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Status"
+            />
+            {errors.status && (
+              <p id="status-error" className="mt-2 text-sm text-red-600">
+                {errors.status.message}
+              </p>
+            )}
+          </div>
+        </TabsContent>
 
-      {/* Plan End Date Field */}
-      <div>
-        <label
-          htmlFor="planEndDate"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Plan End Date
-        </label>
-        <input
-          id="planEndDate"
-          type="date"
-          {...register('planEndDate')}
-          
-          aria-describedby={errors.planEndDate ? 'planEndDate-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.planEndDate ? 'border-red-300' : ''
-          }`}
-          placeholder=""
-        />
-        {errors.planEndDate && (
-          <p id="planEndDate-error" className="mt-2 text-sm text-red-600">
-            {errors.planEndDate.message}
-          </p>
-        )}
-      </div>
+        {/* Tab 2: Dates */}
+        <TabsContent value="dates" className="space-y-4">
+          {/* Plan Start Date Field */}
+          <div>
+            <label
+              htmlFor="planStartDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan Start Date
+            </label>
+            <input
+              id="planStartDate"
+              type="date"
+              {...register('planStartDate')}
+              aria-describedby={errors.planStartDate ? 'planStartDate-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planStartDate ? 'border-red-300' : ''
+              }`}
+            />
+            {errors.planStartDate && (
+              <p id="planStartDate-error" className="mt-2 text-sm text-red-600">
+                {errors.planStartDate.message}
+              </p>
+            )}
+          </div>
 
-      {/* Approved By Field */}
-      <div>
-        <label
-          htmlFor="approvedBy"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Approved By
-        </label>
-        <input
-          id="approvedBy"
-          type="text"
-          {...register('approvedBy')}
-          
-          aria-describedby={errors.approvedBy ? 'approvedBy-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.approvedBy ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Approved By"
-        />
-        {errors.approvedBy && (
-          <p id="approvedBy-error" className="mt-2 text-sm text-red-600">
-            {errors.approvedBy.message}
-          </p>
-        )}
-      </div>
+          {/* Plan End Date Field */}
+          <div>
+            <label
+              htmlFor="planEndDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Plan End Date
+            </label>
+            <input
+              id="planEndDate"
+              type="date"
+              {...register('planEndDate')}
+              aria-describedby={errors.planEndDate ? 'planEndDate-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.planEndDate ? 'border-red-300' : ''
+              }`}
+            />
+            {errors.planEndDate && (
+              <p id="planEndDate-error" className="mt-2 text-sm text-red-600">
+                {errors.planEndDate.message}
+              </p>
+            )}
+          </div>
 
-      {/* Approved At Field */}
-      <div>
-        <label
-          htmlFor="approvedAt"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Approved At
-        </label>
-        <input
-          id="approvedAt"
-          type="date"
-          {...register('approvedAt')}
-          
-          aria-describedby={errors.approvedAt ? 'approvedAt-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.approvedAt ? 'border-red-300' : ''
-          }`}
-          placeholder=""
-        />
-        {errors.approvedAt && (
-          <p id="approvedAt-error" className="mt-2 text-sm text-red-600">
-            {errors.approvedAt.message}
-          </p>
-        )}
-      </div>
+          {/* Approved By Field */}
+          <div>
+            <label
+              htmlFor="approvedBy"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Approved By
+            </label>
+            <input
+              id="approvedBy"
+              type="text"
+              {...register('approvedBy')}
+              aria-describedby={errors.approvedBy ? 'approvedBy-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.approvedBy ? 'border-red-300' : ''
+              }`}
+              placeholder="e.g., Approved By"
+            />
+            {errors.approvedBy && (
+              <p id="approvedBy-error" className="mt-2 text-sm text-red-600">
+                {errors.approvedBy.message}
+              </p>
+            )}
+          </div>
 
-      {/* Note Field */}
-      <div>
-        <label
-          htmlFor="note"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Note
-        </label>
-        <textarea
-          id="note"
-          rows={4}
-          {...register('note')}
-          aria-describedby={errors.note ? 'note-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.note ? 'border-red-300' : ''
-          }`}
-          placeholder="Note..."
-        />
-        {errors.note && (
-          <p id="note-error" className="mt-2 text-sm text-red-600">
-            {errors.note.message}
-          </p>
-        )}
-      </div>
+          {/* Approved At Field */}
+          <div>
+            <label
+              htmlFor="approvedAt"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Approved At
+            </label>
+            <input
+              id="approvedAt"
+              type="date"
+              {...register('approvedAt')}
+              aria-describedby={errors.approvedAt ? 'approvedAt-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.approvedAt ? 'border-red-300' : ''
+              }`}
+            />
+            {errors.approvedAt && (
+              <p id="approvedAt-error" className="mt-2 text-sm text-red-600">
+                {errors.approvedAt.message}
+              </p>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Tab 3: Notes */}
+        <TabsContent value="notes" className="space-y-4">
+          {/* Note Field */}
+          <div>
+            <label
+              htmlFor="note"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Note
+            </label>
+            <textarea
+              id="note"
+              rows={6}
+              {...register('note')}
+              aria-describedby={errors.note ? 'note-error' : undefined}
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                errors.note ? 'border-red-300' : ''
+              }`}
+              placeholder="Enter your notes here..."
+            />
+            {errors.note && (
+              <p id="note-error" className="mt-2 text-sm text-red-600">
+                {errors.note.message}
+              </p>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
+      <div className="flex justify-end space-x-3 pt-4">
         <button
           type="button"
           onClick={onCancel}
@@ -432,9 +440,11 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
         <button
           type="submit"
           disabled={!isValid || isSubmitting}
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? 'Saving...' : isEditing ? 'Update' : 'Create'} Plan
+          {isSubmitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+          {' '}
+          Plan
         </button>
       </div>
     </form>
