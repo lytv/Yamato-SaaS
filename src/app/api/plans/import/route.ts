@@ -1,0 +1,191 @@
+/**
+ * Plan Import API Route
+ * POST /api/plans/import - Import plans from Excel file
+ * Following existing plan API patterns and auth
+ */
+
+import { Buffer } from 'node:buffer';
+
+import { auth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { ZodError } from 'zod';
+
+import { createPlan as createPlanDb, getPlanByCode } from '@/libs/queries/plan';
+import type { ImportError } from '@/types/import';
+import type { Plan } from '@/types/plan';
+import { parseExcelFile, validateImportData } from '@/utils/excelImportHelpers';
+
+// Force dynamic rendering due to auth() usage and file upload
+export const dynamic = 'force-dynamic';
+
+/**
+ * POST /api/plans/import - Import plans from Excel file
+ */
+export async function POST(request: NextRequest): Promise<Response> {
+  try {
+    // Same auth pattern as existing APIs
+    const { userId, orgId } = await auth();
+    if (!userId) {
+      return Response.json(
+        { success: false, error: 'Unauthorized access', code: 'UNAUTHORIZED' },
+        { status: 401 },
+      );
+    }
+
+    // Native Next.js FormData handling (no multer needed)
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+
+    // File validation
+    if (!file || file.size === 0) {
+      return Response.json(
+        { success: false, error: 'No file provided', code: 'NO_FILE' },
+        { status: 400 },
+      );
+    }
+
+    // Size and type validation
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return Response.json(
+        { success: false, error: 'File too large (max 10MB)', code: 'FILE_TOO_LARGE' },
+        { status: 400 },
+      );
+    }
+
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return Response.json(
+        { success: false, error: 'Invalid file type. Only .xlsx and .xls files are allowed', code: 'INVALID_FILE_TYPE' },
+        { status: 400 },
+      );
+    }
+
+    // Parse Excel using existing utilities
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const importData = await parseExcelFile(buffer);
+
+    // Validate data using existing schemas
+    const validation = validateImportData(importData);
+
+    // Create plans using existing createPlan function (loop approach)
+    const ownerId = orgId || userId;
+    const results = await processImportData(validation.validProducts as any, ownerId);
+
+    return Response.json({
+      success: true,
+      data: {
+        totalRows: importData.length,
+        successCount: results.successful.length,
+        errorCount: results.failed.length,
+        createdPlans: results.successful,
+        errors: [...validation.errors, ...results.failed],
+      },
+    });
+  } catch (error) {
+    console.error('Error importing plans:', error);
+
+    if (error instanceof ZodError) {
+      return Response.json(
+        { success: false, error: 'Invalid request data', code: 'VALIDATION_ERROR', details: error.errors },
+        { status: 400 },
+      );
+    }
+
+    if (error instanceof Error) {
+      if (error.message.includes('Failed to parse Excel file')) {
+        return Response.json(
+          { success: false, error: error.message, code: 'EXCEL_PARSE_ERROR' },
+          { status: 400 },
+        );
+      }
+
+      return Response.json(
+        { success: false, error: error.message, code: 'IMPORT_ERROR' },
+        { status: 400 },
+      );
+    }
+
+    return Response.json(
+      { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      { status: 500 },
+    );
+  }
+}
+
+// Helper function using existing createPlan in loop
+async function processImportData(plans: Array<{ planCode: string; planName: string; planYear: number; planMonth: number; totalTargetQuantity?: number; totalActualQuantity?: number; status?: string; planStartDate?: string; planEndDate?: string; approvedBy?: string; approvedAt?: string; note?: string; rowNumber: number }>, ownerId: string): Promise<{
+  successful: Plan[];
+  failed: ImportError[];
+}> {
+  const successful: Plan[] = [];
+  const failed: ImportError[] = [];
+
+  for (const planData of plans) {
+    try {
+      // Check for existing plan code using existing function
+      const existing = await getPlanByCode(planData.planCode, ownerId);
+      if (existing) {
+        failed.push({
+          rowNumber: planData.rowNumber,
+          field: 'planCode',
+          message: 'Plan code already exists',
+          value: planData.planCode,
+        });
+        continue;
+      }
+
+      // Create plan using existing database function
+      const dbPlan = await createPlanDb({
+        ownerId,
+        planCode: planData.planCode,
+        planName: planData.planName,
+        planYear: planData.planYear,
+        planMonth: planData.planMonth,
+        totalTargetQuantity: planData.totalTargetQuantity,
+        totalActualQuantity: planData.totalActualQuantity,
+        status: planData.status,
+        planStartDate: planData.planStartDate,
+        planEndDate: planData.planEndDate,
+        approvedBy: planData.approvedBy,
+        approvedAt: planData.approvedAt,
+        note: planData.note,
+      });
+
+      // Transform database plan to API plan type
+      const plan: Plan = {
+        id: dbPlan.id,
+        ownerId: dbPlan.ownerId,
+        planCode: dbPlan.planCode,
+        planName: dbPlan.planName,
+        planYear: dbPlan.planYear,
+        planMonth: dbPlan.planMonth,
+        totalTargetQuantity: dbPlan.totalTargetQuantity,
+        totalActualQuantity: dbPlan.totalActualQuantity,
+        status: dbPlan.status,
+        planStartDate: dbPlan.planStartDate,
+        planEndDate: dbPlan.planEndDate,
+        approvedBy: dbPlan.approvedBy,
+        approvedAt: dbPlan.approvedAt,
+        note: dbPlan.note,
+        createdAt: dbPlan.createdAt.toISOString(),
+        updatedAt: dbPlan.updatedAt.toISOString(),
+      };
+
+      successful.push(plan);
+    } catch (error) {
+      failed.push({
+        rowNumber: planData.rowNumber,
+        field: 'general',
+        message: error instanceof Error ? error.message : 'Failed to create plan',
+        value: planData.planCode,
+      });
+    }
+  }
+
+  return { successful, failed };
+}

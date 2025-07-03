@@ -45,7 +45,7 @@
     "feature3_description": "Manage fabric and accessory inventory, control stock levels. Automatically calculate material requirements by order and shortage alerts.",
     "feature4_title": "Quality Control",
     "feature4_description": "QC/QA system at each stage. Track defects, quality reports and ensure export standards.",
-    "feature5_title": "Cost Management", 
+    "feature5_title": "Cost Management",
     "feature5_description": "Accurate production cost calculation by order. Analyze profitability and optimize pricing strategy.",
     "feature6_title": "Smart Reporting",
     "feature6_description": "Real-time KPI tracking dashboard. Production performance reports, quality analysis and business trend insights.",
@@ -123,7 +123,10 @@
     "members": "Members",
     "billing": "Billing",
     "settings": "Settings",
-    "notes": "Notes"
+    "notes": "Notes",
+    "plan": "Plan",
+    "plans": "Plans",
+    "work_tables": "Work Tables"
   },
   "Dashboard": {
     "meta_title": "Yamato ERP Dashboard",
@@ -524,5 +527,52 @@
     },
     "add_new": "Add a new user sync",
     "delete_success": "User sync deleted successfully."
+  },
+  "plan": {
+    "pageTitle": "Plans",
+    "pageDescription": "Manage your production plans and schedules",
+    "createNew": "Create Plan",
+    "create": "Create Plan",
+    "edit": "Edit Plan",
+    "delete": "Delete",
+    "noPlans": "No plans found. Create your first plan to get started!",
+    "searchPlaceholder": "Search plans...",
+    "resetFilters": "Reset Filters",
+    "form": {
+      "planCode": "Plan Code",
+      "planCodePlaceholder": "Enter plan code",
+      "planName": "Plan Name",
+      "planNamePlaceholder": "Enter plan name",
+      "planYear": "Plan Year",
+      "planYearPlaceholder": "Enter plan year",
+      "planMonth": "Plan Month",
+      "planMonthPlaceholder": "Enter plan month",
+      "totalTargetQuantity": "Total Target Quantity",
+      "totalTargetQuantityPlaceholder": "Enter target quantity",
+      "totalActualQuantity": "Total Actual Quantity",
+      "totalActualQuantityPlaceholder": "Enter actual quantity",
+      "status": "Status",
+      "statusPlaceholder": "Enter status",
+      "planStartDate": "Plan Start Date",
+      "planEndDate": "Plan End Date",
+      "approvedBy": "Approved By",
+      "approvedByPlaceholder": "Enter approver name",
+      "approvedAt": "Approved At",
+      "note": "Note",
+      "notePlaceholder": "Enter note",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "save": "Save Plan",
+      "cancel": "Cancel"
+    },
+    "sort": {
+      "createdAt": "Created Date",
+      "updatedAt": "Updated Date",
+      "planCode": "Plan Code",
+      "planName": "Plan Name"
+    },
+    "add_new": "Add a new plan",
+    "delete_success": "Plan deleted successfully.",
+    "deleteConfirmation": "Are you sure you want to delete this plan?"
   }
 }

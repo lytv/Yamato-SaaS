@@ -96,7 +96,10 @@
     "members": "Thành viên",
     "billing": "Thanh toán",
     "settings": "Cài đặt",
-    "notes": "Ghi chú"
+    "notes": "Ghi chú",
+    "plan": "Kế hoạch",
+    "plans": "Danh sách kế hoạch",
+    "work_tables": "Bàn Cắt"
   },
   "DashboardIndex": {
     "title_bar": "Bảng điều khiển",
@@ -133,5 +136,443 @@
   },
   "DataTable": {
     "no_results": "Không có kết quả."
+  },
+  "Pricing": {
+    "section_subtitle": "Tính năng",
+    "section_title": "Khám phá toàn bộ tiềm năng của Yamato ERP",
+    "section_description": "Giải pháp miễn phí và mã nguồn mở cho doanh nghiệp SaaS của bạn, được xây dựng với React, TypeScript, Shadcn UI và Tailwind CSS.",
+    "button_text": "Bắt đầu ngay"
+  },
+  "PricingPlan": {
+    "free_plan_name": "Miễn phí",
+    "premium_plan_name": "Cao cấp",
+    "enterprise_plan_name": "Doanh nghiệp",
+    "free_plan_description": "Dành cho cá nhân",
+    "premium_plan_description": "Dành cho nhóm nhỏ",
+    "enterprise_plan_description": "Dành cho doanh nghiệp lớn",
+    "feature_team_member": "{number} Thành viên",
+    "feature_website": "{number} Website",
+    "feature_storage": "{number} GB Lưu trữ",
+    "feature_transfer": "{number} TB Truyền tải",
+    "feature_email_support": "Hỗ trợ Email",
+    "plan_interval_month": "tháng",
+    "plan_interval_year": "năm",
+    "next_renew_date": "Gói đăng ký của bạn gia hạn vào {date}"
+  },
+  "FAQ": {
+    "question": "Yamato ERP có những tính năng gì nổi bật?",
+    "answer": "Yamato ERP cung cấp hệ thống quản lý toàn diện cho ngành may mặc với các tính năng: quản lý đơn hàng, kế hoạch sản xuất, kiểm soát chất lượng, quản lý nguyên vật liệu, báo cáo thông minh và nhiều tính năng khác để tối ưu hóa quy trình sản xuất."
+  },
+  "CTA": {
+    "title": "Bạn đã sẵn sàng?",
+    "description": "Bắt đầu hành trình số hóa quy trình sản xuất của bạn ngay hôm nay.",
+    "button_text": "Xem trên GitHub"
+  },
+  "Todos": {
+    "title_bar": "Danh sách việc cần làm",
+    "title_bar_description": "Xem và quản lý danh sách việc cần làm",
+    "add_todo_button": "Việc mới"
+  },
+  "TodoTableColumns": {
+    "open_menu": "Mở menu",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "title_header": "Tiêu đề",
+    "message_header": "Thông điệp",
+    "created_at_header": "Ngày tạo"
+  },
+  "AddTodo": {
+    "title_bar": "Thêm việc cần làm",
+    "add_todo_section_title": "Tạo việc mới",
+    "add_todo_section_description": "Điền vào form bên dưới để tạo việc mới"
+  },
+  "EditTodo": {
+    "title_bar": "Sửa việc cần làm",
+    "edit_todo_section_title": "Chỉnh sửa việc",
+    "edit_todo_section_description": "Điền vào form bên dưới để sửa việc"
+  },
+  "TodoForm": {
+    "title_label": "Tiêu đề",
+    "title_description": "Nhập tiêu đề mô tả cho việc cần làm.",
+    "message_title": "Thông điệp",
+    "message_description": "Nhập thông điệp chi tiết cho việc cần làm.",
+    "submit_button": "Gửi"
+  },
+  "todo": {
+    "pageTitle": "Việc cần làm",
+    "pageDescription": "Quản lý việc cần làm và giữ trật tự",
+    "createNew": "Tạo việc mới",
+    "create": "Tạo việc cần làm",
+    "edit": "Sửa việc cần làm",
+    "delete": "Xóa",
+    "noTodos": "Chưa có việc nào. Tạo việc đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm việc cần làm...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "title": "Tiêu đề",
+      "titlePlaceholder": "Nhập tiêu đề việc cần làm",
+      "message": "Thông điệp",
+      "messagePlaceholder": "Nhập mô tả việc cần làm",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu việc cần làm",
+      "cancel": "Hủy"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "title": "Tiêu đề"
+    },
+    "add_new": "Thêm việc cần làm mới",
+    "delete_success": "Xóa việc cần làm thành công.",
+    "deleteConfirmation": "Bạn có chắc muốn xóa việc này?",
+    "deleteSuccess": "Xóa việc cần làm thành công",
+    "deleteError": "Lỗi khi xóa việc cần làm"
+  },
+  "error": {
+    "fetchTodos": "Lỗi khi tải danh sách việc cần làm",
+    "createTodo": "Lỗi khi tạo việc cần làm",
+    "updateTodo": "Lỗi khi cập nhật việc cần làm",
+    "deleteTodo": "Lỗi khi xóa việc cần làm"
+  },
+  "pagination": {
+    "page": "Trang"
+  },
+  "product": {
+    "pageTitle": "Sản phẩm",
+    "pageDescription": "Quản lý sản phẩm và kho hàng",
+    "createNew": "Tạo sản phẩm",
+    "create": "Tạo sản phẩm",
+    "edit": "Sửa sản phẩm",
+    "delete": "Xóa",
+    "importButton": "Nhập khẩu",
+    "export": "Xuất khẩu",
+    "noProducts": "Chưa có sản phẩm nào. Tạo sản phẩm đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm sản phẩm...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "importing": "Đang nhập...",
+    "exporting": "Đang xuất...",
+    "import": {
+      "title": "Nhập sản phẩm từ Excel",
+      "selectFile": "Chọn file Excel (.xlsx)",
+      "selectedFile": "Đã chọn: {fileName} ({fileSize} MB)",
+      "button": "Nhập sản phẩm",
+      "cancel": "Hủy",
+      "close": "Đóng",
+      "results": {
+        "title": "Kết quả nhập",
+        "totalRows": "Tổng số dòng xử lý: {count}",
+        "successCount": "Tạo thành công: {count}",
+        "errorCount": "Thất bại: {count}",
+        "errorsTitle": "Lỗi:",
+        "moreErrors": "... và {count} lỗi khác"
+      },
+      "errors": {
+        "noFile": "Vui lòng chọn file",
+        "fileTooLarge": "File quá lớn (tối đa 10MB)",
+        "invalidFileType": "Loại file không hợp lệ. Chỉ chấp nhận file .xlsx và .xls",
+        "parseError": "Lỗi đọc file Excel",
+        "importFailed": "Nhập thất bại"
+      }
+    },
+    "form": {
+      "productCode": "Mã sản phẩm",
+      "productCodePlaceholder": "vd: PROD-001",
+      "productName": "Tên sản phẩm",
+      "productNamePlaceholder": "Nhập tên sản phẩm",
+      "category": "Danh mục",
+      "categoryPlaceholder": "vd: Điện tử, Phần mềm",
+      "notes": "Ghi chú",
+      "notesPlaceholder": "Ghi chú thêm về sản phẩm...",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu sản phẩm",
+      "cancel": "Hủy",
+      "reset": "Đặt lại"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "productName": "Tên sản phẩm",
+      "productCode": "Mã sản phẩm"
+    },
+    "table": {
+      "productCode": "Mã sản phẩm",
+      "productName": "Tên sản phẩm",
+      "category": "Danh mục",
+      "created": "Ngày tạo",
+      "updated": "Ngày cập nhật",
+      "actions": "Thao tác"
+    }
+  },
+  "productionStep": {
+    "pageTitle": "Công đoạn sản xuất",
+    "pageDescription": "Quản lý công đoạn sản xuất và quy trình làm việc",
+    "createNew": "Tạo công đoạn",
+    "create": "Tạo công đoạn sản xuất",
+    "edit": "Sửa công đoạn sản xuất",
+    "delete": "Xóa",
+    "noProductionSteps": "Chưa có công đoạn sản xuất nào. Tạo công đoạn đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm công đoạn sản xuất...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "stepCode": "Mã công đoạn",
+      "stepCodePlaceholder": "vd: CD61",
+      "stepName": "Tên công đoạn",
+      "stepNamePlaceholder": "vd: Ủi túi lớn",
+      "filmSequence": "Thứ tự phim",
+      "filmSequencePlaceholder": "vd: 61",
+      "stepGroup": "Nhóm công đoạn",
+      "stepGroupPlaceholder": "vd: Nhóm A",
+      "notes": "Ghi chú",
+      "notesPlaceholder": "Ghi chú thêm...",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu công đoạn sản xuất",
+      "cancel": "Hủy",
+      "reset": "Đặt lại"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "stepName": "Tên công đoạn",
+      "stepCode": "Mã công đoạn",
+      "filmSequence": "Thứ tự phim"
+    },
+    "table": {
+      "stepCode": "Mã công đoạn",
+      "stepName": "Tên công đoạn",
+      "filmSequence": "Thứ tự phim",
+      "stepGroup": "Nhóm công đoạn",
+      "created": "Ngày tạo",
+      "updated": "Ngày cập nhật",
+      "actions": "Thao tác"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "create": "Tạo công đoạn sản xuất",
+      "update": "Cập nhật công đoạn sản xuất",
+      "cancel": "Hủy",
+      "reset": "Đặt lại"
+    }
+  },
+  "productionStepDetail": {
+    "bulkAdd": {
+      "title": "🗂️ Thêm hàng loạt chi tiết công đoạn sản xuất",
+      "productsSelection": "Chọn sản phẩm",
+      "searchProducts": "🔍 Tìm kiếm sản phẩm...",
+      "categoryFilter": "🏷️ Lọc theo danh mục ▼",
+      "selectAllProducts": "Chọn tất cả sản phẩm (trang này)",
+      "stepsSelection": "Chọn công đoạn",
+      "searchSteps": "🔍 Tìm kiếm công đoạn...",
+      "groupFilter": "🏷️ Lọc theo nhóm ▼",
+      "selectAllSteps": "Chọn tất cả công đoạn (trang này)",
+      "assignmentConfig": "🎯 Cấu hình gán",
+      "preview": "📊 Xem trước:",
+      "products": "Sản phẩm",
+      "steps": "Công đoạn",
+      "assignments": "Gán công việc",
+      "back": "← Quay lại chi tiết công đoạn sản xuất",
+      "cancel": "Hủy",
+      "reset": "Đặt lại",
+      "createAssignments": "Tạo gán công việc"
+    },
+    "title": "Chi tiết công đoạn sản xuất",
+    "deleteConfirmation": "Bạn có chắc muốn xóa chi tiết công đoạn này?",
+    "deleteSuccess": "Xóa chi tiết công đoạn thành công",
+    "deleteError": "Lỗi khi xóa chi tiết công đoạn"
+  },
+  "MultiAssignConfigForm": {
+    "sequenceStart": "Thứ tự bắt đầu",
+    "autoIncrement": "Tự động tăng thứ tự cho mỗi sản phẩm",
+    "factoryPrice": "Giá nhà máy",
+    "calculatedPrice": "Giá tính toán",
+    "quantityLimit1": "Giới hạn số lượng 1",
+    "quantityLimit2": "Giới hạn số lượng 2",
+    "isFinalStep": "Là công đoạn cuối",
+    "isVtStep": "Là công đoạn vật tư",
+    "isParkingStep": "Là công đoạn lưu kho"
+  },
+  "MultiAssignProgress": {
+    "chunk": "Khối",
+    "created": "Đã tạo",
+    "skipped": "Bỏ qua",
+    "failed": "Thất bại",
+    "doneSummary": "Gán hàng loạt hoàn thành! Tổng: {total}, Tạo: {created}, Bỏ qua: {skipped}, Thất bại: {failed}",
+    "error": "Có lỗi xảy ra trong quá trình gán hàng loạt. Vui lòng thử lại hoặc kiểm tra chi tiết lỗi."
+  },
+  "MultiAssignPreview": {
+    "totalCombinations": "Tổng số tổ hợp:",
+    "conflictWarning": "Cảnh báo: {count} tổ hợp đã tồn tại",
+    "productLabel": "Sản phẩm",
+    "stepLabel": "Công đoạn",
+    "otherConflicts": "...và {count} tổ hợp khác",
+    "allConflicted": "Tất cả tổ hợp đã tồn tại. Không thể tạo mới."
+  },
+  "product_step_crosstab": {
+    "title": "Bảng chéo sản phẩm-công đoạn"
+  },
+  "ProductStepCrosstab": {
+    "title": "Bảng chéo sản phẩm-công đoạn",
+    "description": "Xem và phân tích dữ liệu giá công đoạn sản phẩm."
+  },
+  "note": {
+    "pageTitle": "Ghi chú",
+    "pageDescription": "Quản lý ghi chú và giữ trật tự",
+    "createNew": "Tạo ghi chú",
+    "create": "Tạo ghi chú",
+    "edit": "Sửa ghi chú",
+    "delete": "Xóa",
+    "noNotes": "Chưa có ghi chú nào. Tạo ghi chú đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm ghi chú...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "title": "Tiêu đề",
+      "titlePlaceholder": "Nhập tiêu đề ghi chú",
+      "content": "Nội dung",
+      "contentPlaceholder": "Nhập nội dung ghi chú",
+      "category": "Danh mục",
+      "categoryPlaceholder": "Nhập danh mục ghi chú",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "create": "Tạo ghi chú",
+      "update": "Cập nhật ghi chú",
+      "save": "Lưu ghi chú",
+      "cancel": "Hủy"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "title": "Tiêu đề"
+    },
+    "add_new": "Thêm ghi chú mới",
+    "deleteConfirmation": "Bạn có chắc muốn xóa ghi chú này?",
+    "deleteSuccess": "Xóa ghi chú thành công",
+    "deleteError": "Lỗi khi xóa ghi chú"
+  },
+  "productsub": {
+    "pageTitle": "Sản phẩm phụ",
+    "pageDescription": "Quản lý sản phẩm phụ và kho hàng",
+    "createNew": "Tạo sản phẩm phụ"
+  },
+  "process": {
+    "pageTitle": "Quy trình",
+    "pageDescription": "Quản lý quy trình sản xuất",
+    "createNew": "Tạo quy trình",
+    "create": "Tạo quy trình",
+    "edit": "Sửa quy trình",
+    "delete": "Xóa",
+    "noProcesses": "Chưa có quy trình nào. Tạo quy trình đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm quy trình...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "processCode": "Mã quy trình",
+      "processCodePlaceholder": "Nhập mã quy trình",
+      "processName": "Tên quy trình",
+      "processNamePlaceholder": "Nhập tên quy trình",
+      "processCategory": "Danh mục quy trình",
+      "processType": "Loại quy trình",
+      "department": "Phòng ban",
+      "description": "Mô tả",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu quy trình",
+      "cancel": "Hủy"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "processCode": "Mã quy trình",
+      "processName": "Tên quy trình"
+    },
+    "add_new": "Thêm quy trình mới",
+    "delete_success": "Xóa quy trình thành công.",
+    "deleteConfirmation": "Bạn có chắc muốn xóa quy trình này?"
+  },
+  "user_sync": {
+    "pageTitle": "Đồng bộ người dùng",
+    "pageDescription": "Quản lý đồng bộ người dùng và trạng thái tích hợp",
+    "createNew": "Tạo đồng bộ người dùng",
+    "edit": "Sửa đồng bộ người dùng",
+    "delete": "Xóa",
+    "noUserSyncs": "Chưa có đồng bộ người dùng nào. Tạo đồng bộ đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm đồng bộ người dùng...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "userId": "ID người dùng",
+      "userIdPlaceholder": "Nhập ID người dùng",
+      "email": "Email",
+      "emailPlaceholder": "Nhập email",
+      "fullName": "Họ tên đầy đủ",
+      "fullNamePlaceholder": "Nhập họ tên đầy đủ",
+      "avatarUrl": "URL avatar",
+      "avatarUrlPlaceholder": "Nhập URL avatar",
+      "role": "Vai trò",
+      "rolePlaceholder": "Nhập vai trò",
+      "organizationRole": "Vai trò tổ chức",
+      "organizationRolePlaceholder": "Nhập vai trò tổ chức",
+      "isActive": "Hoạt động",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu đồng bộ người dùng",
+      "cancel": "Hủy"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "email": "Email"
+    },
+    "add_new": "Thêm đồng bộ người dùng mới",
+    "delete_success": "Xóa đồng bộ người dùng thành công."
+  },
+  "plan": {
+    "pageTitle": "Kế hoạch",
+    "pageDescription": "Quản lý kế hoạch sản xuất và lịch trình",
+    "createNew": "Tạo kế hoạch",
+    "create": "Tạo kế hoạch",
+    "edit": "Sửa kế hoạch",
+    "delete": "Xóa",
+    "noPlans": "Chưa có kế hoạch nào. Tạo kế hoạch đầu tiên để bắt đầu!",
+    "searchPlaceholder": "Tìm kiếm kế hoạch...",
+    "resetFilters": "Đặt lại bộ lọc",
+    "form": {
+      "planCode": "Mã kế hoạch",
+      "planCodePlaceholder": "Nhập mã kế hoạch",
+      "planName": "Tên kế hoạch",
+      "planNamePlaceholder": "Nhập tên kế hoạch",
+      "planYear": "Năm kế hoạch",
+      "planYearPlaceholder": "Nhập năm kế hoạch",
+      "planMonth": "Tháng kế hoạch",
+      "planMonthPlaceholder": "Nhập tháng kế hoạch",
+      "totalTargetQuantity": "Tổng số lượng mục tiêu",
+      "totalTargetQuantityPlaceholder": "Nhập số lượng mục tiêu",
+      "totalActualQuantity": "Tổng số lượng thực tế",
+      "totalActualQuantityPlaceholder": "Nhập số lượng thực tế",
+      "status": "Trạng thái",
+      "statusPlaceholder": "Nhập trạng thái",
+      "planStartDate": "Ngày bắt đầu kế hoạch",
+      "planEndDate": "Ngày kết thúc kế hoạch",
+      "approvedBy": "Được phê duyệt bởi",
+      "approvedByPlaceholder": "Nhập tên người phê duyệt",
+      "approvedAt": "Ngày phê duyệt",
+      "note": "Ghi chú",
+      "notePlaceholder": "Nhập ghi chú",
+      "creating": "Đang tạo...",
+      "updating": "Đang cập nhật...",
+      "save": "Lưu kế hoạch",
+      "cancel": "Hủy"
+    },
+    "sort": {
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "planCode": "Mã kế hoạch",
+      "planName": "Tên kế hoạch"
+    },
+    "add_new": "Thêm kế hoạch mới",
+    "delete_success": "Xóa kế hoạch thành công.",
+    "deleteConfirmation": "Bạn có chắc muốn xóa kế hoạch này?"
   }
 }

@@ -66,8 +66,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 ],
               },
               {
-                href: '/dashboard/work-tables',
-                label: 'Plan',
+                label: t('plan'),
+                submenu: [
+                  {
+                    href: '/dashboard/plans',
+                    label: t('plans'),
+                  },
+                  {
+                    href: '/dashboard/work-tables',
+                    label: t('work_tables'),
+                  },
+                ],
               },
               {
                 href: '/dashboard/organization-profile/organization-members',

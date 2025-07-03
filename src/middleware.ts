@@ -49,6 +49,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/work-tables(.*)', // ✅ Add work-tables API routes for Clerk protection
   '/api/processes(.*)', // ✅ Add processes API routes
   '/api/user_syncs(.*)', // ✅ Add user_syncs API routes
+  '/api/plans(.*)', // ✅ Add plans API routes
   '/api/protected(.*)',
   '/api/organization-profile/sync-users', // Bảo vệ API đồng bộ user
   // Add other protected API routes here

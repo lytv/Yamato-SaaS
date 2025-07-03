@@ -1,6 +1,8 @@
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
+  check,
   date,
   decimal,
   index,
@@ -189,6 +191,54 @@ export const productionStepDetailSchema = pgTable('production_step_detail', {
     table.sequenceNumber,
   ),
 }));
+
+// ======================
+// PLAN - Monthly Production Plans (T.6, T.7, T.8, T.9)
+export const planSchema = pgTable('plan', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+
+  // Plan Identity
+  planCode: text('plan_code').notNull(), // T.6, T.7, T.8, T.9
+  planName: text('plan_name').notNull(), // 06.2025, 07.2025, 08.2025, 09.2025
+  planYear: integer('plan_year').notNull(), // 2025
+  planMonth: integer('plan_month').notNull(), // 6, 7, 8, 9
+
+  // Quantities & Targets
+  totalTargetQuantity: integer('total_target_quantity'), // 6675, 6125
+  totalActualQuantity: integer('total_actual_quantity').default(0),
+
+  // Status & Scheduling
+  status: text('status').default('draft'), // draft/active/completed/cancelled
+  planStartDate: date('plan_start_date'),
+  planEndDate: date('plan_end_date'),
+
+  // Approval & Notes
+  approvedBy: text('approved_by'),
+  approvedAt: timestamp('approved_at', { mode: 'date' }),
+  note: text('note'),
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    planCodeOwnerIdx: uniqueIndex('plan_code_owner_idx').on(
+      table.planCode,
+      table.ownerId,
+    ),
+    planMonthYearIdx: index('plan_month_year_idx').on(
+      table.planYear,
+      table.planMonth,
+    ),
+    planStatusIdx: index('plan_status_idx').on(table.status),
+
+    // Check constraints
+    planMonthValidCheck: check('plan_month_valid', sql`plan_month >= 1 AND plan_month <= 12`),
+  };
+});
 
 export const processSchema = pgTable('process', {
   id: serial('id').primaryKey(),
