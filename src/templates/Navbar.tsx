@@ -32,29 +32,8 @@ export const Navbar = () => {
           </>
         )}
       >
-        <li>
-          <Link href="/features">{t('features')}</Link>
-        </li>
-
-        <li>
-          <Link href="/docs">{t('docs')}</Link>
-        </li>
-
-        <li>
-          <Link href="/blog">{t('blog')}</Link>
-        </li>
-
-        <li>
-          <Link href="/community">{t('community')}</Link>
-        </li>
-
-        <li>
-          <Link href="/company">{t('company')}</Link>
-        </li>
-
-        <li>
-          <Link href="/contact">{t('contact')}</Link>
-        </li>
+        {/* Đã xoá các link Features, Documentation, Blog, Community, Company, Contact */}
+        <></>
       </CenteredMenu>
     </Section>
   );

@@ -24,16 +24,15 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-3 py-4">
           <DashboardHeader
             menu={[
+              // Dashboard & Overview
               {
                 href: '/dashboard',
                 label: t('home'),
               },
+
+              // Product Management
               {
-                href: '/dashboard/notes',
-                label: t('notes'),
-              },
-              {
-                label: t('product'),
+                label: t('product_management'),
                 submenu: [
                   {
                     href: '/dashboard/products',
@@ -52,25 +51,23 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     label: t('production_step_details'),
                   },
                   {
-                    href: '/dashboard/processes',
-                    label: t('processes'),
-                  },
-                  {
-                    href: '/dashboard/user_syncs',
-                    label: t('user_syncs'),
-                  },
-                  {
                     href: '/dashboard/product-step-crosstab',
                     label: t('product_step_crosstab'),
                   },
                 ],
               },
+
+              // Planning & Workflow
               {
-                label: t('plan'),
+                label: t('planning_workflow'),
                 submenu: [
                   {
                     href: '/dashboard/plans',
                     label: t('plans'),
+                  },
+                  {
+                    href: '/dashboard/processes',
+                    label: t('processes'),
                   },
                   {
                     href: '/dashboard/work-tables',
@@ -78,10 +75,31 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                   },
                 ],
               },
+
+              // Organization Management
               {
-                href: '/dashboard/organization-profile/organization-members',
-                label: t('members'),
+                label: t('organization'),
+                submenu: [
+                  {
+                    href: '/dashboard/notes',
+                    label: t('notes'),
+                  },
+                  {
+                    href: '/dashboard/todos',
+                    label: t('todos'),
+                  },
+                  {
+                    href: '/dashboard/organization-profile/organization-members',
+                    label: t('members'),
+                  },
+                  {
+                    href: '/dashboard/user_syncs',
+                    label: t('user_syncs'),
+                  },
+                ],
               },
+
+              // Settings
               {
                 href: '/dashboard/organization-profile',
                 label: t('settings'),

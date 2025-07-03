@@ -112,16 +112,22 @@
   "DashboardLayout": {
     "home": "Accueil",
     "todos": "Tâches",
-    "product": "Produit",
+    "notes": "Notes",
+    "product_management": "Gestion des Produits",
     "products": "Produits",
     "productsubs": "Sous-produits",
     "production_steps": "Étapes de Production",
     "production_step_details": "Détails des Étapes de Production",
     "product_step_crosstab": "Tableau Croisé",
+    "planning_workflow": "Planification & Flux de Travail",
+    "plans": "Plans",
     "processes": "Processus",
+    "work_tables": "Tables de Travail",
+    "organization": "Organisation",
     "members": "Membres",
-    "billing": "Facturation",
-    "settings": "Paramètres"
+    "user_syncs": "Synchronisation Utilisateurs",
+    "settings": "Paramètres",
+    "billing": "Facturation"
   },
   "Dashboard": {
     "meta_title": "Tableau de bord Yamato ERP",
