@@ -29,6 +29,8 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
     formState: { errors, isValid },
     reset,
     watch,
+    setValue,
+    getValues,
   } = useForm<PlanFormData>({
     resolver: zodResolver(planFormSchema),
     defaultValues: plan
@@ -54,10 +56,10 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           totalTargetQuantity: 0,
           totalActualQuantity: 0,
           status: '',
-          planStartDate: undefined,
-          planEndDate: undefined,
+          planStartDate: new Date().toISOString().slice(0, 10),
+          planEndDate: new Date().toISOString().slice(0, 10),
           approvedBy: '',
-          approvedAt: undefined,
+          approvedAt: new Date().toISOString().slice(0, 10),
           note: '',
         },
     mode: 'onChange',
@@ -93,6 +95,25 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
   };
 
   const isSubmitting = isCreating || isUpdating;
+
+  // Logic: Khi nhập xong Plan Code, nếu đúng định dạng MMYYYY thì tự động set Plan Month, Plan Year, Plan Name
+  const handlePlanCodeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+    // Định dạng MMYYYY (2 số đầu là tháng, 4 số cuối là năm)
+    const match = value.match(/^(0[1-9]|1[0-2])(20\d{2})$/);
+    if (match && match[1] && match[2]) {
+      const mm = Number.parseInt(String(match[1]), 10);
+      const yyyy = Number.parseInt(String(match[2]), 10);
+      setValue('planMonth', mm, { shouldValidate: true, shouldDirty: true });
+      setValue('planYear', yyyy, { shouldValidate: true, shouldDirty: true });
+      // Chỉ set Plan Name nếu người dùng chưa sửa (giá trị hiện tại trùng với planCode hoặc rỗng)
+      const currentPlanName = getValues('planName');
+      const currentPlanCode = getValues('planCode') || '';
+      if (!currentPlanName || currentPlanName === currentPlanCode) {
+        setValue('planName', value, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -130,6 +151,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
                 errors.planCode ? 'border-red-300' : ''
               }`}
               placeholder="e.g., Plan Code"
+              onBlur={handlePlanCodeBlur}
             />
             {errors.planCode && (
               <p id="planCode-error" className="mt-2 text-sm text-red-600">
