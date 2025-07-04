@@ -240,6 +240,59 @@ export const planSchema = pgTable('plan', {
   };
 });
 
+// ======================
+// PLAN_DETAIL - Location-based Production Allocation
+export const planDetailSchema = pgTable('plan_detail', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+
+  // Foreign Keys
+  planId: integer('plan_id')
+    .references(() => planSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Location & Resource Allocation
+  locationCode: text('location_code').notNull(), // K04, K01, K31 or 2, 7, 4, 10, 5
+  locationType: text('location_type'), // alpha/numeric
+
+  // Product Reference
+  productCode: text('product_code').notNull(), // NHA01, NHA02A
+  productSubCode: text('product_sub_code').notNull(), // NHA_01_CM, NHA_02_CO
+
+  // Quantity Planning
+  plannedQuantity: integer('planned_quantity').notNull(),
+  actualQuantity: integer('actual_quantity').default(0),
+
+  // Scheduling
+  plannedStartDate: date('planned_start_date'),
+  plannedEndDate: date('planned_end_date'),
+  actualStartDate: date('actual_start_date'),
+  actualEndDate: date('actual_end_date'),
+
+  // Status & Priority
+  status: text('status').default('planned'), // planned/in_progress/completed/cancelled
+  priority: integer('priority').default(5), // 1=highest, 10=lowest
+  note: text('note'),
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    planDetailUniqueIdx: uniqueIndex('plan_detail_unique_idx').on(
+      table.planId,
+      table.locationCode,
+      table.productSubCode,
+      table.ownerId,
+    ),
+    planDetailLocationIdx: index('plan_detail_location_idx').on(table.locationCode),
+    planDetailProductIdx: index('plan_detail_product_idx').on(table.productCode),
+    planDetailStatusIdx: index('plan_detail_status_idx').on(table.status),
+  };
+});
+
 export const processSchema = pgTable('process', {
   id: serial('id').primaryKey(),
   ownerId: text('owner_id').notNull(),

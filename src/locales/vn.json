@@ -94,6 +94,7 @@
     "product_step_crosstab": "Bảng chéo sản phẩm-công đoạn",
     "planning_workflow": "Lập kế hoạch",
     "plans": "Danh sách kế hoạch",
+    "plandetails": "Chi tiết kế hoạch",
     "processes": "Quy trình",
     "work_tables": "Bàn Cắt",
     "organization": "Tổ chức",
@@ -575,5 +576,48 @@
     "add_new": "Thêm kế hoạch mới",
     "delete_success": "Xóa kế hoạch thành công.",
     "deleteConfirmation": "Bạn có chắc muốn xóa kế hoạch này?"
+  },
+  "plandetail": {
+    "pageTitle": "Chi tiết kế hoạch",
+    "pageDescription": "Quản lý tất cả chi tiết kế hoạch tại đây.",
+    "createNew": "Tạo mới chi tiết kế hoạch",
+    "tabs": {
+      "required": "Chi tiết",
+      "location": "Số lượng",
+      "dates": "Ngày tháng",
+      "other": "Khác"
+    },
+    "form": {
+      "plan": "Kế hoạch",
+      "locationCode": "Mã vị trí",
+      "productCode": "Mã sản phẩm",
+      "productSubCode": "Mã sản phẩm phụ",
+      "plannedQuantity": "Số lượng kế hoạch",
+      "locationType": "Loại vị trí",
+      "actualQuantity": "Số lượng thực tế",
+      "plannedStartDate": "Ngày bắt đầu kế hoạch",
+      "plannedEndDate": "Ngày kết thúc kế hoạch",
+      "actualStartDate": "Ngày bắt đầu thực tế",
+      "actualEndDate": "Ngày kết thúc thực tế",
+      "status": "Trạng thái",
+      "priority": "Độ ưu tiên",
+      "note": "Ghi chú",
+      "selectPlan": "Chọn kế hoạch",
+      "selectProduct": "Chọn sản phẩm",
+      "selectLocation": "Chọn vị trí",
+      "selectProductSub": "Chọn sản phẩm phụ",
+      "enterLocationCode": "Nhập mã vị trí",
+      "enterProductCode": "Nhập mã sản phẩm",
+      "enterProductSubCode": "Nhập mã sản phẩm phụ",
+      "enterPlannedQuantity": "Nhập số lượng kế hoạch",
+      "enterLocationType": "Nhập loại vị trí",
+      "enterActualQuantity": "Nhập số lượng thực tế",
+      "enterStatus": "Nhập trạng thái",
+      "enterPriority": "Nhập độ ưu tiên (1-10)",
+      "enterNote": "Nhập ghi chú",
+      "saving": "Đang lưu...",
+      "updatePlanDetail": "Cập nhật chi tiết kế hoạch",
+      "createPlanDetail": "Tạo chi tiết kế hoạch"
+    }
   }
 }

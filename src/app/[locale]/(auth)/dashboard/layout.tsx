@@ -66,6 +66,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     label: t('plans'),
                   },
                   {
+                    href: '/dashboard/plandetails',
+                    label: t('plandetails'),
+                  },
+                  {
                     href: '/dashboard/processes',
                     label: t('processes'),
                   },

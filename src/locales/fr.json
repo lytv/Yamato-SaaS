@@ -121,6 +121,7 @@
     "product_step_crosstab": "Tableau Croisé",
     "planning_workflow": "Planification & Flux de Travail",
     "plans": "Plans",
+    "plandetails": "Détails du plan",
     "processes": "Processus",
     "work_tables": "Tables de Travail",
     "organization": "Organisation",
@@ -369,5 +370,48 @@
     "add_new": "Ajouter un nouveau processus",
     "delete_success": "Processus supprimé avec succès.",
     "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer ce processus ?"
+  },
+  "plandetail": {
+    "pageTitle": "Détails du plan",
+    "pageDescription": "Gérez tous les détails du plan ici.",
+    "createNew": "Créer un nouveau détail de plan",
+    "tabs": {
+      "required": "Champs requis",
+      "location": "Emplacement et quantité",
+      "dates": "Dates",
+      "other": "Autre"
+    },
+    "form": {
+      "plan": "Plan",
+      "locationCode": "Code d'emplacement",
+      "productCode": "Code produit",
+      "productSubCode": "Code sous-produit",
+      "plannedQuantity": "Quantité prévue",
+      "locationType": "Type d'emplacement",
+      "actualQuantity": "Quantité réelle",
+      "plannedStartDate": "Date de début prévue",
+      "plannedEndDate": "Date de fin prévue",
+      "actualStartDate": "Date de début réelle",
+      "actualEndDate": "Date de fin réelle",
+      "status": "Statut",
+      "priority": "Priorité",
+      "note": "Note",
+      "selectPlan": "Sélectionner un plan",
+      "selectProduct": "Sélectionner un produit",
+      "selectLocation": "Sélectionner un emplacement",
+      "selectProductSub": "Sélectionner un sous-produit",
+      "enterLocationCode": "Entrez le code d'emplacement",
+      "enterProductCode": "Entrez le code produit",
+      "enterProductSubCode": "Entrez le code sous-produit",
+      "enterPlannedQuantity": "Entrez la quantité prévue",
+      "enterLocationType": "Entrez le type d'emplacement",
+      "enterActualQuantity": "Entrez la quantité réelle",
+      "enterStatus": "Entrez le statut",
+      "enterPriority": "Entrez la priorité (1-10)",
+      "enterNote": "Entrez la note",
+      "saving": "Enregistrement...",
+      "updatePlanDetail": "Mettre à jour le détail du plan",
+      "createPlanDetail": "Créer le détail du plan"
+    }
   }
 }

@@ -121,6 +121,7 @@
     "product_step_crosstab": "Product Step Crosstab",
     "planning_workflow": "Planning",
     "plans": "Plans",
+    "plandetails": "Plan Details",
     "processes": "Processes",
     "work_tables": "Work Tables",
     "organization": "Organization",
@@ -575,5 +576,48 @@
     "add_new": "Add a new plan",
     "delete_success": "Plan deleted successfully.",
     "deleteConfirmation": "Are you sure you want to delete this plan?"
+  },
+  "plandetail": {
+    "pageTitle": "Plan Details",
+    "pageDescription": "Manage all plan details here.",
+    "createNew": "Create Plan Detail",
+    "tabs": {
+      "required": "Required",
+      "location": "Quantity",
+      "dates": "Dates",
+      "other": "Other"
+    },
+    "form": {
+      "plan": "Plan",
+      "locationCode": "Location Code",
+      "productCode": "Product Code",
+      "productSubCode": "Product Sub Code",
+      "plannedQuantity": "Planned Quantity",
+      "locationType": "Location Type",
+      "actualQuantity": "Actual Quantity",
+      "plannedStartDate": "Planned Start Date",
+      "plannedEndDate": "Planned End Date",
+      "actualStartDate": "Actual Start Date",
+      "actualEndDate": "Actual End Date",
+      "status": "Status",
+      "priority": "Priority",
+      "note": "Note",
+      "selectPlan": "Select Plan",
+      "selectProduct": "Select Product",
+      "selectLocation": "Select Location",
+      "selectProductSub": "Select Product Sub",
+      "enterLocationCode": "Enter location code",
+      "enterProductCode": "Enter product code",
+      "enterProductSubCode": "Enter product sub code",
+      "enterPlannedQuantity": "Enter planned quantity",
+      "enterLocationType": "Enter location type",
+      "enterActualQuantity": "Enter actual quantity",
+      "enterStatus": "Enter status",
+      "enterPriority": "Enter priority (1-10)",
+      "enterNote": "Enter note",
+      "saving": "Saving...",
+      "updatePlanDetail": "Update Plan Detail",
+      "createPlanDetail": "Create Plan Detail"
+    }
   }
 }
