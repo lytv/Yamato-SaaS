@@ -71,6 +71,7 @@ export function usePlanDetails({
         limit,
         showAll,
         ownerId,
+        includeRelations: true,
       });
 
       setState({

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -61,12 +61,18 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     },
   });
 
+  // Sử dụng useWatch để theo dõi productCode
+  const productCode = useWatch({ control: form.control, name: 'productCode' });
+
   const { createPlanDetail, updatePlanDetail } = usePlanDetailMutations();
 
   // Filter product sub codes based on selected product code
-  const filteredProductSubCodes = relationOptions.productSubCodes.filter(
-    option => option.productCode === form.watch('productCode'),
+  const filteredByProduct = relationOptions.productSubCodes.filter(
+    option => option.productCode === productCode,
   );
+  const filteredProductSubCodes = (productCode && filteredByProduct.length === 0)
+    ? relationOptions.productSubCodes
+    : filteredByProduct;
 
   // Reset productSubCode when productCode changes
   useEffect(() => {
@@ -243,11 +249,11 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                     <Select
                       onValueChange={value => field.onChange(value)}
                       value={field.value}
-                      disabled={!form.watch('productCode')}
+                      disabled={!productCode}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={form.watch('productCode') ? t('form.selectProductSub') : 'Select product first'} />
+                          <SelectValue placeholder={productCode ? t('form.selectProductSub') : 'Select product first'} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -264,7 +270,7 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                             )
                           : (
                               <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                {form.watch('productCode') ? 'No product sub codes available for this product' : 'Please select a product first'}
+                                {productCode ? t('form.noProductSubAvailable') : 'Please select a product first'}
                               </div>
                             )}
                       </SelectContent>

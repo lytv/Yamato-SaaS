@@ -6,14 +6,14 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { PlanDetailSkeleton } from '@/features/plandetail/PlanDetailSkeleton';
 import { usePlanDetailExport } from '@/hooks/usePlanDetailExport';
 import { usePlanDetailFilters } from '@/hooks/usePlanDetailFilters';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
 import { usePlanDetails } from '@/hooks/usePlanDetails';
-import type { ImportPlanDetailResult, PlanDetail } from '@/types/plandetail';
+import type { ImportPlanDetailResult, PlanDetail, PlanDetailWithRelations } from '@/types/plandetail';
 
 import { PlanDetailImportModal } from './PlanDetailImportModal';
 
@@ -28,6 +28,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
+  const [relationOptions, setRelationOptions] = useState<{ products: { productCode: string; productName: string }[] }>({ products: [] });
 
   const {
     filters,
@@ -52,19 +53,25 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
   const { deletePlanDetail, isDeleting } = usePlanDetailMutations();
   const { handleExport, isExporting } = usePlanDetailExport();
 
+  // Fetch relationOptions (products) khi mount
+  useEffect(() => {
+    const fetchRelationOptions = async () => {
+      try {
+        const res = await fetch('/api/plandetails/relations/options');
+        if (res.ok) {
+          const data = await res.json();
+          setRelationOptions({ products: data.data.products || [] });
+        }
+      } catch (err) {
+        // silent
+      }
+    };
+    fetchRelationOptions();
+  }, []);
+
   // Handle import success
   const handleImportSuccess = (_result: ImportPlanDetailResult) => {
     refresh();
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   // Handle delete confirmation
@@ -308,66 +315,81 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
         <table role="table" className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Product Sub Code
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Product Code
+              </th> */}
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Plan Code
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Product Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Planned Quantity
+              </th>
+              {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Updated
-              </th>
+              </th> */}
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {plandetails.map(plandetail => (
-              <tr key={plandetail.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                  {plandetail.productSubCode}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {plandetail.productCode}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {plandetail.status || '-'}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {formatDate(plandetail.createdAt)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {formatDate(plandetail.updatedAt)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => onEdit(plandetail)}
-                      disabled={isDeleting}
-                      className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteClick(plandetail)}
-                      disabled={isDeleting}
-                      className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {plandetails.map(plandetailRaw => {
+              const plandetail = plandetailRaw as PlanDetailWithRelations;
+              // Lấy productName từ relationOptions nếu có
+              let productName = '-';
+              if (plandetail.productCode && Array.isArray(relationOptions?.products)) {
+                const found = relationOptions.products.find(p => p.productCode === plandetail.productCode);
+                if (found) productName = found.productName;
+              }
+              return (
+                <tr key={plandetail.id} className="hover:bg-gray-50">
+                  {/* <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                    {plandetail.productSubCode}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {plandetail.productCode}
+                  </td> */}
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {plandetail.plan?.planCode || '-'}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {productName}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {plandetail.plannedQuantity}
+                  </td>
+                  {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {plandetail.status || '-'}
+                  </td> */}
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(plandetail)}
+                        disabled={isDeleting}
+                        className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(plandetail)}
+                        disabled={isDeleting}
+                        className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
