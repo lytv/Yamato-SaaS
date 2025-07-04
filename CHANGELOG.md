@@ -1,3 +1,12 @@
+## [1.1.5](https://github.com/lytv/Yamato-SaaS/compare/v1.1.4...v1.1.5) (2025-07-04)
+
+
+### Bug Fixes
+
+* đồng bộ schema, type, xoá test, fix build, sạch typescript error ([ee6dbf8](https://github.com/lytv/Yamato-SaaS/commit/ee6dbf86136d9dc61b87892be27d75129b8194e5))
+* update plan module fixes documentation ([bec38eb](https://github.com/lytv/Yamato-SaaS/commit/bec38eb7becd9b3a9d8205fc6ee737d5ba26f3f5))
+* update plan module fixes documentation ([040ff94](https://github.com/lytv/Yamato-SaaS/commit/040ff94ed7205e0982c3c45702d30a037cc747b7))
+
 ## [1.1.4](https://github.com/lytv/Yamato-SaaS/compare/v1.1.3...v1.1.4) (2025-07-03)
 
 
