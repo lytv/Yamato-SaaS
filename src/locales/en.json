@@ -130,7 +130,8 @@
     "settings": "Settings",
     "billing": "Billing",
     "employee_salary_entries": "Employee Salary Entries",
-    "salary": "Salary"
+    "salary": "Salary",
+    "salaries": "Salaries"
   },
   "Dashboard": {
     "meta_title": "Yamato ERP Dashboard",
