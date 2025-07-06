@@ -71,6 +71,10 @@ export const userSyncFormSchema = z.object({
     .trim()
     .max(50, 'Organization role must be 50 characters or less')
     .optional(),
+  shortcut: z.string()
+    .trim()
+    .max(50, 'Shortcut must be 50 characters or less')
+    .optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -100,6 +104,10 @@ export const updateUserSyncSchema = z.object({
   organizationRole: z.string()
     .trim()
     .max(50, 'Organization role must be 50 characters or less')
+    .optional(),
+  shortcut: z.string()
+    .trim()
+    .max(50, 'Shortcut must be 50 characters or less')
     .optional(),
   isActive: z.boolean().optional(),
 }).refine(

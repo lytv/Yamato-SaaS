@@ -29,6 +29,7 @@ function mapClerkUserToDb(user: any) {
     avatarUrl: user.image_url,
     role: user.public_metadata?.role || 'member',
     organizationRole: user.public_metadata?.organizationRole || null,
+    shortcut: user.public_metadata?.shortcut || null,
     isActive: user.banned === false,
     createdAt: new Date(user.created_at),
     updatedAt: new Date(user.updated_at),

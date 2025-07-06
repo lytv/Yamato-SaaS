@@ -101,7 +101,9 @@
     "members": "Thành viên",
     "user_syncs": "Đồng bộ người dùng",
     "settings": "Cài đặt",
-    "billing": "Thanh toán"
+    "billing": "Thanh toán",
+    "employee_salary_entries": "Bảng lương nhân viên",
+    "salaries": "Lương"
   },
   "DashboardIndex": {
     "title_bar": "Bảng điều khiển",
@@ -618,6 +620,41 @@
       "saving": "Đang lưu...",
       "updatePlanDetail": "Cập nhật chi tiết kế hoạch",
       "createPlanDetail": "Tạo chi tiết kế hoạch"
+    }
+  },
+  "employeeSalaryEntry": {
+    "pageTitle": "Bảng lương nhân viên",
+    "pageDescription": "Quản lý bảng lương, nhập lương sản lượng cho nhân viên.",
+    "createNew": "Thêm bảng lương nhân viên",
+    "edit": "Sửa bảng lương nhân viên",
+    "delete": "Xoá bảng lương nhân viên",
+    "form": {
+      "employee": "Nhân viên",
+      "productionStepDetail": "Chi tiết công đoạn",
+      "plan": "Kế hoạch",
+      "workDate": "Ngày làm việc",
+      "entryDate": "Ngày nhập liệu",
+      "actualQuantity": "Số lượng thực tế",
+      "plannedQuantity": "Số lượng kế hoạch",
+      "limitQuantity": "Số lượng giới hạn",
+      "previousEnteredQuantity": "Số lượng đã nhập trước",
+      "unitPrice": "Đơn giá",
+      "totalAmount": "Tổng tiền",
+      "salaryNote": "Ghi chú lương",
+      "status": "Trạng thái",
+      "approvedBy": "Người duyệt",
+      "approvedAt": "Thời gian duyệt",
+      "startTime": "Bắt đầu làm",
+      "endTime": "Kết thúc làm",
+      "workDurationMinutes": "Thời lượng làm (phút)",
+      "ownerId": "Chủ sở hữu"
+    },
+    "status": {
+      "draft": "Nháp",
+      "submitted": "Đã gửi",
+      "approved": "Đã duyệt",
+      "paid": "Đã trả lương",
+      "cancelled": "Đã huỷ"
     }
   }
 }

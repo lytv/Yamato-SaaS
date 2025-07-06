@@ -118,7 +118,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 }
 
 // Helper function using existing createUserSync in loop
-async function processImportData(user_syncs: Array<{ userId: string; email: string; fullName?: string; role?: string; organizationRole?: string; isActive?: boolean; rowNumber: number }>, ownerId: string): Promise<{
+async function processImportData(user_syncs: Array<{ userId: string; email: string; fullName?: string; role?: string; organizationRole?: string; shortcut?: string; isActive?: boolean; rowNumber: number }>, ownerId: string): Promise<{
   successful: UserSync[];
   failed: ImportError[];
 }> {
@@ -147,6 +147,7 @@ async function processImportData(user_syncs: Array<{ userId: string; email: stri
         fullName: user_syncData.fullName,
         role: user_syncData.role,
         organizationRole: user_syncData.organizationRole,
+        shortcut: user_syncData.shortcut,
         isActive: user_syncData.isActive,
       });
 
@@ -159,6 +160,7 @@ async function processImportData(user_syncs: Array<{ userId: string; email: stri
         avatarUrl: dbUserSync.avatarUrl,
         role: dbUserSync.role,
         organizationRole: dbUserSync.organizationRole,
+        shortcut: dbUserSync.shortcut,
         isActive: dbUserSync.isActive,
         createdAt: dbUserSync.createdAt.toISOString(),
         updatedAt: dbUserSync.updatedAt.toISOString(),

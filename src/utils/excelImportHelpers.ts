@@ -477,7 +477,7 @@ export async function parseUserSyncExcelFile(buffer: Buffer): Promise<ImportUser
 
     // Extract headers from first row
     const headers = rawData[0] as string[];
-    const expectedHeaders = ['User ID', 'Email', 'Full Name', 'Role', 'Organization Role', 'Active'];
+    const expectedHeaders = ['User ID', 'Email', 'Full Name', 'Role', 'Organization Role', 'Shortcut', 'Active'];
 
     // Validate headers
     const hasRequiredHeaders = expectedHeaders.slice(0, 2).every(header =>
@@ -495,6 +495,7 @@ export async function parseUserSyncExcelFile(buffer: Buffer): Promise<ImportUser
       fullName: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'full name'),
       role: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'role'),
       organizationRole: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'organization role'),
+      shortcut: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'shortcut'),
       isActive: headers.findIndex(h => h && h.toString().toLowerCase().trim() === 'active'),
     };
 
@@ -516,6 +517,7 @@ export async function parseUserSyncExcelFile(buffer: Buffer): Promise<ImportUser
       const fullName = headerMap.fullName >= 0 ? (row[headerMap.fullName]?.toString().trim() || '') : '';
       const role = headerMap.role >= 0 ? (row[headerMap.role]?.toString().trim() || '') : '';
       const organizationRole = headerMap.organizationRole >= 0 ? (row[headerMap.organizationRole]?.toString().trim() || '') : '';
+      const shortcut = headerMap.shortcut >= 0 ? (row[headerMap.shortcut]?.toString().trim() || '') : '';
       const isActiveStr = headerMap.isActive >= 0 ? (row[headerMap.isActive]?.toString().trim() || '') : '';
       const isActive = isActiveStr.toLowerCase() === 'yes' || isActiveStr.toLowerCase() === 'true' || isActiveStr === '1';
 
@@ -526,6 +528,7 @@ export async function parseUserSyncExcelFile(buffer: Buffer): Promise<ImportUser
         fullName: fullName || undefined,
         role: role || undefined,
         organizationRole: organizationRole || undefined,
+        shortcut: shortcut || undefined,
         isActive,
         rowNumber,
       };

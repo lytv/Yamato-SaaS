@@ -1,0 +1,1 @@
+ALTER TABLE "user_sync" ADD COLUMN "shortcut" text; 

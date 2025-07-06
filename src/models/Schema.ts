@@ -13,6 +13,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { employeeSalaryEntrySchema, employeeSalaryEntryRelations } from './Schema/employeeSalaryEntry';
 
 // This file defines the structure of your database tables using the Drizzle ORM.
 
@@ -430,6 +431,7 @@ export const userSyncSchema = pgTable('user_sync', {
   avatarUrl: text('avatar_url'),
   role: text('role').default('member'), // Vai trò của user (admin, member, viewer, ...)
   organizationRole: text('organization_role'), // Vai trò trong tổ chức (nếu có)
+  shortcut: text('shortcut'),
   isActive: boolean('is_active').default(true), // Trạng thái hoạt động
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { mode: 'date' })
@@ -437,3 +439,8 @@ export const userSyncSchema = pgTable('user_sync', {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+// ======================
+// EMPLOYEE_SALARY_ENTRY - Bảng nhập lương theo sản lượng nhân viên
+// ======================
+export { employeeSalaryEntrySchema, employeeSalaryEntryRelations };

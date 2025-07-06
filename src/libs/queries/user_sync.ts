@@ -32,6 +32,7 @@ export async function createUserSync(data: CreateUserSyncInput): Promise<UserSyn
       avatarUrl: data.avatarUrl,
       role: data.role,
       organizationRole: data.organizationRole,
+      shortcut: data.shortcut,
       isActive: data.isActive,
     })
     .returning();
@@ -182,6 +183,7 @@ export async function updateUserSync(
       avatarUrl: data.avatarUrl ?? existingUserSync.avatarUrl,
       role: data.role ?? existingUserSync.role,
       organizationRole: data.organizationRole ?? existingUserSync.organizationRole,
+      shortcut: data.shortcut ?? existingUserSync.shortcut,
       isActive: data.isActive ?? existingUserSync.isActive,
       updatedAt: new Date(),
     })

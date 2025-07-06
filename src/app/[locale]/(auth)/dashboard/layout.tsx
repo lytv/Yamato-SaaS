@@ -57,6 +57,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 ],
               },
 
+              // Thêm menu Salaries với submenu Employee Salary Entries
+              {
+                label: t('salaries'),
+                submenu: [
+                  {
+                    href: '/dashboard/employeeSalaryEntries',
+                    label: t('employee_salary_entries'),
+                  },
+                ],
+              },
+
               // Planning & Workflow
               {
                 label: t('planning_workflow'),

@@ -1,0 +1,12 @@
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "actualQuantityCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "actualQuantityCheck" CHECK (actual_quantity >= 0);
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "plannedQuantityCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "plannedQuantityCheck" CHECK (planned_quantity >= 0);
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "limitQuantityCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "limitQuantityCheck" CHECK (limit_quantity >= 0);
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "unitPriceCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "unitPriceCheck" CHECK (unit_price >= 0);
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "totalAmountCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "totalAmountCheck" CHECK (total_amount >= 0);
+ALTER TABLE "employee_salary_entry" DROP CONSTRAINT IF EXISTS "workDurationCheck";
+ALTER TABLE "employee_salary_entry" ADD CONSTRAINT "workDurationCheck" CHECK (work_duration_minutes >= 0); 

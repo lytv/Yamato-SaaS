@@ -45,6 +45,7 @@ export type UserSyncFormData = {
   avatarUrl?: string;
   role?: string;
   organizationRole?: string;
+  shortcut?: string;
   isActive?: boolean;
 };
 
@@ -57,6 +58,7 @@ export type CreateUserSyncInput = {
   avatarUrl?: string;
   role?: string;
   organizationRole?: string;
+  shortcut?: string;
   isActive?: boolean;
 };
 
@@ -66,6 +68,7 @@ export type UpdateUserSyncInput = {
   avatarUrl?: string;
   role?: string;
   organizationRole?: string;
+  shortcut?: string;
   isActive?: boolean;
 };
 

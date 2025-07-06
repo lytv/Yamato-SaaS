@@ -38,6 +38,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           avatarUrl: user_sync.avatarUrl || '',
           role: user_sync.role || '',
           organizationRole: user_sync.organizationRole || '',
+          shortcut: user_sync.shortcut || '',
           isActive: typeof user_sync.isActive === 'boolean' ? user_sync.isActive : false,
         }
       : {
@@ -47,6 +48,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           avatarUrl: '',
           role: '',
           organizationRole: '',
+          shortcut: '',
           isActive: false,
         },
     mode: 'onChange',
@@ -171,6 +173,22 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
         />
         {errors.organizationRole && (
           <p id="organizationRole-error" className="mt-2 text-sm text-red-600">{errors.organizationRole.message}</p>
+        )}
+      </div>
+
+      {/* Shortcut Field */}
+      <div>
+        <label htmlFor="shortcut" className="block text-sm font-medium text-gray-700">Shortcut</label>
+        <input
+          id="shortcut"
+          type="text"
+          {...register('shortcut')}
+          aria-describedby={errors.shortcut ? 'shortcut-error' : undefined}
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.shortcut ? 'border-red-300' : ''}`}
+          placeholder="e.g., user-shortcut"
+        />
+        {errors.shortcut && (
+          <p id="shortcut-error" className="mt-2 text-sm text-red-600">{errors.shortcut.message}</p>
         )}
       </div>
 

@@ -1,0 +1,2 @@
+-- Đã di chuyển file này sang backup để tách từng lệnh SQL ra file riêng biệt.
+-- Các lệnh SQL đã được tách ra thành các file 0013a_..., 0013b_..., ... trong thư mục migrations/.

@@ -128,7 +128,9 @@
     "members": "Membres",
     "user_syncs": "Synchronisation Utilisateurs",
     "settings": "Paramètres",
-    "billing": "Facturation"
+    "billing": "Facturation",
+    "employee_salary_entries": "Entrées de salaire des employés",
+    "salaries": "Salaires"
   },
   "Dashboard": {
     "meta_title": "Tableau de bord Yamato ERP",
@@ -412,6 +414,41 @@
       "saving": "Enregistrement...",
       "updatePlanDetail": "Mettre à jour le détail du plan",
       "createPlanDetail": "Créer le détail du plan"
+    }
+  },
+  "employeeSalaryEntry": {
+    "pageTitle": "Fiches de paie des employés",
+    "pageDescription": "Gérer les fiches de paie et les enregistrements de salaire des employés.",
+    "createNew": "Créer une fiche de paie employé",
+    "edit": "Modifier la fiche de paie employé",
+    "delete": "Supprimer la fiche de paie employé",
+    "form": {
+      "employee": "Employé",
+      "productionStepDetail": "Détail de l'étape de production",
+      "plan": "Plan",
+      "workDate": "Date de travail",
+      "entryDate": "Date de saisie",
+      "actualQuantity": "Quantité réelle",
+      "plannedQuantity": "Quantité planifiée",
+      "limitQuantity": "Quantité limite",
+      "previousEnteredQuantity": "Quantité saisie précédente",
+      "unitPrice": "Prix unitaire",
+      "totalAmount": "Montant total",
+      "salaryNote": "Note de salaire",
+      "status": "Statut",
+      "approvedBy": "Approuvé par",
+      "approvedAt": "Date d'approbation",
+      "startTime": "Heure de début",
+      "endTime": "Heure de fin",
+      "workDurationMinutes": "Durée de travail (minutes)",
+      "ownerId": "Propriétaire"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "submitted": "Soumis",
+      "approved": "Approuvé",
+      "paid": "Payé",
+      "cancelled": "Annulé"
     }
   }
 }

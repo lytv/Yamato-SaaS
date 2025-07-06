@@ -128,7 +128,9 @@
     "members": "Members",
     "user_syncs": "User Syncs",
     "settings": "Settings",
-    "billing": "Billing"
+    "billing": "Billing",
+    "employee_salary_entries": "Employee Salary Entries",
+    "salary": "Salary"
   },
   "Dashboard": {
     "meta_title": "Yamato ERP Dashboard",
@@ -618,6 +620,41 @@
       "saving": "Saving...",
       "updatePlanDetail": "Update Plan Detail",
       "createPlanDetail": "Create Plan Detail"
+    }
+  },
+  "employeeSalaryEntry": {
+    "pageTitle": "Employee Salary Entries",
+    "pageDescription": "Manage employee salary entries and payroll records.",
+    "createNew": "Create Employee Salary Entry",
+    "edit": "Edit Employee Salary Entry",
+    "delete": "Delete Employee Salary Entry",
+    "form": {
+      "employee": "Employee",
+      "productionStepDetail": "Production Step Detail",
+      "plan": "Plan",
+      "workDate": "Work Date",
+      "entryDate": "Entry Date",
+      "actualQuantity": "Actual Quantity",
+      "plannedQuantity": "Planned Quantity",
+      "limitQuantity": "Limit Quantity",
+      "previousEnteredQuantity": "Previous Entered Quantity",
+      "unitPrice": "Unit Price",
+      "totalAmount": "Total Amount",
+      "salaryNote": "Salary Note",
+      "status": "Status",
+      "approvedBy": "Approved By",
+      "approvedAt": "Approved At",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "workDurationMinutes": "Work Duration (Minutes)",
+      "ownerId": "Owner ID"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
     }
   }
 }

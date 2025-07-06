@@ -67,6 +67,7 @@ export type ImportUserSyncData = {
   fullName?: string;
   role?: string;
   organizationRole?: string;
+  shortcut?: string;
   isActive?: boolean;
   rowNumber: number;
 };

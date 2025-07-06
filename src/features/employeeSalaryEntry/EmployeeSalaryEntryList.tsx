@@ -1,31 +1,31 @@
 /**
- * UserSyncList Component
+ * EmployeeSalaryEntryList Component
  * Following TDD Workflow Standards - Green Phase
- * Displays user_syncs in table format with search, sort, pagination, and actions
+ * Displays employeeSalaryEntrys in table format with search, sort, pagination, and actions
  */
 
 import { useAuth } from '@clerk/nextjs';
 import { Download, Upload } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { UserSyncSkeleton } from '@/features/user_sync/UserSyncSkeleton';
-import { useUserSyncExport } from '@/hooks/useUserSyncExport';
-import { useUserSyncFilters } from '@/hooks/useUserSyncFilters';
-import { useUserSyncMutations } from '@/hooks/useUserSyncMutations';
-import { useUserSyncs } from '@/hooks/useUserSyncs';
+import { EmployeeSalaryEntrySkeleton } from '@/features/employeeSalaryEntry/EmployeeSalaryEntrySkeleton';
+import { useEmployeeSalaryEntryExport } from '@/hooks/useEmployeeSalaryEntryExport';
+import { useEmployeeSalaryEntryFilters } from '@/hooks/useEmployeeSalaryEntryFilters';
+import { useEmployeeSalaryEntryMutations } from '@/hooks/useEmployeeSalaryEntryMutations';
+import { useEmployeeSalaryEntrys } from '@/hooks/useEmployeeSalaryEntrys';
+import type { EmployeeSalaryEntry } from '@/types/employeeSalaryEntry';
 import type { ImportResult } from '@/types/import';
-import type { UserSync } from '@/types/user_sync';
 
-import { UserSyncImportModal } from './UserSyncImportModal';
+import { EmployeeSalaryEntryImportModal } from './EmployeeSalaryEntryImportModal';
 
-type UserSyncListProps = {
-  onEdit: (user_sync: UserSync) => void;
-  onDelete: (user_sync: UserSync) => void;
+type EmployeeSalaryEntryListProps = {
+  onEdit: (employeeSalaryEntry: EmployeeSalaryEntry) => void;
+  onDelete: (employeeSalaryEntry: EmployeeSalaryEntry) => void;
 };
 
-export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Element {
+export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntryListProps): JSX.Element {
   const { userId, orgId } = useAuth();
-  const [deleteConfirmUserSync, setDeleteConfirmUserSync] = useState<UserSync | null>(null);
+  const [deleteConfirmEmployeeSalaryEntry, setDeleteConfirmEmployeeSalaryEntry] = useState<EmployeeSalaryEntry | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -39,12 +39,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     handleSortChange,
     handleSortOrderChange,
     resetFilters,
-  } = useUserSyncFilters();
+  } = useEmployeeSalaryEntryFilters();
 
   // Get ownerId for multi-tenancy
   const ownerId = orgId || userId || '';
 
-  const { user_syncs, pagination, isLoading, error, refresh } = useUserSyncs({
+  const { employeeSalaryEntrys, pagination, isLoading, error, refresh } = useEmployeeSalaryEntrys({
     search,
     sortBy,
     sortOrder,
@@ -54,12 +54,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     showAll,
   });
 
-  const { deleteUserSync, isDeleting } = useUserSyncMutations();
-  const { exportUserSyncs, isExporting, exportError, clearError } = useUserSyncExport();
+  const { deleteEmployeeSalaryEntry, isDeleting } = useEmployeeSalaryEntryMutations();
+  const { exportEmployeeSalaryEntrys, isExporting, exportError, clearError } = useEmployeeSalaryEntryExport();
 
   // Handle import success
   const handleImportSuccess = (_result: ImportResult) => {
-    // Refresh user_sync list
+    // Refresh employeeSalaryEntry list
     refresh();
 
     // The modal will show the success/error details,
@@ -77,30 +77,30 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (user_sync: UserSync): void => {
-    setDeleteConfirmUserSync(user_sync);
+  const handleDeleteClick = (employeeSalaryEntry: EmployeeSalaryEntry): void => {
+    setDeleteConfirmEmployeeSalaryEntry(employeeSalaryEntry);
     setDeleteError(null);
   };
 
   // Handle delete confirmation
   const handleDeleteConfirm = async (): Promise<void> => {
-    if (!deleteConfirmUserSync) {
+    if (!deleteConfirmEmployeeSalaryEntry) {
       return;
     }
 
     try {
-      await deleteUserSync(deleteConfirmUserSync.userId, ownerId);
-      onDelete(deleteConfirmUserSync);
-      setDeleteConfirmUserSync(null);
+      await deleteEmployeeSalaryEntry(deleteConfirmEmployeeSalaryEntry.id);
+      onDelete(deleteConfirmEmployeeSalaryEntry);
+      setDeleteConfirmEmployeeSalaryEntry(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete user_sync';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete employeeSalaryEntry';
       setDeleteError(errorMessage);
     }
   };
 
   // Handle delete cancel
   const handleDeleteCancel = (): void => {
-    setDeleteConfirmUserSync(null);
+    setDeleteConfirmEmployeeSalaryEntry(null);
     setDeleteError(null);
   };
 
@@ -119,10 +119,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     handleSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  // Handle export user_syncs
-  const handleExportUserSyncs = async (): Promise<void> => {
+  // Handle export employeeSalaryEntrys
+  const handleExportEmployeeSalaryEntrys = async (): Promise<void> => {
     try {
-      await exportUserSyncs({
+      await exportEmployeeSalaryEntrys({
         search,
         sortBy,
         sortOrder,
@@ -138,10 +138,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   if (isLoading) {
     return (
       <div>
-        <div role="status" aria-label="Loading user_syncs" className="sr-only">
-          Loading user_syncs...
+        <div role="status" aria-label="Loading employeeSalaryEntrys" className="sr-only">
+          Loading employeeSalaryEntrys...
         </div>
-        <UserSyncSkeleton data-testid="user_sync-list-skeleton" />
+        <EmployeeSalaryEntrySkeleton data-testid="employeeSalaryEntry-list-skeleton" />
       </div>
     );
   }
@@ -163,12 +163,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   }
 
   // Empty state
-  if (user_syncs.length === 0 && !search) {
+  if (employeeSalaryEntrys.length === 0 && !search) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No user_syncs found</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No employeeSalaryEntrys found</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Create your first user_sync to get started.
+          Create your first employeeSalaryEntry to get started.
         </p>
       </div>
     );
@@ -182,10 +182,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search user_syncs..."
+              placeholder="Search employeeSalaryEntrys..."
               value={search}
               onChange={handleSearchInputChange}
-              aria-label="Search user_syncs"
+              aria-label="Search employeeSalaryEntrys"
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -218,8 +218,8 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             >
               <option value="createdAt">Created Date</option>
               <option value="updatedAt">Updated Date</option>
-              <option value="user_syncName">UserSync Name</option>
-              <option value="user_syncCode">UserSync Code</option>
+              <option value="employeeSalaryEntryName">EmployeeSalaryEntry Name</option>
+              <option value="employeeSalaryEntryCode">EmployeeSalaryEntry Code</option>
             </select>
 
             <button
@@ -235,9 +235,9 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           {/* Export Button */}
           <button
             type="button"
-            onClick={handleExportUserSyncs}
-            disabled={isExporting || user_syncs.length === 0}
-            aria-label="Export user_syncs to Excel"
+            onClick={handleExportEmployeeSalaryEntrys}
+            disabled={isExporting || employeeSalaryEntrys.length === 0}
+            aria-label="Export employeeSalaryEntrys to Excel"
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="mr-2 size-4" />
@@ -248,7 +248,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           <button
             type="button"
             onClick={() => setImportModalOpen(true)}
-            aria-label="Import user_syncs from Excel"
+            aria-label="Import employeeSalaryEntrys from Excel"
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Upload className="mr-2 size-4" />
@@ -296,17 +296,17 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
         </div>
       )}
 
-      {/* UserSync Count */}
+      {/* EmployeeSalaryEntry Count */}
       <div className="text-sm text-gray-600">
         Showing
         {' '}
-        {user_syncs.length}
+        {employeeSalaryEntrys.length}
         {' '}
         of
         {' '}
         {pagination?.total || 0}
         {' '}
-        user_syncs
+        employeeSalaryEntrys
         {pagination?.page && (
           <span>
             {' '}
@@ -316,58 +316,54 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
         )}
       </div>
 
-      {/* UserSyncs Table */}
+      {/* EmployeeSalaryEntrys Table */}
       <div className="overflow-x-auto">
         <table role="table" className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">User ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Avatar</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Org Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Shortcut</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Active</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Updated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                EmployeeSalaryEntry Code
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                EmployeeSalaryEntry Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Created
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Updated
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {user_syncs.map(user_sync => (
-              <tr key={user_sync.userId} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.userId}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.email}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.fullName || '-'}</td>
+            {employeeSalaryEntrys.map(employeeSalaryEntry => (
+              <tr key={employeeSalaryEntry.id} className="hover:bg-gray-50">
+                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                  {employeeSalaryEntry.id}
+                </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {user_sync.avatarUrl
-                    ? (
-                        <img src={user_sync.avatarUrl} alt="avatar" className="size-8 rounded-full object-cover" />
-                      )
-                    : (
-                        <span className="text-gray-400">-</span>
-                      )}
+                  {employeeSalaryEntry.status}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.role || '-'}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.organizationRole || '-'}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{user_sync.shortcut || '-'}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  {user_sync.isActive
-                    ? (
-                        <span className="inline-block rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">Active</span>
-                      )
-                    : (
-                        <span className="inline-block rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Inactive</span>
-                      )}
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  {employeeSalaryEntry.salary_note}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatDate(user_sync.createdAt)}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatDate(user_sync.updatedAt)}</td>
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  {formatDate(employeeSalaryEntry.created_at)}
+                </td>
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  {formatDate(employeeSalaryEntry.updated_at)}
+                </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                   <div className="flex space-x-2">
                     <button
                       type="button"
-                      onClick={() => onEdit(user_sync)}
+                      onClick={() => onEdit(employeeSalaryEntry)}
                       disabled={isDeleting}
                       className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -375,7 +371,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteClick(user_sync)}
+                      onClick={() => handleDeleteClick(employeeSalaryEntry)}
                       disabled={isDeleting}
                       className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -396,13 +392,13 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             <p className="text-sm text-gray-700">
               Showing
               {' '}
-              {user_syncs.length}
+              {employeeSalaryEntrys.length}
               {' '}
               of
               {' '}
               {pagination.total}
               {' '}
-              user_syncs
+              employeeSalaryEntrys
             </p>
           </div>
           <div className="flex items-center space-x-2">
@@ -427,7 +423,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirmUserSync && (
+      {deleteConfirmEmployeeSalaryEntry && (
         <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-gray-600/50">
           <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
             <div className="mt-3 text-center">
@@ -435,7 +431,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
                   Are you sure you want to delete "
-                  {deleteConfirmUserSync.fullName || deleteConfirmUserSync.email}
+                  {deleteConfirmEmployeeSalaryEntry.status}
                   "? This action cannot be undone.
                 </p>
                 {deleteError && (
@@ -467,7 +463,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
       )}
 
       {/* Import Modal */}
-      <UserSyncImportModal
+      <EmployeeSalaryEntryImportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onSuccess={handleImportSuccess}
