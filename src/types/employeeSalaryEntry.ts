@@ -17,16 +17,18 @@ export type EmployeeSalaryEntry = Omit<EmployeeSalaryEntryDb, 'createdAt' | 'upd
 
 // EmployeeSalaryEntry with enhanced relations (camelCase)
 export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
-  userSync?: { userId: string; fullName: string | null };
+  userSync?: { userId: string; fullName: string | null; shortcut: string | null };
   productionStepDetail?: { id: number };
   plan?: { id: number; planName: string };
+  product?: { id: number; productCode: string; productName: string }; // 🆕 Add product relation
 };
 
 // Form data type cho React Hook Form (camelCase)
 export type EmployeeSalaryEntryFormData = {
   userId: string;
-  productionStepDetailId: number;
+  productionStepDetailId?: number;
   planId: number;
+  productId: number; // 🆕 Add product field
   workDate: Date | string;
   entryDate?: Date | string;
   actualQuantity?: number;
@@ -48,8 +50,9 @@ export type EmployeeSalaryEntryFormData = {
 export type CreateEmployeeSalaryEntryInput = {
   readonly ownerId: string;
   userId: string;
-  productionStepDetailId: number;
+  productionStepDetailId?: number;
   planId: number;
+  productId: number; // 🆕 Add product field
   workDate: Date | string;
   entryDate?: Date | string;
   actualQuantity?: number;
@@ -72,8 +75,9 @@ export type UpdateEmployeeSalaryEntryInput = Partial<CreateEmployeeSalaryEntryIn
 // Relation options (camelCase)
 export type EmployeeSalaryEntryRelationOptions = {
   readonly userSyncs: { userId: string; fullName: string | null; shortcut: string | null }[];
-  readonly productionStepDetails: { id: number }[];
+  readonly productionStepDetails: { id: number; stepName?: string }[]; // 🆕 Add stepName
   readonly plans: { id: number; planName: string }[];
+  readonly products: { id: number; productCode: string; productName: string }[]; // 🆕 Add products
 };
 
 // API Response types (camelCase)
@@ -127,6 +131,7 @@ export type EmployeeSalaryEntryListParams = {
   readonly userId?: string;
   readonly productionStepDetailId?: number;
   readonly planId?: number;
+  readonly productId?: number; // 🆕 Add product filter
 };
 
 export type EmployeeSalaryEntryListParamsWithOwner = EmployeeSalaryEntryListParams & {
@@ -208,6 +213,7 @@ export type EmployeeSalaryEntryFilters = {
     userId?: string;
     productionStepDetailId?: number;
     planId?: number;
+    productId?: number; // 🆕 Add product filter
   };
 };
 

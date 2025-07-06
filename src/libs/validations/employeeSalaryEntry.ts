@@ -11,6 +11,7 @@ export const employeeSalaryEntryFormObject = z.object({
   userId: z.string().optional(),
   productionStepDetailId: z.number().int().positive().optional(),
   planId: z.number().int().positive().optional(),
+  productId: z.number().int().positive().optional(), // 🆕 Add productId validation
   workDate: z.union([z.string(), z.date()]).refine((date) => {
     const d = new Date(date);
     const now = new Date();
@@ -86,6 +87,7 @@ export const createEmployeeSalaryEntrySchema = z.object({
   startTime: z.union([z.string(), z.date()]).optional(),
   endTime: z.union([z.string(), z.date()]).optional(),
   workDurationMinutes: z.number().int().min(0).max(1440, 'Work duration cannot exceed 24 hours').optional(),
+  productId: z.number().int().positive('Product is required'),
 });
 
 // Update employeeSalaryEntry schema (all fields optional)
@@ -161,6 +163,7 @@ export const employeeSalaryEntryListParamsSchema = z.object({
   userId: z.string().optional(),
   productionStepDetailId: z.number().int().positive().optional(),
   planId: z.number().int().positive().optional(),
+  productId: z.number().int().positive().optional(), // 🆕 Add productId validation
 });
 
 // 🆕 V4: Enhanced import row validation for Excel import with relations
@@ -168,6 +171,7 @@ export const importEmployeeSalaryEntryRowSchema = z.object({
   userId: z.string().min(1, 'Employee is required'),
   productionStepDetailId: z.number().int().positive('Production Step Detail is required'),
   planId: z.number().int().positive('Plan is required'),
+  productId: z.number().int().positive('Product is required'), // 🆕 Add productId validation
   workDate: z.union([z.string(), z.date()]).refine((date) => {
     const d = new Date(date);
     const now = new Date();

@@ -23,6 +23,8 @@ import { planSchema } from './plan';
 import { productionStepDetailSchema } from './productionStepDetail';
 // Import related schemas
 import { userSyncSchema } from './userSync';
+// 🆕 Import productSchema for new foreign key
+import { productSchema } from '../Schema';
 
 export const employeeSalaryEntrySchema = pgTable('employee_salary_entry', {
   id: serial('id').primaryKey(),
@@ -49,6 +51,8 @@ export const employeeSalaryEntrySchema = pgTable('employee_salary_entry', {
   user_id: text('user_id').notNull().references(() => userSyncSchema.userId, { onDelete: 'cascade' }),
   production_step_detail_id: integer('production_step_detail_id').notNull().references(() => productionStepDetailSchema.id, { onDelete: 'cascade' }),
   plan_id: integer('plan_id').notNull().references(() => planSchema.id, { onDelete: 'cascade' }),
+  // 🆕 Add product foreign key
+  product_id: integer('product_id').notNull().references(() => productSchema.id, { onDelete: 'cascade' }),
 
   // Standard timestamps with enhanced configuration
   created_at: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
@@ -58,17 +62,19 @@ export const employeeSalaryEntrySchema = pgTable('employee_salary_entry', {
     .notNull(),
 }, (table) => {
   return {
-    // 🆕 V4: Complex unique indexes
-    employeeWorkUniqueIdx: uniqueIndex('employeeWorkUniqueIdx').on(table.user_id, table.production_step_detail_id, table.plan_id, table.work_date, table.owner_id),
+    // 🆕 V4: Complex unique indexes - updated to include product_id
+    employeeWorkUniqueIdx: uniqueIndex('employeeWorkUniqueIdx').on(table.user_id, table.production_step_detail_id, table.plan_id, table.product_id, table.work_date, table.owner_id),
 
     // 🆕 V4: Composite indexes for performance
     employeeIdIdx: index('employeeIdIdx').on(table.user_id),
     planIdIdx: index('planIdIdx').on(table.plan_id),
+    productIdIdx: index('productIdIdx').on(table.product_id), // 🆕 Add product index
     workDateIdx: index('workDateIdx').on(table.work_date),
     statusIdx: index('statusIdx').on(table.status),
     entryDateIdx: index('entryDateIdx').on(table.entry_date),
     userPlanIdx: index('userPlanIdx').on(table.user_id, table.plan_id),
     planDateIdx: index('planDateIdx').on(table.plan_id, table.work_date),
+    productDateIdx: index('productDateIdx').on(table.product_id, table.work_date), // 🆕 Add product-date index
 
     // 🆕 V4: Check constraints for data integrity
     actualQuantityCheck: check('actualQuantityCheck', sql`actual_quantity >= 0`),
@@ -96,5 +102,11 @@ export const employeeSalaryEntryRelations = relations(employeeSalaryEntrySchema,
     fields: [employeeSalaryEntrySchema.plan_id],
     references: [planSchema.id],
     relationName: 'employeeSalaryEntry_plan',
+  }),
+  // 🆕 Add product relation
+  product: one(productSchema, {
+    fields: [employeeSalaryEntrySchema.product_id],
+    references: [productSchema.id],
+    relationName: 'employeeSalaryEntry_product',
   }),
 }));

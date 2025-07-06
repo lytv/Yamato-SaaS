@@ -9,7 +9,8 @@ import { NextResponse } from 'next/server';
 
 import {
   deleteEmployeeSalaryEntry,
-  getEmployeeSalaryEntryById,
+  getEmployeeSalaryEntryByIdRaw,
+  getEmployeeSalaryEntryByIdWithRelations,
   updateEmployeeSalaryEntry,
 } from '@/libs/queries/employeeSalaryEntry';
 import {
@@ -32,7 +33,12 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const includeRelations = searchParams.get('includeRelations') === 'true';
 
-    const employeeSalaryEntry = await getEmployeeSalaryEntryById(id, userId, includeRelations);
+    let employeeSalaryEntry;
+    if (includeRelations) {
+      employeeSalaryEntry = await getEmployeeSalaryEntryByIdWithRelations(id, userId);
+    } else {
+      employeeSalaryEntry = await getEmployeeSalaryEntryByIdRaw(id, userId);
+    }
 
     if (!employeeSalaryEntry) {
       return NextResponse.json(

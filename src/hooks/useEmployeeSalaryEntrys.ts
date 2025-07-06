@@ -43,7 +43,8 @@ export function useEmployeeSalaryEntrys({
   limit = DEFAULT_PARAMS.limit,
   ownerId,
   showAll = DEFAULT_PARAMS.showAll,
-}: EmployeeSalaryEntryListParamsWithOwner): EmployeeSalaryEntrysReturn {
+  includeRelations = true, // 🆕 Add includeRelations parameter with default true
+}: EmployeeSalaryEntryListParamsWithOwner & { includeRelations?: boolean }): EmployeeSalaryEntrysReturn {
   const [state, setState] = useState<EmployeeSalaryEntrysState>({
     employeeSalaryEntrys: [],
     pagination: null,
@@ -68,6 +69,7 @@ export function useEmployeeSalaryEntrys({
         page,
         limit,
         showAll,
+        includeRelations, // 🆕 Add includeRelations parameter
         ownerId: ownerId || '', // luôn truyền ownerId
       });
 
@@ -96,7 +98,7 @@ export function useEmployeeSalaryEntrys({
         pagination: null,
       }));
     }
-  }, [search, sortBy, sortOrder, page, limit, showAll, ownerId]);
+  }, [search, sortBy, sortOrder, page, limit, showAll, includeRelations, ownerId]); // 🆕 Add includeRelations to dependency array
 
   const refresh = useCallback(() => {
     fetchData();

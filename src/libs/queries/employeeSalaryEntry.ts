@@ -7,7 +7,7 @@
 import { and, asc, between, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
-import { employeeSalaryEntrySchema, planSchema, productionStepDetailSchema, userSyncSchema } from '@/models/Schema';
+import { employeeSalaryEntrySchema, planSchema, productionStepDetailSchema, productionStepSchema, productSchema, userSyncSchema } from '@/models/Schema';
 import type {
   CreateEmployeeSalaryEntryInput,
   EmployeeSalaryEntryBatchRequest,
@@ -15,9 +15,40 @@ import type {
   EmployeeSalaryEntryDb,
   EmployeeSalaryEntryRelationOptions,
   EmployeeSalaryEntryStats,
-  EmployeeSalaryEntryWithRelations,
   UpdateEmployeeSalaryEntryInput,
 } from '@/types/employeeSalaryEntry';
+
+export type EmployeeSalaryEntry = {
+  id: number;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  workDate: string | Date | null;
+  entryDate?: string | Date | null;
+  actualQuantity?: number | null;
+  plannedQuantity?: number | null;
+  limitQuantity?: number | null;
+  previousEnteredQuantity?: number | null;
+  unitPrice?: number | null;
+  totalAmount?: number | null;
+  salaryNote?: string | null;
+  status?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | Date | null;
+  startTime?: string | Date | null;
+  endTime?: string | Date | null;
+  workDurationMinutes?: number | null;
+  userId?: string | null;
+  productionStepDetailId?: number | null;
+  planId?: number | null;
+  productId?: number | null;
+};
+
+export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
+  userSync?: { userId: string; fullName: string | null; shortcut: string | null };
+  productionStepDetail?: { id: number };
+  plan?: { id: number; planName: string };
+  product?: { id: number; productCode: string; productName: string };
+};
 
 /**
  * 🆕 V4: Create a new employeeSalaryEntry with enhanced features
@@ -61,6 +92,18 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
       throw new Error('Plan not found');
     }
   }
+  // 🆕 Validate product exists
+  if (data.productId) {
+    const productExists = await db
+      .select({ id: productSchema.id })
+      .from(productSchema)
+      .where(eq(productSchema.id, data.productId))
+      .limit(1);
+
+    if (!productExists.length) {
+      throw new Error('Product not found');
+    }
+  }
 
   //  V4: Business logic - Auto-calculate total amount
   if (data.actualQuantity && data.unitPrice && !data.totalAmount) {
@@ -89,6 +132,7 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
       user_id: data.userId,
       production_step_detail_id: data.productionStepDetailId,
       plan_id: data.planId,
+      product_id: data.productId, // 🆕 Add product_id
     } as any)
     .returning();
 
@@ -118,8 +162,9 @@ export async function getEmployeeSalaryEntries(params: {
   user_id?: string;
   production_step_detail_id?: number;
   plan_id?: number;
+  product_id?: number; // 🆕 Add product_id parameter
   owner_id?: string;
-}): Promise<EmployeeSalaryEntryDb | EmployeeSalaryEntryWithRelations[]> {
+}): Promise<EmployeeSalaryEntryWithRelations[]> {
   const {
     page = 1,
     limit = 10,
@@ -133,6 +178,7 @@ export async function getEmployeeSalaryEntries(params: {
     user_id,
     production_step_detail_id,
     plan_id,
+    product_id, // 🆕 Add product_id
     owner_id,
   } = params;
 
@@ -165,6 +211,7 @@ export async function getEmployeeSalaryEntries(params: {
       user_id: employeeSalaryEntrySchema.user_id,
       production_step_detail_id: employeeSalaryEntrySchema.production_step_detail_id,
       plan_id: employeeSalaryEntrySchema.plan_id,
+      product_id: employeeSalaryEntrySchema.product_id, // 🆕 Add product_id
 
       // 🆕 V4: Related entity data with text FK support
 
@@ -173,6 +220,7 @@ export async function getEmployeeSalaryEntries(params: {
             userSync: {
               userId: userSyncSchema.userId,
               fullName: userSyncSchema.fullName,
+              shortcut: userSyncSchema.shortcut, // 🆕 Add shortcut
             },
           }
         : {}),
@@ -193,6 +241,17 @@ export async function getEmployeeSalaryEntries(params: {
             },
           }
         : {}),
+
+      // 🆕 Add product relation
+      ...(includeRelations
+        ? {
+            product: {
+              id: productSchema.id,
+              productCode: productSchema.productCode,
+              productName: productSchema.productName,
+            },
+          }
+        : {}),
     })
     .from(employeeSalaryEntrySchema)
     .leftJoin(
@@ -206,6 +265,11 @@ export async function getEmployeeSalaryEntries(params: {
     .leftJoin(
       planSchema,
       eq(employeeSalaryEntrySchema.plan_id, planSchema.id),
+    )
+    // 🆕 Add product leftJoin
+    .leftJoin(
+      productSchema,
+      eq(employeeSalaryEntrySchema.product_id, productSchema.id),
     );
 
   // Build enhanced where conditions
@@ -219,6 +283,9 @@ export async function getEmployeeSalaryEntries(params: {
     conditions.push(ilike(userSyncSchema.fullName, `%${search}%`));
     conditions.push(ilike(productionStepDetailSchema.id, `%${search}%`));
     conditions.push(ilike(planSchema.planName, `%${search}%`));
+    // 🆕 Add product search conditions
+    conditions.push(ilike(productSchema.productCode, `%${search}%`));
+    conditions.push(ilike(productSchema.productName, `%${search}%`));
   }
   if (status) {
     conditions.push(eq(employeeSalaryEntrySchema.status, status));
@@ -248,6 +315,10 @@ export async function getEmployeeSalaryEntries(params: {
   }
   if (plan_id !== undefined) {
     whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.plan_id, plan_id));
+  }
+  // 🆕 Add product_id filter
+  if (product_id !== undefined) {
+    whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.product_id, product_id));
   }
 
   // 🆕 V4: Enhanced sorting with relation support
@@ -279,31 +350,33 @@ export async function getEmployeeSalaryEntries(params: {
     .offset(offset);
 
   return results.map(r => ({
-    ...r,
+    id: r.id,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
     workDate: r.work_date,
     entryDate: r.entry_date,
-    actualQuantity: r.actual_quantity,
-    plannedQuantity: r.planned_quantity,
-    limitQuantity: r.limit_quantity,
-    previousEnteredQuantity: r.previous_entered_quantity,
-    unitPrice: r.unit_price,
-    totalAmount: r.total_amount,
+    actualQuantity: r.actual_quantity !== null && r.actual_quantity !== undefined ? Number(r.actual_quantity) : null,
+    plannedQuantity: r.planned_quantity !== null && r.planned_quantity !== undefined ? Number(r.planned_quantity) : null,
+    limitQuantity: r.limit_quantity !== null && r.limit_quantity !== undefined ? Number(r.limit_quantity) : null,
+    previousEnteredQuantity: r.previous_entered_quantity !== null && r.previous_entered_quantity !== undefined ? Number(r.previous_entered_quantity) : null,
+    unitPrice: r.unit_price !== null && r.unit_price !== undefined ? Number(r.unit_price) : null,
+    totalAmount: r.total_amount !== null && r.total_amount !== undefined ? Number(r.total_amount) : null,
     salaryNote: r.salary_note,
+    status: r.status,
     approvedBy: r.approved_by,
     approvedAt: r.approved_at,
     startTime: r.start_time,
     endTime: r.end_time,
-    workDurationMinutes: r.work_duration_minutes,
-    ownerId: r.owner_id,
+    workDurationMinutes: r.work_duration_minutes !== null && r.work_duration_minutes !== undefined ? Number(r.work_duration_minutes) : null,
     userId: r.user_id,
     productionStepDetailId: r.production_step_detail_id,
     planId: r.plan_id,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
+    productId: r.product_id,
     userSync: r.userSync
       ? {
           userId: r.userSync.userId,
           fullName: r.userSync.fullName,
+          shortcut: (r.userSync as any).shortcut ?? null,
         }
       : undefined,
     plan: r.plan
@@ -317,67 +390,78 @@ export async function getEmployeeSalaryEntries(params: {
           id: r.productionStepDetail.id,
         }
       : undefined,
+    product: r.product
+      ? {
+          id: r.product.id,
+          productCode: r.product.productCode,
+          productName: r.product.productName,
+        }
+      : undefined,
   }));
 }
 
 /**
- * 🆕 V4: Get employeeSalaryEntry by ID with enhanced features
+ * 🆕 V4: Get employeeSalaryEntry by id (snake_case, không relations)
  */
-export async function getEmployeeSalaryEntryById(id: number, owner_id: string, includeRelations = false): Promise<EmployeeSalaryEntryDb | EmployeeSalaryEntryWithRelations | undefined> {
+export async function getEmployeeSalaryEntryByIdRaw(id: number, owner_id: string): Promise<EmployeeSalaryEntryDb | undefined> {
+  const query = db
+    .select()
+    .from(employeeSalaryEntrySchema)
+    .where(and(
+      eq(employeeSalaryEntrySchema.id, id),
+      eq(employeeSalaryEntrySchema.owner_id, owner_id),
+    ))
+    .limit(1);
+  const [result] = await query;
+  return result;
+}
+
+/**
+ * 🆕 V4: Get employeeSalaryEntry by id with relations (camelCase)
+ */
+export async function getEmployeeSalaryEntryByIdWithRelations(id: number, owner_id: string): Promise<EmployeeSalaryEntryWithRelations | undefined> {
   const query = db
     .select({
       id: employeeSalaryEntrySchema.id,
-      work_date: employeeSalaryEntrySchema.work_date,
-      entry_date: employeeSalaryEntrySchema.entry_date,
-      actual_quantity: employeeSalaryEntrySchema.actual_quantity,
-      planned_quantity: employeeSalaryEntrySchema.planned_quantity,
-      limit_quantity: employeeSalaryEntrySchema.limit_quantity,
-      previous_entered_quantity: employeeSalaryEntrySchema.previous_entered_quantity,
-      unit_price: employeeSalaryEntrySchema.unit_price,
-      total_amount: employeeSalaryEntrySchema.total_amount,
-      salary_note: employeeSalaryEntrySchema.salary_note,
+      workDate: employeeSalaryEntrySchema.work_date,
+      entryDate: employeeSalaryEntrySchema.entry_date,
+      actualQuantity: employeeSalaryEntrySchema.actual_quantity,
+      plannedQuantity: employeeSalaryEntrySchema.planned_quantity,
+      limitQuantity: employeeSalaryEntrySchema.limit_quantity,
+      previousEnteredQuantity: employeeSalaryEntrySchema.previous_entered_quantity,
+      unitPrice: employeeSalaryEntrySchema.unit_price,
+      totalAmount: employeeSalaryEntrySchema.total_amount,
+      salaryNote: employeeSalaryEntrySchema.salary_note,
       status: employeeSalaryEntrySchema.status,
-      approved_by: employeeSalaryEntrySchema.approved_by,
-      approved_at: employeeSalaryEntrySchema.approved_at,
-      start_time: employeeSalaryEntrySchema.start_time,
-      end_time: employeeSalaryEntrySchema.end_time,
-      work_duration_minutes: employeeSalaryEntrySchema.work_duration_minutes,
-      owner_id: employeeSalaryEntrySchema.owner_id,
-      created_at: employeeSalaryEntrySchema.created_at,
-      updated_at: employeeSalaryEntrySchema.updated_at,
-
-      // Foreign key fields
-      user_id: employeeSalaryEntrySchema.user_id,
-      production_step_detail_id: employeeSalaryEntrySchema.production_step_detail_id,
-      plan_id: employeeSalaryEntrySchema.plan_id,
-
-      // Related entity data
-
-      ...(includeRelations
-        ? {
-            userSync: {
-              userId: userSyncSchema.userId,
-              fullName: userSyncSchema.fullName,
-            },
-          }
-        : {}),
-
-      ...(includeRelations
-        ? {
-            productionStepDetail: {
-              id: productionStepDetailSchema.id,
-            },
-          }
-        : {}),
-
-      ...(includeRelations
-        ? {
-            plan: {
-              id: planSchema.id,
-              planName: planSchema.planName,
-            },
-          }
-        : {}),
+      approvedBy: employeeSalaryEntrySchema.approved_by,
+      approvedAt: employeeSalaryEntrySchema.approved_at,
+      startTime: employeeSalaryEntrySchema.start_time,
+      endTime: employeeSalaryEntrySchema.end_time,
+      workDurationMinutes: employeeSalaryEntrySchema.work_duration_minutes,
+      createdAt: employeeSalaryEntrySchema.created_at,
+      updatedAt: employeeSalaryEntrySchema.updated_at,
+      userId: employeeSalaryEntrySchema.user_id,
+      productionStepDetailId: employeeSalaryEntrySchema.production_step_detail_id,
+      planId: employeeSalaryEntrySchema.plan_id,
+      productId: employeeSalaryEntrySchema.product_id,
+      // Relations
+      userSync: {
+        userId: userSyncSchema.userId,
+        fullName: userSyncSchema.fullName,
+        shortcut: (userSyncSchema as any).shortcut ?? null,
+      },
+      productionStepDetail: {
+        id: productionStepDetailSchema.id,
+      },
+      plan: {
+        id: planSchema.id,
+        planName: planSchema.planName,
+      },
+      product: {
+        id: productSchema.id,
+        productCode: productSchema.productCode,
+        productName: productSchema.productName,
+      },
     })
     .from(employeeSalaryEntrySchema)
     .leftJoin(
@@ -391,20 +475,48 @@ export async function getEmployeeSalaryEntryById(id: number, owner_id: string, i
     .leftJoin(
       planSchema,
       eq(employeeSalaryEntrySchema.plan_id, planSchema.id),
-    );
-
-  const [result] = await query
+    )
+    .leftJoin(
+      productSchema,
+      eq(employeeSalaryEntrySchema.product_id, productSchema.id),
+    )
     .where(and(
       eq(employeeSalaryEntrySchema.id, id),
       eq(employeeSalaryEntrySchema.owner_id, owner_id),
     ))
     .limit(1);
-
+  const [result] = await query;
   if (!result) {
     return undefined;
   }
-
-  return result;
+  return {
+    id: result.id,
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    workDate: result.workDate,
+    entryDate: result.entryDate,
+    actualQuantity: result.actualQuantity !== null && result.actualQuantity !== undefined ? Number(result.actualQuantity) : null,
+    plannedQuantity: result.plannedQuantity !== null && result.plannedQuantity !== undefined ? Number(result.plannedQuantity) : null,
+    limitQuantity: result.limitQuantity !== null && result.limitQuantity !== undefined ? Number(result.limitQuantity) : null,
+    previousEnteredQuantity: result.previousEnteredQuantity !== null && result.previousEnteredQuantity !== undefined ? Number(result.previousEnteredQuantity) : null,
+    unitPrice: result.unitPrice !== null && result.unitPrice !== undefined ? Number(result.unitPrice) : null,
+    totalAmount: result.totalAmount !== null && result.totalAmount !== undefined ? Number(result.totalAmount) : null,
+    salaryNote: result.salaryNote,
+    status: result.status,
+    approvedBy: result.approvedBy,
+    approvedAt: result.approvedAt,
+    startTime: result.startTime,
+    endTime: result.endTime,
+    workDurationMinutes: result.workDurationMinutes !== null && result.workDurationMinutes !== undefined ? Number(result.workDurationMinutes) : null,
+    userId: result.userId,
+    productionStepDetailId: result.productionStepDetailId,
+    planId: result.planId,
+    productId: result.productId,
+    userSync: result.userSync && result.userSync.userId ? result.userSync : undefined,
+    productionStepDetail: result.productionStepDetail && result.productionStepDetail.id ? result.productionStepDetail : undefined,
+    plan: result.plan && result.plan.id ? result.plan : undefined,
+    product: result.product && result.product.id ? result.product : undefined,
+  };
 }
 
 /**
@@ -416,16 +528,16 @@ export async function updateEmployeeSalaryEntry(
   data: UpdateEmployeeSalaryEntryInput,
 ): Promise<EmployeeSalaryEntryDb> {
   // Get existing entity for conditional updates
-  const existingEmployeeSalaryEntry = await getEmployeeSalaryEntryById(id, owner_id);
+  const existingEmployeeSalaryEntry = await getEmployeeSalaryEntryByIdWithRelations(id, owner_id);
   if (!existingEmployeeSalaryEntry) {
     throw new Error('EmployeeSalaryEntry not found or access denied');
   }
 
   // 🆕 V4: Auto-calculate total amount if needed
   if (data.actualQuantity !== undefined || data.unitPrice !== undefined) {
-    const actual_quantity = data.actualQuantity ?? existingEmployeeSalaryEntry.actual_quantity ?? 0;
-    const unit_price = data.unitPrice ?? existingEmployeeSalaryEntry.unit_price ?? 0;
-    data.totalAmount = Number(actual_quantity) * Number(unit_price);
+    const actualQuantity = data.actualQuantity ?? existingEmployeeSalaryEntry.actualQuantity ?? 0;
+    const unitPrice = data.unitPrice ?? existingEmployeeSalaryEntry.unitPrice ?? 0;
+    data.totalAmount = Number(actualQuantity) * Number(unitPrice);
   }
 
   // Build update data with proper type handling
@@ -434,62 +546,62 @@ export async function updateEmployeeSalaryEntry(
   if (data.userId !== undefined) {
     updateData.user_id = data.userId;
   } else {
-    updateData.user_id = existingEmployeeSalaryEntry.user_id;
+    updateData.user_id = existingEmployeeSalaryEntry.userId;
   }
   if (data.productionStepDetailId !== undefined) {
     updateData.production_step_detail_id = data.productionStepDetailId;
   } else {
-    updateData.production_step_detail_id = existingEmployeeSalaryEntry.production_step_detail_id;
+    updateData.production_step_detail_id = existingEmployeeSalaryEntry.productionStepDetailId;
   }
   if (data.planId !== undefined) {
     updateData.plan_id = data.planId;
   } else {
-    updateData.plan_id = existingEmployeeSalaryEntry.plan_id;
+    updateData.plan_id = existingEmployeeSalaryEntry.planId;
   }
   if (data.workDate !== undefined) {
     updateData.work_date = data.workDate ? new Date(data.workDate) : null;
   } else {
-    updateData.work_date = existingEmployeeSalaryEntry.work_date;
+    updateData.work_date = existingEmployeeSalaryEntry.workDate;
   }
   if (data.entryDate !== undefined) {
     updateData.entry_date = data.entryDate ? new Date(data.entryDate) : null;
   } else {
-    updateData.entry_date = existingEmployeeSalaryEntry.entry_date;
+    updateData.entry_date = existingEmployeeSalaryEntry.entryDate;
   }
   if (data.actualQuantity !== undefined) {
     updateData.actual_quantity = data.actualQuantity;
   } else {
-    updateData.actual_quantity = existingEmployeeSalaryEntry.actual_quantity;
+    updateData.actual_quantity = existingEmployeeSalaryEntry.actualQuantity;
   }
   if (data.plannedQuantity !== undefined) {
     updateData.planned_quantity = data.plannedQuantity;
   } else {
-    updateData.planned_quantity = existingEmployeeSalaryEntry.planned_quantity;
+    updateData.planned_quantity = existingEmployeeSalaryEntry.plannedQuantity;
   }
   if (data.limitQuantity !== undefined) {
     updateData.limit_quantity = data.limitQuantity;
   } else {
-    updateData.limit_quantity = existingEmployeeSalaryEntry.limit_quantity;
+    updateData.limit_quantity = existingEmployeeSalaryEntry.limitQuantity;
   }
   if (data.previousEnteredQuantity !== undefined) {
     updateData.previous_entered_quantity = data.previousEnteredQuantity;
   } else {
-    updateData.previous_entered_quantity = existingEmployeeSalaryEntry.previous_entered_quantity;
+    updateData.previous_entered_quantity = existingEmployeeSalaryEntry.previousEnteredQuantity;
   }
   if (data.unitPrice !== undefined) {
     updateData.unit_price = data.unitPrice;
   } else {
-    updateData.unit_price = existingEmployeeSalaryEntry.unit_price;
+    updateData.unit_price = existingEmployeeSalaryEntry.unitPrice;
   }
   if (data.totalAmount !== undefined) {
     updateData.total_amount = data.totalAmount;
   } else {
-    updateData.total_amount = existingEmployeeSalaryEntry.total_amount;
+    updateData.total_amount = existingEmployeeSalaryEntry.totalAmount;
   }
   if (data.salaryNote !== undefined) {
     updateData.salary_note = data.salaryNote;
   } else {
-    updateData.salary_note = existingEmployeeSalaryEntry.salary_note;
+    updateData.salary_note = existingEmployeeSalaryEntry.salaryNote;
   }
   if (data.status !== undefined) {
     updateData.status = data.status;
@@ -499,27 +611,27 @@ export async function updateEmployeeSalaryEntry(
   if (data.approvedBy !== undefined) {
     updateData.approved_by = data.approvedBy;
   } else {
-    updateData.approved_by = existingEmployeeSalaryEntry.approved_by;
+    updateData.approved_by = existingEmployeeSalaryEntry.approvedBy;
   }
   if (data.approvedAt !== undefined) {
     updateData.approved_at = data.approvedAt ? new Date(data.approvedAt) : null;
   } else {
-    updateData.approved_at = existingEmployeeSalaryEntry.approved_at;
+    updateData.approved_at = existingEmployeeSalaryEntry.approvedAt;
   }
   if (data.startTime !== undefined) {
     updateData.start_time = data.startTime ? new Date(data.startTime) : null;
   } else {
-    updateData.start_time = existingEmployeeSalaryEntry.start_time;
+    updateData.start_time = existingEmployeeSalaryEntry.startTime;
   }
   if (data.endTime !== undefined) {
     updateData.end_time = data.endTime ? new Date(data.endTime) : null;
   } else {
-    updateData.end_time = existingEmployeeSalaryEntry.end_time;
+    updateData.end_time = existingEmployeeSalaryEntry.endTime;
   }
   if (data.workDurationMinutes !== undefined) {
     updateData.work_duration_minutes = data.workDurationMinutes;
   } else {
-    updateData.work_duration_minutes = existingEmployeeSalaryEntry.work_duration_minutes;
+    updateData.work_duration_minutes = existingEmployeeSalaryEntry.workDurationMinutes;
   }
 
   const [updatedEmployeeSalaryEntry] = await db
@@ -550,10 +662,36 @@ export async function deleteEmployeeSalaryEntry(id: number, owner_id: string): P
 }
 
 /**
+ * 🆕 V4: Get production step details by product with step names
+ */
+export async function getProductionStepDetailsByProduct(productId: number): Promise<{
+  id: number;
+  stepName: string;
+}[]> {
+  const results = await db
+    .select({
+      id: productionStepDetailSchema.id,
+      stepName: productionStepSchema.stepName,
+    })
+    .from(productionStepDetailSchema)
+    .leftJoin(
+      productionStepSchema,
+      eq(productionStepDetailSchema.productionStepId, productionStepSchema.id),
+    )
+    .where(eq(productionStepDetailSchema.productId, productId))
+    .orderBy(asc(productionStepDetailSchema.id));
+
+  return results.map(r => ({
+    id: r.id,
+    stepName: r.stepName || `Step ${r.id}`, // Fallback if stepName is null
+  }));
+}
+
+/**
  * 🆕 V4: Get relation options with enhanced performance
  */
 export async function getEmployeeSalaryEntryRelationOptions(): Promise<EmployeeSalaryEntryRelationOptions> {
-  const [userSyncOptions, productionStepDetailOptions, planOptions] = await Promise.all([
+  const [userSyncOptions, productionStepDetailOptions, planOptions, productOptions] = await Promise.all([
 
     db.select({
       userId: userSyncSchema.userId,
@@ -569,12 +707,25 @@ export async function getEmployeeSalaryEntryRelationOptions(): Promise<EmployeeS
       id: planSchema.id,
       planName: planSchema.planName,
     }).from(planSchema).orderBy(asc(planSchema.planName)),
+
+    // 🆕 Add product options query
+    db.select({
+      id: productSchema.id,
+      productCode: productSchema.productCode,
+      productName: productSchema.productName,
+    }).from(productSchema).orderBy(asc(productSchema.productName)),
   ]);
+
+  console.log('userSyncOptions:', userSyncOptions);
+  console.log('productionStepDetailOptions:', productionStepDetailOptions);
+  console.log('planOptions:', planOptions);
+  console.log('productOptions:', productOptions);
 
   return {
     userSyncs: userSyncOptions,
     productionStepDetails: productionStepDetailOptions,
     plans: planOptions,
+    products: productOptions, // 🆕 Add products
   };
 }
 

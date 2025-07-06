@@ -8,11 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -50,12 +50,27 @@ export function EmployeeSalaryEntryForm({
     userSyncs: [],
     productionStepDetails: [],
     plans: [],
+    products: [], // 🆕 Add products array
   });
-  
+
+  // 🆕 State for filtered production step details based on selected product
+  const [filteredProductionStepDetails, setFilteredProductionStepDetails] = useState<{
+    id: number;
+    stepName?: string;
+  }[]>([]);
+
   // 🆕 State for shortcut functionality
   const [shortcutValue, setShortcutValue] = useState('');
   const [shortcutMessage, setShortcutMessage] = useState('');
   const [shortcutError, setShortcutError] = useState('');
+
+  // 🆕 State for product code functionality
+  const [productCodeValue, setProductCodeValue] = useState('');
+  const [productCodeMessage, setProductCodeMessage] = useState('');
+  const [productCodeError, setProductCodeError] = useState('');
+
+  // 🆕 State for form error
+  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
@@ -80,6 +95,7 @@ export function EmployeeSalaryEntryForm({
       userId: employeeSalaryEntry?.user_id ?? undefined,
       productionStepDetailId: employeeSalaryEntry?.production_step_detail_id ?? undefined,
       planId: employeeSalaryEntry?.plan_id ?? undefined,
+      productId: employeeSalaryEntry?.product_id ?? undefined, // 🆕 Add productId default
     },
   });
 
@@ -107,14 +123,14 @@ export function EmployeeSalaryEntryForm({
     setShortcutValue(shortcut);
     setShortcutError('');
     setShortcutMessage('');
-    
+
     if (!shortcut.trim()) {
       return;
     }
 
     // Find employee by shortcut
     const matchedEmployee = relationOptions.userSyncs.find(
-      user => user.shortcut && user.shortcut.toLowerCase() === shortcut.toLowerCase().trim()
+      user => user.shortcut && user.shortcut.toLowerCase() === shortcut.toLowerCase().trim(),
     );
 
     if (matchedEmployee) {
@@ -126,9 +142,36 @@ export function EmployeeSalaryEntryForm({
     }
   }, [relationOptions.userSyncs, form]);
 
+  // 🆕 Function to handle product code search
+  const handleProductCodeSearch = useCallback((productCode: string) => {
+    setProductCodeValue(productCode);
+    setProductCodeError('');
+    setProductCodeMessage('');
+
+    if (!productCode.trim()) {
+      return;
+    }
+
+    // Find product by product code
+    const matchedProduct = relationOptions.products.find(
+      product => product.productCode && product.productCode.toLowerCase() === productCode.toLowerCase().trim(),
+    );
+
+    if (matchedProduct) {
+      // Auto-populate product selection
+      form.setValue('productId', matchedProduct.id);
+      setProductCodeMessage(`✅ Found: ${matchedProduct.productName}`);
+    } else {
+      setProductCodeError(`❌ No product found with code: "${productCode}"`);
+    }
+  }, [relationOptions.products, form]);
+
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' });
+  
+  // 🆕 Watch for productId changes to load filtered production step details
+  const productId = useWatch({ control: form.control, name: 'productId' });
 
   useEffect(() => {
     if (actualQuantity && unitPrice) {
@@ -136,6 +179,35 @@ export function EmployeeSalaryEntryForm({
       form.setValue('totalAmount', calculatedTotal);
     }
   }, [actualQuantity, unitPrice, form]);
+
+  // 🆕 Load filtered production step details when product changes
+  useEffect(() => {
+    const loadProductionStepDetails = async () => {
+      if (productId) {
+        try {
+          const response = await fetch(`/api/employeeSalaryEntries/relations/production-step-details?productId=${productId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setFilteredProductionStepDetails(data.data);
+            // Reset productionStepDetailId when product changes
+            form.setValue('productionStepDetailId', undefined);
+          } else {
+            console.error('Failed to load production step details:', response.statusText);
+            setFilteredProductionStepDetails([]);
+          }
+        } catch (error) {
+          console.error('Error loading production step details:', error);
+          setFilteredProductionStepDetails([]);
+        }
+      } else {
+        // Clear production step details if no product selected
+        setFilteredProductionStepDetails([]);
+        form.setValue('productionStepDetailId', undefined);
+      }
+    };
+
+    loadProductionStepDetails();
+  }, [productId, form]);
 
   // 🆕 V4: Auto-calculate work duration from start/end times
   const startTime = useWatch({ control: form.control, name: 'startTime' });
@@ -158,15 +230,19 @@ export function EmployeeSalaryEntryForm({
     try {
       // Check for required fields before submission
       if (!data.userId) {
-        alert('Please select an Employee');
+        setFormError('Please select an Employee');
         return;
       }
       if (!data.productionStepDetailId) {
-        alert('Please select a Production Step Detail');
+        setFormError('Please select a Production Step Detail');
         return;
       }
       if (!data.planId) {
-        alert('Please select a Plan');
+        setFormError('Please select a Plan');
+        return;
+      }
+      if (!data.productId) {
+        setFormError('Please select a Product');
         return;
       }
 
@@ -175,43 +251,50 @@ export function EmployeeSalaryEntryForm({
         data.status = 'draft';
       }
 
-      console.log('Submitting data:', data); // Debug log
+      // Xóa lỗi trước khi submit
+      setFormError(null);
       await onSubmit(data);
       if (onSuccess) {
         onSuccess(employeeSalaryEntry!);
       }
     } catch (error) {
-      console.error('Form submission error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to save';
-      alert(`Error: ${errorMessage}`);
+      setFormError(errorMessage);
     }
   }, [onSubmit, onSuccess, employeeSalaryEntry]);
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {formError && (
+          <div className="mb-4 rounded border border-red-300 bg-red-100 px-4 py-2 text-red-700">
+            {formError}
+          </div>
+        )}
         <div className="flex flex-col gap-6">
 
+          {/* Employee Section */}
           <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-employee, #e0f2fe)' }}>
             {/* 🆕 Shortcut Input Field */}
             <div className="w-1/5 min-w-[180px]">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Employee Shortcut</label>
+                <label className="text-sm font-medium" htmlFor="employee-shortcut">Employee Shortcut</label>
                 <Input
+                  id="employee-shortcut"
                   placeholder="Enter shortcut..."
                   value={shortcutValue}
-                  onChange={(e) => handleShortcutSearch(e.target.value)}
+                  onChange={e => handleShortcutSearch(e.target.value)}
                   className="text-sm"
                 />
                 {shortcutMessage && (
-                  <p className="text-xs text-green-600 font-medium">{shortcutMessage}</p>
+                  <p className="text-xs font-medium text-green-600">{shortcutMessage}</p>
                 )}
                 {shortcutError && (
-                  <p className="text-xs text-red-600 font-medium">{shortcutError}</p>
+                  <p className="text-xs font-medium text-red-600">{shortcutError}</p>
                 )}
               </div>
             </div>
-            
+
             <div className="w-1/4 min-w-[220px]">
               <FormField
                 control={form.control}
@@ -236,7 +319,9 @@ export function EmployeeSalaryEntryForm({
                       <SelectContent>
                         {relationOptions.userSyncs?.map(option => (
                           <SelectItem key={option.userId} value={option.userId.toString()}>
-                            {option.fullName} {option.shortcut ? `(${option.shortcut})` : ''}
+                            {option.fullName}
+                            {' '}
+                            {option.shortcut ? `(${option.shortcut})` : ''}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -248,11 +333,85 @@ export function EmployeeSalaryEntryForm({
             </div>
             <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
               {/* Hiển thị tên nhân viên đã chọn, nổi bật, lớn hơn, căn phải */}
-              <div className="flex-1 flex items-center justify-end">
+              <div className="flex flex-1 items-center justify-end">
                 {(() => {
                   const selected = relationOptions.userSyncs.find(u => u.userId.toString() === form.watch('userId'));
                   if (selected && selected.fullName) {
                     return <span className="text-2xl font-semibold text-gray-900">{selected.fullName}</span>;
+                  }
+                  return null;
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* Product Section - moved up */}
+          <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-product, #f0fdf4)' }}>
+            {/* 🆕 Product Code Input Field */}
+            <div className="w-1/5 min-w-[180px]">
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="product-code">Product Code</label>
+                <Input
+                  id="product-code"
+                  placeholder="Enter product code..."
+                  value={productCodeValue}
+                  onChange={e => handleProductCodeSearch(e.target.value)}
+                  className="text-sm"
+                />
+                {productCodeMessage && (
+                  <p className="text-xs font-medium text-green-600">{productCodeMessage}</p>
+                )}
+                {productCodeError && (
+                  <p className="text-xs font-medium text-red-600">{productCodeError}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="w-1/4 min-w-[220px]">
+              <FormField
+                control={form.control}
+                name="productId"
+                render={({ field: formField }) => (
+                  <FormItem>
+                    <FormLabel>Product</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        formField.onChange(Number(value));
+                        // Clear product code messages when manually selecting
+                        setProductCodeMessage('');
+                        setProductCodeError('');
+                      }}
+                      value={formField.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Product" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {relationOptions.products?.map(option => (
+                          <SelectItem key={option.id} value={option.id.toString()}>
+                            {option.productName}
+                            {' '}
+                            (
+                            {option.productCode}
+                            )
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
+              {/* Hiển thị tên product đã chọn, nổi bật, lớn hơn, căn phải */}
+              <div className="flex flex-1 items-center justify-end">
+                {(() => {
+                  const selected = relationOptions.products.find(p => p.id === form.watch('productId'));
+                  if (selected && selected.productName) {
+                    return <span className="text-2xl font-semibold text-gray-900">{selected.productName}</span>;
                   }
                   return null;
                 })()}
@@ -273,16 +432,23 @@ export function EmployeeSalaryEntryForm({
                         formField.onChange(Number(value));
                       }}
                       value={formField.value?.toString()}
+                      disabled={!productId} // 🆕 Disable if no product selected
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Production Step Detail" />
+                          <SelectValue placeholder={
+                            !productId 
+                              ? "Select Product first" 
+                              : filteredProductionStepDetails.length === 0 
+                                ? "No steps available" 
+                                : "Select Production Step Detail"
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {relationOptions.productionStepDetails?.map(option => (
+                        {filteredProductionStepDetails.map(option => (
                           <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.id}
+                            {option.stepName || `Step ${option.id}`} {/* 🆕 Show stepName */}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -293,11 +459,16 @@ export function EmployeeSalaryEntryForm({
               />
             </div>
             <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
-              {/* Hiển thị chi tiết production step detail đã chọn */}
-              {(() => {
-                const selected = relationOptions.productionStepDetails.find(p => p.id === form.watch('productionStepDetailId'));
-                return selected ? `ID: ${selected.id}` : '';
-              })()}
+              {/* 🆕 Hiển thị step name đã chọn */}
+              <div className="flex flex-1 items-center justify-end">
+                {(() => {
+                  const selected = filteredProductionStepDetails.find(p => p.id === form.watch('productionStepDetailId'));
+                  if (selected && selected.stepName) {
+                    return <span className="text-lg font-semibold text-gray-900">{selected.stepName}</span>;
+                  }
+                  return null;
+                })()}
+              </div>
             </div>
           </div>
 
@@ -600,23 +771,34 @@ export function EmployeeSalaryEntryForm({
 
         {/* 🆕 V4: Enhanced Action Buttons */}
         <div className="flex justify-end gap-4 border-t pt-4">
-          <Button type="button" variant="outline" onClick={() => {
-            form.reset({
-              workDate: new Date().toISOString().split('T')[0],
-              entryDate: new Date().toISOString().split('T')[0],
-              actualQuantity: 0,
-              salaryNote: '',
-              status: 'draft', // Always keep draft
-              approvedBy: '',
-              userId: undefined,
-              productionStepDetailId: undefined,
-              planId: undefined,
-            });
-            // 🆕 Reset shortcut state
-            setShortcutValue('');
-            setShortcutMessage('');
-            setShortcutError('');
-          }}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              form.reset({
+                workDate: new Date().toISOString().split('T')[0],
+                entryDate: new Date().toISOString().split('T')[0],
+                actualQuantity: 0,
+                salaryNote: '',
+                status: 'draft', // Always keep draft
+                approvedBy: '',
+                userId: undefined,
+                productionStepDetailId: undefined,
+                planId: undefined,
+                productId: undefined, // 🆕 Add productId reset
+              });
+              // 🆕 Reset shortcut state
+              setShortcutValue('');
+              setShortcutMessage('');
+              setShortcutError('');
+              // 🆕 Reset product code state
+              setProductCodeValue('');
+              setProductCodeMessage('');
+              setProductCodeError('');
+              // 🆕 Reset filtered production step details
+              setFilteredProductionStepDetails([]);
+            }}
+          >
             Reset
           </Button>
           <Button type="submit" disabled={isLoading}>
@@ -651,6 +833,6 @@ export function EmployeeSalaryEntryForm({
           </details>
         )}
       </form>
-    </Form>
+    </FormProvider>
   );
 }

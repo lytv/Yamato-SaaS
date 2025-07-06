@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       userId: searchParams.get('userId') || undefined,
       productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
       planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
+      productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined, // 🆕 Add productId parameter
     });
 
     const employeeSalaryEntries = await getEmployeeSalaryEntries({

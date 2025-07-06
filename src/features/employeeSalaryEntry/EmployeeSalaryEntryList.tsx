@@ -13,19 +13,19 @@ import { useEmployeeSalaryEntryExport } from '@/hooks/useEmployeeSalaryEntryExpo
 import { useEmployeeSalaryEntryFilters } from '@/hooks/useEmployeeSalaryEntryFilters';
 import { useEmployeeSalaryEntryMutations } from '@/hooks/useEmployeeSalaryEntryMutations';
 import { useEmployeeSalaryEntrys } from '@/hooks/useEmployeeSalaryEntrys';
-import type { EmployeeSalaryEntry } from '@/types/employeeSalaryEntry';
+import type { EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
 import type { ImportResult } from '@/types/import';
 
 import { EmployeeSalaryEntryImportModal } from './EmployeeSalaryEntryImportModal';
 
 type EmployeeSalaryEntryListProps = {
-  onEdit: (employeeSalaryEntry: EmployeeSalaryEntry) => void;
-  onDelete: (employeeSalaryEntry: EmployeeSalaryEntry) => void;
+  onEdit: (employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => void;
+  onDelete: (employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => void;
 };
 
 export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntryListProps): JSX.Element {
   const { userId, orgId } = useAuth();
-  const [deleteConfirmEmployeeSalaryEntry, setDeleteConfirmEmployeeSalaryEntry] = useState<EmployeeSalaryEntry | null>(null);
+  const [deleteConfirmEmployeeSalaryEntry, setDeleteConfirmEmployeeSalaryEntry] = useState<EmployeeSalaryEntryWithRelations | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -77,7 +77,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (employeeSalaryEntry: EmployeeSalaryEntry): void => {
+  const handleDeleteClick = (employeeSalaryEntry: EmployeeSalaryEntryWithRelations): void => {
     setDeleteConfirmEmployeeSalaryEntry(employeeSalaryEntry);
     setDeleteError(null);
   };
@@ -322,13 +322,16 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                EmployeeSalaryEntry Code
+                ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                EmployeeSalaryEntry Name
+                Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Category
+                Product Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                Salary Note
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Created
@@ -342,13 +345,17 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {employeeSalaryEntrys.map(employeeSalaryEntry => (
+            {(employeeSalaryEntrys as EmployeeSalaryEntryWithRelations[]).map(employeeSalaryEntry => (
               <tr key={employeeSalaryEntry.id} className="hover:bg-gray-50">
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                   {employeeSalaryEntry.id}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                   {employeeSalaryEntry.status}
+                </td>
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                  {/* 🆕 Display product name */}
+                  {employeeSalaryEntry.product?.productName || 'N/A'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {employeeSalaryEntry.salary_note}
