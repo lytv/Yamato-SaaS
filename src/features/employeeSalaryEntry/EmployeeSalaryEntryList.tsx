@@ -52,6 +52,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
     limit: 10,
     ownerId,
     showAll,
+    includeRelations: true, // Ensure we get userSync, product, and productionStepDetail data
   });
 
   const { deleteEmployeeSalaryEntry, isDeleting } = useEmployeeSalaryEntryMutations();
@@ -64,16 +65,6 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
 
     // The modal will show the success/error details,
     // so we don't need additional user notification here
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   // Handle delete confirmation
@@ -182,7 +173,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search employeeSalaryEntrys..."
+              placeholder="Search by employee name, product name, or step name..."
               value={search}
               onChange={handleSearchInputChange}
               aria-label="Search employeeSalaryEntrys"
@@ -218,8 +209,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
             >
               <option value="createdAt">Created Date</option>
               <option value="updatedAt">Updated Date</option>
-              <option value="employeeSalaryEntryName">EmployeeSalaryEntry Name</option>
-              <option value="employeeSalaryEntryCode">EmployeeSalaryEntry Code</option>
+              <option value="workDate">Work Date</option>
             </select>
 
             <button
@@ -322,22 +312,16 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
+                Employee Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Product Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Salary Note
+                Step Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Updated
+                Actual Quantity
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Actions
@@ -348,23 +332,18 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
             {(employeeSalaryEntrys as EmployeeSalaryEntryWithRelations[]).map(employeeSalaryEntry => (
               <tr key={employeeSalaryEntry.id} className="hover:bg-gray-50">
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                  {employeeSalaryEntry.id}
+                  {employeeSalaryEntry.userSync?.fullName || employeeSalaryEntry.userSync?.shortcut || 'N/A'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {employeeSalaryEntry.status}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {/* 🆕 Display product name */}
                   {employeeSalaryEntry.product?.productName || 'N/A'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {employeeSalaryEntry.salary_note}
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                  {'stepName' in (employeeSalaryEntry.productionStepDetail ?? {})
+                    ? (employeeSalaryEntry.productionStepDetail as any).stepName
+                    : 'N/A'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {formatDate(employeeSalaryEntry.created_at)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {formatDate(employeeSalaryEntry.updated_at)}
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                  {employeeSalaryEntry.actual_quantity ?? 'N/A'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                   <div className="flex space-x-2">
@@ -437,8 +416,10 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
               <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "
-                  {deleteConfirmEmployeeSalaryEntry.status}
+                  Are you sure you want to delete the salary entry for "
+                  {deleteConfirmEmployeeSalaryEntry.userSync?.fullName
+                  || deleteConfirmEmployeeSalaryEntry.userSync?.shortcut
+                  || 'Unknown Employee'}
                   "? This action cannot be undone.
                 </p>
                 {deleteError && (
