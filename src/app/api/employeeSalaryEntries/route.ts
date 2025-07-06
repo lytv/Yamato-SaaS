@@ -104,12 +104,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log('📨 Received POST body:', JSON.stringify(body, null, 2));
 
     // 🆕 V4: Enhanced validation with detailed error messages
-    const validatedData = validateCreateEmployeeSalaryEntry({
+    const dataToValidate = {
       ...body,
-      owner_id: userId,
-    });
+      ownerId: userId, // Add ownerId from auth
+    };
+    
+    console.log('🔍 Data to validate:', JSON.stringify(dataToValidate, null, 2));
+
+    const validatedData = validateCreateEmployeeSalaryEntry(dataToValidate);
+    console.log('✅ Validated data:', JSON.stringify(validatedData, null, 2));
 
     const employeeSalaryEntry = await createEmployeeSalaryEntry(validatedData);
 
@@ -126,16 +132,17 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error creating employeeSalaryEntry:', error);
+    console.error('❌ Error creating employeeSalaryEntry:', error);
 
     // 🆕 V4: Enhanced error handling with validation details
     if (error instanceof Error && error.message.includes('validation')) {
+      console.error('🔍 Validation error details:', error);
       return NextResponse.json(
         {
           error: 'Validation failed',
           code: 'VALIDATION_ERROR',
           details: error.message,
-          validationErrors: {}, // Could be enhanced with detailed field errors
+          validationErrors: error, // Include full error object for debugging
         },
         { status: 400 },
       );

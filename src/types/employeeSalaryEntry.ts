@@ -71,7 +71,7 @@ export type UpdateEmployeeSalaryEntryInput = Partial<CreateEmployeeSalaryEntryIn
 
 // Relation options (camelCase)
 export type EmployeeSalaryEntryRelationOptions = {
-  readonly userSyncs: { userId: string; fullName: string | null }[];
+  readonly userSyncs: { userId: string; fullName: string | null; shortcut: string | null }[];
   readonly productionStepDetails: { id: number }[];
   readonly plans: { id: number; planName: string }[];
 };

@@ -558,6 +558,7 @@ export async function getEmployeeSalaryEntryRelationOptions(): Promise<EmployeeS
     db.select({
       userId: userSyncSchema.userId,
       fullName: userSyncSchema.fullName,
+      shortcut: userSyncSchema.shortcut,
     }).from(userSyncSchema).orderBy(asc(userSyncSchema.fullName)),
 
     db.select({

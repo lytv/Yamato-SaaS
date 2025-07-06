@@ -51,6 +51,11 @@ export function EmployeeSalaryEntryForm({
     productionStepDetails: [],
     plans: [],
   });
+  
+  // 🆕 State for shortcut functionality
+  const [shortcutValue, setShortcutValue] = useState('');
+  const [shortcutMessage, setShortcutMessage] = useState('');
+  const [shortcutError, setShortcutError] = useState('');
 
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
@@ -66,8 +71,8 @@ export function EmployeeSalaryEntryForm({
       unitPrice: typeof employeeSalaryEntry?.unit_price === 'number' ? employeeSalaryEntry.unit_price : undefined,
       totalAmount: typeof employeeSalaryEntry?.total_amount === 'number' ? employeeSalaryEntry.total_amount : undefined,
       salaryNote: employeeSalaryEntry?.salary_note ?? '',
-      status: '',
-      approvedBy: '',
+      status: employeeSalaryEntry?.status || 'draft', // Force draft for new entries
+      approvedBy: employeeSalaryEntry?.approved_by ?? '',
       approvedAt: undefined,
       startTime: undefined,
       endTime: undefined,
@@ -96,6 +101,30 @@ export function EmployeeSalaryEntryForm({
 
     loadRelationOptions();
   }, []);
+
+  // 🆕 Function to handle shortcut search
+  const handleShortcutSearch = useCallback((shortcut: string) => {
+    setShortcutValue(shortcut);
+    setShortcutError('');
+    setShortcutMessage('');
+    
+    if (!shortcut.trim()) {
+      return;
+    }
+
+    // Find employee by shortcut
+    const matchedEmployee = relationOptions.userSyncs.find(
+      user => user.shortcut && user.shortcut.toLowerCase() === shortcut.toLowerCase().trim()
+    );
+
+    if (matchedEmployee) {
+      // Auto-populate employee selection
+      form.setValue('userId', matchedEmployee.userId);
+      setShortcutMessage(`✅ Found: ${matchedEmployee.fullName}`);
+    } else {
+      setShortcutError(`❌ No employee found with shortcut: "${shortcut}"`);
+    }
+  }, [relationOptions.userSyncs, form]);
 
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
@@ -127,13 +156,34 @@ export function EmployeeSalaryEntryForm({
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: EmployeeSalaryEntryFormData) => {
     try {
+      // Check for required fields before submission
+      if (!data.userId) {
+        alert('Please select an Employee');
+        return;
+      }
+      if (!data.productionStepDetailId) {
+        alert('Please select a Production Step Detail');
+        return;
+      }
+      if (!data.planId) {
+        alert('Please select a Plan');
+        return;
+      }
+
+      // Force set status to draft if empty
+      if (!data.status || data.status.trim() === '') {
+        data.status = 'draft';
+      }
+
+      console.log('Submitting data:', data); // Debug log
       await onSubmit(data);
       if (onSuccess) {
         onSuccess(employeeSalaryEntry!);
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      // You could add toast notification here
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+      alert(`Error: ${errorMessage}`);
     }
   }, [onSubmit, onSuccess, employeeSalaryEntry]);
 
@@ -143,6 +193,25 @@ export function EmployeeSalaryEntryForm({
         <div className="flex flex-col gap-6">
 
           <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-employee, #e0f2fe)' }}>
+            {/* 🆕 Shortcut Input Field */}
+            <div className="w-1/5 min-w-[180px]">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Employee Shortcut</label>
+                <Input
+                  placeholder="Enter shortcut..."
+                  value={shortcutValue}
+                  onChange={(e) => handleShortcutSearch(e.target.value)}
+                  className="text-sm"
+                />
+                {shortcutMessage && (
+                  <p className="text-xs text-green-600 font-medium">{shortcutMessage}</p>
+                )}
+                {shortcutError && (
+                  <p className="text-xs text-red-600 font-medium">{shortcutError}</p>
+                )}
+              </div>
+            </div>
+            
             <div className="w-1/4 min-w-[220px]">
               <FormField
                 control={form.control}
@@ -153,6 +222,9 @@ export function EmployeeSalaryEntryForm({
                     <Select
                       onValueChange={(value) => {
                         formField.onChange(value);
+                        // Clear shortcut messages when manually selecting
+                        setShortcutMessage('');
+                        setShortcutError('');
                       }}
                       value={formField.value?.toString()}
                     >
@@ -164,7 +236,7 @@ export function EmployeeSalaryEntryForm({
                       <SelectContent>
                         {relationOptions.userSyncs?.map(option => (
                           <SelectItem key={option.userId} value={option.userId.toString()}>
-                            {option.fullName}
+                            {option.fullName} {option.shortcut ? `(${option.shortcut})` : ''}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -528,7 +600,23 @@ export function EmployeeSalaryEntryForm({
 
         {/* 🆕 V4: Enhanced Action Buttons */}
         <div className="flex justify-end gap-4 border-t pt-4">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button type="button" variant="outline" onClick={() => {
+            form.reset({
+              workDate: new Date().toISOString().split('T')[0],
+              entryDate: new Date().toISOString().split('T')[0],
+              actualQuantity: 0,
+              salaryNote: '',
+              status: 'draft', // Always keep draft
+              approvedBy: '',
+              userId: undefined,
+              productionStepDetailId: undefined,
+              planId: undefined,
+            });
+            // 🆕 Reset shortcut state
+            setShortcutValue('');
+            setShortcutMessage('');
+            setShortcutError('');
+          }}>
             Reset
           </Button>
           <Button type="submit" disabled={isLoading}>

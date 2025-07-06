@@ -8,9 +8,9 @@ import { z } from 'zod';
 
 // 🆕 V4: Enhanced form validation schema with complex rules
 export const employeeSalaryEntryFormObject = z.object({
-  userId: z.string().min(1, 'Employee is required'),
-  productionStepDetailId: z.number().int().positive('Production Step Detail is required'),
-  planId: z.number().int().positive('Plan is required'),
+  userId: z.string().optional(),
+  productionStepDetailId: z.number().int().positive().optional(),
+  planId: z.number().int().positive().optional(),
   workDate: z.union([z.string(), z.date()]).refine((date) => {
     const d = new Date(date);
     const now = new Date();
@@ -25,7 +25,7 @@ export const employeeSalaryEntryFormObject = z.object({
   unitPrice: z.number().min(0, 'Value must be non-negative').max(99999999.99, 'Unit Price exceeds maximum allowed value').optional(),
   totalAmount: z.number().min(0, 'Value must be non-negative').max(9999999999.99, 'Total Amount exceeds maximum allowed value').optional(),
   salaryNote: z.string().trim().optional(),
-  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled)$/, 'Invalid status value').optional(),
+  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled|)$/, 'Invalid status value').optional(),
   approvedBy: z.string().trim().optional(),
   approvedAt: z.union([z.string(), z.date()]).optional(),
   startTime: z.union([z.string(), z.date()]).refine((date) => {
@@ -60,9 +60,32 @@ export const employeeSalaryEntryFormSchema = employeeSalaryEntryFormObject.refin
   path: ['totalAmount'],
 });
 
-// Create employeeSalaryEntry schema (same as form + ownerId)
-export const createEmployeeSalaryEntrySchema = employeeSalaryEntryFormObject.extend({
+// Create employeeSalaryEntry schema (same as form + ownerId + required fields validation)
+export const createEmployeeSalaryEntrySchema = z.object({
   ownerId: z.string().min(1, 'Owner ID is required'),
+  userId: z.string().min(1, 'Employee is required'),
+  productionStepDetailId: z.number().int().positive('Production Step Detail is required'),
+  planId: z.number().int().positive('Plan is required'),
+  workDate: z.union([z.string(), z.date()]).refine((date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    return d >= threeMonthsAgo && d <= now;
+  }, 'Work date must be within the last 3 months'),
+  entryDate: z.union([z.string(), z.date()]).optional(),
+  actualQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+  plannedQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+  limitQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+  previousEnteredQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+  unitPrice: z.number().min(0, 'Value must be non-negative').max(99999999.99, 'Unit Price exceeds maximum allowed value').optional(),
+  totalAmount: z.number().min(0, 'Value must be non-negative').max(9999999999.99, 'Total Amount exceeds maximum allowed value').optional(),
+  salaryNote: z.string().trim().optional(),
+  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled|)$/, 'Invalid status value').optional(),
+  approvedBy: z.string().trim().optional(),
+  approvedAt: z.union([z.string(), z.date()]).optional(),
+  startTime: z.union([z.string(), z.date()]).optional(),
+  endTime: z.union([z.string(), z.date()]).optional(),
+  workDurationMinutes: z.number().int().min(0).max(1440, 'Work duration cannot exceed 24 hours').optional(),
 });
 
 // Update employeeSalaryEntry schema (all fields optional)
@@ -84,7 +107,7 @@ export const updateEmployeeSalaryEntrySchema = z.object({
   unitPrice: z.number().min(0, 'Value must be non-negative').max(99999999.99, 'Unit Price exceeds maximum allowed value').optional(),
   totalAmount: z.number().min(0, 'Value must be non-negative').max(9999999999.99, 'Total Amount exceeds maximum allowed value').optional(),
   salaryNote: z.string().trim().optional(),
-  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled)$/, 'Invalid status value').optional(),
+  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled|)$/, 'Invalid status value').optional(),
   approvedBy: z.string().trim().optional(),
   approvedAt: z.union([z.string(), z.date()]).optional(),
   startTime: z.union([z.string(), z.date()]).refine((date) => {
@@ -159,7 +182,7 @@ export const importEmployeeSalaryEntryRowSchema = z.object({
   unitPrice: z.number().min(0, 'Value must be non-negative').max(99999999.99, 'Unit Price exceeds maximum allowed value').optional(),
   totalAmount: z.number().min(0, 'Value must be non-negative').max(9999999999.99, 'Total Amount exceeds maximum allowed value').optional(),
   salaryNote: z.string().trim().optional(),
-  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled)$/, 'Invalid status value').optional(),
+  status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled|)$/, 'Invalid status value').optional(),
   approvedBy: z.string().trim().optional(),
   approvedAt: z.union([z.string(), z.date()]).optional(),
   startTime: z.union([z.string(), z.date()]).refine((date) => {
