@@ -16,11 +16,48 @@ export type EmployeeSalaryEntry = Omit<EmployeeSalaryEntryDb, 'createdAt' | 'upd
 };
 
 // EmployeeSalaryEntry with enhanced relations (camelCase)
-export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
-  userSync?: { userId: string; fullName: string | null; shortcut: string | null };
-  productionStepDetail?: { id: number };
-  plan?: { id: number; planName: string };
-  product?: { id: number; productCode: string; productName: string }; // 🆕 Add product relation
+export type EmployeeSalaryEntryWithRelations = {
+  id: number;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  workDate: string | Date | null;
+  entryDate?: string | Date | null;
+  actualQuantity?: number | null;
+  plannedQuantity?: number | null;
+  limitQuantity?: number | null;
+  previousEnteredQuantity?: number | null;
+  unitPrice?: number | null;
+  totalAmount?: number | null;
+  salaryNote?: string | null;
+  status?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | Date | null;
+  startTime?: string | Date | null;
+  endTime?: string | Date | null;
+  workDurationMinutes?: number | null;
+  userId?: string | null;
+  productionStepDetailId?: number | null;
+  planId?: number | null;
+  productId?: number | null;
+  // Relations
+  userSync?: {
+    userId: string;
+    fullName: string;
+    shortcut?: string | null;
+  };
+  plan?: {
+    id: number;
+    planName: string;
+  };
+  productionStepDetail?: {
+    id: number;
+    stepName?: string;
+  };
+  product?: {
+    id: number;
+    productCode: string;
+    productName: string;
+  };
 };
 
 // Form data type cho React Hook Form (camelCase)

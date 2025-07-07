@@ -93,7 +93,9 @@ export function EmployeeSalaryEntryForm({
       endTime: undefined,
       workDurationMinutes: undefined,
       userId: employeeSalaryEntry?.user_id ?? undefined,
-      productionStepDetailId: employeeSalaryEntry?.production_step_detail_id ?? undefined,
+      productionStepDetailId: typeof employeeSalaryEntry?.productionStepDetail === 'object' && employeeSalaryEntry.productionStepDetail !== null && typeof employeeSalaryEntry.productionStepDetail.id === 'number'
+        ? employeeSalaryEntry.productionStepDetail.id
+        : undefined,
       planId: employeeSalaryEntry?.plan_id ?? undefined,
       productId: employeeSalaryEntry?.product_id ?? undefined, // 🆕 Add productId default
     },
@@ -169,7 +171,7 @@ export function EmployeeSalaryEntryForm({
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' });
-  
+
   // 🆕 Watch for productId changes to load filtered production step details
   const productId = useWatch({ control: form.control, name: 'productId' });
 
@@ -437,18 +439,21 @@ export function EmployeeSalaryEntryForm({
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={
-                            !productId 
-                              ? "Select Product first" 
-                              : filteredProductionStepDetails.length === 0 
-                                ? "No steps available" 
-                                : "Select Production Step Detail"
-                          } />
+                            !productId
+                              ? 'Select Product first'
+                              : filteredProductionStepDetails.length === 0
+                                ? 'No steps available'
+                                : 'Select Production Step Detail'
+                          }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {filteredProductionStepDetails.map(option => (
                           <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.stepName || `Step ${option.id}`} {/* 🆕 Show stepName */}
+                            {option.stepName || `Step ${option.id}`}
+                            {' '}
+                            {/* 🆕 Show stepName */}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -343,7 +343,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
                     : 'N/A'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {employeeSalaryEntry.actual_quantity ?? 'N/A'}
+                  {employeeSalaryEntry.actualQuantity ?? 'N/A'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                   <div className="flex space-x-2">
