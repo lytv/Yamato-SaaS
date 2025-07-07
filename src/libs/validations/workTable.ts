@@ -22,31 +22,9 @@ const CreateWorkTableBase = z.object({
     .min(1, 'Table code is required')
     .max(20, 'Table code must be less than 20 characters')
     .regex(/^[\w-]+$/, 'Table code must be alphanumeric with underscores or hyphens'),
-  tableName: z.string().max(100, 'Table name must be less than 100 characters').optional(),
+  tableName: z.string().max(100, 'Table name must be less than 100 characters'),
   tableDetail: z.string().max(200, 'Table detail must be less than 200 characters').optional(),
-  tableType: TableTypeSchema.optional(),
-  tableCategory: z.number().int().min(1).max(999).optional(),
-  capacityPerDay: CapacitySchema.optional(),
-  capacityPerHour: CapacitySchema.optional(),
-  tableSizeLength: DimensionSchema.optional(),
-  tableSizeWidth: DimensionSchema.optional(),
-  locationCode: z.string().max(50, 'Location code must be less than 50 characters').optional(),
-  department: z.string().max(100, 'Department must be less than 100 characters').optional(),
-  assignedOperator: z.string().max(100, 'Assigned operator must be less than 100 characters').optional(),
-  supervisor: z.string().max(100, 'Supervisor must be less than 100 characters').optional(),
-  status: WorkTableStatusSchema.default('active'),
-  availabilitySchedule: z.string().max(500, 'Availability schedule must be less than 500 characters').optional(),
-  lastMaintenanceDate: OptionalDateSchema,
-  nextMaintenanceDate: OptionalDateSchema,
-  equipmentModel: z.string().max(100, 'Equipment model must be less than 100 characters').optional(),
-  installationDate: OptionalDateSchema,
-  warrantyExpiryDate: OptionalDateSchema,
-  utilizationRate: PercentageSchema.default(0),
-  efficiencyRating: PercentageSchema.default(0),
-  totalProcessedUnits: z.number().int().min(0).default(0),
-  specialCapabilities: z.string().max(1000, 'Special capabilities must be less than 1000 characters').optional(),
-  limitations: z.string().max(1000, 'Limitations must be less than 1000 characters').optional(),
-  note: z.string().max(500, 'Note must be less than 500 characters').optional(),
+  tableType: TableTypeSchema,
 });
 
 export const CreateWorkTableSchema = CreateWorkTableBase;
@@ -195,41 +173,8 @@ export const WorkTableListParamsSchema = z.object({
 export const WorkTableFormSchema = z.object({
   tableCode: z.string().min(1, 'Table code is required').max(20),
   tableName: z.string().max(100),
-  tableDetail: z.string().max(200),
+  tableDetail: z.string().max(200).optional(),
   tableType: TableTypeSchema,
-  tableCategory: z.number().int().min(1).max(999),
-  capacityPerDay: CapacitySchema,
-  capacityPerHour: CapacitySchema,
-  tableSizeLength: DimensionSchema,
-  tableSizeWidth: DimensionSchema,
-  locationCode: z.string().max(50),
-  department: z.string().max(100),
-  assignedOperator: z.string().max(100),
-  supervisor: z.string().max(100),
-  status: WorkTableStatusSchema,
-  availabilitySchedule: z.string().max(500),
-  lastMaintenanceDate: OptionalDateSchema,
-  nextMaintenanceDate: OptionalDateSchema,
-  equipmentModel: z.string().max(100),
-  installationDate: OptionalDateSchema,
-  warrantyExpiryDate: OptionalDateSchema,
-  utilizationRate: PercentageSchema,
-  efficiencyRating: PercentageSchema,
-  totalProcessedUnits: z.number().int().min(0),
-  specialCapabilities: z.string().max(1000),
-  limitations: z.string().max(1000),
-  note: z.string().max(500),
-}).refine((data) => {
-  if (data.capacityPerHour && data.capacityPerDay) {
-    const maxReasonableHourly = Math.ceil(data.capacityPerDay / 8);
-    if (data.capacityPerHour > maxReasonableHourly) {
-      return false;
-    }
-  }
-  return true;
-}, {
-  message: 'Hourly capacity should not exceed daily capacity divided by working hours',
-  path: ['capacityPerHour'],
 });
 
 export const CreateWorkTableRequestSchema = CreateWorkTableBase.omit({ ownerId: true });

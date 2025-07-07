@@ -8,14 +8,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { fetchEmployeeSalaryEntrys } from '@/libs/api/employeeSalaryEntries';
-import type {
-  EmployeeSalaryEntry,
-  EmployeeSalaryEntryListParamsWithOwner,
-  EmployeeSalaryEntrysResponse,
-} from '@/types/employeeSalaryEntry';
+import type { EmployeeSalaryEntryListParamsWithOwner, EmployeeSalaryEntrysResponse, EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
 
 type EmployeeSalaryEntrysState = {
-  employeeSalaryEntrys: EmployeeSalaryEntry[];
+  employeeSalaryEntrys: EmployeeSalaryEntryWithRelations[];
   pagination: EmployeeSalaryEntrysResponse['pagination'] | null;
   isLoading: boolean;
   error: string | null;

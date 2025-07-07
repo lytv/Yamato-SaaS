@@ -14,9 +14,12 @@ export type WorkTable = Omit<WorkTableDb, 'createdAt' | 'updatedAt' | 'lastMaint
 };
 
 // Input types
-export type CreateWorkTableInput = Omit<typeof workTableSchema.$inferInsert, 'tableSizeLength' | 'tableSizeWidth'> & {
-  tableSizeLength?: string | null;
-  tableSizeWidth?: string | null;
+export type CreateWorkTableInput = {
+  ownerId: string;
+  tableCode: string;
+  tableName: string;
+  tableDetail?: string;
+  tableType: TableType;
 };
 export type UpdateWorkTableInput = Partial<Omit<CreateWorkTableInput, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>>;
 
@@ -54,30 +57,8 @@ export type WorkTableErrorResponse = {
 export type WorkTableFormData = {
   tableCode: string;
   tableName: string;
-  tableDetail: string;
+  tableDetail?: string;
   tableType: TableType;
-  tableCategory: number;
-  capacityPerDay: number;
-  capacityPerHour: number;
-  tableSizeLength: string | null | undefined;
-  tableSizeWidth: string | null | undefined;
-  locationCode: string;
-  department: string;
-  assignedOperator: string;
-  supervisor: string;
-  status: WorkTableStatus;
-  availabilitySchedule: string;
-  lastMaintenanceDate: string | null;
-  nextMaintenanceDate: string | null;
-  equipmentModel: string;
-  installationDate: string | null;
-  warrantyExpiryDate: string | null;
-  utilizationRate: number;
-  efficiencyRating: number;
-  totalProcessedUnits: number;
-  specialCapabilities: string;
-  limitations: string;
-  note: string;
 };
 
 // List parameters with work table specific filters

@@ -75,29 +75,29 @@ export function EmployeeSalaryEntryForm({
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
     defaultValues: {
-      workDate: employeeSalaryEntry?.work_date ? new Date(employeeSalaryEntry.work_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      entryDate: employeeSalaryEntry?.entry_date
-        ? new Date(employeeSalaryEntry.entry_date).toISOString().split('T')[0]
+      workDate: employeeSalaryEntry?.workDate ? new Date(employeeSalaryEntry.workDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      entryDate: employeeSalaryEntry?.entryDate
+        ? new Date(employeeSalaryEntry.entryDate).toISOString().split('T')[0]
         : new Date().toISOString().split('T')[0],
-      actualQuantity: employeeSalaryEntry?.actual_quantity ?? 0,
-      plannedQuantity: employeeSalaryEntry?.planned_quantity ?? undefined,
-      limitQuantity: employeeSalaryEntry?.limit_quantity ?? undefined,
-      previousEnteredQuantity: employeeSalaryEntry?.previous_entered_quantity ?? undefined,
-      unitPrice: typeof employeeSalaryEntry?.unit_price === 'number' ? employeeSalaryEntry.unit_price : undefined,
-      totalAmount: typeof employeeSalaryEntry?.total_amount === 'number' ? employeeSalaryEntry.total_amount : undefined,
-      salaryNote: employeeSalaryEntry?.salary_note ?? '',
+      actualQuantity: employeeSalaryEntry?.actualQuantity ?? 0,
+      plannedQuantity: employeeSalaryEntry?.plannedQuantity ?? undefined,
+      limitQuantity: employeeSalaryEntry?.limitQuantity ?? undefined,
+      previousEnteredQuantity: employeeSalaryEntry?.previousEnteredQuantity ?? undefined,
+      unitPrice: typeof employeeSalaryEntry?.unitPrice === 'number' ? employeeSalaryEntry.unitPrice : undefined,
+      totalAmount: typeof employeeSalaryEntry?.totalAmount === 'number' ? employeeSalaryEntry.totalAmount : undefined,
+      salaryNote: employeeSalaryEntry?.salaryNote ?? '',
       status: employeeSalaryEntry?.status || 'draft', // Force draft for new entries
-      approvedBy: employeeSalaryEntry?.approved_by ?? '',
+      approvedBy: employeeSalaryEntry?.approvedBy ?? '',
       approvedAt: undefined,
       startTime: undefined,
       endTime: undefined,
       workDurationMinutes: undefined,
-      userId: employeeSalaryEntry?.user_id ?? undefined,
+      userId: employeeSalaryEntry?.userId ?? undefined,
       productionStepDetailId: typeof employeeSalaryEntry?.productionStepDetail === 'object' && employeeSalaryEntry.productionStepDetail !== null && typeof employeeSalaryEntry.productionStepDetail.id === 'number'
         ? employeeSalaryEntry.productionStepDetail.id
         : undefined,
-      planId: employeeSalaryEntry?.plan_id ?? undefined,
-      productId: employeeSalaryEntry?.product_id ?? undefined, // 🆕 Add productId default
+      planId: employeeSalaryEntry?.planId ?? undefined,
+      productId: employeeSalaryEntry?.productId ?? undefined, // 🆕 Add productId default
     },
   });
 

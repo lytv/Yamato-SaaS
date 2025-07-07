@@ -18,7 +18,13 @@ export async function createWorkTable(data: CreateWorkTableInput): Promise<WorkT
   }
   const [workTable] = await db
     .insert(workTableSchema)
-    .values({ ...data })
+    .values({
+      ownerId: data.ownerId,
+      tableCode: data.tableCode,
+      tableName: data.tableName,
+      tableDetail: data.tableDetail,
+      tableType: data.tableType,
+    })
     .returning();
   if (!workTable) {
     throw new Error('Failed to create work table');

@@ -15,12 +15,12 @@ import { Button } from '@/components/ui/button';
 import { EmployeeSalaryEntryForm } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryForm';
 import { EmployeeSalaryEntryList } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryList';
 import { useEmployeeSalaryEntryMutations } from '@/hooks/useEmployeeSalaryEntryMutations';
-import type { EmployeeSalaryEntry } from '@/types/employeeSalaryEntry';
+import type { EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
 
 type ModalState = {
   isOpen: boolean;
   mode: 'create' | 'edit';
-  employeeSalaryEntry?: EmployeeSalaryEntry;
+  employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
 };
 
 /**
@@ -146,7 +146,7 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
     });
   };
 
-  const handleEditEmployeeSalaryEntry = (employeeSalaryEntry: EmployeeSalaryEntry) => {
+  const handleEditEmployeeSalaryEntry = (employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => {
     setModal({
       isOpen: true,
       mode: 'edit',
@@ -166,7 +166,7 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleDeleteSuccess = (_employeeSalaryEntry: EmployeeSalaryEntry) => {
+  const handleDeleteSuccess = (_employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => {
     // Trigger a refresh after successful delete
     setRefreshKey(prev => prev + 1);
   };

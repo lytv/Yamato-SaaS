@@ -104,20 +104,16 @@ export async function fetchWorkTable(id: number): Promise<WorkTableResponse> {
 }
 
 export async function createWorkTable(data: CreateWorkTableInput): Promise<WorkTableResponse> {
-  const response = await fetch(API_BASE, {
+  const { tableCode, tableName, tableDetail, tableType, ownerId } = data;
+  const res = await fetch('/api/work-tables', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tableCode, tableName, tableDetail, tableType, ownerId }),
   });
-
-  if (!response.ok) {
-    const errorData: WorkTableErrorResponse = await response.json();
-    throw new Error(errorData.error || 'Failed to create work table');
+  if (!res.ok) {
+    throw new Error(await res.text());
   }
-
-  return response.json();
+  return res.json();
 }
 
 export async function updateWorkTable(id: number, data: UpdateWorkTableInput): Promise<WorkTableResponse> {

@@ -79,6 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<WorkTable
       );
     }
 
+    // Chỉ nhận 4 trường: tableCode, tableName, tableDetail, tableType (và ownerId)
     const body = await request.json();
     const validatedData = validateCreateWorkTable({ ...body, ownerId: userId });
 
