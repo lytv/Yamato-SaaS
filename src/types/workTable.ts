@@ -98,14 +98,11 @@ export type WorkTableFilters = {
   sortBy: 'createdAt' | 'updatedAt' | 'tableName' | 'tableCode' | 'capacityPerDay' | 'utilizationRate' | 'efficiencyRating';
   sortOrder: 'asc' | 'desc';
   tableType: TableType | 'all';
-  status: WorkTableStatus | 'all';
-  department: string;
   locationCode: string;
   tableCategory: number | 'all';
   assignedOperator: string;
   supervisor: string;
   // Capacity range filters
-  capacityPerDayRange: [number, number];
   capacityPerHourRange: [number, number];
   // Performance range filters
   utilizationRateRange: [number, number];

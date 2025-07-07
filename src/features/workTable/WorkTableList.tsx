@@ -16,13 +16,10 @@ const DEFAULT_FILTERS: WorkTableFilters = {
   sortBy: 'createdAt',
   sortOrder: 'desc',
   tableType: 'all',
-  status: 'all',
-  department: '',
   locationCode: '',
   tableCategory: 'all',
   assignedOperator: '',
   supervisor: '',
-  capacityPerDayRange: [0, 1000],
   capacityPerHourRange: [0, 100],
   utilizationRateRange: [0, 100],
   efficiencyRatingRange: [0, 100],
@@ -99,9 +96,6 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                 <th className="p-2 text-left">Code</th>
                 <th className="p-2 text-left">Name</th>
                 <th className="p-2 text-left">Type</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Department</th>
-                <th className="p-2 text-left">Capacity/Day</th>
                 <th className="p-2 text-left">Actions</th>
               </tr>
             </thead>
@@ -128,22 +122,6 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                           <td className="p-2">{workTable.tableCode}</td>
                           <td className="p-2">{workTable.tableName}</td>
                           <td className="p-2">{workTable.tableType}</td>
-                          <td className="p-2">
-                            <span className={`rounded px-2 py-1 text-xs ${
-                              workTable.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : workTable.status === 'maintenance'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : workTable.status === 'offline'
-                                    ? 'bg-gray-100 text-gray-800'
-                                    : 'bg-red-100 text-red-800'
-                            }`}
-                            >
-                              {workTable.status}
-                            </span>
-                          </td>
-                          <td className="p-2">{workTable.department}</td>
-                          <td className="p-2">{workTable.capacityPerDay}</td>
                           <td className="p-2">
                             <div className="flex gap-2">
                               {onView && (
