@@ -1,0 +1,315 @@
+/*
+===============================================================
+🚀 ROADMAP IMPLEMENTATION - OUTSOURCE MANAGEMENT SYSTEM
+===============================================================
+
+Thứ tự implementation dựa trên dependencies và độ phức tạp:
+- Foundation → Core Logic → Advanced Features → UI Polish
+- Mỗi phase có deliverable rõ ràng, test được độc lập
+*/
+
+// ===============================================================
+// 📋 PHASE 1: FOUNDATION (Tuần 1)
+// ===============================================================
+
+/*
+🎯 MỤC TIÊU: Xây dựng foundation với bảng outsource_order
+✅ DEPENDENCIES: Chỉ phụ thuộc user_sync (đã có)
+⏱️ THỜI GIAN: 3-5 ngày
+*/
+
+// 1.1. Schema Migration
+/*
+File: src/models/Schema.ts
+Thêm: outsourceOrderSchema + relations
+*/
+
+export const phase1_schema = `
+// Add to Schema.ts
+export const outsourceOrderSchema = pgTable('outsource_order', {
+  // ... copy từ artifact đã tạo
+});
+
+export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ many, one }) => ({
+  // Basic relations với user_sync
+}));
+`;
+
+// 1.2. Basic API Endpoints
+/*
+Files cần tạo:
+- src/app/api/outsource-orders/route.ts (GET, POST)
+- src/app/api/outsource-orders/[id]/route.ts (GET, PUT, DELETE)
+*/
+
+export const phase1_apis = `
+// GET /api/outsource-orders - List orders
+// POST /api/outsource-orders - Create order
+// GET /api/outsource-orders/[id] - Get order detail
+// PUT /api/outsource-orders/[id] - Update order
+// DELETE /api/outsource-orders/[id] - Delete order
+
+// Business Logic:
+- Auto-generate orderCode (GGC001, GGC002...)
+- User validation (created_by, assigned_to from user_sync)
+- Basic status management (draft/sent/in_progress/completed/cancelled)
+- Date validation (expectedDate >= orderDate)
+`;
+
+// 1.3. Phase 1 Deliverables
+/*
+✅ Table outsource_order hoạt động
+✅ CRUD APIs cơ bản
+✅ Order code auto-generation
+✅ User assignment validation
+✅ Simple list view (có thể test bằng Postman)
+
+🔧 Commands:
+npm run db:generate
+npm run db:push (hoặc migration sẽ auto apply)
+*/
+
+// ===============================================================
+// 📝 PHASE 2: CORE BUSINESS LOGIC (Tuần 2-3) 
+// ===============================================================
+
+/*
+🎯 MỤC TIÊU: Implement order details với business logic phức tạp
+✅ DEPENDENCIES: outsource_order + plan + product + production_step (đã có)
+⏱️ THỜI GIAN: 7-10 ngày
+*/
+
+// 2.1. Schema cho Order Details
+export const phase2_schema = `
+// Add to Schema.ts
+export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
+  // ... copy từ artifact đã tạo với full fields
+});
+
+// Update relations để include details
+export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ many, one }) => ({
+  details: many(outsourceOrderDetailSchema), // ADD THIS
+  // ... existing relations
+}));
+`;
+
+// 2.2. Cascading APIs (Plan → Product → Step)
+/*
+Files cần tạo:
+- src/app/api/plans/[planId]/products/route.ts
+- src/app/api/products/[productId]/steps/route.ts
+- src/app/api/outsource-orders/[id]/details/route.ts
+*/
+
+export const phase2_business_logic = `
+// Core Business Logic cần implement:
+
+1. Plan → Product Filtering:
+   SELECT product.* 
+   FROM plan_detail 
+   JOIN product ON product.product_code = plan_detail.product_code
+   WHERE plan_detail.plan_id = ? AND plan_detail.owner_id = ?
+
+2. Product → Production Step Filtering:
+   SELECT production_step.*, production_step_detail.*
+   FROM production_step_detail
+   JOIN production_step ON production_step.id = production_step_detail.production_step_id
+   WHERE production_step_detail.product_id = ? AND production_step_detail.owner_id = ?
+   ORDER BY production_step_detail.sequence_number
+
+3. Quantity Validation:
+   - Check ordered_quantity <= plan_detail.planned_quantity
+   - Multiple order details có thể reference cùng plan/product
+
+4. Denormalization:
+   - Auto-fill planCode, planName từ plan table
+   - Auto-fill productCode, productName từ product table  
+   - Auto-fill stepCode, stepName từ production_step table
+`;
+
+// 2.3. Phase 2 Deliverables
+/*
+✅ Full order creation workflow
+✅ Plan/Product/Step cascading dropdowns  
+✅ Order detail management (CRUD)
+✅ Quantity validation logic
+✅ Denormalization working
+✅ Basic progress calculation (completed_quantity/ordered_quantity)
+
+🎯 Milestone: Có thể tạo được order hoàn chỉnh với details
+*/
+
+// ===============================================================
+// 🎁 PHASE 3: ADVANCED FEATURES (Tuần 4-5)
+// ===============================================================
+
+/*
+🎯 MỤC TIÊU: Receipt management + Status tracking
+✅ DEPENDENCIES: outsource_order_detail hoàn thành
+⏱️ THỜI GIAN: 7-10 ngày
+*/
+
+// 3A. Receipt Management (3-4 ngày)
+export const phase3a_receipts = `
+// Files cần tạo:
+- src/app/api/outsource-orders/details/[detailId]/receipts/route.ts
+- src/app/api/receipts/[receiptId]/route.ts
+
+// Business Logic:
+1. Receipt Creation:
+   - Validate: sum(receipt_quantity) <= ordered_quantity
+   - Auto-generate receiptNumber (REC001, REC002...)
+   - Auto-update completed_quantity trong order_detail
+   - Quality control tracking
+
+2. Multi-batch Receipt:
+   - Một order detail có thể nhận nhiều lần
+   - Track từng lần nhận với date/user/quality
+   - Progress calculation realtime
+
+3. Auto Status Update:
+   - order_detail.status = 'completed' when fully received
+   - order.status = 'completed' when all details completed
+`;
+
+// 3B. Status History (2-3 ngày)  
+export const phase3b_status_history = `
+// Schema: outsource_order_status_history
+// Auto-track mọi status change với:
+- Who changed (changedByUserId)
+- When changed (timestamp)
+- From/To status
+- Reason + notes
+- IP address + user agent (optional)
+
+// Integration:
+- Trigger khi update order.status
+- API để view history
+- Notification system hooks
+`;
+
+// 3.4. Phase 3 Deliverables
+/*
+✅ Multi-batch receipt system
+✅ Quality control workflow
+✅ Progress tracking chi tiết
+✅ Complete audit trail
+✅ Auto status management
+
+🎯 Milestone: Hệ thống outsource hoàn chỉnh về mặt logic
+*/
+
+// ===============================================================
+// 🎨 PHASE 4: UI & INTEGRATION (Tuần 6-7)
+// ===============================================================
+
+/*
+🎯 MỤC TIÊU: Polish UI và production-ready features
+✅ DEPENDENCIES: All core features hoàn thành
+⏱️ THỜI GIAN: 7-10 ngày
+*/
+
+// 4A. UI Components (4-5 ngày)
+export const phase4a_ui = `
+Components cần tạo:
+- OutsourceOrderList (table với search/filter)
+- CreateOrderModal (multi-step wizard)
+- OrderDetailView (với progress tracking)
+- ReceiptManagement (create/view receipts)
+- StatusHistory (audit trail view)
+- Dashboard (stats và charts)
+
+UI Framework:
+- Tailwind CSS (đã có)
+- Headless UI hoặc Radix UI cho components
+- React Hook Form cho forms
+- SWR cho data fetching
+`;
+
+// 4B. Integration & Polish (3-4 ngày)
+export const phase4b_polish = `
+Production Features:
+1. Notifications:
+   - Email alerts khi status change
+   - In-app notifications
+   - Push notifications (optional)
+
+2. Reports & Analytics:
+   - Excel export cho orders/receipts
+   - Performance reports theo contractor
+   - Quality analysis charts
+   - Timeline views
+
+3. Error Handling:
+   - User-friendly error messages
+   - Toast notifications
+   - Form validation feedback
+   - Loading states
+
+4. Performance:
+   - Database indexes optimization
+   - API response caching
+   - Pagination cho large datasets
+   - Image optimization cho attachments
+`;
+
+// 4.4. Phase 4 Deliverables
+/*
+✅ Complete professional UI
+✅ Notifications system
+✅ Reports và analytics
+✅ Error handling và UX polish
+✅ Performance optimization
+✅ Production-ready system
+
+🎯 Milestone: Ready for production deployment
+*/
+
+// ===============================================================
+// 📊 SUMMARY & RECOMMENDATIONS
+// ===============================================================
+
+export const implementation_summary = `
+🎯 TOTAL TIMELINE: 6-7 tuần
+
+CRITICAL SUCCESS FACTORS:
+1. ✅ Tuần tự theo phases - không skip
+2. ✅ Test kỹ mỗi phase trước khi chuyển tiếp  
+3. ✅ Database migration cẩn thận
+4. ✅ Keep existing data safe
+
+PARALLEL DEVELOPMENT (nếu có team):
+- Backend Dev: Phase 1-3 (APIs + Logic)
+- Frontend Dev: Phase 4A (UI Components) 
+- QA: Testing từng phase
+
+RISK MITIGATION:
+- Backup database trước mỗi migration
+- Feature flags cho gradual rollout
+- Staging environment testing
+- User training và documentation
+
+FIRST STEP TODAY:
+1. Add outsourceOrderSchema vào Schema.ts
+2. Run npm run db:generate  
+3. Tạo basic API route cho outsource-orders
+4. Test với Postman
+
+🚀 START WITH PHASE 1 - Foundation is everything!
+`;
+
+// Commands để bắt đầu:
+/*
+# 1. Add schema to Schema.ts
+# 2. Generate migration
+npm run db:generate
+
+# 3. Push to database  
+npm run db:push
+
+# 4. Create first API route
+mkdir -p src/app/api/outsource-orders
+touch src/app/api/outsource-orders/route.ts
+
+# 5. Start coding! 🚀
+*/

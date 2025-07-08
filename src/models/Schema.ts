@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
@@ -13,7 +13,10 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { employeeSalaryEntrySchema, employeeSalaryEntryRelations } from './Schema/employeeSalaryEntry';
+
+import { employeeSalaryEntryRelations, employeeSalaryEntrySchema } from './Schema/employeeSalaryEntry';
+
+export * from './Schema/outsourceOrder';
 
 // This file defines the structure of your database tables using the Drizzle ORM.
 
@@ -440,7 +443,110 @@ export const userSyncSchema = pgTable('user_sync', {
     .notNull(),
 });
 
+export const outsourceOrderSchema = pgTable('outsource_order', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+
+  // Order Identity
+  orderCode: text('order_code').notNull(), // GGC001, GGC002 (Giao Gia Công)
+  orderTitle: text('order_title'), // Tiêu đề phiếu (optional)
+
+  // People Involved
+  createdByUserId: text('created_by_user_id').notNull(), // Người lập phiếu (current user)
+  assignedToUserId: text('assigned_to_user_id').notNull(), // Người nhận phiếu (from user_sync)
+
+  // Dates
+  orderDate: date('order_date').notNull(), // Ngày giao phiếu (default today)
+  expectedCompletionDate: date('expected_completion_date'), // Ngày dự kiến hoàn thành tổng thể
+  actualCompletionDate: date('actual_completion_date'), // Ngày hoàn thành thực tế
+
+  // Status & Management
+  status: text('status').default('draft'), // draft/sent/in_progress/completed/cancelled
+  priority: integer('priority').default(5), // 1=highest, 10=lowest
+
+  // Financial (optional)
+  totalAmount: decimal('total_amount', { precision: 12, scale: 2 }), // Tổng giá trị
+  currency: text('currency').default('VND'), // Đơn vị tiền tệ
+
+  // Documentation
+  notes: text('notes'), // Ghi chú
+  attachment: text('attachment'), // Link file đính kèm
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    orderCodeOwnerIdx: uniqueIndex('order_code_owner_idx').on(
+      table.orderCode,
+      table.ownerId,
+    ),
+    statusIdx: index('outsource_order_status_idx').on(table.status),
+    assignedUserIdx: index('outsource_order_assigned_user_idx').on(table.assignedToUserId),
+    orderDateIdx: index('outsource_order_date_idx').on(table.orderDate),
+    createdByUserIdx: index('outsource_order_created_by_idx').on(table.createdByUserId),
+  };
+});
+
+export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ one }) => ({
+  createdByUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.createdByUserId],
+    references: [userSyncSchema.userId],
+  }),
+  assignedToUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.assignedToUserId],
+    references: [userSyncSchema.userId],
+  }),
+}));
+
+export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+  outsourceOrderId: integer('outsource_order_id')
+    .references(() => outsourceOrderSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+  planId: integer('plan_id')
+    .references(() => planSchema.id, { onDelete: 'restrict' })
+    .notNull(),
+  productId: integer('product_id')
+    .references(() => productSchema.id, { onDelete: 'restrict' })
+    .notNull(),
+  productionStepId: integer('production_step_id')
+    .references(() => productionStepSchema.id, { onDelete: 'restrict' })
+    .notNull(),
+  planCode: text('plan_code').notNull(),
+  planName: text('plan_name').notNull(),
+  productCode: text('product_code').notNull(),
+  productName: text('product_name').notNull(),
+  stepCode: text('step_code').notNull(),
+  stepName: text('step_name').notNull(),
+  orderedQuantity: integer('ordered_quantity').notNull(),
+  completedQuantity: integer('completed_quantity').default(0),
+  expectedCompletionDate: date('expected_completion_date').notNull(),
+  actualCompletionDate: date('actual_completion_date'),
+  status: text('status').default('pending'),
+  sequenceNumber: integer('sequence_number'),
+  unitPrice: decimal('unit_price', { precision: 10, scale: 2 }),
+  totalPrice: decimal('total_price', { precision: 12, scale: 2 }),
+  itemNotes: text('item_notes'),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    orderDetailOrderIdx: index('outsource_order_detail_order_idx').on(table.outsourceOrderId),
+    orderDetailPlanIdx: index('outsource_order_detail_plan_idx').on(table.planId),
+    orderDetailProductIdx: index('outsource_order_detail_product_idx').on(table.productId),
+    orderDetailStepIdx: index('outsource_order_detail_step_idx').on(table.productionStepId),
+    orderDetailStatusIdx: index('outsource_order_detail_status_idx').on(table.status),
+  };
+});
+
 // ======================
 // EMPLOYEE_SALARY_ENTRY - Bảng nhập lương theo sản lượng nhân viên
 // ======================
-export { employeeSalaryEntrySchema, employeeSalaryEntryRelations };
+export { employeeSalaryEntryRelations, employeeSalaryEntrySchema };

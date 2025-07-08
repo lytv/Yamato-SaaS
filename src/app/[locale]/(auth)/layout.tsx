@@ -2,6 +2,8 @@
 
 import { enUS, frFR } from '@clerk/localizations';
 import { ClerkProvider } from '@clerk/nextjs';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { AppConfig } from '@/utils/AppConfig';
 
@@ -36,7 +38,9 @@ export default function AuthLayout(props: {
       signUpFallbackRedirectUrl={dashboardUrl}
       afterSignOutUrl={afterSignOutUrl}
     >
-      {props.children}
+      <QueryClientProvider client={useState(() => new QueryClient())[0]}>
+        {props.children}
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }

@@ -1,0 +1,161 @@
+erDiagram
+    %% PLANNING TABLES 
+    PLAN {
+        int id PK
+        string owner_id
+        string plan_code UK
+        string plan_name
+        int plan_year
+        int plan_month
+        int total_target_quantity
+        string status
+        date plan_start_date
+        date plan_end_date
+        timestamp created_at
+    }
+    
+    PLAN_DETAIL {
+        int id PK
+        string owner_id
+        int plan_id FK
+        string location_code
+        string product_code
+        string product_sub_code
+        int planned_quantity
+        int actual_quantity
+        string status
+        timestamp created_at
+    }
+    
+    %% PRODUCT TABLES
+    PRODUCT {
+        int id PK
+        string owner_id
+        string product_code UK
+        string product_name
+        text notes
+        string category
+        timestamp created_at
+    }
+    
+    PRODUCTION_STEP {
+        int id PK
+        string owner_id
+        string step_code UK
+        string step_name
+        string film_sequence
+        string step_group
+        timestamp created_at
+    }
+    
+    PRODUCTION_STEP_DETAIL {
+        int id PK
+        string owner_id
+        int product_id FK
+        int production_step_id FK
+        int sequence_number
+        decimal factory_price
+        boolean is_final_step
+        timestamp created_at
+    }
+    
+    %% OUTSOURCE TABLES
+    OUTSOURCE_ORDER {
+        int id PK
+        string owner_id
+        string order_code UK
+        string order_title
+        string created_by_user_id FK
+        string assigned_to_user_id FK
+        date order_date
+        date expected_completion_date
+        string status
+        int priority
+        text notes
+        timestamp created_at
+    }
+    
+    OUTSOURCE_ORDER_DETAIL {
+        int id PK
+        string owner_id
+        int outsource_order_id FK
+        int plan_id FK
+        int product_id FK
+        int production_step_id FK
+        string plan_code
+        string product_code
+        string step_code
+        string step_name
+        int ordered_quantity
+        int completed_quantity
+        date expected_completion_date
+        string status
+        decimal unit_price
+        timestamp created_at
+    }
+    
+    OUTSOURCE_ORDER_RECEIPT {
+        int id PK
+        string owner_id
+        int outsource_order_detail_id FK
+        string receipt_number UK
+        string receipt_title
+        int receipt_quantity
+        date receipt_date
+        string quality_status
+        int quality_score
+        int defect_quantity
+        int rework_quantity
+        string received_by_user_id FK
+        string inspected_by_user_id FK
+        string batch_number
+        string storage_location
+        string status
+        text notes
+        timestamp created_at
+    }
+    
+    OUTSOURCE_ORDER_STATUS_HISTORY {
+        int id PK
+        string owner_id
+        int outsource_order_id FK
+        string from_status
+        string to_status
+        string changed_by_user_id FK
+        string change_reason
+        timestamp created_at
+    }
+    
+    %% USER TABLE
+    USER_SYNC {
+        string user_id PK
+        string owner_id
+        string email
+        string full_name
+        string role
+        boolean is_active
+        timestamp created_at
+    }
+    
+    %% RELATIONSHIPS
+    PLAN ||--o{ PLAN_DETAIL : "has_details"
+    PRODUCT ||--o{ PRODUCTION_STEP_DETAIL : "has_steps"
+    PRODUCTION_STEP ||--o{ PRODUCTION_STEP_DETAIL : "used_in"
+    
+    OUTSOURCE_ORDER ||--o{ OUTSOURCE_ORDER_DETAIL : "contains"
+    OUTSOURCE_ORDER ||--o{ OUTSOURCE_ORDER_STATUS_HISTORY : "tracks"
+    
+    %% NEW: Receipt relationships
+    OUTSOURCE_ORDER_DETAIL ||--o{ OUTSOURCE_ORDER_RECEIPT : "received_in_batches"
+    
+    PLAN ||--o{ OUTSOURCE_ORDER_DETAIL : "referenced_by"
+    PRODUCT ||--o{ OUTSOURCE_ORDER_DETAIL : "ordered_in"
+    PRODUCTION_STEP ||--o{ OUTSOURCE_ORDER_DETAIL : "assigned_to"
+    
+    USER_SYNC ||--o{ OUTSOURCE_ORDER : "creates"
+    USER_SYNC ||--o{ OUTSOURCE_ORDER : "receives"
+    USER_SYNC ||--o{ OUTSOURCE_ORDER_STATUS_HISTORY : "changes"
+    
+    %% NEW: User relationships for receipts
+    USER_SYNC ||--o{ OUTSOURCE_ORDER_RECEIPT : "receives_items"
+    USER_SYNC ||--o{ OUTSOURCE_ORDER_RECEIPT : "inspects_quality"

@@ -114,6 +114,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 ],
               },
 
+              // Outsource menu
+              {
+                label: 'Outsource',
+                submenu: [
+                  {
+                    href: '/dashboard/outsourceOrders',
+                    label: 'Order',
+                  },
+                ],
+              },
+
               // Settings
               {
                 href: '/dashboard/organization-profile',

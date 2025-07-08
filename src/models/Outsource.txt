@@ -1,0 +1,261 @@
+export const outsourceOrderSchema = pgTable('outsource_order', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+
+  // Order Identity
+  orderCode: text('order_code').notNull(), // GGC001, GGC002 (Giao Gia Công)
+  orderTitle: text('order_title'), // Tiêu đề phiếu (optional)
+
+  // People Involved
+  createdByUserId: text('created_by_user_id').notNull(), // Người lập phiếu (current user)
+  assignedToUserId: text('assigned_to_user_id').notNull(), // Người nhận phiếu (from user_sync)
+
+  // Dates
+  orderDate: date('order_date').notNull(), // Ngày giao phiếu (default today)
+  expectedCompletionDate: date('expected_completion_date'), // Ngày dự kiến hoàn thành tổng thể
+  actualCompletionDate: date('actual_completion_date'), // Ngày hoàn thành thực tế
+
+  // Status & Management
+  status: text('status').default('draft'), // draft/sent/in_progress/completed/cancelled
+  priority: integer('priority').default(5), // 1=highest, 10=lowest
+
+  // Financial (optional)
+  totalAmount: decimal('total_amount', { precision: 12, scale: 2 }), // Tổng giá trị
+  currency: text('currency').default('VND'), // Đơn vị tiền tệ
+
+  // Documentation
+  notes: text('notes'), // Ghi chú
+  attachment: text('attachment'), // Link file đính kèm
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    orderCodeOwnerIdx: uniqueIndex('order_code_owner_idx').on(
+      table.orderCode,
+      table.ownerId,
+    ),
+    statusIdx: index('outsource_order_status_idx').on(table.status),
+    assignedUserIdx: index('outsource_order_assigned_user_idx').on(table.assignedToUserId),
+    orderDateIdx: index('outsource_order_date_idx').on(table.orderDate),
+    createdByUserIdx: index('outsource_order_created_by_idx').on(table.createdByUserId),
+  };
+});
+
+export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+
+  // Foreign Key to Main Order
+  outsourceOrderId: integer('outsource_order_id')
+    .references(() => outsourceOrderSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Plan & Product References
+  planId: integer('plan_id')
+    .references(() => planSchema.id, { onDelete: 'restrict' })
+    .notNull(), // Kế hoạch
+  productId: integer('product_id')
+    .references(() => productSchema.id, { onDelete: 'restrict' })
+    .notNull(), // Mã sản phẩm
+  productionStepId: integer('production_step_id')
+    .references(() => productionStepSchema.id, { onDelete: 'restrict' })
+    .notNull(), // Công đoạn được giao
+
+  // Denormalized fields for performance
+  planCode: text('plan_code').notNull(), // From Plan table
+  planName: text('plan_name').notNull(), // From Plan table
+  productCode: text('product_code').notNull(), // From Product table
+  productName: text('product_name').notNull(), // From Product table
+  stepCode: text('step_code').notNull(), // From ProductionStep table
+  stepName: text('step_name').notNull(), // From ProductionStep table
+
+  // Quantity & Scheduling
+  orderedQuantity: integer('ordered_quantity').notNull(), // Số lượng giao
+  completedQuantity: integer('completed_quantity').default(0), // Số lượng đã hoàn thành
+
+  // Dates
+  expectedCompletionDate: date('expected_completion_date').notNull(), // Ngày dự kiến hoàn thành
+  actualCompletionDate: date('actual_completion_date'), // Ngày hoàn thành thực tế
+
+  // Status & Tracking
+  status: text('status').default('pending'), // pending/in_progress/completed/cancelled
+  sequenceNumber: integer('sequence_number'), // Thứ tự trong phiếu
+
+  // Pricing (optional)
+  unitPrice: decimal('unit_price', { precision: 10, scale: 2 }), // Đơn giá
+  totalPrice: decimal('total_price', { precision: 12, scale: 2 }), // Thành tiền
+
+  // Notes
+  itemNotes: text('item_notes'), // Ghi chú riêng cho item này
+
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    orderDetailOrderIdx: index('outsource_order_detail_order_idx').on(table.outsourceOrderId),
+    orderDetailPlanIdx: index('outsource_order_detail_plan_idx').on(table.planId),
+    orderDetailProductIdx: index('outsource_order_detail_product_idx').on(table.productId),
+    orderDetailStepIdx: index('outsource_order_detail_step_idx').on(table.productionStepId),
+    orderDetailStatusIdx: index('outsource_order_detail_status_idx').on(table.status),
+
+    // Check constraints
+    quantityValidCheck: check('quantity_valid', sql`ordered_quantity > 0`),
+    completedQuantityCheck: check('completed_quantity_valid', sql`completed_quantity >= 0 AND completed_quantity <= ordered_quantity`),
+  };
+});
+
+export const outsourceOrderStatusHistorySchema = pgTable('outsource_order_status_history', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(),
+
+  // Foreign Key
+  outsourceOrderId: integer('outsource_order_id')
+    .references(() => outsourceOrderSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Status Tracking
+  fromStatus: text('from_status'), // Trạng thái cũ (null cho lần đầu tạo)
+  toStatus: text('to_status').notNull(), // Trạng thái mới
+
+  // Change Information
+  changedByUserId: text('changed_by_user_id').notNull(), // Ai thay đổi
+  changeReason: text('change_reason'), // Lý do thay đổi
+  changeNote: text('change_note'), // Ghi chú thêm
+
+  // Additional Context
+  ipAddress: text('ip_address'), // IP của người thay đổi
+  userAgent: text('user_agent'), // Browser/device info
+
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => {
+  return {
+    statusHistoryOrderIdx: index('status_history_order_idx').on(table.outsourceOrderId),
+    statusHistoryDateIdx: index('status_history_date_idx').on(table.createdAt),
+    statusHistoryUserIdx: index('status_history_user_idx').on(table.changedByUserId),
+    statusHistoryStatusIdx: index('status_history_status_idx').on(table.toStatus),
+  };
+});
+
+// Relations definitions
+export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ many, one }) => ({
+  details: many(outsourceOrderDetailSchema),
+  statusHistory: many(outsourceOrderStatusHistorySchema),
+  createdByUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.createdByUserId],
+    references: [userSyncSchema.userId],
+  }),
+  assignedToUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.assignedToUserId],
+    references: [userSyncSchema.userId],
+  }),
+}));
+
+export const outsourceOrderDetailRelations = relations(outsourceOrderDetailSchema, ({ one }) => ({
+  outsourceOrder: one(outsourceOrderSchema, {
+    fields: [outsourceOrderDetailSchema.outsourceOrderId],
+    references: [outsourceOrderSchema.id],
+  }),
+  plan: one(planSchema, {
+    fields: [outsourceOrderDetailSchema.planId],
+    references: [planSchema.id],
+  }),
+  product: one(productSchema, {
+    fields: [outsourceOrderDetailSchema.productId],
+    references: [productSchema.id],
+  }),
+  productionStep: one(productionStepSchema, {
+    fields: [outsourceOrderDetailSchema.productionStepId],
+    references: [productionStepSchema.id],
+  }),
+}));
+
+export const outsourceOrderStatusHistoryRelations = relations(outsourceOrderStatusHistorySchema, ({ one }) => ({
+  outsourceOrder: one(outsourceOrderSchema, {
+    fields: [outsourceOrderStatusHistorySchema.outsourceOrderId],
+    references: [outsourceOrderSchema.id],
+  }),
+  changedByUser: one(userSyncSchema, {
+    fields: [outsourceOrderStatusHistorySchema.changedByUserId],
+    references: [userSyncSchema.userId],
+  }),
+}));
+export const outsourceOrderReceiptSchema = pgTable('outsource_order_receipt', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+
+  // Foreign Key to Order Detail
+  outsourceOrderDetailId: integer('outsource_order_detail_id')
+    .references(() => outsourceOrderDetailSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Receipt Identity
+  receiptNumber: text('receipt_number').notNull(), // REC001, REC002... (auto-generated)
+  receiptTitle: text('receipt_title'), // Tiêu đề phiếu nhận (optional)
+
+  // Receipt Information
+  receiptQuantity: integer('receipt_quantity').notNull(), // Số lượng nhận lại trong lần này
+  receiptDate: date('receipt_date').notNull(), // Ngày nhận lại
+  plannedReceiptDate: date('planned_receipt_date'), // Ngày dự kiến nhận (nếu có)
+
+  // Quality Control
+  qualityStatus: text('quality_status').default('pending'), // pending/passed/failed/partial/needs_rework
+  qualityScore: integer('quality_score'), // Điểm chất lượng 1-10
+  defectQuantity: integer('defect_quantity').default(0), // Số lượng lỗi
+  reworkQuantity: integer('rework_quantity').default(0), // Số lượng cần làm lại
+  qualityNotes: text('quality_notes'), // Ghi chú về chất lượng
+
+  // People Involved
+  receivedByUserId: text('received_by_user_id').notNull(), // Người nhận lại (from user_sync)
+  inspectedByUserId: text('inspected_by_user_id'), // Người kiểm tra chất lượng
+  deliveredByUserId: text('delivered_by_user_id'), // Người giao hàng (contractor)
+
+  // Location & Storage
+  batchNumber: text('batch_number'), // Số lô/batch
+  storageLocation: text('storage_location'), // Vị trí lưu kho
+  warehouseCode: text('warehouse_code'), // Mã kho
+
+  // Financial (if needed)
+  actualUnitCost: decimal('actual_unit_cost', { precision: 10, scale: 2 }), // Đơn giá thực tế
+  totalCost: decimal('total_cost', { precision: 12, scale: 2 }), // Tổng chi phí cho lần nhận này
+
+  // Documentation
+  notes: text('notes'), // Ghi chú chung
+  attachments: text('attachments'), // Link file đính kèm (ảnh, PDF)
+
+  // Status & Workflow
+  status: text('status').default('received'), // received/inspected/stored/processed
+  isPartialReceipt: boolean('is_partial_receipt').default(true), // Nhận một phần hay toàn bộ
+
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+}, (table) => {
+  return {
+    // Indexes for performance
+    receiptDetailIdx: index('receipt_detail_idx').on(table.outsourceOrderDetailId),
+    receiptDateIdx: index('receipt_date_idx').on(table.receiptDate),
+    receiptNumberOwnerIdx: uniqueIndex('receipt_number_owner_idx').on(
+      table.receiptNumber,
+      table.ownerId,
+    ),
+    receiptUserIdx: index('receipt_user_idx').on(table.receivedByUserId),
+    receiptQualityIdx: index('receipt_quality_idx').on(table.qualityStatus),
+    receiptStatusIdx: index('receipt_status_idx').on(table.status),
+    receiptBatchIdx: index('receipt_batch_idx').on(table.batchNumber),
+
+    // Check constraints
+    receiptQuantityValidCheck: check('receipt_quantity_valid', sql`receipt_quantity > 0`),
+    defectQuantityValidCheck: check('defect_quantity_valid', sql`defect_quantity >= 0 AND defect_quantity <= receipt_quantity`),
+    reworkQuantityValidCheck: check('rework_quantity_valid', sql`rework_quantity >= 0 AND rework_quantity <= receipt_quantity`),
+    qualityScoreValidCheck: check('quality_score_valid', sql`quality_score IS NULL OR (quality_score >= 1 AND quality_score <= 10)`),
+  };
+});
