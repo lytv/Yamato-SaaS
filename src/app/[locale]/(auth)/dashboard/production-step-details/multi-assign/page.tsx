@@ -160,15 +160,15 @@ export default function MultiAssignPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4">
-      <h1 className="mb-2 text-2xl font-bold">{t('title', { default: '🗂️ Bulk Add Production Step Details' })}</h1>
+      <h1 className="mb-2 text-2xl font-bold">{t('title')}</h1>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Products Selection */}
         <div className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-semibold">{t('productsSelection', { default: 'Products Selection' })}</h2>
+          <h2 className="mb-2 font-semibold">{t('productsSelection')}</h2>
           <div className="mb-2 flex gap-2">
             <input
               className="w-full rounded border px-2 py-1"
-              placeholder={t('searchProducts', { default: '🔍 Search products...' })}
+              placeholder={t('searchProducts')}
               value={productSearch}
               onChange={(e) => {
                 setProductSearch(e.target.value);
@@ -183,23 +183,23 @@ export default function MultiAssignPage() {
                 setProductPage(1);
               }}
             >
-              <option value="">{t('categoryFilter', { default: '🏷️ Category Filter ▼' })}</option>
+              <option value="">{t('categoryFilter')}</option>
             </select>
           </div>
           <div className="mb-2">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllProducts} onChange={handleSelectAllProducts} />
-              {t('selectAllProducts', { default: 'Select All Products (this page)' })}
+              {t('selectAllProducts')}
             </label>
           </div>
           <div className="mb-2 min-h-[120px]">
             {loadingProducts
               ? (
-                  <div>Đang tải sản phẩm...</div>
+                  <div>{t('loadingProducts')}</div>
                 )
               : products.length === 0
                 ? (
-                    <div>Không có sản phẩm</div>
+                    <div>{t('noProducts')}</div>
                   )
                 : (
                     <ProductMultiSelect
@@ -214,12 +214,13 @@ export default function MultiAssignPage() {
           </div>
           {/* Pagination */}
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <button type="button" onClick={() => setProductPage(p => Math.max(1, p - 1))} disabled={productPage === 1}>Prev</button>
+            <button type="button" onClick={() => setProductPage(p => Math.max(1, p - 1))} disabled={productPage === 1}>{t('prev')}</button>
             <span>
-              Trang
+              {t('page')}
+              {' '}
               {productPage}
             </span>
-            <button type="button" onClick={() => setProductPage(p => (productPagination?.hasMore ? p + 1 : p))} disabled={!productPagination?.hasMore}>Next</button>
+            <button type="button" onClick={() => setProductPage(p => (productPagination?.hasMore ? p + 1 : p))} disabled={!productPagination?.hasMore}>{t('next')}</button>
             {productPagination && (
               <span>
                 (
@@ -236,11 +237,11 @@ export default function MultiAssignPage() {
         </div>
         {/* Steps Selection */}
         <div className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-semibold">{t('stepsSelection', { default: 'Steps Selection' })}</h2>
+          <h2 className="mb-2 font-semibold">{t('stepsSelection')}</h2>
           <div className="mb-2 flex gap-2">
             <input
               className="w-full rounded border px-2 py-1"
-              placeholder={t('searchSteps', { default: '🔍 Search steps...' })}
+              placeholder={t('searchSteps')}
               value={stepSearch}
               onChange={(e) => {
                 setStepSearch(e.target.value);
@@ -255,23 +256,23 @@ export default function MultiAssignPage() {
                 setStepPage(1);
               }}
             >
-              <option value="">{t('groupFilter', { default: '🏷️ Group Filter ▼' })}</option>
+              <option value="">{t('groupFilter')}</option>
             </select>
           </div>
           <div className="mb-2">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllSteps} onChange={handleSelectAllSteps} />
-              {t('selectAllSteps', { default: 'Select All Steps (this page)' })}
+              {t('selectAllSteps')}
             </label>
           </div>
           <div className="mb-2 min-h-[120px]">
             {loadingSteps
               ? (
-                  <div>Đang tải công đoạn...</div>
+                  <div>{t('loadingSteps')}</div>
                 )
               : productionSteps.length === 0
                 ? (
-                    <div>Không có công đoạn</div>
+                    <div>{t('noSteps')}</div>
                   )
                 : (
                     <StepMultiSelect
@@ -286,12 +287,13 @@ export default function MultiAssignPage() {
           </div>
           {/* Pagination */}
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <button type="button" onClick={() => setStepPage(p => Math.max(1, p - 1))} disabled={stepPage === 1}>Prev</button>
+            <button type="button" onClick={() => setStepPage(p => Math.max(1, p - 1))} disabled={stepPage === 1}>{t('prev')}</button>
             <span>
-              Trang
+              {t('page')}
+              {' '}
               {stepPage}
             </span>
-            <button type="button" onClick={() => setStepPage(p => (stepPagination?.hasMore ? p + 1 : p))} disabled={!stepPagination?.hasMore}>Next</button>
+            <button type="button" onClick={() => setStepPage(p => (stepPagination?.hasMore ? p + 1 : p))} disabled={!stepPagination?.hasMore}>{t('next')}</button>
             {stepPagination && (
               <span>
                 (
@@ -309,38 +311,38 @@ export default function MultiAssignPage() {
       </div>
       {/* Assignment Configuration */}
       <div className="mt-4 rounded border bg-gray-50 p-4">
-        <h3 className="mb-2 font-semibold">{t('assignmentConfig', { default: '🎯 Assignment Configuration' })}</h3>
+        <h3 className="mb-2 font-semibold">{t('assignmentConfig')}</h3>
         <MultiAssignConfigForm initialValues={config} onChange={handleConfigChange} />
       </div>
       {/* Preview & Actions */}
       <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <span className="font-medium">
-            {t('preview', { default: '📊 Preview:' })}
+            {t('preview')}
             {' '}
             {selectedProducts.length}
             {' '}
-            {t('products', { default: 'Products' })}
+            {t('products')}
             {' × '}
             {selectedSteps.length}
             {' '}
-            {t('steps', { default: 'Steps' })}
+            {t('steps')}
             {' = '}
             {selectedProducts.length * selectedSteps.length}
             {' '}
-            {t('assignments', { default: 'Assignments' })}
+            {t('assignments')}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <a href="/dashboard/production-step-details">
-            <Button variant="outline">{t('back', { default: '← Back to Production Step Details' })}</Button>
+            <Button variant="outline">{t('back')}</Button>
           </a>
-          <Button variant="outline" onClick={handleCancel}>{t('cancel', { default: 'Cancel' })}</Button>
-          <Button variant="outline" onClick={handleReset}>{t('reset', { default: 'Reset' })}</Button>
+          <Button variant="outline" onClick={handleCancel}>{t('cancel')}</Button>
+          <Button variant="outline" onClick={handleReset}>{t('reset')}</Button>
           <Button className="bg-green-600 text-white" onClick={handleBulkAssign} disabled={selectedProducts.length === 0 || selectedSteps.length === 0 || progress.status === 'processing'}>
             <span className="mr-2">💾</span>
             {' '}
-            {t('createAssignments', { default: 'Create Assignments' })}
+            {t('createAssignments')}
           </Button>
         </div>
       </div>

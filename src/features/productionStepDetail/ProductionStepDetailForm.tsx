@@ -6,6 +6,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -24,6 +25,7 @@ type ProductionStepDetailFormProps = {
 export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCancel }: ProductionStepDetailFormProps): JSX.Element {
   const { userId, orgId } = useAuth();
   const ownerId = orgId || userId || '';
+  const t = useTranslations('productionStepDetail.form');
   const isEditing = Boolean(productionStepDetail);
 
   const { createProductionStepDetail, updateProductionStepDetail, isCreating, isUpdating, error, clearError } = useProductionStepDetailMutations();
@@ -104,28 +106,25 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
       {/* Error Display */}
       {error && (
         <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+          <div className="text-sm text-red-700">{t('error')}</div>
         </div>
       )}
 
       {/* Product Selection */}
       <div>
-        <label
-          htmlFor="productId"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Product *
+        <label htmlFor="productId" className="block text-sm font-medium text-gray-700">
+          {t('product')}
+          {' '}
+          *
         </label>
         <select
           id="productId"
           {...register('productId', { valueAsNumber: true })}
           aria-required="true"
           aria-describedby={errors.productId ? 'productId-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.productId ? 'border-red-300' : ''
-          }`}
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.productId ? 'border-red-300' : ''}`}
         >
-          <option value={0}>Select a product...</option>
+          <option value={0}>{t('product_placeholder')}</option>
           {products.map(product => (
             <option key={product.id} value={product.id}>
               {product.productCode}
@@ -144,22 +143,19 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
 
       {/* Production Step Selection */}
       <div>
-        <label
-          htmlFor="productionStepId"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Production Step *
+        <label htmlFor="productionStepId" className="block text-sm font-medium text-gray-700">
+          {t('productionStep')}
+          {' '}
+          *
         </label>
         <select
           id="productionStepId"
           {...register('productionStepId', { valueAsNumber: true })}
           aria-required="true"
           aria-describedby={errors.productionStepId ? 'productionStepId-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.productionStepId ? 'border-red-300' : ''
-          }`}
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.productionStepId ? 'border-red-300' : ''}`}
         >
-          <option value={0}>Select a production step...</option>
+          <option value={0}>{t('productionStep_placeholder')}</option>
           {productionSteps.map(step => (
             <option key={step.id} value={step.id}>
               {step.stepCode}
@@ -178,11 +174,10 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
 
       {/* Sequence Number */}
       <div>
-        <label
-          htmlFor="sequenceNumber"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Sequence Number *
+        <label htmlFor="sequenceNumber" className="block text-sm font-medium text-gray-700">
+          {t('sequenceNumber')}
+          {' '}
+          *
         </label>
         <input
           id="sequenceNumber"
@@ -192,10 +187,8 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
           {...register('sequenceNumber', { valueAsNumber: true })}
           aria-required="true"
           aria-describedby={errors.sequenceNumber ? 'sequenceNumber-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.sequenceNumber ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., 1"
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.sequenceNumber ? 'border-red-300' : ''}`}
+          placeholder={t('sequenceNumber_placeholder')}
         />
         {errors.sequenceNumber && (
           <p id="sequenceNumber-error" className="mt-2 text-sm text-red-600">
@@ -212,17 +205,15 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             htmlFor="factoryPrice"
             className="block text-sm font-medium text-gray-700"
           >
-            Factory Price
+            {t('factoryPrice')}
           </label>
           <input
             id="factoryPrice"
             type="text"
             {...register('factoryPrice')}
             aria-describedby={errors.factoryPrice ? 'factoryPrice-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.factoryPrice ? 'border-red-300' : ''
-            }`}
-            placeholder="e.g., 100.50"
+            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.factoryPrice ? 'border-red-300' : ''}`}
+            placeholder={t('factoryPrice_placeholder')}
           />
           {errors.factoryPrice && (
             <p id="factoryPrice-error" className="mt-2 text-sm text-red-600">
@@ -237,17 +228,15 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             htmlFor="calculatedPrice"
             className="block text-sm font-medium text-gray-700"
           >
-            Calculated Price
+            {t('calculatedPrice')}
           </label>
           <input
             id="calculatedPrice"
             type="text"
             {...register('calculatedPrice')}
             aria-describedby={errors.calculatedPrice ? 'calculatedPrice-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.calculatedPrice ? 'border-red-300' : ''
-            }`}
-            placeholder="e.g., 110.75"
+            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.calculatedPrice ? 'border-red-300' : ''}`}
+            placeholder={t('calculatedPrice_placeholder')}
           />
           {errors.calculatedPrice && (
             <p id="calculatedPrice-error" className="mt-2 text-sm text-red-600">
@@ -265,7 +254,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             htmlFor="quantityLimit1"
             className="block text-sm font-medium text-gray-700"
           >
-            Quantity Limit 1
+            {t('quantityLimit1')}
           </label>
           <input
             id="quantityLimit1"
@@ -274,10 +263,8 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             step="1"
             {...register('quantityLimit1', { valueAsNumber: true })}
             aria-describedby={errors.quantityLimit1 ? 'quantityLimit1-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.quantityLimit1 ? 'border-red-300' : ''
-            }`}
-            placeholder="e.g., 1000"
+            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.quantityLimit1 ? 'border-red-300' : ''}`}
+            placeholder={t('quantityLimit1_placeholder')}
           />
           {errors.quantityLimit1 && (
             <p id="quantityLimit1-error" className="mt-2 text-sm text-red-600">
@@ -292,7 +279,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             htmlFor="quantityLimit2"
             className="block text-sm font-medium text-gray-700"
           >
-            Quantity Limit 2
+            {t('quantityLimit2')}
           </label>
           <input
             id="quantityLimit2"
@@ -301,10 +288,8 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
             step="1"
             {...register('quantityLimit2', { valueAsNumber: true })}
             aria-describedby={errors.quantityLimit2 ? 'quantityLimit2-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.quantityLimit2 ? 'border-red-300' : ''
-            }`}
-            placeholder="e.g., 2000"
+            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.quantityLimit2 ? 'border-red-300' : ''}`}
+            placeholder={t('quantityLimit2_placeholder')}
           />
           {errors.quantityLimit2 && (
             <p id="quantityLimit2-error" className="mt-2 text-sm text-red-600">
@@ -316,7 +301,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
 
       {/* Special Step Flags */}
       <div className="space-y-4">
-        <div className="text-sm font-medium text-gray-700">Special Step Flags</div>
+        <div className="text-sm font-medium text-gray-700">{t('specialStepFlags')}</div>
 
         <div className="space-y-3">
           {/* Final Step */}
@@ -328,7 +313,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="isFinalStep" className="ml-2 text-sm text-gray-700">
-              Final Step
+              {t('isFinalStep')}
             </label>
           </div>
 
@@ -341,7 +326,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="isVtStep" className="ml-2 text-sm text-gray-700">
-              VT Step
+              {t('isVtStep')}
             </label>
           </div>
 
@@ -354,7 +339,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="isParkingStep" className="ml-2 text-sm text-gray-700">
-              Parking Step
+              {t('isParkingStep')}
             </label>
           </div>
         </div>
@@ -367,7 +352,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
           onClick={onCancel}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Cancel
+          {t('cancel')}
         </button>
 
         <button
@@ -375,7 +360,7 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
           onClick={handleReset}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Reset
+          {t('reset')}
         </button>
 
         <button
@@ -385,11 +370,11 @@ export function ProductionStepDetailForm({ productionStepDetail, onSuccess, onCa
         >
           {isSubmitting
             ? isEditing
-              ? 'Updating...'
-              : 'Creating...'
+              ? t('updating')
+              : t('creating')
             : isEditing
-              ? 'Update Production Step Detail'
-              : 'Create Production Step Detail'}
+              ? t('updateProductionStepDetail')
+              : t('createProductionStepDetail')}
         </button>
       </div>
     </form>

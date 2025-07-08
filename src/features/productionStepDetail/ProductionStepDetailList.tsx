@@ -5,6 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
 import { ProductionStepDetailSkeleton } from '@/features/productionStepDetail/ProductionStepDetailSkeleton';
@@ -15,6 +16,7 @@ import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { useProducts } from '@/hooks/useProducts';
 
 export function ProductionStepDetailList(): JSX.Element {
+  const t = useTranslations('productionStepDetail.list');
   const { userId, orgId } = useAuth();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
@@ -157,8 +159,8 @@ export function ProductionStepDetailList(): JSX.Element {
   if (isLoading) {
     return (
       <div>
-        <div role="status" aria-label="Loading production step details" className="sr-only">
-          Loading production step details...
+        <div role="status" aria-label={t('loading')} className="sr-only">
+          {t('loading')}
         </div>
         <ProductionStepDetailSkeleton data-testid="production-step-detail-list-skeleton" />
       </div>
@@ -175,7 +177,7 @@ export function ProductionStepDetailList(): JSX.Element {
           onClick={refresh}
           className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          Retry
+          {t('retry')}
         </button>
       </div>
     );
@@ -185,10 +187,8 @@ export function ProductionStepDetailList(): JSX.Element {
   if (productionStepDetails.length === 0 && !search && !productId && !productionStepId) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No production step details found</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Create your first production step detail to get started.
-        </p>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty_title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('empty_desc')}</p>
       </div>
     );
   }
@@ -201,11 +201,11 @@ export function ProductionStepDetailList(): JSX.Element {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search production step details..."
+              placeholder={t('search_placeholder')}
               value={searchInput}
               onChange={handleSearchInputChange}
               onKeyDown={handleSearchInputKeyDown}
-              aria-label="Search production step details"
+              aria-label={t('search_placeholder')}
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -215,22 +215,19 @@ export function ProductionStepDetailList(): JSX.Element {
           {/* Product Filter */}
           <div className="flex items-center space-x-2">
             <label htmlFor="productFilter" className="text-sm font-medium text-gray-700">
-              Product:
+              {t('product_label')}
             </label>
             <select
               id="productFilter"
               value={productId || ''}
               onChange={handleProductFilterChange}
-              aria-label="Filter by product"
+              aria-label={t('product_aria')}
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="">All Products</option>
+              <option value="">{t('all_products')}</option>
               {products.map(product => (
                 <option key={product.id} value={product.id}>
-                  {product.productCode}
-                  {' '}
-                  -
-                  {product.productName}
+                  {product.productCode} - {product.productName}
                 </option>
               ))}
             </select>
@@ -239,22 +236,19 @@ export function ProductionStepDetailList(): JSX.Element {
           {/* Production Step Filter */}
           <div className="flex items-center space-x-2">
             <label htmlFor="productionStepFilter" className="text-sm font-medium text-gray-700">
-              Step:
+              {t('step_label')}
             </label>
             <select
               id="productionStepFilter"
               value={productionStepId || ''}
               onChange={handleProductionStepFilterChange}
-              aria-label="Filter by production step"
+              aria-label={t('step_aria')}
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="">All Steps</option>
+              <option value="">{t('all_steps')}</option>
               {productionSteps.map(step => (
                 <option key={step.id} value={step.id}>
-                  {step.stepCode}
-                  {' '}
-                  -
-                  {step.stepName}
+                  {step.stepCode} - {step.stepName}
                 </option>
               ))}
             </select>
@@ -262,21 +256,20 @@ export function ProductionStepDetailList(): JSX.Element {
 
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
-            <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
-            </label>
+            <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">{t('sort_by')}</label>
             <select
               id="sortBy"
               value={sortBy}
               onChange={handleSortFieldChange}
-              aria-label="Sort by"
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              className="rounded-md border-gray-300 py-1 pl-2 pr-6 text-sm"
             >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="sequenceNumber">Sequence</option>
-              <option value="factoryPrice">Factory Price</option>
-              <option value="calculatedPrice">Calculated Price</option>
+              <option value="createdAt">{t('sort_createdAt')}</option>
+              <option value="updatedAt">{t('sort_updatedAt')}</option>
+              <option value="sequenceNumber">{t('sort_sequenceNumber')}</option>
+              <option value="factoryPrice">{t('sort_factoryPrice')}</option>
+              <option value="calculatedPrice">{t('sort_calculatedPrice')}</option>
+              <option value="product">{t('sort_product')}</option>
+              <option value="productionStep">{t('sort_productionStep')}</option>
             </select>
 
             <button
@@ -294,10 +287,9 @@ export function ProductionStepDetailList(): JSX.Element {
             <button
               type="button"
               onClick={resetFilters}
-              aria-label="Clear filters"
-              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="ml-2 text-xs text-gray-500 underline"
             >
-              Clear filters
+              {t('reset')}
             </button>
           )}
         </div>
@@ -308,24 +300,17 @@ export function ProductionStepDetailList(): JSX.Element {
         <div className="text-sm text-gray-600">
           {search && (
             <>
-              Search results for "
-              {search}
-              "
-              {(productId || productionStepId) && ' • '}
+              {t('search_results_for')} "{search}"{(productId || productionStepId) && ' • '}
             </>
           )}
           {productId && (
             <>
-              Product:
-              {' '}
-              {productMap.get(productId)?.productName || `ID ${productId}`}
-              {productionStepId && ' • '}
+              {t('product_label')}: {productMap.get(productId)?.productName || `ID ${productId}`}{productionStepId && ' • '}
             </>
           )}
           {productionStepId && (
             <>
-              Step:
-              {productionStepMap.get(productionStepId)?.stepName || `ID ${productionStepId}`}
+              {t('step_label')}: {productionStepMap.get(productionStepId)?.stepName || `ID ${productionStepId}`}
             </>
           )}
         </div>
@@ -333,20 +318,11 @@ export function ProductionStepDetailList(): JSX.Element {
 
       {/* Production Step Detail Count */}
       <div className="text-sm text-gray-600">
-        Showing
-        {' '}
-        {productionStepDetails.length}
-        {' '}
-        of
-        {' '}
-        {pagination?.total || 0}
-        {' '}
-        production step details
+        {t('showing', { count: productionStepDetails.length, total: pagination?.total || 0 })}
         {pagination?.page && (
           <span>
             {' '}
-            • Page
-            {pagination.page}
+            {t('pagination.page')} {page} {t('pagination.of')} {Math.ceil(pagination.total / pagination.limit)}
           </span>
         )}
       </div>
@@ -380,30 +356,19 @@ export function ProductionStepDetailList(): JSX.Element {
                   aria-label="Select all rows"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Product
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Production Step
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Sequence
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Factory Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Calculated Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Flags
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
-              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.product')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.productionStep')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.sequenceNumber')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.factoryPrice')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.calculatedPrice')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.quantityLimit1')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.quantityLimit2')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isFinalStep')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isVtStep')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isParkingStep')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.created')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.updated')}</th>
+              <th className="px-4 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -486,19 +451,24 @@ export function ProductionStepDetailList(): JSX.Element {
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {formatDate(detail.createdAt)}
                   </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {formatDate(detail.updatedAt)}
+                  </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
                         type="button"
-                        className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => { /* handle edit */ }}
+                        className="mr-2 rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
                       >
-                        Edit
+                        {t('edit')}
                       </button>
                       <button
                         type="button"
-                        className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => { /* handle delete */ }}
+                        className="rounded bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
                       >
-                        Delete
+                        {t('delete')}
                       </button>
                     </div>
                   </td>
@@ -519,12 +489,12 @@ export function ProductionStepDetailList(): JSX.Element {
             disabled={page === 1}
             aria-label="Previous page"
           >
-            Prev
+            {t('pagination.previous')}
           </button>
           <span className="text-sm text-gray-700">
-            Page
+            {t('pagination.page')}
             {' '}
-            {pagination.page}
+            {page}
             {' / '}
             {Math.max(1, Math.ceil(pagination.total / pagination.limit))}
           </span>
@@ -535,7 +505,7 @@ export function ProductionStepDetailList(): JSX.Element {
             disabled={!pagination.hasMore}
             aria-label="Next page"
           >
-            Next
+            {t('pagination.next')}
           </button>
         </div>
       )}
@@ -544,15 +514,13 @@ export function ProductionStepDetailList(): JSX.Element {
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="rounded bg-white p-6 shadow-xl">
-            <div className="mb-4 text-lg font-semibold">
-              Are you sure you want to delete
-              {selectedIds.length}
-              {' '}
-              selected rows?
-            </div>
+            <h3 className="mb-2 text-lg font-medium text-gray-900">{t('delete_confirm_title')}</h3>
+            <p className="mb-4 text-sm text-gray-600">
+              {t('delete_confirm_desc')}
+            </p>
             <div className="flex justify-end space-x-3">
-              <button type="button" onClick={cancelDeleteSelected} className="rounded border px-4 py-2">Cancel</button>
-              <button type="button" onClick={confirmDeleteSelected} className="rounded bg-red-600 px-4 py-2 text-white">Delete</button>
+              <button type="button" onClick={cancelDeleteSelected} className="rounded border px-4 py-2">{t('delete_cancel')}</button>
+              <button type="button" onClick={confirmDeleteSelected} className="rounded bg-red-600 px-4 py-2 text-white">{isDeleting ? t('delete_deleting') : t('delete_confirm')}</button>
             </div>
           </div>
         </div>

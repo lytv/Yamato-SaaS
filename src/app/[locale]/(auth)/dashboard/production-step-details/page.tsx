@@ -7,6 +7,7 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,8 @@ function ProductionStepDetailModal({
     }
   };
 
+  const t = useTranslations('productionStepDetail.form');
+
   if (!modal.isOpen) {
     return null;
   }
@@ -70,7 +73,7 @@ function ProductionStepDetailModal({
       <div className="relative z-10 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-xl font-semibold">
-            {modal.mode === 'create' ? 'Create Production Step Detail' : 'Edit Production Step Detail'}
+            {modal.mode === 'create' ? t('title') : t('edit_title')}
           </h2>
           <Button
             variant="ghost"
@@ -109,6 +112,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
 
   const { isCreating } = useProductionStepDetailMutations();
+  const t = useTranslations('productionStepDetail.page');
 
   // Mobile detection
   useEffect(() => {
@@ -146,10 +150,10 @@ export default function ProductionStepDetailsPage(): JSX.Element {
         <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
-              Production Step Details
+              {t('title')}
             </h1>
             <p className="mt-2 max-w-4xl text-sm text-gray-500">
-              Manage the assignment of production steps to products with sequencing, pricing, and capacity controls.
+              {t('description')}
             </p>
           </div>
 
@@ -160,7 +164,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
               size={isMobile ? 'sm' : 'default'}
               className="w-full sm:w-auto"
             >
-              {isMobile ? 'Add Detail' : 'Add Production Step Detail'}
+              {isMobile ? t('add_detail_mobile') : t('add_detail')}
             </Button>
             <a href="/dashboard/production-step-details/multi-assign">
               <Button
@@ -168,7 +172,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
                 size={isMobile ? 'sm' : 'default'}
                 className="w-full sm:w-auto"
               >
-                {isMobile ? 'Bulk Add' : 'Bulk Add Production Step Details'}
+                {isMobile ? t('bulk_add_mobile') : t('bulk_add')}
               </Button>
             </a>
           </div>

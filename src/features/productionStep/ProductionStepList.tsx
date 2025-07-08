@@ -6,6 +6,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 
 import { useProductionStepFilters } from '@/hooks/useProductionStepFilters';
@@ -21,6 +22,7 @@ type ProductionStepListProps = {
 };
 
 export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps): JSX.Element {
+  const t = useTranslations('productionStep.list');
   const { userId, orgId } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -132,7 +134,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
   // Loading state
   if (isLoading) {
     return (
-      <div className="p-8 text-center text-gray-500">Loading production steps...</div>
+      <div className="p-8 text-center text-gray-500">{t('loading')}</div>
     );
   }
 
@@ -146,7 +148,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
           onClick={refresh}
           className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          Retry
+          {t('retry')}
         </button>
       </div>
     );
@@ -156,8 +158,8 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
   if (productionSteps.length === 0 && !search) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No production steps found</h3>
-        <p className="mt-1 text-sm text-gray-500">Create your first production step to get started.</p>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty_title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('empty_desc')}</p>
       </div>
     );
   }
@@ -180,26 +182,26 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
 
       {/* Header with Export & Import Button */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Production Steps</h2>
+        <h2 className="text-lg font-semibold">{t('title')}</h2>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={handleExport}
             disabled={isExporting}
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            title="Export production steps to Excel"
+            title={t('export')}
           >
             <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export to Excel'}
+            {isExporting ? t('exporting') : t('export')}
           </button>
           <button
             type="button"
             onClick={() => setIsImportOpen(true)}
             className="inline-flex items-center rounded-md border border-green-300 bg-white px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-50 disabled:opacity-50"
-            title="Import production steps from Excel"
+            title={t('import')}
           >
             <span className="mr-2">📥</span>
-            Import from Excel
+            {t('import')}
           </button>
         </div>
       </div>
@@ -209,26 +211,26 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
         <div className="max-w-xs flex-1">
           <input
             type="text"
-            placeholder="Search production steps..."
+            placeholder={t('search_placeholder')}
             value={search}
             onChange={e => handleSearchChange(e.target.value)}
-            aria-label="Search production steps"
+            aria-label={t('search_placeholder')}
             className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">Sort by:</label>
+          <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">{t('sort_by')}</label>
           <select
             id="sortBy"
             value={sortBy}
             onChange={e => handleSortChange(e.target.value as any)}
             className="rounded-md border-gray-300 py-1 pl-2 pr-6 text-sm"
           >
-            <option value="createdAt">Created At</option>
-            <option value="updatedAt">Updated At</option>
-            <option value="stepName">Step Name</option>
-            <option value="stepCode">Step Code</option>
-            <option value="filmSequence">Film Sequence</option>
+            <option value="createdAt">{t('sort_createdAt')}</option>
+            <option value="updatedAt">{t('sort_updatedAt')}</option>
+            <option value="stepName">{t('sort_stepName')}</option>
+            <option value="stepCode">{t('sort_stepCode')}</option>
+            <option value="filmSequence">{t('sort_filmSequence')}</option>
           </select>
           <button
             type="button"
@@ -243,7 +245,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
             onClick={resetFilters}
             className="ml-2 text-xs text-gray-500 underline"
           >
-            Reset
+            {t('reset')}
           </button>
         </div>
       </div>
@@ -253,14 +255,14 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Step Code</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Step Name</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Film Sequence</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Step Group</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Notes</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Updated</th>
-              <th className="px-4 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.stepCode')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.stepName')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.filmSequence')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.stepGroup')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.notes')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.created')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.updated')}</th>
+              <th className="px-4 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -279,14 +281,14 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
                     onClick={() => onEdit(step)}
                     className="mr-2 rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
                   >
-                    Edit
+                    {t('edit')}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteClick(step)}
                     className="rounded bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
                   >
-                    Delete
+                    {t('delete')}
                   </button>
                 </td>
               </tr>
@@ -299,11 +301,11 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
       {pagination && (
         <div className="flex items-center justify-between pt-4 text-sm">
           <span>
-            Page
+            {t('pagination.page')}
             {' '}
             {page}
             {' '}
-            of
+            {t('pagination.of')}
             {' '}
             {Math.ceil(pagination.total / pagination.limit)}
           </span>
@@ -314,7 +316,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
               className="rounded border px-2 py-1"
               disabled={page === 1}
             >
-              Previous
+              {t('pagination.previous')}
             </button>
             <button
               type="button"
@@ -322,7 +324,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
               className="rounded border px-2 py-1"
               disabled={!pagination.hasMore}
             >
-              Next
+              {t('pagination.next')}
             </button>
           </div>
         </div>
@@ -332,12 +334,9 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
       {deleteConfirmStep && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-lg font-medium text-gray-900">Confirm deletion</h3>
+            <h3 className="mb-2 text-lg font-medium text-gray-900">{t('delete_confirm_title')}</h3>
             <p className="mb-4 text-sm text-gray-600">
-              Are you sure you want to delete production step
-              {' '}
-              <span className="font-mono font-semibold">{deleteConfirmStep.stepCode}</span>
-              ? This action cannot be undone.
+              {t('delete_confirm_desc', { stepCode: deleteConfirmStep.stepCode })}
             </p>
             {deleteError && <div className="mb-2 text-sm text-red-600">{deleteError}</div>}
             <div className="flex justify-end gap-2">
@@ -347,7 +346,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
                 className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 disabled={isDeleting}
               >
-                Cancel
+                {t('delete_cancel')}
               </button>
               <button
                 type="button"
@@ -355,7 +354,7 @@ export function ProductionStepList({ onEdit, onDelete }: ProductionStepListProps
                 disabled={isDeleting}
                 className="rounded border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t('delete_deleting') : t('delete_confirm')}
               </button>
             </div>
           </div>

@@ -7,10 +7,14 @@
  *
  * Usage: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts [entityName]
  * Example: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts plan
+ * Example: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts outsourceOrderDetail
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+// Import fixed outsource order detail config
+import { outsourceOrderDetailConfig } from './outsource-order-detail-config-fixed';
 
 type FieldConfig = {
   name: string;
@@ -1801,12 +1805,18 @@ function main() {
     console.error('❌ Please provide entity name');
     console.log('Usage: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts [entityName]');
     console.log('Example: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts plan');
+    console.log('Example: npx ts-node scripts/enhanced-generate-advanced-entity-V3-with-relations.ts outsourceOrderDetail');
     process.exit(1);
   }
 
   let config: EntityConfig;
   if (entityName.toLowerCase() === 'plan' || entityName.toLowerCase() === 'plans') {
     config = planConfigWithRelations;
+  } else if (entityName.toLowerCase() === 'outsourceorderdetail' || 
+           entityName.toLowerCase() === 'outsource_order_detail' ||
+           entityName.toLowerCase() === 'outsource-order-detail' ||
+           entityName.toLowerCase() === 'outsourceorderdetails') {
+    config = outsourceOrderDetailConfig;
   } else {
     // Use plan config as template for other entities
     config = {

@@ -70,19 +70,17 @@ function ProductModal({
 
       {/* Modal content */}
       <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="modal-title" className="text-xl font-semibold">
-            {modal.mode === 'create' ? 'Create Product' : 'Edit Product'}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
-          >
-            ✕
-          </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          aria-label="Close"
+        >
+          ✕
+        </Button>
+        <div className="mb-4">
+          {/* Tiêu đề đã nằm trong ProductForm, không cần lặp lại ở đây */}
         </div>
 
         <ProductForm
