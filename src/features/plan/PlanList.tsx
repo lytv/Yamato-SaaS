@@ -6,6 +6,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download, Upload } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 
 import { PlanSkeleton } from '@/features/plan/PlanSkeleton';
@@ -40,6 +41,8 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
     handleSortOrderChange,
     resetFilters,
   } = usePlanFilters();
+
+  const t = useTranslations('PlanList');
 
   // Get ownerId for multi-tenancy
   const ownerId = orgId || userId || '';
@@ -138,8 +141,8 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
   if (isLoading) {
     return (
       <div>
-        <div role="status" aria-label="Loading plans" className="sr-only">
-          Loading plans...
+        <div role="status" aria-label={t('loading_plans')} className="sr-only">
+          {t('loading_plans')}
         </div>
         <PlanSkeleton data-testid="plan-list-skeleton" />
       </div>
@@ -156,7 +159,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
           onClick={refresh}
           className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          Retry
+          {t('retry')}
         </button>
       </div>
     );
@@ -166,9 +169,9 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
   if (plans.length === 0 && !search) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No plans found</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('no_entries_found')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Create your first plan to get started.
+          {t('create_first_entry')}
         </p>
       </div>
     );
@@ -182,10 +185,10 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search plans..."
+              placeholder={t('search_placeholder')}
               value={search}
               onChange={handleSearchInputChange}
-              aria-label="Search plans"
+              aria-label={t('search_placeholder')}
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -198,7 +201,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
-              Show All
+              {t('show_all')}
             </label>
           </div>
         </div>
@@ -207,19 +210,19 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
             <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
+              {t('sort_by')}
             </label>
             <select
               id="sortBy"
               value={sortBy}
               onChange={handleSortFieldChange}
-              aria-label="Sort by"
+              aria-label={t('sort_by')}
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="planName">Plan Name</option>
-              <option value="planCode">Plan Code</option>
+              <option value="createdAt">{t('created_date')}</option>
+              <option value="updatedAt">{t('updated_date')}</option>
+              <option value="planName">{t('plan_name')}</option>
+              <option value="planCode">{t('plan_code')}</option>
             </select>
 
             <button
@@ -241,7 +244,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export'}
+            {isExporting ? t('exporting') : t('export')}
           </button>
 
           {/* Import Button */}
@@ -252,7 +255,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Upload className="mr-2 size-4" />
-            Import
+            {t('import')}
           </button>
 
           {/* Clear Search */}
@@ -263,7 +266,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
               aria-label="Clear search"
               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Clear search
+              {t('clear_search')}
             </button>
           )}
         </div>
@@ -273,7 +276,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
       {exportError && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-800">
-            Export failed:
+            {t('export_failed')}
             {' '}
             {exportError}
             <button
@@ -281,7 +284,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
               onClick={clearError}
               className="ml-2 underline hover:no-underline"
             >
-              Dismiss
+              {t('dismiss')}
             </button>
           </div>
         </div>
@@ -290,7 +293,9 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
       {/* Search Results Info */}
       {search && (
         <div className="text-sm text-gray-600">
-          Search results for "
+          {t('search_results_for')}
+          {' '}
+          "
           {search}
           "
         </div>
@@ -298,19 +303,22 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
 
       {/* Plan Count */}
       <div className="text-sm text-gray-600">
-        Showing
+        {t('showing')}
         {' '}
         {plans.length}
         {' '}
-        of
+        {t('of')}
         {' '}
         {pagination?.total || 0}
         {' '}
-        plans
+        {t('plans')}
         {pagination?.page && (
           <span>
             {' '}
-            • Page
+            •
+            {' '}
+            {t('page')}
+            {' '}
             {pagination.page}
           </span>
         )}
@@ -322,22 +330,22 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Plan Code
+                {t('plan_code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Plan Name
+                {t('plan_name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
+                {t('status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
+                {t('created')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Updated
+                {t('updated')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
@@ -367,7 +375,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
                       disabled={isDeleting}
                       className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
                       type="button"
@@ -375,7 +383,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
                       disabled={isDeleting}
                       className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Delete
+                      {t('delete')}
                     </button>
                   </div>
                 </td>
@@ -390,15 +398,15 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
         <div className="mt-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-700">
-              Showing
+              {t('showing')}
               {' '}
               {plans.length}
               {' '}
-              of
+              {t('of')}
               {' '}
               {pagination.total}
               {' '}
-              plans
+              {t('plans')}
             </p>
           </div>
           <div className="flex items-center space-x-2">
@@ -408,7 +416,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
               disabled={page <= 1}
               className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               type="button"
@@ -416,7 +424,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
               disabled={!pagination?.hasMore}
               className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>
@@ -427,12 +435,10 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
         <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-gray-600/50">
           <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
             <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('confirm_deletion')}</h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "
-                  {deleteConfirmPlan.planName}
-                  "? This action cannot be undone.
+                  {t('delete_confirm_message', { name: deleteConfirmPlan.planName })}
                 </p>
                 {deleteError && (
                   <div className="mt-2 text-sm text-red-600">{deleteError}</div>
@@ -445,7 +451,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
                     onClick={handleDeleteCancel}
                     className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-500 hover:bg-gray-50"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="button"
@@ -453,7 +459,7 @@ export function PlanList({ onEdit, onDelete }: PlanListProps): JSX.Element {
                     disabled={isDeleting}
                     className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
                   >
-                    {isDeleting ? 'Deleting...' : 'Confirm delete'}
+                    {isDeleting ? t('deleting') : t('confirm_delete')}
                   </button>
                 </div>
               </div>

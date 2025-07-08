@@ -8,11 +8,14 @@
 import {
   Download,
   Edit,
+  Eye,
   Plus,
   RefreshCw,
   Search,
   Trash2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -56,6 +59,8 @@ function toFormData(item: OutsourceOrderWithRelations | null): OutsourceOrderFor
 }
 
 export function OutsourceOrderList() {
+  const t = useTranslations('outsourceOrder.list');
+  const router = useRouter();
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderWithRelations | null>(null);
@@ -79,6 +84,10 @@ export function OutsourceOrderList() {
     setIsFormOpen(true);
   };
 
+  const handleViewDetails = (item: OutsourceOrderWithRelations) => {
+    router.push(`/dashboard/outsourceOrders/${item.id}/details`);
+  };
+
   const handleDelete = async (id: number) => {
     try {
       await deleteMutation.mutateAsync(id);
@@ -92,12 +101,12 @@ export function OutsourceOrderList() {
     return (
       <div className="flex flex-col items-center justify-center rounded bg-white p-6 py-8 shadow">
         <p className="mb-4 text-destructive">
-          Error loading outsourceOrders:
+          {t('error_loading')}
           {error.message}
         </p>
         <Button onClick={() => refetch()} variant="outline">
           <RefreshCw className="mr-2 size-4" />
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -110,19 +119,19 @@ export function OutsourceOrderList() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="rounded bg-white p-4 shadow">
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">Total outsourceOrders</p>
+            <p className="text-xs text-muted-foreground">{t('total')}</p>
           </div>
           <div className="rounded bg-white p-4 shadow">
             <div className="text-2xl font-bold">{stats.today}</div>
-            <p className="text-xs text-muted-foreground">Created Today</p>
+            <p className="text-xs text-muted-foreground">{t('created_today')}</p>
           </div>
           <div className="rounded bg-white p-4 shadow">
             <div className="text-2xl font-bold">{stats.thisWeek}</div>
-            <p className="text-xs text-muted-foreground">This Week</p>
+            <p className="text-xs text-muted-foreground">{t('this_week')}</p>
           </div>
           <div className="rounded bg-white p-4 shadow">
             <div className="text-2xl font-bold">{stats.thisMonth}</div>
-            <p className="text-xs text-muted-foreground">This Month</p>
+            <p className="text-xs text-muted-foreground">{t('this_month')}</p>
           </div>
         </div>
       )}
@@ -130,7 +139,7 @@ export function OutsourceOrderList() {
       {/* Controls */}
       <div className="mt-4 rounded bg-white p-6 shadow">
         <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-bold">OutsourceOrders</h2>
+          <h2 className="text-lg font-bold">{t('title')}</h2>
           <div className="flex gap-2">
 
             <Button
@@ -140,12 +149,12 @@ export function OutsourceOrderList() {
               disabled={isExporting}
             >
               <Download className="mr-2 size-4" />
-              Export
+              {t('export')}
             </Button>
 
             <Button onClick={() => setIsFormOpen(true)}>
               <Plus className="mr-2 size-4" />
-              Add OutsourceOrder
+              {t('add')}
             </Button>
           </div>
         </div>
@@ -158,7 +167,7 @@ export function OutsourceOrderList() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Search outsourceOrders..."
+                  placeholder={t('search_placeholder')}
                   value={filters.search}
                   onChange={e => setSearch(e.target.value)}
                   className="pl-10"
@@ -168,7 +177,7 @@ export function OutsourceOrderList() {
 
             {hasActiveFilters && (
               <Button variant="outline" onClick={resetFilters}>
-                Clear Filters
+                {t('clear_filters')}
               </Button>
             )}
           </div>
@@ -183,14 +192,14 @@ export function OutsourceOrderList() {
                   <TableHeader>
                     <TableRow>
 
-                      <TableHead>orderCode</TableHead>
-                      <TableHead>orderTitle</TableHead>
-                      <TableHead>Created By</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Order Date</TableHead>
-                      <TableHead>Expected Completion Date</TableHead>
-                      <TableHead>Actual Completion Date</TableHead>
-                      <TableHead className="w-24">Actions</TableHead>
+                      <TableHead>{t('table.order_code')}</TableHead>
+                      <TableHead>{t('table.order_title')}</TableHead>
+                      <TableHead>{t('table.created_by')}</TableHead>
+                      <TableHead>{t('table.assigned_to')}</TableHead>
+                      <TableHead>{t('table.order_date')}</TableHead>
+                      <TableHead>{t('table.expected_completion_date')}</TableHead>
+                      <TableHead>{t('table.actual_completion_date')}</TableHead>
+                      <TableHead className="w-32">{t('table.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -217,6 +226,15 @@ export function OutsourceOrderList() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleViewDetails(item)}
+                              className="size-8 p-0"
+                              title="View Details"
+                            >
+                              <Eye className="size-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEdit(item)}
                               className="size-8 p-0"
                             >
@@ -240,7 +258,7 @@ export function OutsourceOrderList() {
 
           {outsourceOrders.length === 0 && !isLoading && (
             <div className="py-8 text-center text-muted-foreground">
-              No outsourceOrders found. Create your first one!
+              {t('empty')}
             </div>
           )}
         </div>
@@ -271,11 +289,11 @@ export function OutsourceOrderList() {
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h3 className="mb-2 text-lg font-bold">Are you sure?</h3>
-            <p className="mb-4">This action cannot be undone. This will permanently delete the outsourceOrder.</p>
+            <h3 className="mb-2 text-lg font-bold">{t('delete_confirm_title')}</h3>
+            <p className="mb-4">{t('delete_confirm_desc')}</p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>Delete</Button>
+              <Button variant="outline" onClick={() => setDeleteId(null)}>{t('cancel')}</Button>
+              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>{t('delete')}</Button>
             </div>
           </div>
         </div>

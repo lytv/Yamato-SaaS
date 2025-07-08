@@ -8,6 +8,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -36,6 +37,7 @@ export function OutsourceOrderForm({
 }: OutsourceOrderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { userId } = useAuth();
+  const t = useTranslations('outsourceOrder.form');
 
   const createMutation = useCreateOutsourceOrder();
   const updateMutation = useUpdateOutsourceOrder();
@@ -158,20 +160,20 @@ export function OutsourceOrderForm({
     <div className="mx-auto w-full max-w-2xl rounded bg-white p-6 shadow">
       <div className="mb-4 border-b pb-2">
         <h2 className="text-xl font-bold">
-          {isEditing ? `Edit ${outsourceOrder?.orderTitle || 'OutsourceOrder'}` : 'Create New OutsourceOrder'}
+          {isEditing ? t('edit_title', { title: outsourceOrder?.orderTitle || t('default_title') }) : t('create_title')}
         </h2>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Error display */}
         {(createMutation.error || updateMutation.error) && (
           <div className="rounded bg-red-100 p-2 text-red-700">
-            {createMutation.error?.message || updateMutation.error?.message}
+            {t('submit_error')}
           </div>
         )}
 
         {/* Assigned To */}
         <div className="space-y-2">
-          <Label htmlFor="assignedToUserId">Assigned To *</Label>
+          <Label htmlFor="assignedToUserId">{t('assigned_to')}</Label>
 
           {isLoadingOptions
             ? (
@@ -189,7 +191,7 @@ export function OutsourceOrderForm({
                   }}
                 >
                   <SelectTrigger className={errors.assignedToUserId ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select assigned to..." />
+                    <SelectValue placeholder={t('assigned_to_placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {relationOptions?.userSyncs?.map((option: { userId: string; fullName: string }) => (
@@ -207,11 +209,11 @@ export function OutsourceOrderForm({
 
         {/* Order Code */}
         <div className="space-y-2">
-          <Label htmlFor="orderCode">Order Code *</Label>
+          <Label htmlFor="orderCode">{t('order_code')}</Label>
           <Input
             id="orderCode"
             type="text"
-            placeholder="Enter order code..."
+            placeholder={t('order_code_placeholder')}
             {...register('orderCode')}
             className={errors.orderCode ? 'border-destructive' : ''}
           />
@@ -221,11 +223,11 @@ export function OutsourceOrderForm({
         </div>
         {/* Order Title */}
         <div className="space-y-2">
-          <Label htmlFor="orderTitle">Order Title</Label>
+          <Label htmlFor="orderTitle">{t('order_title')}</Label>
           <Input
             id="orderTitle"
             type="text"
-            placeholder="Enter order title..."
+            placeholder={t('order_title_placeholder')}
             {...register('orderTitle')}
             className={errors.orderTitle ? 'border-destructive' : ''}
           />
@@ -235,7 +237,7 @@ export function OutsourceOrderForm({
         </div>
         {/* Order Date */}
         <div className="space-y-2">
-          <Label htmlFor="orderDate">Order Date *</Label>
+          <Label htmlFor="orderDate">{t('order_date')}</Label>
           <Input
             id="orderDate"
             type="date"
@@ -249,7 +251,7 @@ export function OutsourceOrderForm({
         </div>
         {/* Expected Completion Date */}
         <div className="space-y-2">
-          <Label htmlFor="expectedCompletionDate">Expected Completion Date</Label>
+          <Label htmlFor="expectedCompletionDate">{t('expected_completion_date')}</Label>
           <Input
             id="expectedCompletionDate"
             type="date"
@@ -263,7 +265,7 @@ export function OutsourceOrderForm({
         </div>
         {/* Actual Completion Date */}
         <div className="space-y-2">
-          <Label htmlFor="actualCompletionDate">Actual Completion Date</Label>
+          <Label htmlFor="actualCompletionDate">{t('actual_completion_date')}</Label>
           <Input
             id="actualCompletionDate"
             type="date"
@@ -277,11 +279,11 @@ export function OutsourceOrderForm({
         </div>
         {/* Total Amount */}
         <div className="space-y-2">
-          <Label htmlFor="totalAmount">Total Amount (Optional)</Label>
+          <Label htmlFor="totalAmount">{t('total_amount')}</Label>
           <Input
             id="totalAmount"
             type="number"
-            placeholder="Enter total amount (optional)..."
+            placeholder={t('total_amount_placeholder')}
             {...register('totalAmount')}
             className={errors.totalAmount ? 'border-destructive' : ''}
           />
@@ -291,10 +293,10 @@ export function OutsourceOrderForm({
         </div>
         {/* Notes */}
         <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
+          <Label htmlFor="notes">{t('notes')}</Label>
           <Textarea
             id="notes"
-            placeholder="Enter notes..."
+            placeholder={t('notes_placeholder')}
             {...register('notes')}
             className={errors.notes ? 'border-destructive' : ''}
           />
@@ -304,11 +306,11 @@ export function OutsourceOrderForm({
         </div>
         {/* Attachment */}
         <div className="space-y-2">
-          <Label htmlFor="attachment">Attachment</Label>
+          <Label htmlFor="attachment">{t('attachment')}</Label>
           <Input
             id="attachment"
             type="text"
-            placeholder="Enter attachment..."
+            placeholder={t('attachment_placeholder')}
             {...register('attachment')}
             className={errors.attachment ? 'border-destructive' : ''}
           />
@@ -319,7 +321,7 @@ export function OutsourceOrderForm({
 
         {/* Created By */}
         <div className="space-y-2">
-          <Label htmlFor="createdByUserId">Created By *</Label>
+          <Label htmlFor="createdByUserId">{t('created_by')}</Label>
 
           {isLoadingOptions
             ? (
@@ -331,7 +333,7 @@ export function OutsourceOrderForm({
                   onValueChange={value => setValue('createdByUserId', value)}
                 >
                   <SelectTrigger className={errors.createdByUserId ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select created by..." />
+                    <SelectValue placeholder={t('created_by_placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {relationOptions?.userSyncs?.map((option: { userId: string; fullName: string }) => (
@@ -356,7 +358,7 @@ export function OutsourceOrderForm({
             disabled={isSubmitting}
           >
             <X className="mr-2 size-4" />
-            Cancel
+            {t('cancel')}
           </Button>
 
           <Button
@@ -371,9 +373,9 @@ export function OutsourceOrderForm({
               : (
                   <Save className="mr-2 size-4" />
                 )}
-            {isEditing ? 'Update' : 'Create'}
+            {isEditing ? t('update') : t('create')}
             {' '}
-            OutsourceOrder
+            {t('form_title')}
           </Button>
         </div>
       </form>

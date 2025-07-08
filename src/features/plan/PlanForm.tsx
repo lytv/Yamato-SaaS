@@ -5,6 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -20,6 +21,7 @@ type PlanFormProps = {
 };
 
 export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Element {
+  const t = useTranslations('PlanForm');
   const isEditing = Boolean(plan);
   const { createPlan, updatePlan, isCreating, isUpdating, error, clearError } = usePlanMutations();
 
@@ -126,9 +128,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
 
       <Tabs defaultValue="required" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="required">Required Fields</TabsTrigger>
-          <TabsTrigger value="dates">Dates</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="required">{t('tab_required')}</TabsTrigger>
+          <TabsTrigger value="dates">{t('tab_dates')}</TabsTrigger>
+          <TabsTrigger value="notes">{t('tab_notes')}</TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Required Fields */}
@@ -139,7 +141,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planCode"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan Code *
+              {t('plan_code')}
+              {' '}
+              *
             </label>
             <input
               id="planCode"
@@ -150,7 +154,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.planCode ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Plan Code"
+              placeholder={t('plan_code_placeholder')}
               onBlur={handlePlanCodeBlur}
             />
             {errors.planCode && (
@@ -166,7 +170,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planName"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan Name *
+              {t('plan_name')}
+              {' '}
+              *
             </label>
             <input
               id="planName"
@@ -177,7 +183,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.planName ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Plan Name"
+              placeholder={t('plan_name_placeholder')}
             />
             {errors.planName && (
               <p id="planName-error" className="mt-2 text-sm text-red-600">
@@ -192,7 +198,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planYear"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan Year *
+              {t('plan_year')}
+              {' '}
+              *
             </label>
             <input
               id="planYear"
@@ -203,7 +211,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.planYear ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Plan Year"
+              placeholder={t('plan_year_placeholder')}
             />
             {errors.planYear && (
               <p id="planYear-error" className="mt-2 text-sm text-red-600">
@@ -218,7 +226,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planMonth"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan Month *
+              {t('plan_month')}
+              {' '}
+              *
             </label>
             <input
               id="planMonth"
@@ -229,7 +239,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.planMonth ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Plan Month"
+              placeholder={t('plan_month_placeholder')}
             />
             {errors.planMonth && (
               <p id="planMonth-error" className="mt-2 text-sm text-red-600">
@@ -244,7 +254,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="totalTargetQuantity"
               className="block text-sm font-medium text-gray-700"
             >
-              Total Target Quantity
+              {t('total_target_quantity')}
             </label>
             <input
               id="totalTargetQuantity"
@@ -254,7 +264,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.totalTargetQuantity ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Total Target Quantity"
+              placeholder={t('total_target_quantity_placeholder')}
             />
             {errors.totalTargetQuantity && (
               <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600">
@@ -269,7 +279,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="totalActualQuantity"
               className="block text-sm font-medium text-gray-700"
             >
-              Total Actual Quantity
+              {t('total_actual_quantity')}
             </label>
             <input
               id="totalActualQuantity"
@@ -279,7 +289,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.totalActualQuantity ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Total Actual Quantity"
+              placeholder={t('total_actual_quantity_placeholder')}
             />
             {errors.totalActualQuantity && (
               <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600">
@@ -294,7 +304,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="status"
               className="block text-sm font-medium text-gray-700"
             >
-              Status
+              {t('status')}
             </label>
             <input
               id="status"
@@ -304,7 +314,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.status ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Status"
+              placeholder={t('status_placeholder')}
             />
             {errors.status && (
               <p id="status-error" className="mt-2 text-sm text-red-600">
@@ -322,7 +332,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planStartDate"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan Start Date
+              {t('plan_start_date')}
             </label>
             <input
               id="planStartDate"
@@ -346,7 +356,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="planEndDate"
               className="block text-sm font-medium text-gray-700"
             >
-              Plan End Date
+              {t('plan_end_date')}
             </label>
             <input
               id="planEndDate"
@@ -370,7 +380,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="approvedBy"
               className="block text-sm font-medium text-gray-700"
             >
-              Approved By
+              {t('approved_by')}
             </label>
             <input
               id="approvedBy"
@@ -380,7 +390,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.approvedBy ? 'border-red-300' : ''
               }`}
-              placeholder="e.g., Approved By"
+              placeholder={t('approved_by_placeholder')}
             />
             {errors.approvedBy && (
               <p id="approvedBy-error" className="mt-2 text-sm text-red-600">
@@ -395,7 +405,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="approvedAt"
               className="block text-sm font-medium text-gray-700"
             >
-              Approved At
+              {t('approved_at')}
             </label>
             <input
               id="approvedAt"
@@ -422,7 +432,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               htmlFor="note"
               className="block text-sm font-medium text-gray-700"
             >
-              Note
+              {t('note')}
             </label>
             <textarea
               id="note"
@@ -432,7 +442,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
                 errors.note ? 'border-red-300' : ''
               }`}
-              placeholder="Enter your notes here..."
+              placeholder={t('note_placeholder')}
             />
             {errors.note && (
               <p id="note-error" className="mt-2 text-sm text-red-600">
@@ -450,23 +460,23 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           onClick={onCancel}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="button"
           onClick={handleReset}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Reset
+          {t('reset')}
         </button>
         <button
           type="submit"
           disabled={!isValid || isSubmitting}
           className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+          {isSubmitting ? t('saving') : isEditing ? t('update') : t('create')}
           {' '}
-          Plan
+          {t('plan')}
         </button>
       </div>
     </form>

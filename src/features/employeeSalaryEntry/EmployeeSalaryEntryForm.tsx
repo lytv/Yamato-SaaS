@@ -7,6 +7,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
@@ -100,6 +101,8 @@ export function EmployeeSalaryEntryForm({
       productId: employeeSalaryEntry?.productId ?? undefined, // 🆕 Add productId default
     },
   });
+
+  const t = useTranslations('EmployeeSalaryEntryForm');
 
   // 🆕 V4: Load relation options with error handling
   useEffect(() => {
@@ -270,7 +273,24 @@ export function EmployeeSalaryEntryForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {formError && (
           <div className="mb-4 rounded border border-red-300 bg-red-100 px-4 py-2 text-red-700">
-            {formError}
+            {(() => {
+              if (formError === 'Please select an Employee') {
+                return t('required_employee');
+              }
+              if (formError === 'Please select a Production Step Detail') {
+                return t('required_production_step_detail');
+              }
+              if (formError === 'Please select a Plan') {
+                return t('required_plan');
+              }
+              if (formError === 'Please select a Product') {
+                return t('required_product');
+              }
+              if (formError === 'Failed to save') {
+                return t('failed_to_save');
+              }
+              return formError;
+            })()}
           </div>
         )}
         <div className="flex flex-col gap-6">
@@ -280,19 +300,19 @@ export function EmployeeSalaryEntryForm({
             {/* 🆕 Shortcut Input Field */}
             <div className="w-1/5 min-w-[180px]">
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="employee-shortcut">Employee Shortcut</label>
+                <label className="text-sm font-medium" htmlFor="employee-shortcut">{t('employee_shortcut')}</label>
                 <Input
                   id="employee-shortcut"
-                  placeholder="Enter shortcut..."
+                  placeholder={t('employee_shortcut_placeholder')}
                   value={shortcutValue}
                   onChange={e => handleShortcutSearch(e.target.value)}
                   className="text-sm"
                 />
                 {shortcutMessage && (
-                  <p className="text-xs font-medium text-green-600">{shortcutMessage}</p>
+                  <p className="text-xs font-medium text-green-600">{t('employee_shortcut_found', { name: shortcutMessage.replace('✅ Found: ', '') })}</p>
                 )}
                 {shortcutError && (
-                  <p className="text-xs font-medium text-red-600">{shortcutError}</p>
+                  <p className="text-xs font-medium text-red-600">{t('employee_shortcut_not_found', { shortcut: shortcutValue })}</p>
                 )}
               </div>
             </div>
@@ -303,7 +323,7 @@ export function EmployeeSalaryEntryForm({
                 name="userId"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Employee</FormLabel>
+                    <FormLabel>{t('employee')}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         formField.onChange(value);
@@ -315,7 +335,7 @@ export function EmployeeSalaryEntryForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Employee" />
+                          <SelectValue placeholder={t('select_employee')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -352,19 +372,19 @@ export function EmployeeSalaryEntryForm({
             {/* 🆕 Product Code Input Field */}
             <div className="w-1/5 min-w-[180px]">
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="product-code">Product Code</label>
+                <label className="text-sm font-medium" htmlFor="product-code">{t('product_code')}</label>
                 <Input
                   id="product-code"
-                  placeholder="Enter product code..."
+                  placeholder={t('product_code_placeholder')}
                   value={productCodeValue}
                   onChange={e => handleProductCodeSearch(e.target.value)}
                   className="text-sm"
                 />
                 {productCodeMessage && (
-                  <p className="text-xs font-medium text-green-600">{productCodeMessage}</p>
+                  <p className="text-xs font-medium text-green-600">{t('product_code_found', { name: productCodeMessage.replace('✅ Found: ', '') })}</p>
                 )}
                 {productCodeError && (
-                  <p className="text-xs font-medium text-red-600">{productCodeError}</p>
+                  <p className="text-xs font-medium text-red-600">{t('product_code_not_found', { code: productCodeValue })}</p>
                 )}
               </div>
             </div>
@@ -375,7 +395,7 @@ export function EmployeeSalaryEntryForm({
                 name="productId"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Product</FormLabel>
+                    <FormLabel>{t('product')}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         formField.onChange(Number(value));
@@ -387,7 +407,7 @@ export function EmployeeSalaryEntryForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Product" />
+                          <SelectValue placeholder={t('select_product')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -428,7 +448,7 @@ export function EmployeeSalaryEntryForm({
                 name="productionStepDetailId"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Production Step Detail</FormLabel>
+                    <FormLabel>{t('production_step_detail')}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         formField.onChange(Number(value));
@@ -440,10 +460,10 @@ export function EmployeeSalaryEntryForm({
                         <SelectTrigger>
                           <SelectValue placeholder={
                             !productId
-                              ? 'Select Product first'
+                              ? t('select_product_first')
                               : filteredProductionStepDetails.length === 0
-                                ? 'No steps available'
-                                : 'Select Production Step Detail'
+                                ? t('no_steps_available')
+                                : t('select_production_step_detail')
                           }
                           />
                         </SelectTrigger>
@@ -484,7 +504,7 @@ export function EmployeeSalaryEntryForm({
                 name="planId"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Plan</FormLabel>
+                    <FormLabel>{t('plan')}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         formField.onChange(Number(value));
@@ -493,7 +513,7 @@ export function EmployeeSalaryEntryForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Plan" />
+                          <SelectValue placeholder={t('select_plan')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -527,7 +547,7 @@ export function EmployeeSalaryEntryForm({
                 name="workDate"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Work Date</FormLabel>
+                    <FormLabel>{t('work_date')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -543,7 +563,7 @@ export function EmployeeSalaryEntryForm({
                                   format(new Date(formField.value), 'PPP')
                                 )
                               : (
-                                  <span>Pick work date</span>
+                                  <span>{t('pick_work_date')}</span>
                                 )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -573,7 +593,7 @@ export function EmployeeSalaryEntryForm({
                 name="entryDate"
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel>Entry Date</FormLabel>
+                    <FormLabel>{t('entry_date')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -589,7 +609,7 @@ export function EmployeeSalaryEntryForm({
                                   format(new Date(formField.value), 'PPP')
                                 )
                               : (
-                                  <span>Pick entry date</span>
+                                  <span>{t('pick_entry_date')}</span>
                                 )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -620,11 +640,11 @@ export function EmployeeSalaryEntryForm({
               name="actualQuantity"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Actual Quantity</FormLabel>
+                  <FormLabel>{t('actual_quantity')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter actual quantity"
+                      placeholder={t('actual_quantity_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -642,11 +662,11 @@ export function EmployeeSalaryEntryForm({
               name="plannedQuantity"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Planned Quantity</FormLabel>
+                  <FormLabel>{t('planned_quantity')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter planned quantity"
+                      placeholder={t('planned_quantity_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -664,11 +684,11 @@ export function EmployeeSalaryEntryForm({
               name="limitQuantity"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Limit Quantity</FormLabel>
+                  <FormLabel>{t('limit_quantity')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter limit quantity"
+                      placeholder={t('limit_quantity_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -686,11 +706,11 @@ export function EmployeeSalaryEntryForm({
               name="previousEnteredQuantity"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Previous Entered Quantity</FormLabel>
+                  <FormLabel>{t('previous_entered_quantity')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter previous entered quantity"
+                      placeholder={t('previous_entered_quantity_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -708,12 +728,12 @@ export function EmployeeSalaryEntryForm({
               name="unitPrice"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Unit Price</FormLabel>
+                  <FormLabel>{t('unit_price')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
-                      placeholder="0.00"
+                      placeholder={t('unit_price_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -731,12 +751,12 @@ export function EmployeeSalaryEntryForm({
               name="totalAmount"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Total Amount</FormLabel>
+                  <FormLabel>{t('total_amount')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
-                      placeholder="0.00"
+                      placeholder={t('total_amount_placeholder')}
                       {...formField}
                       onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -745,7 +765,7 @@ export function EmployeeSalaryEntryForm({
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">Auto-calculated from quantity × unit price</p>
+                  <p className="text-xs text-muted-foreground">{t('auto_calculated')}</p>
                 </FormItem>
               )}
             />
@@ -757,10 +777,10 @@ export function EmployeeSalaryEntryForm({
               name="salaryNote"
               render={({ field: formField }) => (
                 <FormItem>
-                  <FormLabel>Salary Note</FormLabel>
+                  <FormLabel>{t('salary_note')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter salary note"
+                      placeholder={t('salary_note_placeholder')}
                       className="min-h-[100px]"
                       {...formField}
                     />
@@ -804,23 +824,23 @@ export function EmployeeSalaryEntryForm({
               setFilteredProductionStepDetails([]);
             }}
           >
-            Reset
+            {t('reset')}
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading
               ? (
                   <>
                     <div className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    {mode === 'create' ? 'Creating...' : 'Updating...'}
+                    {mode === 'create' ? t('creating') : t('updating')}
                   </>
                 )
               : (
-                  mode === 'create' ? 'Create EmployeeSalaryEntry' : 'Update EmployeeSalaryEntry'
+                  mode === 'create' ? t('create') : t('update')
                 )}
           </Button>
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t('cancel')}
             </Button>
           )}
         </div>
