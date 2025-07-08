@@ -6,6 +6,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -55,6 +56,8 @@ export function OutsourceOrderDetailForm({
   const createMutation = useCreateOutsourceOrderDetail();
   const updateMutation = useUpdateOutsourceOrderDetail();
   const { data: relationOptions, isLoading: isLoadingOptions, error: optionsError } = useOutsourceOrderDetailRelationOptions(outsourceOrderId);
+
+  const t = useTranslations('OrderDetailForm');
 
   // Tính ngày hiện tại + 30 ngày
   const today = new Date();
@@ -196,10 +199,10 @@ export function OutsourceOrderDetailForm({
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold">
-          {isEditing ? 'Edit Order Detail' : 'Add Order Detail'}
+          {isEditing ? t('edit_title') : t('add_title')}
         </h2>
         <p className="text-sm text-gray-600">
-          {isEditing ? 'Update order detail information' : 'Add a new detail item to the order'}
+          {isEditing ? t('edit_description') : t('add_description')}
         </p>
       </div>
 
@@ -211,7 +214,10 @@ export function OutsourceOrderDetailForm({
             name="planId"
             render={_ => (
               <FormItem className="flex flex-row items-center gap-x-2">
-                <FormLabel className="min-w-[120px]">Plan *</FormLabel>
+                <FormLabel className="min-w-[120px]">
+                  {t('plan')}
+                  <span> *</span>
+                </FormLabel>
                 <Select
                   onValueChange={handlePlanChange}
                   value={selectedPlan?.id.toString() || ''}
@@ -221,10 +227,10 @@ export function OutsourceOrderDetailForm({
                     <SelectTrigger>
                       <SelectValue placeholder={
                         isLoadingOptions
-                          ? 'Loading plans...'
+                          ? t('loading_plans')
                           : relationOptions?.plans.length === 0
-                            ? 'No plans available'
-                            : 'Select plan...'
+                            ? t('no_plans_available')
+                            : t('select_plan')
                       }
                       />
                     </SelectTrigger>
@@ -232,11 +238,11 @@ export function OutsourceOrderDetailForm({
                   <SelectContent>
                     {isLoadingOptions
                       ? (
-                          <SelectItem value="loading" disabled>Loading plans...</SelectItem>
+                          <SelectItem value="loading" disabled>{t('loading_plans')}</SelectItem>
                         )
                       : relationOptions?.plans.length === 0
                         ? (
-                            <SelectItem value="empty" disabled>No plans found</SelectItem>
+                            <SelectItem value="empty" disabled>{t('no_plans_available')}</SelectItem>
                           )
                         : (
                             relationOptions?.plans.map(plan => (
@@ -244,6 +250,7 @@ export function OutsourceOrderDetailForm({
                                 {plan.planCode}
                                 {' '}
                                 -
+                                {' '}
                                 {plan.planName}
                               </SelectItem>
                             ))
@@ -252,7 +259,8 @@ export function OutsourceOrderDetailForm({
                 </Select>
                 {optionsError && (
                   <p className="text-sm text-red-500">
-                    Error loading plans:
+                    {t('error_loading_plans')}
+                    {': '}
                     {optionsError.message}
                   </p>
                 )}
@@ -267,14 +275,17 @@ export function OutsourceOrderDetailForm({
             name="productId"
             render={_ => (
               <FormItem className="flex flex-row items-center gap-x-2">
-                <FormLabel className="min-w-[120px]">Product *</FormLabel>
+                <FormLabel className="min-w-[120px]">
+                  {t('product')}
+                  <span> *</span>
+                </FormLabel>
                 <Select
                   onValueChange={handleProductChange}
                   value={selectedProduct?.id.toString() || ''}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select product..." />
+                      <SelectValue placeholder={t('select_product')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -283,6 +294,7 @@ export function OutsourceOrderDetailForm({
                         {product.productCode}
                         {' '}
                         -
+                        {' '}
                         {product.productName}
                       </SelectItem>
                     ))}
@@ -299,14 +311,18 @@ export function OutsourceOrderDetailForm({
             name="productionStepId"
             render={_ => (
               <FormItem className="flex flex-row items-center gap-x-2">
-                <FormLabel className="min-w-[120px]">Production Step *</FormLabel>
+                <FormLabel className="min-w-[120px]">
+                  {t('production_step')}
+                  {' '}
+                  *
+                </FormLabel>
                 <Select
                   onValueChange={handleStepChange}
                   value={selectedStep?.id.toString() || ''}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select production step..." />
+                      <SelectValue placeholder={t('select_production_step')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -325,30 +341,29 @@ export function OutsourceOrderDetailForm({
             )}
           />
 
-          {/* Quantity and Pricing Row */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="orderedQuantity"
-              render={_ => (
-                <FormItem className="flex flex-row items-center gap-x-2">
-                  <FormLabel className="min-w-[120px]">Ordered Quantity *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="1"
-                      {...form.register('orderedQuantity', { valueAsNumber: true })}
-                      placeholder="Enter quantity..."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Xóa toàn bộ FormField cho unitPrice, totalPrice, sequenceNumber */}
-
-          </div>
+          {/* Ordered Quantity */}
+          <FormField
+            control={form.control}
+            name="orderedQuantity"
+            render={_ => (
+              <FormItem className="flex flex-row items-center gap-x-2">
+                <FormLabel className="min-w-[120px]">
+                  {t('ordered_quantity')}
+                  {' '}
+                  *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    {...form.register('orderedQuantity', { valueAsNumber: true })}
+                    placeholder={t('ordered_quantity_placeholder')}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Expected Completion Date */}
           <FormField
@@ -356,7 +371,11 @@ export function OutsourceOrderDetailForm({
             name="expectedCompletionDate"
             render={_ => (
               <FormItem className="flex flex-row items-center gap-x-2">
-                <FormLabel className="min-w-[120px]">Expected Completion Date *</FormLabel>
+                <FormLabel className="min-w-[120px]">
+                  {t('expected_completion_date')}
+                  {' '}
+                  *
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -376,7 +395,7 @@ export function OutsourceOrderDetailForm({
               className="text-sm text-blue-600 underline"
               onClick={() => setShowAdvancedFields(v => !v)}
             >
-              {showAdvancedFields ? 'Ẩn các trường nâng cao' : 'Hiện các trường nâng cao'}
+              {showAdvancedFields ? t('hide_advanced') : t('show_advanced')}
             </button>
           </div>
 
@@ -389,13 +408,13 @@ export function OutsourceOrderDetailForm({
                 name="completedQuantity"
                 render={_ => (
                   <FormItem className="flex flex-row items-center gap-x-2">
-                    <FormLabel className="min-w-[120px]">Completed Quantity</FormLabel>
+                    <FormLabel className="min-w-[120px]">{t('completed_quantity')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min="0"
                         {...form.register('completedQuantity', { valueAsNumber: true })}
-                        placeholder="Enter completed quantity..."
+                        placeholder={t('completed_quantity_placeholder')}
                       />
                     </FormControl>
                     <FormMessage />
@@ -409,18 +428,18 @@ export function OutsourceOrderDetailForm({
                 name="status"
                 render={_ => (
                   <FormItem className="flex flex-row items-center gap-x-2">
-                    <FormLabel className="min-w-[120px]">Status</FormLabel>
+                    <FormLabel className="min-w-[120px]">{t('status')}</FormLabel>
                     <Select onValueChange={value => form.setValue('status', value)} value={String(form.watch('status') ?? '')}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status..." />
+                          <SelectValue placeholder={t('status_placeholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                        <SelectItem value="pending">{t('pending')}</SelectItem>
+                        <SelectItem value="in_progress">{t('in_progress')}</SelectItem>
+                        <SelectItem value="completed">{t('completed')}</SelectItem>
+                        <SelectItem value="cancelled">{t('cancelled')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -434,7 +453,7 @@ export function OutsourceOrderDetailForm({
                 name="actualCompletionDate"
                 render={_ => (
                   <FormItem className="flex flex-row items-center gap-x-2">
-                    <FormLabel className="min-w-[120px]">Actual Completion Date</FormLabel>
+                    <FormLabel className="min-w-[120px]">{t('actual_completion_date')}</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -453,11 +472,11 @@ export function OutsourceOrderDetailForm({
                 name="itemNotes"
                 render={_ => (
                   <FormItem className="flex flex-row items-center gap-x-2">
-                    <FormLabel className="min-w-[120px]">Notes</FormLabel>
+                    <FormLabel className="min-w-[120px]">{t('notes')}</FormLabel>
                     <FormControl>
                       <Textarea
                         {...form.register('itemNotes')}
-                        placeholder="Additional notes about this detail item..."
+                        placeholder={t('notes_placeholder')}
                         rows={3}
                       />
                     </FormControl>
@@ -473,7 +492,7 @@ export function OutsourceOrderDetailForm({
             {/* Form Validation Status */}
             {!form.formState.isValid && (
               <div className="mr-auto text-sm text-red-500">
-                Please fill in all required fields
+                {t('required')}
               </div>
             )}
 
@@ -487,12 +506,12 @@ export function OutsourceOrderDetailForm({
             )}
 
             <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || !form.formState.isValid}>
               {isLoading
-                ? (isEditing ? 'Updating...' : 'Creating...')
-                : (isEditing ? 'Update Detail' : 'Create Detail')}
+                ? (isEditing ? t('updating') : t('creating'))
+                : (isEditing ? t('update') : t('create'))}
             </Button>
           </div>
         </form>

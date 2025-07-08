@@ -15,6 +15,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [search, setSearch] = useState('');
+  const t = useTranslations('OrderDetailList');
 
   const {
     data: outsourceOrderDetails = [],
@@ -142,20 +144,20 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
           onClick={handleBackToOrders}
           className="text-blue-600 hover:text-blue-800"
         >
-          Dashboard
+          {t('dashboard')}
         </button>
         <span className="mx-2 text-gray-400">/</span>
         <button
           onClick={handleBackToOrders}
           className="text-blue-600 hover:text-blue-800"
         >
-          OutsourceOrders
+          {t('outsource_orders')}
         </button>
         <span className="mx-2 text-gray-400">/</span>
         <span className="text-gray-600">
           {order?.orderCode}
           {' '}
-          Details
+          {t('details')}
         </span>
       </nav>
 
@@ -165,16 +167,17 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
           <div className="mb-4 flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Order Details:
+                {t('order_details')}
+                :
                 {order.orderCode}
               </h1>
               <p className="mt-1 text-gray-600">
-                Created by
+                {t('created_by')}
                 {' '}
                 {order.createdByUser?.fullName || order.createdByUserId}
                 {' '}
                 •
-                Assigned to
+                {t('assigned_to')}
                 {' '}
                 {order.assignedToUser?.fullName || order.assignedToUserId}
               </p>
@@ -197,19 +200,19 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
           {/* Order Info Grid */}
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3 lg:grid-cols-5">
             <div>
-              <span className="text-gray-500">Order Date:</span>
+              <span className="text-gray-500">{t('order_date')}</span>
               <div className="font-medium">
                 {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
               </div>
             </div>
             <div>
-              <span className="text-gray-500">Expected Date:</span>
+              <span className="text-gray-500">{t('expected_date')}</span>
               <div className="font-medium">
                 {order.expectedCompletionDate ? new Date(order.expectedCompletionDate).toLocaleDateString() : '-'}
               </div>
             </div>
             <div>
-              <span className="text-gray-500">Status:</span>
+              <span className="text-gray-500">{t('status')}</span>
               <div>
                 <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
                   {order.status}
@@ -217,13 +220,13 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               </div>
             </div>
             <div>
-              <span className="text-gray-500">Priority:</span>
+              <span className="text-gray-500">{t('priority')}</span>
               <div className="font-medium">
                 {order.priority ? `Priority ${order.priority}` : '-'}
               </div>
             </div>
             <div>
-              <span className="text-gray-500">Total Amount:</span>
+              <span className="text-gray-500">{t('total_amount')}</span>
               <div className="font-medium text-green-600">
                 {(() => {
                   const amount = Number(order.totalAmount);
@@ -240,21 +243,21 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-            <p className="text-sm text-gray-600">Total Items</p>
+            <p className="text-sm text-gray-600">{t('total_items')}</p>
           </div>
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="text-2xl font-bold text-green-600">{stats.totalCompletedQuantity || 0}</div>
-            <p className="text-sm text-gray-600">Completed Quantity</p>
+            <p className="text-sm text-gray-600">{t('completed_quantity')}</p>
           </div>
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="text-2xl font-bold text-orange-600">{stats.totalOrderedQuantity || 0}</div>
-            <p className="text-sm text-gray-600">Ordered Quantity</p>
+            <p className="text-sm text-gray-600">{t('ordered_quantity')}</p>
           </div>
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="text-2xl font-bold text-purple-600">
               {stats.completionRate ? `${(stats.completionRate * 100).toFixed(1)}%` : '0%'}
             </div>
-            <p className="text-sm text-gray-600">Completion Rate</p>
+            <p className="text-sm text-gray-600">{t('completion_rate')}</p>
           </div>
         </div>
       )}
@@ -262,7 +265,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
       {/* Controls */}
       <div className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-bold">Order Details</h2>
+          <h2 className="text-lg font-bold">{t('order_details')}</h2>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -271,7 +274,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               disabled={isExporting}
             >
               <Download className="mr-2 size-4" />
-              Export
+              {t('export')}
             </Button>
 
             <Button onClick={() => setIsFormOpen(true)}>
@@ -288,7 +291,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Search details..."
+                  placeholder={t('search_details')}
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="pl-10"
@@ -307,16 +310,16 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Production Step</TableHead>
-                      <TableHead className="text-right">Ordered Qty</TableHead>
-                      <TableHead className="text-right">Completed</TableHead>
-                      <TableHead className="text-right">Unit Price</TableHead>
-                      <TableHead className="text-right">Total Price</TableHead>
-                      <TableHead>Expected Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-24 text-center">Actions</TableHead>
+                      <TableHead>{t('plan')}</TableHead>
+                      <TableHead>{t('product')}</TableHead>
+                      <TableHead>{t('production_step')}</TableHead>
+                      <TableHead className="text-right">{t('ordered_qty')}</TableHead>
+                      <TableHead className="text-right">{t('completed')}</TableHead>
+                      <TableHead className="text-right">{t('unit_price')}</TableHead>
+                      <TableHead className="text-right">{t('total_price')}</TableHead>
+                      <TableHead>{t('expected_date')}</TableHead>
+                      <TableHead>{t('status')}</TableHead>
+                      <TableHead className="w-24 text-center">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -392,7 +395,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
 
           {filteredDetails.length === 0 && !isLoading && (
             <div className="py-8 text-center text-muted-foreground">
-              {search ? 'No details found matching your search.' : 'No details found. Add the first one!'}
+              {search ? t('no_details_found_search') : t('no_details_found')}
             </div>
           )}
         </div>
@@ -424,11 +427,11 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h3 className="mb-2 text-lg font-bold">Are you sure?</h3>
-            <p className="mb-4">This action cannot be undone. This will permanently delete the order detail.</p>
+            <h3 className="mb-2 text-lg font-bold">{t('are_you_sure')}</h3>
+            <p className="mb-4">{t('delete_warning')}</p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>Delete</Button>
+              <Button variant="outline" onClick={() => setDeleteId(null)}>{t('cancel')}</Button>
+              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>{t('delete')}</Button>
             </div>
           </div>
         </div>
