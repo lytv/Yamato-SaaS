@@ -6,6 +6,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download, Upload } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 
 import { ProcessSkeleton } from '@/features/process/ProcessSkeleton';
@@ -25,6 +26,7 @@ type ProcessListProps = {
 
 export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element {
   const { userId, orgId } = useAuth();
+  const t = useTranslations('process.list');
   const [deleteConfirmProcess, setDeleteConfirmProcess] = useState<Process | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -166,10 +168,8 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
   if (processs.length === 0 && !search) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No processs found</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Create your first process to get started.
-        </p>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('no_process_found')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('create_first_process')}</p>
       </div>
     );
   }
@@ -182,10 +182,10 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search processs..."
+              placeholder={t('search_placeholder')}
               value={search}
               onChange={handleSearchInputChange}
-              aria-label="Search processs"
+              aria-label={t('search_aria_label')}
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -198,7 +198,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
-              Show All
+              {t('show_all')}
             </label>
           </div>
         </div>
@@ -207,31 +207,31 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
             <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
+              {t('sort_by')}
             </label>
             <select
               id="sortBy"
               value={sortBy}
               onChange={handleSortFieldChange}
-              aria-label="Sort by"
+              aria-label={t('sort_by')}
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="processName">Process Name</option>
-              <option value="processCode">Process Code</option>
-              <option value="processCategory">Process Category</option>
-              <option value="processType">Process Type</option>
-              <option value="department">Department</option>
+              <option value="createdAt">{t('created_at')}</option>
+              <option value="updatedAt">{t('updated_at')}</option>
+              <option value="processName">{t('process_name')}</option>
+              <option value="processCode">{t('process_code')}</option>
+              <option value="processCategory">{t('process_category')}</option>
+              <option value="processType">{t('process_type')}</option>
+              <option value="department">{t('department')}</option>
             </select>
 
             <button
               type="button"
               onClick={handleSortOrderToggle}
-              aria-label="Sort order"
+              aria-label={t('sort_order')}
               className="inline-flex items-center rounded-md border border-gray-300 bg-white p-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              {sortOrder === 'desc' ? '↓' : '↑'}
+              {sortOrder === 'desc' ? t('desc') : t('asc')}
             </button>
           </div>
 
@@ -240,22 +240,22 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
             type="button"
             onClick={handleExportProcesss}
             disabled={isExporting || processs.length === 0}
-            aria-label="Export processs to Excel"
+            aria-label={t('export_aria_label')}
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export'}
+            {isExporting ? t('exporting') : t('export')}
           </button>
 
           {/* Import Button */}
           <button
             type="button"
             onClick={() => setImportModalOpen(true)}
-            aria-label="Import processs from Excel"
+            aria-label={t('import_aria_label')}
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Upload className="mr-2 size-4" />
-            Import
+            {t('import')}
           </button>
 
           {/* Clear Search */}
@@ -263,10 +263,10 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
             <button
               type="button"
               onClick={resetFilters}
-              aria-label="Clear search"
+              aria-label={t('clear_search_aria_label')}
               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Clear search
+              {t('clear_search')}
             </button>
           )}
         </div>
@@ -325,22 +325,22 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Process Code
+                {t('process_code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Process Name
+                {t('process_name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Category
+                {t('category')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
+                {t('created')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Updated
+                {t('updated')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
@@ -370,7 +370,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
                       disabled={isDeleting}
                       className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
                       type="button"
@@ -378,7 +378,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
                       disabled={isDeleting}
                       className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Delete
+                      {t('delete')}
                     </button>
                   </div>
                 </td>
@@ -411,7 +411,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
               disabled={page <= 1}
               className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               type="button"
@@ -419,7 +419,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
               disabled={!pagination?.hasMore}
               className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>
@@ -430,12 +430,10 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
         <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-gray-600/50">
           <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
             <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('confirm_deletion')}</h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "
-                  {deleteConfirmProcess.processName}
-                  "? This action cannot be undone.
+                  {t('confirm_delete_message', { name: deleteConfirmProcess.processName })}
                 </p>
                 {deleteError && (
                   <div className="mt-2 text-sm text-red-600">{deleteError}</div>
@@ -448,7 +446,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
                     onClick={handleDeleteCancel}
                     className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-500 hover:bg-gray-50"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="button"
@@ -456,7 +454,7 @@ export function ProcessList({ onEdit, onDelete }: ProcessListProps): JSX.Element
                     disabled={isDeleting}
                     className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
                   >
-                    {isDeleting ? 'Deleting...' : 'Confirm delete'}
+                    {isDeleting ? t('deleting') : t('confirm_delete')}
                   </button>
                 </div>
               </div>

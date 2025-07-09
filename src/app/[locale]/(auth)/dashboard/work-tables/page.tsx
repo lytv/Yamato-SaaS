@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import type { WorkTable } from '@/types/workTable';
 
 export default function WorkTablesPage() {
   const { userId } = useAuth();
+  const t = useTranslations('workTable.page');
   const [formMode, setFormMode] = useState<'hidden' | 'create' | 'edit'>('hidden');
   const [selectedWorkTable, setSelectedWorkTable] = useState<WorkTable | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -65,15 +67,13 @@ export default function WorkTablesPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Work Tables</h1>
-        <p className="text-muted-foreground">
-          Manage your production work tables and equipment
-        </p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
 
       <div className="mb-4">
         <Button onClick={handleCreate}>
-          Add Work Table
+          {t('add_new')}
         </Button>
       </div>
 
@@ -81,7 +81,7 @@ export default function WorkTablesPage() {
       {formMode !== 'hidden' && (
         <div className="mb-6">
           <WorkTableForm
-            title={formMode === 'edit' ? 'Edit Work Table' : 'Create Work Table'}
+            title={formMode === 'edit' ? 'edit_title' : 'create_title'}
             isEditMode={formMode === 'edit'}
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}

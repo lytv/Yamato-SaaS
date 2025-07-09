@@ -5,6 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -19,6 +20,7 @@ type UserSyncFormProps = {
 };
 
 export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormProps): JSX.Element {
+  const t = useTranslations('userSync.form');
   const isEditing = Boolean(user_sync);
   const { createUserSync, updateUserSync, isCreating, isUpdating, error, clearError } = useUserSyncMutations();
 
@@ -93,10 +95,9 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           <div className="text-sm text-red-700">{error}</div>
         </div>
       )}
-
       {/* User ID Field */}
       <div>
-        <label htmlFor="userId" className="block text-sm font-medium text-gray-700">User ID *</label>
+        <label htmlFor="userId" className="block text-sm font-medium text-gray-700">{t('user_id_label')}</label>
         <input
           id="userId"
           type="text"
@@ -104,16 +105,15 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           aria-required="true"
           aria-describedby={errors.userId ? 'userId-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.userId ? 'border-red-300' : ''}`}
-          placeholder="e.g., clerk_user_id"
+          placeholder={t('user_id_placeholder')}
         />
         {errors.userId && (
           <p id="userId-error" className="mt-2 text-sm text-red-600">{errors.userId.message}</p>
         )}
       </div>
-
       {/* Email Field */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email *</label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">{t('email_label')}</label>
         <input
           id="email"
           type="email"
@@ -121,110 +121,108 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           aria-required="true"
           aria-describedby={errors.email ? 'email-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.email ? 'border-red-300' : ''}`}
-          placeholder="e.g., user@email.com"
+          placeholder={t('email_placeholder')}
         />
         {errors.email && (
           <p id="email-error" className="mt-2 text-sm text-red-600">{errors.email.message}</p>
         )}
       </div>
-
       {/* Full Name Field */}
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
+        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">{t('full_name_label')}</label>
         <input
           id="fullName"
           type="text"
           {...register('fullName')}
           aria-describedby={errors.fullName ? 'fullName-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.fullName ? 'border-red-300' : ''}`}
-          placeholder="e.g., John Doe"
+          placeholder={t('full_name_placeholder')}
         />
         {errors.fullName && (
           <p id="fullName-error" className="mt-2 text-sm text-red-600">{errors.fullName.message}</p>
         )}
       </div>
-
       {/* Role Field */}
       <div>
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700">{t('role_label')}</label>
         <input
           id="role"
           type="text"
           {...register('role')}
           aria-describedby={errors.role ? 'role-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.role ? 'border-red-300' : ''}`}
-          placeholder="e.g., admin, member, viewer"
+          placeholder={t('role_placeholder')}
         />
         {errors.role && (
           <p id="role-error" className="mt-2 text-sm text-red-600">{errors.role.message}</p>
         )}
       </div>
-
       {/* Organization Role Field */}
       <div>
-        <label htmlFor="organizationRole" className="block text-sm font-medium text-gray-700">Organization Role</label>
+        <label htmlFor="organizationRole" className="block text-sm font-medium text-gray-700">{t('org_role_label')}</label>
         <input
           id="organizationRole"
           type="text"
           {...register('organizationRole')}
           aria-describedby={errors.organizationRole ? 'organizationRole-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.organizationRole ? 'border-red-300' : ''}`}
-          placeholder="e.g., manager, staff"
+          placeholder={t('org_role_placeholder')}
         />
         {errors.organizationRole && (
           <p id="organizationRole-error" className="mt-2 text-sm text-red-600">{errors.organizationRole.message}</p>
         )}
       </div>
-
       {/* Shortcut Field */}
       <div>
-        <label htmlFor="shortcut" className="block text-sm font-medium text-gray-700">Shortcut</label>
+        <label htmlFor="shortcut" className="block text-sm font-medium text-gray-700">{t('shortcut_label')}</label>
         <input
           id="shortcut"
           type="text"
           {...register('shortcut')}
           aria-describedby={errors.shortcut ? 'shortcut-error' : undefined}
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.shortcut ? 'border-red-300' : ''}`}
-          placeholder="e.g., user-shortcut"
+          placeholder={t('shortcut_placeholder')}
         />
         {errors.shortcut && (
           <p id="shortcut-error" className="mt-2 text-sm text-red-600">{errors.shortcut.message}</p>
         )}
       </div>
-
       {/* Is Active Field */}
       <div className="flex items-center space-x-2">
         <input
           id="isActive"
           type="checkbox"
           {...register('isActive')}
-          className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
         />
-        <label htmlFor="isActive" className="text-sm font-medium text-gray-700">Active</label>
+        <label htmlFor="isActive" className="text-sm font-medium text-gray-700">{t('is_active_label')}</label>
       </div>
-
-      {/* Form Actions */}
       <div className="flex justify-end space-x-3">
         <button
           type="button"
           onClick={onCancel}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="button"
           onClick={handleReset}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Reset
+          {t('reset')}
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !isValid}
-          className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isEditing ? 'Update UserSync' : 'Create UserSync'}
+          {isSubmitting
+            ? isEditing
+              ? t('updating')
+              : t('creating')
+            : isEditing
+              ? t('update')
+              : t('create')}
         </button>
       </div>
     </form>

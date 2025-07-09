@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const DEFAULT_FILTERS: WorkTableFilters = {
 };
 
 export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
+  const t = useTranslations('workTable.list');
   const [filters, setFilters] = useState<WorkTableFilters>(DEFAULT_FILTERS);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -69,7 +71,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
           {error}
         </p>
         <Button onClick={refresh} className="mt-2">
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -80,7 +82,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
       {/* Search and Filters */}
       <div className="flex gap-4">
         <Input
-          placeholder="Search work tables..."
+          placeholder={t('search_placeholder')}
           value={filters.search}
           onChange={e => handleSearchChange(e.target.value)}
           className="max-w-sm"
@@ -93,10 +95,10 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="p-2 text-left">Code</th>
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-left">Type</th>
-                <th className="p-2 text-left">Actions</th>
+                <th className="p-2 text-left">{t('code')}</th>
+                <th className="p-2 text-left">{t('name')}</th>
+                <th className="p-2 text-left">{t('type')}</th>
+                <th className="p-2 text-left">{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,7 +114,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                   ? (
                       <tr>
                         <td colSpan={7} className="p-4 text-center text-muted-foreground">
-                          No work tables found
+                          {t('no_work_tables_found')}
                         </td>
                       </tr>
                     )
@@ -130,7 +132,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                                   size="sm"
                                   onClick={() => onView(workTable)}
                                 >
-                                  View
+                                  {t('view')}
                                 </Button>
                               )}
                               {onEdit && (
@@ -139,7 +141,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                                   size="sm"
                                   onClick={() => onEdit(workTable)}
                                 >
-                                  Edit
+                                  {t('edit')}
                                 </Button>
                               )}
                               <Button
@@ -148,7 +150,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
                                 onClick={() => handleDelete(workTable.id)}
                                 disabled={isDeleting}
                               >
-                                Delete
+                                {t('delete')}
                               </Button>
                             </div>
                           </td>
@@ -164,19 +166,11 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
       {pagination && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing
-            {' '}
-            {((pagination.page - 1) * pagination.limit) + 1}
-            {' '}
-            to
-            {' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)}
-            {' '}
-            of
-            {' '}
-            {pagination.total}
-            {' '}
-            work tables
+            {t('showing', {
+              from: ((pagination.page - 1) * pagination.limit) + 1,
+              to: Math.min(pagination.page * pagination.limit, pagination.total),
+              total: pagination.total,
+            })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -185,7 +179,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
             >
-              Previous
+              {t('previous')}
             </Button>
             <Button
               variant="outline"
@@ -193,7 +187,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={!pagination.hasMore}
             >
-              Next
+              {t('next')}
             </Button>
           </div>
         </div>

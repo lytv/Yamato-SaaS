@@ -5,6 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -19,6 +20,7 @@ type ProcessFormProps = {
 };
 
 export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps): JSX.Element {
+  const t = useTranslations('process.form');
   const isEditing = Boolean(process);
   const { createProcess, updateProcess, isCreating, isUpdating, error, clearError } = useProcessMutations();
 
@@ -92,7 +94,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           htmlFor="processCode"
           className="block text-sm font-medium text-gray-700"
         >
-          Process Code *
+          {t('processCode_label')}
         </label>
         <input
           id="processCode"
@@ -103,7 +105,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
             errors.processCode ? 'border-red-300' : ''
           }`}
-          placeholder="e.g., PROD-001"
+          placeholder={t('processCode_placeholder')}
         />
         {errors.processCode && (
           <p id="processCode-error" className="mt-2 text-sm text-red-600">
@@ -118,7 +120,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           htmlFor="processName"
           className="block text-sm font-medium text-gray-700"
         >
-          Process Name *
+          {t('processName_label')}
         </label>
         <input
           id="processName"
@@ -129,7 +131,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
             errors.processName ? 'border-red-300' : ''
           }`}
-          placeholder="Enter process name"
+          placeholder={t('processName_placeholder')}
         />
         {errors.processName && (
           <p id="processName-error" className="mt-2 text-sm text-red-600">
@@ -144,7 +146,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           htmlFor="processCategory"
           className="block text-sm font-medium text-gray-700"
         >
-          Category
+          {t('processCategory_label')}
         </label>
         <input
           id="processCategory"
@@ -154,7 +156,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
             errors.processCategory ? 'border-red-300' : ''
           }`}
-          placeholder="e.g., Electronics, Software"
+          placeholder={t('processCategory_placeholder')}
         />
         {errors.processCategory && (
           <p id="processCategory-error" className="mt-2 text-sm text-red-600">
@@ -169,7 +171,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           htmlFor="description"
           className="block text-sm font-medium text-gray-700"
         >
-          Description
+          {t('description_label')}
         </label>
         <textarea
           id="description"
@@ -179,7 +181,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
             errors.description ? 'border-red-300' : ''
           }`}
-          placeholder="Additional notes about the process..."
+          placeholder={t('description_placeholder')}
         />
         {errors.description && (
           <p id="description-error" className="mt-2 text-sm text-red-600">
@@ -195,7 +197,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           onClick={onCancel}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Cancel
+          {t('cancel')}
         </button>
 
         <button
@@ -203,7 +205,7 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
           onClick={handleReset}
           className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          Reset
+          {t('reset')}
         </button>
 
         <button
@@ -213,11 +215,11 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
         >
           {isSubmitting
             ? isEditing
-              ? 'Updating...'
-              : 'Creating...'
+              ? t('updating')
+              : t('creating')
             : isEditing
-              ? 'Update Process'
-              : 'Create Process'}
+              ? t('update')
+              : t('create')}
         </button>
       </div>
     </form>

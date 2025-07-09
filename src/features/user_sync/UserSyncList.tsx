@@ -6,6 +6,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download, Upload } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 
 import { UserSyncSkeleton } from '@/features/user_sync/UserSyncSkeleton';
@@ -25,6 +26,7 @@ type UserSyncListProps = {
 
 export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Element {
   const { userId, orgId } = useAuth();
+  const t = useTranslations('userSync.list');
   const [deleteConfirmUserSync, setDeleteConfirmUserSync] = useState<UserSync | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -182,10 +184,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search user_syncs..."
+              placeholder={t('search_placeholder')}
               value={search}
               onChange={handleSearchInputChange}
-              aria-label="Search user_syncs"
+              aria-label={t('search_aria_label')}
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -198,7 +200,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
-              Show All
+              {t('show_all')}
             </label>
           </div>
         </div>
@@ -207,28 +209,28 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
             <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
+              {t('sort_by')}
             </label>
             <select
               id="sortBy"
               value={sortBy}
               onChange={handleSortFieldChange}
-              aria-label="Sort by"
+              aria-label={t('sort_by')}
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="user_syncName">UserSync Name</option>
-              <option value="user_syncCode">UserSync Code</option>
+              <option value="createdAt">{t('created_at')}</option>
+              <option value="updatedAt">{t('updated_at')}</option>
+              <option value="fullName">{t('full_name')}</option>
+              <option value="email">{t('email')}</option>
             </select>
 
             <button
               type="button"
               onClick={handleSortOrderToggle}
-              aria-label="Sort order"
+              aria-label={t('sort_order')}
               className="inline-flex items-center rounded-md border border-gray-300 bg-white p-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              {sortOrder === 'desc' ? '↓' : '↑'}
+              {sortOrder === 'desc' ? t('desc') : t('asc')}
             </button>
           </div>
 
@@ -237,22 +239,22 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             type="button"
             onClick={handleExportUserSyncs}
             disabled={isExporting || user_syncs.length === 0}
-            aria-label="Export user_syncs to Excel"
+            aria-label={t('export_aria_label')}
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export'}
+            {isExporting ? t('exporting') : t('export')}
           </button>
 
           {/* Import Button */}
           <button
             type="button"
             onClick={() => setImportModalOpen(true)}
-            aria-label="Import user_syncs from Excel"
+            aria-label={t('import_aria_label')}
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Upload className="mr-2 size-4" />
-            Import
+            {t('import')}
           </button>
 
           {/* Clear Search */}
@@ -260,10 +262,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             <button
               type="button"
               onClick={resetFilters}
-              aria-label="Clear search"
+              aria-label={t('clear_search_aria_label')}
               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Clear search
+              {t('clear_search')}
             </button>
           )}
         </div>
@@ -321,17 +323,17 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
         <table role="table" className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">User ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Avatar</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Org Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Shortcut</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Active</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Updated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('user_id')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('email')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('full_name')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('avatar')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('role')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('org_role')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('shortcut')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('is_active')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('created')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('updated')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -371,7 +373,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                       disabled={isDeleting}
                       className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
                       type="button"
@@ -379,7 +381,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                       disabled={isDeleting}
                       className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Delete
+                      {t('delete')}
                     </button>
                   </div>
                 </td>
@@ -412,7 +414,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               disabled={page <= 1}
               className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               type="button"
@@ -420,7 +422,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               disabled={!pagination?.hasMore}
               className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>

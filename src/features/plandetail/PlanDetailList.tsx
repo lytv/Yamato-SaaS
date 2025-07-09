@@ -6,7 +6,8 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Download } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import React, { useEffect, useState } from 'react';
 
 import { PlanDetailSkeleton } from '@/features/plandetail/PlanDetailSkeleton';
 import { usePlanDetailExport } from '@/hooks/usePlanDetailExport';
@@ -24,6 +25,7 @@ type PlanDetailListProps = {
 
 export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.Element {
   const { userId, orgId } = useAuth();
+  const t = useTranslations('plandetailList');
   const [deleteConfirmPlanDetail, setDeleteConfirmPlanDetail] = useState<PlanDetail | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -184,10 +186,10 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
           <div className="relative max-w-lg flex-1">
             <input
               type="text"
-              placeholder="Search plandetails..."
+              placeholder={t('search_placeholder')}
               value={search}
               onChange={handleSearchInputChange}
-              aria-label="Search plandetails"
+              aria-label={t('search_placeholder')}
               className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
             />
           </div>
@@ -200,7 +202,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
-              Show All
+              {t('show_all')}
             </label>
           </div>
         </div>
@@ -209,7 +211,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
             <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
+              {t('sort_by')}
             </label>
             <select
               id="sortBy"
@@ -218,10 +220,10 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               aria-label="Sort by"
               className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="plandetailName">PlanDetail Name</option>
-              <option value="plandetailCode">PlanDetail Code</option>
+              <option value="createdAt">{t('created_date')}</option>
+              <option value="updatedAt">{t('updated_date')}</option>
+              <option value="plandetailName">{t('plandetail_name')}</option>
+              <option value="plandetailCode">{t('plandetail_code')}</option>
             </select>
 
             <button
@@ -243,7 +245,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export'}
+            {isExporting ? t('exporting') : t('export')}
           </button>
 
           {/* Import Modal/Button */}
@@ -257,7 +259,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               aria-label="Clear search"
               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Clear search
+              {t('clear_search')}
             </button>
           )}
         </div>
@@ -284,28 +286,19 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
       {/* Search Results Info */}
       {search && (
         <div className="text-sm text-gray-600">
-          Search results for "
-          {search}
-          "
+          {t('search_results_for', { search })}
         </div>
       )}
 
       {/* PlanDetail Count */}
       <div className="text-sm text-gray-600">
-        Showing
-        {' '}
-        {plandetails.length}
-        {' '}
-        of
-        {' '}
-        {pagination?.total || 0}
-        {' '}
-        plandetails
+        {t('showing', { count: plandetails.length, total: pagination?.total })}
         {pagination?.page && (
           <span>
             {' '}
-            • Page
-            {pagination.page}
+            •
+            {' '}
+            {t('page', { page: pagination.page })}
           </span>
         )}
       </div>
@@ -322,30 +315,32 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                 Product Code
               </th> */}
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Plan Code
+                {t('plan_code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Product Name
+                {t('product_name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Planned Quantity
+                {t('planned_quantity')}
               </th>
               {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Status
               </th> */}
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {plandetails.map(plandetailRaw => {
+            {plandetails.map((plandetailRaw) => {
               const plandetail = plandetailRaw as PlanDetailWithRelations;
               // Lấy productName từ relationOptions nếu có
               let productName = '-';
               if (plandetail.productCode && Array.isArray(relationOptions?.products)) {
                 const found = relationOptions.products.find(p => p.productCode === plandetail.productCode);
-                if (found) productName = found.productName;
+                if (found) {
+                  productName = found.productName;
+                }
               }
               return (
                 <tr key={plandetail.id} className="hover:bg-gray-50">
@@ -375,7 +370,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                         disabled={isDeleting}
                         className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Edit
+                        {t('edit')}
                       </button>
                       <button
                         type="button"
@@ -383,7 +378,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                         disabled={isDeleting}
                         className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Delete
+                        {t('delete')}
                       </button>
                     </div>
                   </td>
@@ -399,15 +394,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
         <div className="mt-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-700">
-              Showing
-              {' '}
-              {plandetails.length}
-              {' '}
-              of
-              {' '}
-              {pagination.total}
-              {' '}
-              plandetails
+              {t('showing', { count: plandetails.length, total: pagination.total })}
             </p>
           </div>
           <div className="flex items-center space-x-2">
@@ -417,7 +404,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               disabled={page <= 1}
               className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               type="button"
@@ -425,7 +412,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               disabled={!pagination?.hasMore}
               className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>
@@ -439,9 +426,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "
-                  {deleteConfirmPlanDetail.productCode}
-                  "? This action cannot be undone.
+                  {t('delete_confirm_message', { name: deleteConfirmPlanDetail.productCode })}
                 </p>
                 {deleteError && (
                   <div className="mt-2 text-sm text-red-600">{deleteError}</div>
@@ -454,7 +439,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                     onClick={handleDeleteCancel}
                     className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-500 hover:bg-gray-50"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="button"
@@ -462,7 +447,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                     disabled={isDeleting}
                     className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
                   >
-                    {isDeleting ? 'Deleting...' : 'Confirm delete'}
+                    {isDeleting ? t('deleting') : t('confirm_delete')}
                   </button>
                 </div>
               </div>

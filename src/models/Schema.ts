@@ -7,13 +7,18 @@ import {
   decimal,
   index,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
+// ================================
+// SALARY CALCULATION MANAGEMENT SYSTEM SCHEMA (from schema_salary.txt)
+// ================================
 import { employeeSalaryEntryRelations, employeeSalaryEntrySchema } from './Schema/employeeSalaryEntry';
 
 export * from './Schema/outsourceOrder';
@@ -645,5 +650,268 @@ export const outsourceOrderReceiptRelations = relations(outsourceOrderReceiptSch
   deliveredByUser: one(userSyncSchema, {
     fields: [outsourceOrderReceiptSchema.deliveredByUserId],
     references: [userSyncSchema.userId],
+  }),
+}));
+
+// Calculation Batches - Bảng chủ quản lý các đợt tính toán lương
+export const calculationBatches = pgTable('calculation_batches', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  description: text('description'),
+  defaultStartDate: timestamp('default_start_date', { withTimezone: true }).notNull(),
+  defaultEndDate: timestamp('default_end_date', { withTimezone: true }).notNull(),
+  status: text('status', {
+    enum: ['draft', 'calculating', 'calculated', 'finalized', 'cancelled'],
+  }).notNull().default('draft'),
+  createdBy: uuid('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  calculatedAt: timestamp('calculated_at', { withTimezone: true }),
+  finalizedAt: timestamp('finalized_at', { withTimezone: true }),
+  finalizedBy: uuid('finalized_by'),
+  totalUsers: integer('total_users').default(0),
+  totalEmployeeSalary: decimal('total_employee_salary', { precision: 15, scale: 2 }).default('0'),
+  totalOutsourceAmount: decimal('total_outsource_amount', { precision: 15, scale: 2 }).default('0'),
+  grandTotal: decimal('grand_total', { precision: 15, scale: 2 }).default('0'),
+  autoCalculateOnCreate: boolean('auto_calculate_on_create').default(false),
+  allowUserPeriodOverride: boolean('allow_user_period_override').default(true),
+  incrementalMode: boolean('incremental_mode').default(false),
+  lastFullCalculation: timestamp('last_full_calculation', { withTimezone: true }),
+  affectedUsersCount: integer('affected_users_count').default(0),
+  notes: text('notes'),
+  metadata: jsonb('metadata'),
+}, table => ({
+  nameIdx: index('calc_batches_name_idx').on(table.name),
+  statusIdx: index('calc_batches_status_idx').on(table.status),
+  dateRangeIdx: index('calc_batches_date_range_idx').on(table.defaultStartDate, table.defaultEndDate),
+  createdByIdx: index('calc_batches_created_by_idx').on(table.createdBy),
+}));
+
+// User Calculation Periods - Quản lý thời gian tính toán riêng cho từng user
+export const userCalculationPeriods = pgTable('user_calculation_periods', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  batchId: uuid('batch_id').notNull().references(() => calculationBatches.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull(),
+  customStartDate: timestamp('custom_start_date', { withTimezone: true }),
+  customEndDate: timestamp('custom_end_date', { withTimezone: true }),
+  status: text('status', {
+    enum: ['pending', 'calculating', 'calculated', 'excluded', 'error'],
+  }).notNull().default('pending'),
+  isCustomPeriod: boolean('is_custom_period').notNull().default(false),
+  excludeFromCalculation: boolean('exclude_from_calculation').notNull().default(false),
+  calculationProgress: integer('calculation_progress').default(0),
+  lastErrorMessage: text('last_error_message'),
+  retryCount: integer('retry_count').default(0),
+  estimatedCompletionTime: timestamp('estimated_completion_time', { withTimezone: true }),
+  notes: text('notes'),
+  reasonForCustomPeriod: text('reason_for_custom_period'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull(),
+  lastCalculatedAt: timestamp('last_calculated_at', { withTimezone: true }),
+  calculationError: text('calculation_error'),
+}, table => ({
+  batchUserIdx: index('user_calc_periods_batch_user_idx').on(table.batchId, table.userId),
+  batchIdx: index('user_calc_periods_batch_idx').on(table.batchId),
+  userIdx: index('user_calc_periods_user_idx').on(table.userId),
+  statusIdx: index('user_calc_periods_status_idx').on(table.status),
+  uniqueBatchUser: index('user_calc_periods_unique_batch_user').on(table.batchId, table.userId),
+}));
+
+// Calculation Results - Lưu kết quả tính toán cho từng user trong mỗi batch
+export const calculationResults = pgTable('calculation_results', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  batchId: uuid('batch_id').notNull().references(() => calculationBatches.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull(),
+  employeeSalaryTotal: decimal('employee_salary_total', { precision: 15, scale: 2 }).notNull().default('0'),
+  outsourceTotal: decimal('outsource_total', { precision: 15, scale: 2 }).notNull().default('0'),
+  grandTotal: decimal('grand_total', { precision: 15, scale: 2 }).notNull().default('0'),
+  actualStartDate: timestamp('actual_start_date', { withTimezone: true }).notNull(),
+  actualEndDate: timestamp('actual_end_date', { withTimezone: true }).notNull(),
+  totalProductionSteps: integer('total_production_steps').default(0),
+  totalEmployeeEntries: integer('total_employee_entries').default(0),
+  totalOutsourceEntries: integer('total_outsource_entries').default(0),
+  calculatedAt: timestamp('calculated_at', { withTimezone: true }).notNull().defaultNow(),
+  calculationDurationMs: integer('calculation_duration_ms'),
+  hasValidationErrors: boolean('has_validation_errors').default(false),
+  validationErrors: jsonb('validation_errors'),
+  sourceDataHash: text('source_data_hash'),
+  sourceDataVersion: text('source_data_version'),
+  dataChangeDetectionEnabled: boolean('data_change_detection_enabled').default(true),
+  dataHash: text('data_hash'),
+  notes: text('notes'),
+}, table => ({
+  batchUserIdx: index('calc_results_batch_user_idx').on(table.batchId, table.userId),
+  batchIdx: index('calc_results_batch_idx').on(table.batchId),
+  userIdx: index('calc_results_user_idx').on(table.userId),
+  calculatedAtIdx: index('calc_results_calculated_at_idx').on(table.calculatedAt),
+  uniqueBatchUserResult: index('calc_results_unique_batch_user').on(table.batchId, table.userId),
+}));
+
+// Calculation Details - Chi tiết breakdown của calculation results
+export const calculationDetails = pgTable('calculation_details', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  resultId: uuid('result_id').notNull().references(() => calculationResults.id, { onDelete: 'cascade' }),
+  productionStepId: uuid('production_step_id').notNull(),
+  employeeSalaryQuantity: decimal('employee_salary_quantity', { precision: 15, scale: 4 }).default('0'),
+  employeeSalaryUnitPrice: decimal('employee_salary_unit_price', { precision: 15, scale: 4 }).default('0'),
+  employeeSalaryAmount: decimal('employee_salary_amount', { precision: 15, scale: 2 }).default('0'),
+  outsourceQuantity: decimal('outsource_quantity', { precision: 15, scale: 4 }).default('0'),
+  outsourceUnitPrice: decimal('outsource_unit_price', { precision: 15, scale: 4 }).default('0'),
+  outsourceAmount: decimal('outsource_amount', { precision: 15, scale: 2 }).default('0'),
+  stepName: text('step_name'),
+  stepDescription: text('step_description'),
+  sourceEmployeeEntryIds: jsonb('source_employee_entry_ids'),
+  sourceOutsourceReceiptIds: jsonb('source_outsource_receipt_ids'),
+  dataVolumeProcessed: integer('data_volume_processed'),
+  calculationComplexityScore: integer('calculation_complexity_score'),
+  optimizationSuggestions: jsonb('optimization_suggestions'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, table => ({
+  resultIdx: index('calc_details_result_idx').on(table.resultId),
+  stepIdx: index('calc_details_step_idx').on(table.productionStepId),
+  resultStepIdx: index('calc_details_result_step_idx').on(table.resultId, table.productionStepId),
+}));
+
+// Calculation Audit Log - Log mọi thao tác quan trọng
+export const calculationAuditLog = pgTable('calculation_audit_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  batchId: uuid('batch_id'),
+  userId: uuid('user_id'),
+  performedBy: uuid('performed_by').notNull(),
+  action: text('action', {
+    enum: [
+      'batch_created',
+      'batch_updated',
+      'batch_deleted',
+      'batch_calculation_started',
+      'batch_calculation_completed',
+      'batch_calculation_failed',
+      'batch_finalized',
+      'batch_cancelled',
+      'user_period_created',
+      'user_period_updated',
+      'user_period_deleted',
+      'result_calculated',
+      'result_updated',
+      'result_deleted',
+      'system_maintenance',
+      'data_migration',
+    ],
+  }).notNull(),
+  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
+  description: text('description'),
+  oldValues: jsonb('old_values'),
+  newValues: jsonb('new_values'),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  requestId: text('request_id'),
+  metadata: jsonb('metadata'),
+}, table => ({
+  timestampIdx: index('calc_audit_timestamp_idx').on(table.timestamp),
+  batchIdx: index('calc_audit_batch_idx').on(table.batchId),
+  userIdx: index('calc_audit_user_idx').on(table.userId),
+  performedByIdx: index('calc_audit_performed_by_idx').on(table.performedBy),
+  actionIdx: index('calc_audit_action_idx').on(table.action),
+}));
+
+// Batch Templates - Template cho tạo batch nhanh
+export const batchTemplates = pgTable('batch_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  description: text('description'),
+  namingPattern: text('naming_pattern').notNull(),
+  defaultPeriodDays: integer('default_period_days').default(30),
+  autoCalculateOnCreate: boolean('auto_calculate_on_create').default(false),
+  allowUserPeriodOverride: boolean('allow_user_period_override').default(true),
+  defaultMetadata: jsonb('default_metadata'),
+  createdBy: uuid('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  usageCount: integer('usage_count').default(0),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+}, table => ({
+  nameIdx: index('batch_templates_name_idx').on(table.name),
+  createdByIdx: index('batch_templates_created_by_idx').on(table.createdBy),
+}));
+
+// Calculation Notifications - Hệ thống thông báo (ENHANCEMENT)
+export const calculationNotifications = pgTable('calculation_notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  batchId: uuid('batch_id').references(() => calculationBatches.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id'),
+  notificationType: text('notification_type', {
+    enum: ['email', 'sms', 'in_app', 'system'],
+  }).notNull(),
+  priority: text('priority', {
+    enum: ['low', 'medium', 'high', 'critical'],
+  }).notNull().default('medium'),
+  subject: text('subject'),
+  message: text('message').notNull(),
+  metadata: jsonb('metadata'),
+  status: text('status', {
+    enum: ['pending', 'sent', 'delivered', 'failed', 'read'],
+  }).notNull().default('pending'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+  readAt: timestamp('read_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  failureReason: text('failure_reason'),
+  retryCount: integer('retry_count').default(0),
+  maxRetries: integer('max_retries').default(3),
+}, table => ({
+  batchIdx: index('calc_notifications_batch_idx').on(table.batchId),
+  userIdx: index('calc_notifications_user_idx').on(table.userId),
+  statusIdx: index('calc_notifications_status_idx').on(table.status),
+  typeIdx: index('calc_notifications_type_idx').on(table.notificationType),
+  scheduledAtIdx: index('calc_notifications_scheduled_at_idx').on(table.scheduledAt),
+}));
+
+// ================================
+// RELATIONSHIPS for Salary Calculation
+// ================================
+
+export const calculationBatchesRelations = relations(calculationBatches, ({ many }) => ({
+  userPeriods: many(userCalculationPeriods),
+  results: many(calculationResults),
+  auditLogs: many(calculationAuditLog),
+  notifications: many(calculationNotifications),
+}));
+
+export const userCalculationPeriodsRelations = relations(userCalculationPeriods, ({ one }) => ({
+  batch: one(calculationBatches, {
+    fields: [userCalculationPeriods.batchId],
+    references: [calculationBatches.id],
+  }),
+}));
+
+export const calculationResultsRelations = relations(calculationResults, ({ one, many }) => ({
+  batch: one(calculationBatches, {
+    fields: [calculationResults.batchId],
+    references: [calculationBatches.id],
+  }),
+  details: many(calculationDetails),
+}));
+
+export const calculationDetailsRelations = relations(calculationDetails, ({ one }) => ({
+  result: one(calculationResults, {
+    fields: [calculationDetails.resultId],
+    references: [calculationResults.id],
+  }),
+}));
+
+export const calculationAuditLogRelations = relations(calculationAuditLog, ({ one }) => ({
+  batch: one(calculationBatches, {
+    fields: [calculationAuditLog.batchId],
+    references: [calculationBatches.id],
+  }),
+}));
+
+export const calculationNotificationsRelations = relations(calculationNotifications, ({ one }) => ({
+  batch: one(calculationBatches, {
+    fields: [calculationNotifications.batchId],
+    references: [calculationBatches.id],
   }),
 }));
