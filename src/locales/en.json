@@ -1179,7 +1179,21 @@
     "maximum_available": "Maximum available",
     "unit_cost": "Unit Cost",
     "quantity": "Quantity",
-    "total": "Total"
+    "total": "Total",
+    "quality_notes": "Quality Notes",
+    "received_by_user": "Received By",
+    "inspected_by_user": "Inspected By",
+    "delivered_by_user": "Delivered By",
+    "batch_number": "Batch Number",
+    "storage_location": "Storage Location",
+    "warehouse_code": "Warehouse Code",
+    "actual_unit_cost": "Actual Unit Cost (₫)",
+    "total_cost": "Total Cost (₫)",
+    "attachments": "Attachments",
+    "notes": "Additional Notes",
+    "planned_receipt_date": "Planned Receipt Date",
+    "quality_score": "Quality Score (1-10)",
+    "receipt_title": "Receipt Title"
   },
   "OutsourceOrderReceiptSummary": {
     "failedToLoadReceiptStatistics": "Failed to load receipt statistics",

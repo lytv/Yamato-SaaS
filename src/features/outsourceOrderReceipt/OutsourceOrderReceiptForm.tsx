@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -74,6 +75,7 @@ export function OutsourceOrderReceiptForm({
   onSuccess,
   onCancel,
 }: OutsourceOrderReceiptFormProps) {
+  const { userId } = useAuth();
   const { data: relationOptions, isLoading: isLoadingOptions } = useOutsourceOrderReceiptRelationOptions(outsourceOrderDetailId);
   const createMutation = useCreateOutsourceOrderReceipt();
   const updateMutation = useUpdateOutsourceOrderReceipt();
@@ -93,7 +95,9 @@ export function OutsourceOrderReceiptForm({
       defectQuantity: outsourceOrderReceipt?.defectQuantity || 0,
       reworkQuantity: outsourceOrderReceipt?.reworkQuantity || 0,
       qualityNotes: outsourceOrderReceipt?.qualityNotes || '',
-      receivedByUserId: outsourceOrderReceipt?.receivedByUserId || '',
+      receivedByUserId: isEditing
+        ? outsourceOrderReceipt?.receivedByUserId || ''
+        : userId || '',
       inspectedByUserId: outsourceOrderReceipt?.inspectedByUserId || '',
       deliveredByUserId: outsourceOrderReceipt?.deliveredByUserId || '',
       batchNumber: outsourceOrderReceipt?.batchNumber || '',
