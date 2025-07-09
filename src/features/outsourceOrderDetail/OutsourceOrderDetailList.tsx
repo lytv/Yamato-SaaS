@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   Download,
   Edit,
+  Package,
   Plus,
   RefreshCw,
   Search,
@@ -87,7 +88,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
   } = useOutsourceOrderDetailsByOrderId(outsourceOrderId, true);
 
   const { data: order } = useOutsourceOrder(outsourceOrderId, true);
-  const { data: stats } = useOutsourceOrderDetailStats(outsourceOrderId);
+  const { data: stats, refetch: refetchStats } = useOutsourceOrderDetailStats(outsourceOrderId);
   const deleteMutation = useDeleteOutsourceOrderDetail();
   const { exportData, isExporting } = useOutsourceOrderDetailExport();
 
@@ -112,6 +113,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
     try {
       await deleteMutation.mutateAsync(id);
       setDeleteId(null);
+      refetchStats();
     } catch (error) {
       console.error('Delete error:', error);
     }
@@ -372,6 +374,15 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => router.push(`/dashboard/outsourceOrders/${outsourceOrderId}/details/${item.id}`)}
+                              className="size-8 p-0"
+                              title="Manage Receipts"
+                            >
+                              <Package className="size-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEdit(item)}
                               className="size-8 p-0"
                             >
@@ -413,6 +424,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                 setIsFormOpen(false);
                 setEditingItem(null);
                 refetch();
+                refetchStats();
               }}
               onCancel={() => {
                 setIsFormOpen(false);

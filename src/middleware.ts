@@ -54,6 +54,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/employeeSalaryEntries(.*)', // ✅ Add employeeSalaryEntries API routes
   '/api/outsourceOrders(.*)', // ✅ Add outsourceOrders API routes
   '/api/outsourceOrderDetails(.*)', // ✅ Add outsourceOrderDetails API routes
+  '/api/outsourceOrderReceipts(.*)', // ✅ Add outsourceOrderReceipts API routes
   '/api/protected(.*)',
   '/api/organization-profile/sync-users', // Bảo vệ API đồng bộ user
   // Add other protected API routes here

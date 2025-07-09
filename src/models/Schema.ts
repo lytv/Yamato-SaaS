@@ -550,3 +550,100 @@ export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
 // EMPLOYEE_SALARY_ENTRY - Bảng nhập lương theo sản lượng nhân viên
 // ======================
 export { employeeSalaryEntryRelations, employeeSalaryEntrySchema };
+
+// ======================
+// OUTSOURCE_ORDER_RECEIPT - Biên nhận từng lần nhận lại của outsource order detail
+// ======================
+export const outsourceOrderReceiptSchema = pgTable('outsource_order_receipt', {
+  id: serial('id').primaryKey(),
+  ownerId: text('owner_id').notNull(), // Multi-tenancy
+
+  // Foreign Key to Order Detail
+  outsourceOrderDetailId: integer('outsource_order_detail_id')
+    .references(() => outsourceOrderDetailSchema.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Receipt Identity
+  receiptNumber: text('receipt_number').notNull(), // REC001, REC002... (auto-generated)
+  receiptTitle: text('receipt_title'), // Tiêu đề phiếu nhận (optional)
+
+  // Receipt Information
+  receiptQuantity: integer('receipt_quantity').notNull(), // Số lượng nhận lại trong lần này
+  receiptDate: date('receipt_date').notNull(), // Ngày nhận lại
+  plannedReceiptDate: date('planned_receipt_date'), // Ngày dự kiến nhận (nếu có)
+
+  // Quality Control
+  qualityStatus: text('quality_status').default('pending'), // pending/passed/failed/partial/needs_rework
+  qualityScore: integer('quality_score'), // Điểm chất lượng 1-10
+  defectQuantity: integer('defect_quantity').default(0), // Số lượng lỗi
+  reworkQuantity: integer('rework_quantity').default(0), // Số lượng cần làm lại
+  qualityNotes: text('quality_notes'), // Ghi chú về chất lượng
+
+  // People Involved
+  receivedByUserId: text('received_by_user_id').notNull(), // Người nhận lại (from user_sync)
+  inspectedByUserId: text('inspected_by_user_id'), // Người kiểm tra chất lượng
+  deliveredByUserId: text('delivered_by_user_id'), // Người giao hàng (contractor)
+
+  // Location & Storage
+  batchNumber: text('batch_number'), // Số lô/batch
+  storageLocation: text('storage_location'), // Vị trí lưu kho
+  warehouseCode: text('warehouse_code'), // Mã kho
+
+  // Financial (if needed)
+  actualUnitCost: decimal('actual_unit_cost', { precision: 10, scale: 2 }), // Đơn giá thực tế
+  totalCost: decimal('total_cost', { precision: 12, scale: 2 }), // Tổng chi phí cho lần nhận này
+
+  // Documentation
+  notes: text('notes'), // Ghi chú chung
+  attachments: text('attachments'), // Link file đính kèm (ảnh, PDF)
+
+  // Status & Workflow
+  status: text('status').default('received'), // received/inspected/stored/processed
+  isPartialReceipt: boolean('is_partial_receipt').default(true), // Nhận một phần hay toàn bộ
+
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+}, (table) => {
+  return {
+    // Indexes for performance
+    receiptDetailIdx: index('receipt_detail_idx').on(table.outsourceOrderDetailId),
+    receiptDateIdx: index('receipt_date_idx').on(table.receiptDate),
+    receiptNumberOwnerIdx: uniqueIndex('receipt_number_owner_idx').on(
+      table.receiptNumber,
+      table.ownerId,
+    ),
+    receiptUserIdx: index('receipt_user_idx').on(table.receivedByUserId),
+    receiptQualityIdx: index('receipt_quality_idx').on(table.qualityStatus),
+    receiptStatusIdx: index('receipt_status_idx').on(table.status),
+    receiptBatchIdx: index('receipt_batch_idx').on(table.batchNumber),
+
+    // Check constraints
+    receiptQuantityValidCheck: check('receipt_quantity_valid', sql`receipt_quantity > 0`),
+    defectQuantityValidCheck: check('defect_quantity_valid', sql`defect_quantity >= 0 AND defect_quantity <= receipt_quantity`),
+    reworkQuantityValidCheck: check('rework_quantity_valid', sql`rework_quantity >= 0 AND rework_quantity <= receipt_quantity`),
+    qualityScoreValidCheck: check('quality_score_valid', sql`quality_score IS NULL OR (quality_score >= 1 AND quality_score <= 10)`),
+  };
+});
+
+// Relations for outsourceOrderReceiptSchema
+export const outsourceOrderReceiptRelations = relations(outsourceOrderReceiptSchema, ({ one }) => ({
+  outsourceOrderDetail: one(outsourceOrderDetailSchema, {
+    fields: [outsourceOrderReceiptSchema.outsourceOrderDetailId],
+    references: [outsourceOrderDetailSchema.id],
+  }),
+  receivedByUser: one(userSyncSchema, {
+    fields: [outsourceOrderReceiptSchema.receivedByUserId],
+    references: [userSyncSchema.userId],
+  }),
+  inspectedByUser: one(userSyncSchema, {
+    fields: [outsourceOrderReceiptSchema.inspectedByUserId],
+    references: [userSyncSchema.userId],
+  }),
+  deliveredByUser: one(userSyncSchema, {
+    fields: [outsourceOrderReceiptSchema.deliveredByUserId],
+    references: [userSyncSchema.userId],
+  }),
+}));
