@@ -10,7 +10,7 @@ import type {
   ProductStepCrosstabResult,
 } from '@/types/productStepCrosstab';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 export async function getProductStepCrosstab(
   params: ProductStepCrosstabParams,

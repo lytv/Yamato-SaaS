@@ -22,7 +22,7 @@ import type {
   UpdateOutsourceOrderDetailInput,
 } from '@/types/outsourceOrderDetail';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new outsourceOrderDetail with proper date and relation handling

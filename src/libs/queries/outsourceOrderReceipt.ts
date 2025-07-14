@@ -20,7 +20,7 @@ import type {
   UpdateOutsourceOrderReceiptInput,
 } from '@/types/outsourceOrderReceipt';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new outsourceOrderReceipt with proper date and relation handling

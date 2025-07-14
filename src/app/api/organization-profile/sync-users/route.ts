@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
-import { db } from '@/libs/db';
+import { db } from '@/libs/DB';
 import { Env } from '@/libs/Env';
 import { userSyncSchema } from '@/models/Schema';
 

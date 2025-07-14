@@ -15,7 +15,7 @@ import type {
   UpdateProductSubInput,
 } from '@/types/productsub';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new productsubsub

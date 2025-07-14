@@ -15,7 +15,7 @@ import type {
   UserSyncStats,
 } from '@/types/user_sync';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new user_sync

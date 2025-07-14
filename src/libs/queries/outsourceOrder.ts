@@ -16,7 +16,7 @@ import type {
   UpdateOutsourceOrderInput,
 } from '@/types/outsourceOrder';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new outsourceOrder with proper date and relation handling

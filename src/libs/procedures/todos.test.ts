@@ -12,7 +12,7 @@ import {
 } from './todos';
 
 // Mock the database
-vi.mock('@/libs/db', () => ({
+vi.mock('@/libs/DB', () => ({
   db: {
     execute: vi.fn(),
   },
@@ -49,7 +49,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         updated_at: new Date('2023-01-02'),
       }];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(mockDbResult as any);
 
       // Act
@@ -69,7 +69,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should return null when todo not found', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([] as any);
 
       // Act
@@ -90,7 +90,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         updated_at: new Date(),
       }];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(invalidDbResult as any);
 
       // Reset validation mock for this test
@@ -116,7 +116,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         updated_at: new Date('2023-01-01'),
       }];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(mockDbResult as any);
 
       const todoData = {
@@ -142,7 +142,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should throw error when creation fails', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([] as any);
 
       const todoData = {
@@ -168,7 +168,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         updated_at: new Date('2023-01-02'),
       }];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(mockDbResult as any);
 
       // Act
@@ -188,7 +188,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should throw "Todo not found or access denied" for invalid todo', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([] as any);
 
       // Act & Assert
@@ -201,7 +201,7 @@ describe('Todo Stored Procedure Wrappers', () => {
   describe('callDeleteTodo', () => {
     it('should return true when deletion succeeds', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{ success: true }] as any);
 
       // Act
@@ -214,7 +214,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should return false when deletion fails', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{ success: false }] as any);
 
       // Act
@@ -235,7 +235,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         this_month: 8,
       }];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(mockDbResult as any);
 
       // Act
@@ -253,7 +253,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should return zero stats when no data', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([] as any);
 
       // Act
@@ -293,7 +293,7 @@ describe('Todo Stored Procedure Wrappers', () => {
         },
       ];
 
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue(mockDbResult as any);
 
       const params = {
@@ -328,7 +328,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should handle empty results', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([] as any);
 
       const params = {
@@ -353,7 +353,7 @@ describe('Todo Stored Procedure Wrappers', () => {
   describe('callGetTodosCount', () => {
     it('should return count from database', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{ count: 5 }] as any);
 
       // Act
@@ -366,7 +366,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should return 0 when no count returned', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{}] as any);
 
       // Act
@@ -380,7 +380,7 @@ describe('Todo Stored Procedure Wrappers', () => {
   describe('callTodoExists', () => {
     it('should return true when todo exists', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{ exists: true }] as any);
 
       // Act
@@ -393,7 +393,7 @@ describe('Todo Stored Procedure Wrappers', () => {
 
     it('should return false when todo does not exist', async () => {
       // Arrange
-      const { db } = await import('@/libs/db');
+      const { db } = await import('@/libs/DB');
       vi.mocked(db.execute).mockResolvedValue([{ exists: false }] as any);
 
       // Act

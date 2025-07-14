@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { db } from '@/libs/db';
+import { db } from '@/libs/DB';
 import { productionStepDetailSchema } from '@/models/Schema';
 
 const bodySchema = z.object({

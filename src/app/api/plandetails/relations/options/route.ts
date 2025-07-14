@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { asc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/db';
+import { db } from '@/libs/DB';
 import { planSchema, productSchema, productSubSchema, workTableSchema } from '@/models/Schema';
 
 // GET /api/plandetails/relations/options

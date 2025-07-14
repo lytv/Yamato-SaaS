@@ -15,7 +15,7 @@ import type {
   UpdateProductionStepDetailInput,
 } from '@/types/productionStepDetail';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 /**
  * Create a new production step detail

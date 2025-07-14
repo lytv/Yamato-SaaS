@@ -1,6 +1,6 @@
 import { and, asc, avg, count, desc, eq, gte, ilike, lte, or, sum } from 'drizzle-orm';
 
-import { db } from '../db';
+import { db } from '../DB';
 import { workTableSchema } from '@/models/Schema';
 import type {
   CreateWorkTableInput,

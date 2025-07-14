@@ -10,7 +10,6 @@ import { Logo } from './Logo';
 
 export const Navbar = () => {
   const t = useTranslations('Navbar');
-  const tDash = useTranslations('DashboardLayout');
 
   return (
     <Section className="px-3 py-6">

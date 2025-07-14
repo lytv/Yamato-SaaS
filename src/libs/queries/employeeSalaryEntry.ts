@@ -17,7 +17,7 @@ import type {
   UpdateEmployeeSalaryEntryInput,
 } from '@/types/employeeSalaryEntry';
 
-import { db } from '../db';
+import { db } from '../DB';
 
 export type EmployeeSalaryEntry = {
   id: number;
