@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/lytv/Yamato-SaaS/compare/v1.2.0...v1.2.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* update scripts to use tsx for proper alias resolution ([95dd5df](https://github.com/lytv/Yamato-SaaS/commit/95dd5df7ad7b74b15c36eb4ab2f3a85a3ffb0f6c))
+
 # [1.2.0](https://github.com/lytv/Yamato-SaaS/compare/v1.1.6...v1.2.0) (2025-07-14)
 
 
