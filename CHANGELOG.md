@@ -1,3 +1,29 @@
+# [1.2.0](https://github.com/lytv/Yamato-SaaS/compare/v1.1.6...v1.2.0) (2025-07-14)
+
+
+### Bug Fixes
+
+* actualvalue ([59546b2](https://github.com/lytv/Yamato-SaaS/commit/59546b29d6c31fc104692eed7152ec86d52b1ddb))
+* actualvalue ([0b782a2](https://github.com/lytv/Yamato-SaaS/commit/0b782a2368bb623184b83f6d5f402e6c7b3eeeb3))
+* actualvalue ([9dc9a3c](https://github.com/lytv/Yamato-SaaS/commit/9dc9a3c8df043b1d7d5d277b0bcc95d8b54c9020))
+* actualvalue ([3fa7ffe](https://github.com/lytv/Yamato-SaaS/commit/3fa7ffed4aae54ba38f3a36ec375b0d468eaacb1))
+* actualvalue ([129766b](https://github.com/lytv/Yamato-SaaS/commit/129766b4cdf43e5cb23c0b6416aa834c38357b77))
+* actualvalue ([32d870d](https://github.com/lytv/Yamato-SaaS/commit/32d870dac0ce6c8dabb63c0d4511b258ad794b66))
+* update scripts to use tsx for proper alias resolution ([124d8f4](https://github.com/lytv/Yamato-SaaS/commit/124d8f4ebb7db92d4efdd3d1b871d6bdfd68caff))
+
+
+### Features
+
+* add DashboardLayout.salaries to en locale ([55c087a](https://github.com/lytv/Yamato-SaaS/commit/55c087af4843b1d6abddafdd4ba7e3a52b68cc16))
+* add DashboardLayout.salaries to en locale ([05ef504](https://github.com/lytv/Yamato-SaaS/commit/05ef5045a11b8b4f39a51b31a601873328ee2658))
+* add DashboardLayout.salaries to en locale ([dad3f5a](https://github.com/lytv/Yamato-SaaS/commit/dad3f5ac9ceaabb1924dbb8e42baf29374489d7b))
+* add DashboardLayout.salaries to en locale ([8163fa2](https://github.com/lytv/Yamato-SaaS/commit/8163fa2ecfeaf05f90d5cfc62aecec9760d52ded))
+* update UI ([e23d123](https://github.com/lytv/Yamato-SaaS/commit/e23d123d6eacb3e896a050eacc67ca96468b70ba))
+* update UI ([26f1939](https://github.com/lytv/Yamato-SaaS/commit/26f1939e64a723aaa5676da8c48847f5c6fe1f5c))
+* update UI ([5d1e778](https://github.com/lytv/Yamato-SaaS/commit/5d1e778b8dc8987a9e2e11bc43a745de3a6a6c1b))
+* update UI ([14b92fc](https://github.com/lytv/Yamato-SaaS/commit/14b92fcca32bfd8547759f9726df87c827cae501))
+* update UI ([e54adaa](https://github.com/lytv/Yamato-SaaS/commit/e54adaa1ae3aee70031645750aac0fea3b1894fd))
+
 ## [1.1.6](https://github.com/lytv/Yamato-SaaS/compare/v1.1.5...v1.1.6) (2025-07-04)
 
 
