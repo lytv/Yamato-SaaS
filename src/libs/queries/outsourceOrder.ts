@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { outsourceOrderSchema, userSyncSchema } from '@/models/Schema';
 import type {
   CreateOutsourceOrderInput,
@@ -94,7 +94,7 @@ export async function updateOutsourceOrder(
       .from(outsourceOrderSchema)
       .where(and(
         eq(outsourceOrderSchema.orderCode, data.orderCode),
-        eq(outsourceOrderSchema.ownerId, ownerId)
+        eq(outsourceOrderSchema.ownerId, ownerId),
       ))
       .limit(1);
 
@@ -130,7 +130,7 @@ export async function updateOutsourceOrder(
 
   // Build update data object - only include fields that are actually being updated
   const updateData: any = {};
-  
+
   if (data.orderCode !== undefined) {
     updateData.orderCode = data.orderCode;
   }

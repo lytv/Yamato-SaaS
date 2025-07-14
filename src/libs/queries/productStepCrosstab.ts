@@ -1,6 +1,6 @@
 import { and, count, eq, ilike, or } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import {
   productionStepDetailSchema,
   productionStepSchema,
@@ -83,7 +83,7 @@ export async function getProductStepCrosstab(
 
   // Transform results to grouped format
   const groupedResults = results.reduce(
-    (acc, row) => {
+    (acc: ProductStepCrosstabResult[], row) => {
       let existing = acc.find(item => item.productCode === row.productCode);
 
       if (!existing) {

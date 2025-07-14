@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import {
   outsourceOrderSchema,
   planSchema,

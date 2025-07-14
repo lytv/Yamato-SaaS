@@ -65,6 +65,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/employeeSalaryEntries',
                     label: t('employee_salary_entries'),
                   },
+                  {
+                    href: '/dashboard/salary-details',
+                    label: t('salary_details'),
+                  },
                 ],
               },
 

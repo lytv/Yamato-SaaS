@@ -542,7 +542,7 @@ function generateQueriesContent(config: EntityConfig): string {
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { ${config.entityNameLower}Schema } from '@/models/Schema';
 import type {
   Create${config.entityName}Input,

@@ -6,7 +6,7 @@ import { auth } from '@clerk/nextjs/server';
 import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { outsourceOrderSchema } from '@/models/Schema';
 
 export async function GET(request: Request) {

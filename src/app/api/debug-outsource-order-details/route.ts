@@ -3,10 +3,10 @@
  * NOTE: This is a debug endpoint - remove or restrict in production
  */
 import { auth } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { outsourceOrderDetailSchema } from '@/models/Schema';
 
 export async function GET() {
@@ -35,16 +35,15 @@ export async function GET() {
         userId,
         totalRecords: countResult.length,
         userRecords: userRecords.length,
-        sampleData: userRecords
-      }
+        sampleData: userRecords,
+      },
     });
-
   } catch (error) {
     console.error('🚨 Debug API Error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     }, { status: 500 });
   }
 }

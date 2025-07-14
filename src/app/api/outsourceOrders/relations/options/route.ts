@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { userSyncSchema } from '@/models/Schema';
 
 // GET /api/outsourceOrders/relations/options

@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { planDetailSchema, planSchema, productSchema, productSubSchema, workTableSchema } from '@/models/Schema';
 import type {
   CreatePlanDetailInput,
@@ -157,7 +157,7 @@ export async function getPlanDetailsByOwner(
     .offset(offset);
 
   if (includeRelations) {
-    return results.map(result => {
+    return results.map((result) => {
       const { plan, ...rest } = result as any;
       return { ...rest, plan: plan ?? undefined };
     });

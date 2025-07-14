@@ -8,7 +8,7 @@ import { and, eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { outsourceOrderDetailSchema, userSyncSchema } from '@/models/Schema';
 
 // GET /api/outsourceOrderReceipts/relations/options

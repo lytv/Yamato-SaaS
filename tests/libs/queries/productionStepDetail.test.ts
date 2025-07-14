@@ -6,7 +6,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import {
   createProductionStepDetail,
   deleteProductionStepDetail,
@@ -18,7 +18,7 @@ import {
 import type { CreateProductionStepDetailInput, ProductionStepDetailListParamsWithOwner } from '@/types/productionStepDetail';
 
 // Mock the database
-vi.mock('@/libs/DB', () => ({
+vi.mock('@/libs/db', () => ({
   db: {
     insert: vi.fn(),
     select: vi.fn(),

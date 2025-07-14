@@ -25,40 +25,40 @@ type FieldConfig = {
   label: string;
   excelColumn?: string;
   dbColumnType?: 'text' | 'integer' | 'decimal' | 'boolean' | 'date' | 'timestamp';
-  
+
   // 🆕 V4: Enhanced database column configuration
   dbColumnOptions?: {
-    precision?: number;      // For decimal fields (e.g., 10)
-    scale?: number;          // For decimal fields (e.g., 2)
+    precision?: number; // For decimal fields (e.g., 10)
+    scale?: number; // For decimal fields (e.g., 2)
     mode?: 'date' | 'string'; // For timestamp fields
-    defaultNow?: boolean;    // For date/timestamp fields
+    defaultNow?: boolean; // For date/timestamp fields
   };
-  
+
   // 🆕 V4: Enhanced relationship properties
   relation?: {
     type: 'belongsTo' | 'hasMany' | 'manyToMany';
-    entity: string;           // Related entity name (e.g., 'UserSync')
-    entityLower: string;      // Related entity lowercase (e.g., 'userSync')
-    foreignKey: string;       // Field name in current table (e.g., 'userId')
+    entity: string; // Related entity name (e.g., 'UserSync')
+    entityLower: string; // Related entity lowercase (e.g., 'userSync')
+    foreignKey: string; // Field name in current table (e.g., 'userId')
     foreignKeyType?: 'integer' | 'text'; // 🆕 Support text foreign keys
-    referenceKey?: string;    // Field in related table (default: 'id', can be 'userId')
-    displayField: string;     // Field to show in UI (e.g., 'fullName')
-    nullable?: boolean;       // Can be null
+    referenceKey?: string; // Field in related table (default: 'id', can be 'userId')
+    displayField: string; // Field to show in UI (e.g., 'fullName')
+    nullable?: boolean; // Can be null
     onDelete?: 'cascade' | 'restrict' | 'setNull';
-    
+
     // For many-to-many
-    junctionTable?: string;   // Junction table name
+    junctionTable?: string; // Junction table name
     junctionFields?: {
-      currentKey: string;     // Current entity key in junction
-      relatedKey: string;     // Related entity key in junction
+      currentKey: string; // Current entity key in junction
+      relatedKey: string; // Related entity key in junction
     };
   };
 
   // 🆕 V4: Index configuration
   indexes?: {
-    simple?: boolean;        // Single field index
-    composite?: string[];    // Multi-field composite index
-    unique?: boolean;        // Unique index
+    simple?: boolean; // Single field index
+    composite?: string[]; // Multi-field composite index
+    unique?: boolean; // Unique index
   };
 
   // 🆕 V4: Check constraints
@@ -76,7 +76,7 @@ type EntityConfig = {
   codeField: string;
   nameField: string;
   fields: FieldConfig[];
-  
+
   // 🆕 V4: Complex constraints configuration
   complexConstraints?: {
     uniqueIndexes?: {
@@ -92,7 +92,7 @@ type EntityConfig = {
       sql: string;
     }[];
   };
-  
+
   features: {
     pagination: boolean;
     search: boolean;
@@ -122,31 +122,31 @@ function getColumnDefinition(field: FieldConfig): string {
   const nullable = field.required ? '.notNull()' : '';
   const unique = field.unique ? '.unique()' : '';
   const options = field.dbColumnOptions || {};
-  
+
   switch (field.dbColumnType) {
     case 'text':
       return `text('${field.name}')${field.maxLength ? `.max(${field.maxLength})` : ''}${nullable}${unique}`;
-      
+
     case 'integer':
       return `integer('${field.name}')${nullable}${unique}`;
-      
+
     case 'decimal':
       // 🆕 V4: Support precision and scale
       if (options.precision && options.scale) {
         return `decimal('${field.name}', { precision: ${options.precision}, scale: ${options.scale} })${nullable}${unique}`;
       }
       return `decimal('${field.name}')${nullable}${unique}`;
-      
+
     case 'boolean':
       return `boolean('${field.name}')${nullable}`;
-      
+
     case 'date':
       // 🆕 V4: Support defaultNow for date
       if (options.defaultNow) {
         return `date('${field.name}').defaultNow()${nullable}`;
       }
       return `date('${field.name}')${nullable}`;
-      
+
     case 'timestamp':
       // 🆕 V4: Support mode and defaultNow for timestamp
       let timestampDef = `timestamp('${field.name}'`;
@@ -154,16 +154,16 @@ function getColumnDefinition(field: FieldConfig): string {
         timestampDef += `, { mode: '${options.mode}' }`;
       }
       timestampDef += ')';
-      
+
       if (options.defaultNow) {
         timestampDef += '.defaultNow()';
         if (field.name === 'updatedAt') {
           timestampDef += '.$onUpdate(() => new Date())';
         }
       }
-      
+
       return `${timestampDef}${nullable}`;
-      
+
     default:
       return `text('${field.name}')${nullable}${unique}`;
   }
@@ -185,31 +185,33 @@ function convertEntityName(inputName: string): {
 } {
   // Handle both camelCase and SNAKE_CASE inputs
   const cleanName = inputName.toLowerCase();
-  
+
   // Convert snake_case to camelCase
   const camelCase = cleanName.split('_').map((word, index) => {
-    if (index === 0) return word;
+    if (index === 0) {
+      return word;
+    }
     return word.charAt(0).toUpperCase() + word.slice(1);
   }).join('');
-  
+
   // Convert to PascalCase for entity name
   const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
-  
+
   // Convert to snake_case for table name
   const snakeCase = cleanName.replace(/([A-Z])/g, '_$1').toLowerCase();
-  
+
   // Generate plural form
-  const plural = camelCase.endsWith('y') 
-    ? camelCase.slice(0, -1) + 'ies'
-    : camelCase.endsWith('s') 
-    ? camelCase + 'es'
-    : camelCase + 's';
+  const plural = camelCase.endsWith('y')
+    ? `${camelCase.slice(0, -1)}ies`
+    : camelCase.endsWith('s')
+      ? `${camelCase}es`
+      : `${camelCase}s`;
 
   return {
     entityName: pascalCase,
     entityNameLower: camelCase,
     entityNamePlural: plural,
-    tableName: snakeCase.startsWith('_') ? snakeCase.slice(1) : snakeCase
+    tableName: snakeCase.startsWith('_') ? snakeCase.slice(1) : snakeCase,
   };
 }
 
@@ -221,20 +223,20 @@ function convertEntityName(inputName: string): {
  * Generate database schema with enhanced features:
  * - Text foreign keys
  * - Complex unique indexes
- * - Composite indexes  
+ * - Composite indexes
  * - Check constraints
  * - Decimal precision/scale
  * - Timestamp modes
  */
 function generateSchemaWithComplexFeatures(config: EntityConfig): string {
   const relationFields = config.fields.filter(f => f.relation);
-  const regularFields = config.fields.filter(f => 
-    !f.relation && 
-    f.name !== 'id' && 
-    f.name !== 'createdAt' && 
-    f.name !== 'updatedAt'
+  const regularFields = config.fields.filter(f =>
+    !f.relation
+    && f.name !== 'id'
+    && f.name !== 'createdAt'
+    && f.name !== 'updatedAt',
   );
-  
+
   let schemaContent = `/**
  * ${config.entityName} Database Schema with Complex Features
  * Generated by enhanced entity generator script V4
@@ -255,34 +257,36 @@ import {
   index,
   uniqueIndex
 } from 'drizzle-orm/pg-core';
-${relationFields.length > 0 ? `\n// Import related schemas\n${relationFields
+${relationFields.length > 0
+  ? `\n// Import related schemas\n${relationFields
     .map(f => `import { ${f.relation!.entityLower}Schema } from './${f.relation!.entityLower}';`)
-    .join('\n')}` : ''}
+    .join('\n')}`
+  : ''}
 
 export const ${config.entityNameLower}Schema = pgTable('${config.tableName}', {
   id: serial('id').primaryKey(),
   
   // Regular fields
-${regularFields.map(field => {
-    const column = getColumnDefinition(field);
-    return `  ${field.name}: ${column},`;
-  }).join('\n')}
+${regularFields.map((field) => {
+  const column = getColumnDefinition(field);
+  return `  ${field.name}: ${column},`;
+}).join('\n')}
 
   // Foreign key fields
 ${relationFields
-    .filter(f => f.relation?.type === 'belongsTo')
-    .map(field => {
-      const rel = field.relation!;
-      const nullable = rel.nullable ? '' : '.notNull()';
-      const onDelete = rel.onDelete || 'restrict';
-      const fkType = rel.foreignKeyType || 'integer';
-      
-      if (fkType === 'text') {
-        return `  ${rel.foreignKey}: text('${rel.foreignKey}')${nullable}.references(() => ${rel.entityLower}Schema.${rel.referenceKey || 'id'}, { onDelete: '${onDelete}' }),`;
-      } else {
-        return `  ${rel.foreignKey}: integer('${rel.foreignKey}')${nullable}.references(() => ${rel.entityLower}Schema.${rel.referenceKey || 'id'}, { onDelete: '${onDelete}' }),`;
-      }
-    }).join('\n')}
+  .filter(f => f.relation?.type === 'belongsTo')
+  .map((field) => {
+    const rel = field.relation!;
+    const nullable = rel.nullable ? '' : '.notNull()';
+    const onDelete = rel.onDelete || 'restrict';
+    const fkType = rel.foreignKeyType || 'integer';
+
+    if (fkType === 'text') {
+      return `  ${rel.foreignKey}: text('${rel.foreignKey}')${nullable}.references(() => ${rel.entityLower}Schema.${rel.referenceKey || 'id'}, { onDelete: '${onDelete}' }),`;
+    } else {
+      return `  ${rel.foreignKey}: integer('${rel.foreignKey}')${nullable}.references(() => ${rel.entityLower}Schema.${rel.referenceKey || 'id'}, { onDelete: '${onDelete}' }),`;
+    }
+  }).join('\n')}
 
   // Standard timestamps with enhanced configuration
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
@@ -293,50 +297,50 @@ ${relationFields
 }, (table) => {
   return {
     // 🆕 V4: Complex unique indexes
-    ${config.complexConstraints?.uniqueIndexes?.map(idx => 
-      `${idx.name}: uniqueIndex('${idx.name}').on(${idx.fields.map(f => `table.${f}`).join(', ')}),`
+    ${config.complexConstraints?.uniqueIndexes?.map(idx =>
+      `${idx.name}: uniqueIndex('${idx.name}').on(${idx.fields.map(f => `table.${f}`).join(', ')}),`,
     ).join('\n    ') || ''}
     
     // 🆕 V4: Composite indexes for performance
     ${config.complexConstraints?.compositeIndexes?.map(idx =>
-      `${idx.name}: index('${idx.name}').on(${idx.fields.map(f => `table.${f}`).join(', ')}),`
+      `${idx.name}: index('${idx.name}').on(${idx.fields.map(f => `table.${f}`).join(', ')}),`,
     ).join('\n    ') || ''}
     
     // 🆕 V4: Check constraints for data integrity
     ${config.complexConstraints?.checkConstraints?.map(constraint =>
-      `${constraint.name}: check('${constraint.name}', sql\`${constraint.sql}\`),`
+      `${constraint.name}: check('${constraint.name}', sql\`${constraint.sql}\`),`,
     ).join('\n    ') || ''}
   };
 });
 
 // Relations configuration
 export const ${config.entityNameLower}Relations = relations(${config.entityNameLower}Schema, ({ one, many }) => ({
-${relationFields.map(field => {
-    const rel = field.relation!;
-    if (rel.type === 'belongsTo') {
-      return `  ${rel.entityLower}: one(${rel.entityLower}Schema, {
+${relationFields.map((field) => {
+  const rel = field.relation!;
+  if (rel.type === 'belongsTo') {
+    return `  ${rel.entityLower}: one(${rel.entityLower}Schema, {
     fields: [${config.entityNameLower}Schema.${rel.foreignKey}],
     references: [${rel.entityLower}Schema.${rel.referenceKey || 'id'}],
     relationName: '${config.entityNameLower}_${rel.entityLower}',
   }),`;
-    } else if (rel.type === 'hasMany') {
-      return `  ${rel.entityLower}s: many(${rel.entityLower}Schema, {
+  } else if (rel.type === 'hasMany') {
+    return `  ${rel.entityLower}s: many(${rel.entityLower}Schema, {
     relationName: '${config.entityNameLower}_${rel.entityLower}s',
   }),`;
-    } else if (rel.type === 'manyToMany') {
-      return `  ${rel.entityLower}s: many(${rel.junctionTable}Schema, {
+  } else if (rel.type === 'manyToMany') {
+    return `  ${rel.entityLower}s: many(${rel.junctionTable}Schema, {
     relationName: '${config.entityNameLower}_${rel.entityLower}s',
   }),`;
-    }
-    return '';
-  }).filter(Boolean).join('\n')}
+  }
+  return '';
+}).filter(Boolean).join('\n')}
 }));`;
 
   // Add junction table schemas for many-to-many relations
   const manyToManyRelations = relationFields.filter(f => f.relation?.type === 'manyToMany');
   if (manyToManyRelations.length > 0) {
     schemaContent += `\n\n// Junction tables for many-to-many relations\n`;
-    manyToManyRelations.forEach(field => {
+    manyToManyRelations.forEach((field) => {
       const rel = field.relation!;
       schemaContent += `
 export const ${rel.junctionTable}Schema = pgTable('${rel.junctionTable}', {
@@ -369,7 +373,7 @@ export const ${rel.junctionTable}Relations = relations(${rel.junctionTable}Schem
 // 🆕 V4: EMPLOYEE_SALARY_ENTRY CONFIGURATION - EXACT MATCH WITH ACTUAL SCHEMA
 const employeeSalaryEntryConfig: EntityConfig = {
   entityName: 'EmployeeSalaryEntry',
-  entityNameLower: 'employeeSalaryEntry', 
+  entityNameLower: 'employeeSalaryEntry',
   entityNamePlural: 'employeeSalaryEntries',
   tableName: 'employee_salary_entry',
   codeField: 'id', // No specific code field in actual schema
@@ -388,12 +392,12 @@ const employeeSalaryEntryConfig: EntityConfig = {
         entityLower: 'userSync',
         foreignKey: 'userId',
         foreignKeyType: 'text', // ✅ MATCHES: text('user_id')
-        referenceKey: 'userId',  // ✅ MATCHES: references userSyncSchema.userId
+        referenceKey: 'userId', // ✅ MATCHES: references userSyncSchema.userId
         displayField: 'fullName',
-        onDelete: 'cascade'
-      }
+        onDelete: 'cascade',
+      },
     },
-    
+
     // ✅ EXACT MATCH: ProductionStepDetail relationship (integer FK)
     {
       name: 'productionStepDetail',
@@ -407,14 +411,14 @@ const employeeSalaryEntryConfig: EntityConfig = {
         entityLower: 'productionStepDetail',
         foreignKey: 'productionStepDetailId',
         displayField: 'id', // Could be enhanced with sequence info
-        onDelete: 'cascade'
-      }
+        onDelete: 'cascade',
+      },
     },
-    
+
     // ✅ EXACT MATCH: Plan relationship (integer FK)
     {
       name: 'plan',
-      type: 'relation', 
+      type: 'relation',
       required: true,
       label: 'Plan',
       excelColumn: 'Plan',
@@ -424,10 +428,10 @@ const employeeSalaryEntryConfig: EntityConfig = {
         entityLower: 'plan',
         foreignKey: 'planId',
         displayField: 'planName',
-        onDelete: 'cascade'
-      }
+        onDelete: 'cascade',
+      },
     },
-    
+
     // ✅ EXACT MATCH: Date fields
     {
       name: 'workDate',
@@ -438,15 +442,15 @@ const employeeSalaryEntryConfig: EntityConfig = {
       dbColumnType: 'date', // ✅ MATCHES: date('work_date').notNull()
     },
     {
-      name: 'entryDate', 
+      name: 'entryDate',
       type: 'date',
       required: false,
       label: 'Entry Date',
       excelColumn: 'Entry Date',
       dbColumnType: 'date',
-      dbColumnOptions: { defaultNow: true } // ✅ MATCHES: date('entry_date').defaultNow()
+      dbColumnOptions: { defaultNow: true }, // ✅ MATCHES: date('entry_date').defaultNow()
     },
-    
+
     // ✅ EXACT MATCH: Quantity fields (all integers with default(0))
     {
       name: 'actualQuantity',
@@ -458,7 +462,7 @@ const employeeSalaryEntryConfig: EntityConfig = {
     },
     {
       name: 'plannedQuantity',
-      type: 'number', 
+      type: 'number',
       required: false,
       label: 'Planned Quantity',
       excelColumn: 'Planned Quantity',
@@ -480,7 +484,7 @@ const employeeSalaryEntryConfig: EntityConfig = {
       excelColumn: 'Previous Entered Quantity',
       dbColumnType: 'integer', // ✅ MATCHES: integer('previous_entered_quantity').default(0)
     },
-    
+
     // ✅ EXACT MATCH: Decimal fields with precision/scale
     {
       name: 'unitPrice',
@@ -489,18 +493,18 @@ const employeeSalaryEntryConfig: EntityConfig = {
       label: 'Unit Price',
       excelColumn: 'Unit Price',
       dbColumnType: 'decimal',
-      dbColumnOptions: { precision: 10, scale: 2 } // ✅ MATCHES: decimal('unit_price', { precision: 10, scale: 2 })
+      dbColumnOptions: { precision: 10, scale: 2 }, // ✅ MATCHES: decimal('unit_price', { precision: 10, scale: 2 })
     },
     {
       name: 'totalAmount',
       type: 'decimal',
-      required: false, 
+      required: false,
       label: 'Total Amount',
       excelColumn: 'Total Amount',
       dbColumnType: 'decimal',
-      dbColumnOptions: { precision: 12, scale: 2 } // ✅ MATCHES: decimal('total_amount', { precision: 12, scale: 2 })
+      dbColumnOptions: { precision: 12, scale: 2 }, // ✅ MATCHES: decimal('total_amount', { precision: 12, scale: 2 })
     },
-    
+
     // ✅ EXACT MATCH: Text fields
     {
       name: 'salaryNote',
@@ -526,16 +530,16 @@ const employeeSalaryEntryConfig: EntityConfig = {
       excelColumn: 'Approved By',
       dbColumnType: 'text', // ✅ MATCHES: text('approved_by')
     },
-    
+
     // ✅ EXACT MATCH: Timestamp fields with mode: 'date'
     {
       name: 'approvedAt',
       type: 'timestamp',
       required: false,
-      label: 'Approved At', 
+      label: 'Approved At',
       excelColumn: 'Approved At',
       dbColumnType: 'timestamp',
-      dbColumnOptions: { mode: 'date' } // ✅ MATCHES: timestamp('approved_at', { mode: 'date' })
+      dbColumnOptions: { mode: 'date' }, // ✅ MATCHES: timestamp('approved_at', { mode: 'date' })
     },
     {
       name: 'startTime',
@@ -543,8 +547,8 @@ const employeeSalaryEntryConfig: EntityConfig = {
       required: false,
       label: 'Start Time',
       excelColumn: 'Start Time',
-      dbColumnType: 'timestamp', 
-      dbColumnOptions: { mode: 'date' } // ✅ MATCHES: timestamp('start_time', { mode: 'date' })
+      dbColumnType: 'timestamp',
+      dbColumnOptions: { mode: 'date' }, // ✅ MATCHES: timestamp('start_time', { mode: 'date' })
     },
     {
       name: 'endTime',
@@ -553,7 +557,7 @@ const employeeSalaryEntryConfig: EntityConfig = {
       label: 'End Time',
       excelColumn: 'End Time',
       dbColumnType: 'timestamp',
-      dbColumnOptions: { mode: 'date' } // ✅ MATCHES: timestamp('end_time', { mode: 'date' })
+      dbColumnOptions: { mode: 'date' }, // ✅ MATCHES: timestamp('end_time', { mode: 'date' })
     },
     {
       name: 'workDurationMinutes',
@@ -563,7 +567,7 @@ const employeeSalaryEntryConfig: EntityConfig = {
       excelColumn: 'Work Duration Minutes',
       dbColumnType: 'integer', // ✅ MATCHES: integer('work_duration_minutes')
     },
-    
+
     {
       name: 'ownerId',
       type: 'string',
@@ -574,17 +578,17 @@ const employeeSalaryEntryConfig: EntityConfig = {
       dbColumnType: 'text', // ✅ MATCHES: text('owner_id').notNull()
     },
   ],
-  
+
   // ✅ EXACT MATCH: Complex constraints from actual schema
   complexConstraints: {
     uniqueIndexes: [{
       name: 'employeeWorkUniqueIdx', // ✅ MATCHES: employee_work_unique_idx
-      fields: ['userId', 'productionStepDetailId', 'planId', 'workDate', 'ownerId']
+      fields: ['userId', 'productionStepDetailId', 'planId', 'workDate', 'ownerId'],
     }],
     compositeIndexes: [
       // ✅ EXACT MATCH: All index names from actual schema
       { name: 'employeeIdIdx', fields: ['userId'] }, // employee_salary_user_idx
-      { name: 'planIdIdx', fields: ['planId'] }, // employee_salary_plan_idx  
+      { name: 'planIdIdx', fields: ['planId'] }, // employee_salary_plan_idx
       { name: 'workDateIdx', fields: ['workDate'] }, // employee_salary_work_date_idx
       { name: 'statusIdx', fields: ['status'] }, // employee_salary_status_idx
       { name: 'entryDateIdx', fields: ['entryDate'] }, // employee_salary_entry_date_idx
@@ -599,9 +603,9 @@ const employeeSalaryEntryConfig: EntityConfig = {
       { name: 'unitPriceCheck', sql: 'unit_price >= 0' },
       { name: 'totalAmountCheck', sql: 'total_amount >= 0' },
       { name: 'workDurationCheck', sql: 'work_duration_minutes >= 0' },
-    ]
+    ],
   },
-  
+
   features: {
     pagination: true,
     search: true,
@@ -708,7 +712,7 @@ function generateEnhancedValidationSchema(config: EntityConfig): string {
             validation += '.min(0, `${field.label} must be non-negative`)';
             const options = field.dbColumnOptions;
             if (options?.precision && options?.scale) {
-              const maxValue = Math.pow(10, options.precision - options.scale) - Math.pow(10, -options.scale);
+              const maxValue = 10 ** (options.precision - options.scale) - 10 ** -options.scale;
               validation += `.max(${maxValue}, '${field.label} exceeds maximum allowed value')`;
             }
           }
@@ -756,7 +760,8 @@ import { z } from 'zod';
 // 🆕 V4: Enhanced form validation schema with complex rules
 export const ${config.entityNameLower}FormSchema = z.object({
   ${validationSchema}
-})${relationFields.some(f => f.name === 'startTime' && f.relation?.entity === 'endTime') ? `
+})${relationFields.some(f => f.name === 'startTime' && f.relation?.entity === 'endTime')
+  ? `
 // 🆕 V4: Cross-field validation for time fields
 .refine((data) => {
   if (data.startTime && data.endTime) {
@@ -766,7 +771,9 @@ export const ${config.entityNameLower}FormSchema = z.object({
 }, {
   message: "End time must be after start time",
   path: ["endTime"],
-})` : ''}${config.fields.some(f => f.name === 'totalAmount') ? `
+})`
+  : ''}${config.fields.some(f => f.name === 'totalAmount')
+  ? `
 // 🆕 V4: Business logic validation for calculated fields
 .refine((data) => {
   if (data.actualQuantity && data.unitPrice && data.totalAmount) {
@@ -777,7 +784,8 @@ export const ${config.entityNameLower}FormSchema = z.object({
 }, {
   message: "Total amount must equal actual quantity × unit price",
   path: ["totalAmount"],
-})` : ''};
+})`
+  : ''};
 
 // Create ${config.entityNameLower} schema (same as form + ownerId)
 export const create${config.entityName}Schema = ${config.entityNameLower}FormSchema.extend({
@@ -789,11 +797,12 @@ export const update${config.entityName}Schema = z.object({
   ${validationSchema.replace(/,$/gm, '.optional(),').replace(/\.optional\(\)\.optional\(\)/g, '.optional()')}
 });
 
-${relationFields.length > 0 ? `
+${relationFields.length > 0
+  ? `
 // 🆕 V4: Enhanced relation validation schemas
 ${relationFields
   .filter(f => f.relation?.type === 'belongsTo')
-  .map(f => {
+  .map((f) => {
     const fkType = f.relation!.foreignKeyType || 'integer';
     if (fkType === 'text') {
       return `
@@ -815,7 +824,8 @@ ${relationFields
 export const ${f.name}Schema = z.object({
   ${f.name}: z.array(z.number().int().positive()).min(1, '${f.label} must contain at least one item'),
 });`)
-  .join('')}` : ''}
+  .join('')}`
+  : ''}
 
 // 🆕 V4: Enhanced list parameters validation with complex options
 export const ${config.entityNameLower}ListParamsSchema = z.object({
@@ -828,29 +838,35 @@ export const ${config.entityNameLower}ListParamsSchema = z.object({
   includeRelations: z.boolean().default(false),
   // 🆕 V4: Enhanced filtering options
   ${config.fields.some(f => f.name === 'status') ? 'status: z.enum([\'draft\', \'submitted\', \'approved\', \'paid\', \'cancelled\']).optional(),' : ''}
-  ${config.fields.some(f => f.name === 'workDate') ? `
+  ${config.fields.some(f => f.name === 'workDate')
+    ? `
   dateFrom: z.union([z.string(), z.date()]).optional(),
-  dateTo: z.union([z.string(), z.date()]).optional(),` : ''}
-  ${relationFields.some(f => f.relation?.type === 'belongsTo') ? `
-  ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f => 
-    f.relation?.foreignKeyType === 'text' 
+  dateTo: z.union([z.string(), z.date()]).optional(),`
+    : ''}
+  ${relationFields.some(f => f.relation?.type === 'belongsTo')
+    ? `
+  ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f =>
+    f.relation?.foreignKeyType === 'text'
       ? `${f.relation.foreignKey}: z.string().optional(),`
-      : `${f.relation.foreignKey}: z.number().int().positive().optional(),`
-  ).join('\n  ')}` : ''}
+      : `${f.relation.foreignKey}: z.number().int().positive().optional(),`,
+  ).join('\n  ')}`
+    : ''}
 });
 
 // 🆕 V4: Enhanced import row validation for Excel import with relations
 export const import${config.entityName}RowSchema = z.object({
   ${validationSchema}
   rowNumber: z.number().int().positive(),
-})${config.fields.some(f => f.name === 'totalAmount') ? `
+})${config.fields.some(f => f.name === 'totalAmount')
+  ? `
 // Business logic validation for import
 .refine((data) => {
   if (data.actualQuantity && data.unitPrice) {
     data.totalAmount = data.actualQuantity * data.unitPrice;
   }
   return true;
-})` : ''};
+})`
+  : ''};
 
 // ID validation
 export const ${config.entityNameLower}IdSchema = z.object({
@@ -955,24 +971,24 @@ function generateEnhancedTypeFields(config: EntityConfig, includeId = false, inc
  */
 function generateEnhancedRelationTypes(config: EntityConfig): string {
   const relationFields = config.fields.filter(f => f.relation);
-  
+
   if (relationFields.length === 0) {
     return '';
   }
 
   return `
 // 🆕 V4: Enhanced relations types with complex support
-${relationFields.map(field => {
-    const rel = field.relation!;
-    if (rel.type === 'belongsTo') {
-      return `  ${rel.entityLower}?: Pick<${rel.entity}, 'id' | '${rel.displayField}'${rel.referenceKey && rel.referenceKey !== 'id' ? ` | '${rel.referenceKey}'` : ''}>;`;
-    } else if (rel.type === 'hasMany') {
-      return `  ${rel.entityLower}s?: ${rel.entity}[];`;
-    } else if (rel.type === 'manyToMany') {
-      return `  ${rel.entityLower}s?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>[];`;
-    }
-    return '';
-  }).filter(Boolean).join('\n')}`;
+${relationFields.map((field) => {
+  const rel = field.relation!;
+  if (rel.type === 'belongsTo') {
+    return `  ${rel.entityLower}?: Pick<${rel.entity}, 'id' | '${rel.displayField}'${rel.referenceKey && rel.referenceKey !== 'id' ? ` | '${rel.referenceKey}'` : ''}>;`;
+  } else if (rel.type === 'hasMany') {
+    return `  ${rel.entityLower}s?: ${rel.entity}[];`;
+  } else if (rel.type === 'manyToMany') {
+    return `  ${rel.entityLower}s?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>[];`;
+  }
+  return '';
+}).filter(Boolean).join('\n')}`;
 }
 
 /**
@@ -992,9 +1008,11 @@ function generateEnhancedTypesContent(config: EntityConfig): string {
  */
 
 import type { ${config.entityNameLower}Schema } from '@/models/Schema';
-${relationFields.length > 0 ? relationFields.map(f => 
-    `import type { ${f.relation!.entity} } from '@/types/${f.relation!.entityLower}';`
-  ).join('\n') : ''}
+${relationFields.length > 0
+  ? relationFields.map(f =>
+      `import type { ${f.relation!.entity} } from '@/types/${f.relation!.entityLower}';`,
+    ).join('\n')
+  : ''}
 
 // Infer the ${config.entityName}Db type from Drizzle schema
 export type ${config.entityName}Db = typeof ${config.entityNameLower}Schema.$inferSelect;
@@ -1005,10 +1023,12 @@ export type ${config.entityName} = Omit<${config.entityName}Db, 'createdAt' | 'u
   readonly updatedAt: string | Date;
 };
 
-${relationTypes ? `
+${relationTypes
+  ? `
 // ${config.entityName} with enhanced relations
 export type ${config.entityName}WithRelations = ${config.entityName} & {${relationTypes}
-};` : ''}
+};`
+  : ''}
 
 // 🆕 V4: Enhanced form data type for React Hook Form with complex validation
 export type ${config.entityName}FormData = {
@@ -1025,7 +1045,8 @@ export type Update${config.entityName}Input = {
 ${updateInputFields}
 };
 
-${relationFields.length > 0 ? `
+${relationFields.length > 0
+  ? `
 // 🆕 V4: Enhanced relation options for dropdowns with complex support
 export type ${config.entityName}RelationOptions = {
 ${relationFields
@@ -1036,7 +1057,8 @@ ${relationFields
   .filter(f => f.relation?.type === 'manyToMany')
   .map(f => `  readonly ${f.relation!.entityLower}s: readonly Pick<${f.relation!.entity}, 'id' | '${f.relation!.displayField}'>[];`)
   .join('\n')}
-};` : ''}
+};`
+  : ''}
 
 // 🆕 V4: Enhanced API Response types with complex error handling
 export type ${config.entityName}Response = {
@@ -1085,15 +1107,19 @@ export type ${config.entityName}ListParams = {
   readonly includeRelations?: boolean;
   // 🆕 V4: Enhanced filtering options
   ${config.fields.some(f => f.name === 'status') ? 'readonly status?: \'draft\' | \'submitted\' | \'approved\' | \'paid\' | \'cancelled\';' : ''}
-  ${config.fields.some(f => f.name === 'workDate') ? `
+  ${config.fields.some(f => f.name === 'workDate')
+    ? `
   readonly dateFrom?: Date | string;
-  readonly dateTo?: Date | string;` : ''}
-  ${relationFields.some(f => f.relation?.type === 'belongsTo') ? `
-  ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f => 
-    f.relation?.foreignKeyType === 'text' 
+  readonly dateTo?: Date | string;`
+    : ''}
+  ${relationFields.some(f => f.relation?.type === 'belongsTo')
+    ? `
+  ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f =>
+    f.relation?.foreignKeyType === 'text'
       ? `readonly ${f.relation.foreignKey}?: string;`
-      : `readonly ${f.relation.foreignKey}?: number;`
-  ).join('\n  ')}` : ''}
+      : `readonly ${f.relation.foreignKey}?: number;`,
+  ).join('\n  ')}`
+    : ''}
 };
 
 export type ${config.entityName}ListParamsWithOwner = ${config.entityName}ListParams & {
@@ -1134,27 +1160,33 @@ export type ${config.entityName}Stats = {
   readonly today: number;
   readonly thisWeek: number;
   readonly thisMonth: number;
-  ${config.fields.some(f => f.name === 'status') ? `
+  ${config.fields.some(f => f.name === 'status')
+    ? `
   readonly byStatus: {
     readonly draft: number;
     readonly submitted: number;
     readonly approved: number;
     readonly paid: number;
     readonly cancelled: number;
-  };` : ''}
-  ${config.fields.some(f => f.name === 'totalAmount') ? `
+  };`
+    : ''}
+  ${config.fields.some(f => f.name === 'totalAmount')
+    ? `
   readonly financial: {
     readonly totalAmount: number;
     readonly averageAmount: number;
     readonly maxAmount: number;
     readonly minAmount: number;
-  };` : ''}
-  ${config.fields.some(f => f.name === 'workDurationMinutes') ? `
+  };`
+    : ''}
+  ${config.fields.some(f => f.name === 'workDurationMinutes')
+    ? `
   readonly productivity: {
     readonly totalWorkTime: number;
     readonly averageWorkTime: number;
     readonly efficiency: number;
-  };` : ''}
+  };`
+    : ''}
 };
 
 export type ${config.entityName}StatsResponse = {
@@ -1168,19 +1200,23 @@ export type ${config.entityName}Filters = {
   sortBy: 'createdAt' | 'updatedAt' | '${config.nameField}' | '${config.codeField}'${config.fields.some(f => f.name === 'workDate') ? ' | \'workDate\'' : ''}${config.fields.some(f => f.name === 'status') ? ' | \'status\'' : ''};
   sortOrder: 'asc' | 'desc';
   ${config.fields.some(f => f.name === 'status') ? 'status?: \'draft\' | \'submitted\' | \'approved\' | \'paid\' | \'cancelled\';' : ''}
-  ${config.fields.some(f => f.name === 'workDate') ? `
+  ${config.fields.some(f => f.name === 'workDate')
+    ? `
   dateRange?: {
     from: Date | string;
     to: Date | string;
-  };` : ''}
-  ${relationFields.some(f => f.relation?.type === 'belongsTo') ? `
+  };`
+    : ''}
+  ${relationFields.some(f => f.relation?.type === 'belongsTo')
+    ? `
   relations?: {
-    ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f => 
-      f.relation?.foreignKeyType === 'text' 
+    ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f =>
+      f.relation?.foreignKeyType === 'text'
         ? `${f.relation.foreignKey}?: string;`
-        : `${f.relation.foreignKey}?: number;`
+        : `${f.relation.foreignKey}?: number;`,
     ).join('\n    ')}
-  };` : ''}
+  };`
+    : ''}
 };
 
 // 🆕 V4: Enhanced batch operations types
@@ -1212,25 +1248,25 @@ export type ${config.entityName}BatchResponse = {
  * Generate enhanced database insert values with text FK support
  */
 function generateEnhancedInsertValues(config: EntityConfig): string {
-  const regularFields = config.fields.filter(f => 
-    !f.relation && 
-    f.name !== 'id' && 
-    f.name !== 'createdAt' && 
-    f.name !== 'updatedAt'
+  const regularFields = config.fields.filter(f =>
+    !f.relation
+    && f.name !== 'id'
+    && f.name !== 'createdAt'
+    && f.name !== 'updatedAt',
   );
-  
+
   const belongsToFields = config.fields.filter(f => f.relation?.type === 'belongsTo');
-  
+
   const allInsertFields = [
-    ...regularFields.map(field => {
+    ...regularFields.map((field) => {
       if (field.type === 'date' || field.type === 'timestamp') {
         return `${field.name}: data.${field.name} ? new Date(data.${field.name}) : null`;
       }
       return `${field.name}: data.${field.name}`;
     }),
-    ...belongsToFields.map(field => `${field.relation!.foreignKey}: data.${field.relation!.foreignKey}`)
+    ...belongsToFields.map(field => `${field.relation!.foreignKey}: data.${field.relation!.foreignKey}`),
   ];
-  
+
   return allInsertFields.join(',\n      ');
 }
 
@@ -1238,12 +1274,12 @@ function generateEnhancedInsertValues(config: EntityConfig): string {
  * Generate enhanced database update values with text FK and complex field handling
  */
 function generateEnhancedUpdateValues(config: EntityConfig): string {
-  const updateFields = config.fields.filter(f => 
-    f.name !== 'id' && 
-    f.name !== 'ownerId' && 
-    f.name !== 'createdAt' && 
-    f.name !== 'updatedAt' &&
-    f.relation?.type !== 'manyToMany' // Many-to-many handled separately
+  const updateFields = config.fields.filter(f =>
+    f.name !== 'id'
+    && f.name !== 'ownerId'
+    && f.name !== 'createdAt'
+    && f.name !== 'updatedAt'
+    && f.relation?.type !== 'manyToMany', // Many-to-many handled separately
   );
 
   const conditionalUpdates = updateFields.map((field) => {
@@ -1292,14 +1328,18 @@ function generateEnhancedQueriesContent(config: EntityConfig): string {
 
 import { and, asc, count, desc, eq, gte, ilike, or, inArray, lte, between } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { ${config.entityNameLower}Schema } from '@/models/Schema';
-${relationFields.length > 0 ? relationFields.map(f => 
-    `import { ${f.relation!.entityLower}Schema } from '@/models/Schema';`
-  ).join('\n') : ''}
-${manyToManyFields.length > 0 ? manyToManyFields.map(f => 
-    `import { ${f.relation!.junctionTable}Schema } from '@/models/Schema';`
-  ).join('\n') : ''}
+${relationFields.length > 0
+  ? relationFields.map(f =>
+      `import { ${f.relation!.entityLower}Schema } from '@/models/Schema';`,
+    ).join('\n')
+  : ''}
+${manyToManyFields.length > 0
+  ? manyToManyFields.map(f =>
+      `import { ${f.relation!.junctionTable}Schema } from '@/models/Schema';`,
+    ).join('\n')
+  : ''}
 import type {
   Create${config.entityName}Input,
   ${config.entityName}Db,
@@ -1319,13 +1359,14 @@ import type {
  * - Business logic calculations
  */
 export async function create${config.entityName}(data: Create${config.entityName}Input): Promise<${config.entityName}Db> {
-  ${belongsToFields.length > 0 ? `
+  ${belongsToFields.length > 0
+    ? `
   // 🆕 V4: Validate foreign keys exist (supporting both text and integer FKs)
-  ${belongsToFields.map(field => {
+  ${belongsToFields.map((field) => {
     const fkType = field.relation!.foreignKeyType || 'integer';
     const fkField = field.relation!.foreignKey;
     const refKey = field.relation!.referenceKey || 'id';
-    
+
     return `
   if (data.${fkField}) {
     const ${field.relation!.entityLower}Exists = await db
@@ -1338,15 +1379,19 @@ export async function create${config.entityName}(data: Create${config.entityName
       throw new Error('${field.relation!.entity} not found');
     }
   }`;
-  }).join('')}` : ''}
+  }).join('')}`
+    : ''}
 
-  ${config.fields.some(f => f.name === 'totalAmount') ? `
+  ${config.fields.some(f => f.name === 'totalAmount')
+    ? `
   // 🆕 V4: Business logic - Auto-calculate total amount
   if (data.actualQuantity && data.unitPrice && !data.totalAmount) {
     data.totalAmount = data.actualQuantity * data.unitPrice;
-  }` : ''}
+  }`
+    : ''}
 
-  ${manyToManyFields.length > 0 ? `
+  ${manyToManyFields.length > 0
+    ? `
   // 🆕 V4: Handle many-to-many relations with transaction
   return db.transaction(async (tx) => {
     // Create main entity
@@ -1373,7 +1418,8 @@ export async function create${config.entityName}(data: Create${config.entityName
     }`).join('')}
 
     return ${config.entityNameLower};
-  });` : `
+  });`
+    : `
   const [${config.entityNameLower}] = await db
     .insert(${config.entityNameLower}Schema)
     .values({
@@ -1396,7 +1442,7 @@ export async function create${config.entityName}(data: Create${config.entityName
  */
 export async function get${config.entityName}sByOwner(
   params: ${config.entityName}ListParamsWithOwner
-): Promise<${config.entityName}Db${relationFields.length > 0 ? ' | ' + config.entityName + 'WithRelations' : ''}[]> {
+): Promise<${config.entityName}Db${relationFields.length > 0 ? ` | ${config.entityName}WithRelations` : ''}[]> {
   const {
     ownerId,
     page = 1,
@@ -1421,10 +1467,11 @@ export async function get${config.entityName}sByOwner(
         .map(f => `${f.name}: ${config.entityNameLower}Schema.${f.name}`)
         .join(',\n      ')},
       
-      ${belongsToFields.length > 0 ? `
+      ${belongsToFields.length > 0
+        ? `
       // Foreign key fields
-      ${belongsToFields.map(f => 
-        `${f.relation!.foreignKey}: ${config.entityNameLower}Schema.${f.relation!.foreignKey}`
+      ${belongsToFields.map(f =>
+        `${f.relation!.foreignKey}: ${config.entityNameLower}Schema.${f.relation!.foreignKey}`,
       ).join(',\n      ')},
       
       // 🆕 V4: Related entity data with text FK support
@@ -1434,11 +1481,13 @@ export async function get${config.entityName}sByOwner(
           ${f.relation!.referenceKey || 'id'}: ${f.relation!.entityLower}Schema.${f.relation!.referenceKey || 'id'},
           ${f.relation!.displayField}: ${f.relation!.entityLower}Schema.${f.relation!.displayField},
         }
-      } : {})`).join(',\n')}` : ''}
+      } : {})`).join(',\n')}`
+        : ''}
     })
     .from(${config.entityNameLower}Schema);
 
-  ${belongsToFields.length > 0 ? `
+  ${belongsToFields.length > 0
+    ? `
   // 🆕 V4: Add joins for belongsTo relations (supporting text FKs)
   if (includeRelations) {
     ${belongsToFields.map(f => `
@@ -1446,7 +1495,8 @@ export async function get${config.entityName}sByOwner(
       ${f.relation!.entityLower}Schema,
       eq(${config.entityNameLower}Schema.${f.relation!.foreignKey}, ${f.relation!.entityLower}Schema.${f.relation!.referenceKey || 'id'})
     );`).join('')}
-  }` : ''}
+  }`
+    : ''}
 
   // 🆕 V4: Build enhanced where conditions
   let whereConditions = eq(${config.entityNameLower}Schema.ownerId, ownerId);
@@ -1458,9 +1508,11 @@ export async function get${config.entityName}sByOwner(
       ${config.codeField !== 'id' ? `ilike(${config.entityNameLower}Schema.${config.codeField}, searchTerm),` : ''}
       ${config.nameField !== config.codeField ? `ilike(${config.entityNameLower}Schema.${config.nameField}, searchTerm),` : ''}
       ${config.fields.some(f => f.name === 'salaryNote') ? `ilike(${config.entityNameLower}Schema.salaryNote, searchTerm),` : ''}
-      ${belongsToFields.length > 0 && 'includeRelations' ? belongsToFields.map(f => 
-        `ilike(${f.relation!.entityLower}Schema.${f.relation!.displayField}, searchTerm)`
-      ).join(',\n      ') : ''}
+      ${belongsToFields.length > 0 && 'includeRelations'
+        ? belongsToFields.map(f =>
+            `ilike(${f.relation!.entityLower}Schema.${f.relation!.displayField}, searchTerm)`,
+          ).join(',\n      ')
+        : ''}
     ].filter(Boolean);
     
     if (searchConditions.length > 0) {
@@ -1468,13 +1520,16 @@ export async function get${config.entityName}sByOwner(
     }
   }
 
-  ${config.fields.some(f => f.name === 'status') ? `
+  ${config.fields.some(f => f.name === 'status')
+    ? `
   // Status filter
   if (status) {
     whereConditions = and(whereConditions, eq(${config.entityNameLower}Schema.status, status));
-  }` : ''}
+  }`
+    : ''}
 
-  ${config.fields.some(f => f.name === 'workDate') ? `
+  ${config.fields.some(f => f.name === 'workDate')
+    ? `
   // Date range filter
   if (dateFrom && dateTo) {
     whereConditions = and(
@@ -1485,14 +1540,17 @@ export async function get${config.entityName}sByOwner(
     whereConditions = and(whereConditions, gte(${config.entityNameLower}Schema.workDate, new Date(dateFrom)));
   } else if (dateTo) {
     whereConditions = and(whereConditions, lte(${config.entityNameLower}Schema.workDate, new Date(dateTo)));
-  }` : ''}
+  }`
+    : ''}
 
-  ${relationFields.filter(f => f.relation?.type === 'belongsTo').length > 0 ? `
+  ${relationFields.filter(f => f.relation?.type === 'belongsTo').length > 0
+    ? `
   // Relation filters
   ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f => `
   if (${f.relation!.foreignKey}) {
     whereConditions = and(whereConditions, eq(${config.entityNameLower}Schema.${f.relation!.foreignKey}, ${f.relation!.foreignKey}));
-  }`).join('')}` : ''}
+  }`).join('')}`
+    : ''}
 
   // 🆕 V4: Enhanced sorting with relation support
   let orderBy;
@@ -1506,15 +1564,21 @@ export async function get${config.entityName}sByOwner(
     case '${config.nameField}':
       orderBy = sortOrder === 'asc' ? asc(${config.entityNameLower}Schema.${config.nameField}) : desc(${config.entityNameLower}Schema.${config.nameField});
       break;
-    ${config.codeField !== config.nameField ? `case '${config.codeField}':
+    ${config.codeField !== config.nameField
+      ? `case '${config.codeField}':
       orderBy = sortOrder === 'asc' ? asc(${config.entityNameLower}Schema.${config.codeField}) : desc(${config.entityNameLower}Schema.${config.codeField});
-      break;` : ''}
-    ${config.fields.some(f => f.name === 'workDate') ? `case 'workDate':
+      break;`
+      : ''}
+    ${config.fields.some(f => f.name === 'workDate')
+      ? `case 'workDate':
       orderBy = sortOrder === 'asc' ? asc(${config.entityNameLower}Schema.workDate) : desc(${config.entityNameLower}Schema.workDate);
-      break;` : ''}
-    ${config.fields.some(f => f.name === 'status') ? `case 'status':
+      break;`
+      : ''}
+    ${config.fields.some(f => f.name === 'status')
+      ? `case 'status':
       orderBy = sortOrder === 'asc' ? asc(${config.entityNameLower}Schema.status) : desc(${config.entityNameLower}Schema.status);
-      break;` : ''}
+      break;`
+      : ''}
     default:
       orderBy = desc(${config.entityNameLower}Schema.createdAt);
   }
@@ -1525,7 +1589,8 @@ export async function get${config.entityName}sByOwner(
     .limit(limit)
     .offset(offset);
 
-  ${manyToManyFields.length > 0 ? `
+  ${manyToManyFields.length > 0
+    ? `
   // 🆕 V4: Handle many-to-many relations separately for performance
   if (includeRelations && results.length > 0) {
     const entityIds = results.map(r => r.id);
@@ -1556,7 +1621,8 @@ export async function get${config.entityName}sByOwner(
           ${f.relation!.displayField}: rel.${f.relation!.displayField},
         }))`).join(',\n')}
     })) as ${config.entityName}WithRelations[];
-  }` : ''}
+  }`
+    : ''}
 
   return results;
 }
@@ -1568,7 +1634,7 @@ export async function get${config.entityName}ById(
   id: number,
   ownerId: string,
   includeRelations = false
-): Promise<${config.entityName}Db${relationFields.length > 0 ? ' | ' + config.entityName + 'WithRelations' : ''} | undefined> {
+): Promise<${config.entityName}Db${relationFields.length > 0 ? ` | ${config.entityName}WithRelations` : ''} | undefined> {
   let query = db
     .select({
       id: ${config.entityNameLower}Schema.id,
@@ -1577,10 +1643,11 @@ export async function get${config.entityName}ById(
         .map(f => `${f.name}: ${config.entityNameLower}Schema.${f.name}`)
         .join(',\n      ')},
       
-      ${belongsToFields.length > 0 ? `
+      ${belongsToFields.length > 0
+        ? `
       // Foreign key fields
-      ${belongsToFields.map(f => 
-        `${f.relation!.foreignKey}: ${config.entityNameLower}Schema.${f.relation!.foreignKey}`
+      ${belongsToFields.map(f =>
+        `${f.relation!.foreignKey}: ${config.entityNameLower}Schema.${f.relation!.foreignKey}`,
       ).join(',\n      ')},
       
       // Related entity data
@@ -1590,18 +1657,21 @@ export async function get${config.entityName}ById(
           ${f.relation!.referenceKey || 'id'}: ${f.relation!.entityLower}Schema.${f.relation!.referenceKey || 'id'},
           ${f.relation!.displayField}: ${f.relation!.entityLower}Schema.${f.relation!.displayField},
         }
-      } : {})`).join(',\n')}` : ''}
+      } : {})`).join(',\n')}`
+        : ''}
     })
     .from(${config.entityNameLower}Schema);
 
-  ${belongsToFields.length > 0 ? `
+  ${belongsToFields.length > 0
+    ? `
   if (includeRelations) {
     ${belongsToFields.map(f => `
     query = query.leftJoin(
       ${f.relation!.entityLower}Schema,
       eq(${config.entityNameLower}Schema.${f.relation!.foreignKey}, ${f.relation!.entityLower}Schema.${f.relation!.referenceKey || 'id'})
     );`).join('')}
-  }` : ''}
+  }`
+    : ''}
 
   const [result] = await query
     .where(and(
@@ -1614,7 +1684,8 @@ export async function get${config.entityName}ById(
     return undefined;
   }
 
-  ${manyToManyFields.length > 0 ? `
+  ${manyToManyFields.length > 0
+    ? `
   // Handle many-to-many relations
   if (includeRelations) {
     ${manyToManyFields.map(f => `
@@ -1637,7 +1708,8 @@ export async function get${config.entityName}ById(
         ${f.relation!.displayField}: rel.${f.relation!.displayField},
       })),
     } as ${config.entityName}WithRelations;`).join('')}
-  }` : ''}
+  }`
+    : ''}
 
   return result;
 }
@@ -1656,15 +1728,18 @@ export async function update${config.entityName}(
     throw new Error('${config.entityName} not found or access denied');
   }
 
-  ${config.fields.some(f => f.name === 'totalAmount') ? `
+  ${config.fields.some(f => f.name === 'totalAmount')
+    ? `
   // 🆕 V4: Auto-calculate total amount if needed
   if (data.actualQuantity !== undefined || data.unitPrice !== undefined) {
     const actualQuantity = data.actualQuantity ?? existing${config.entityName}.actualQuantity ?? 0;
     const unitPrice = data.unitPrice ?? existing${config.entityName}.unitPrice ?? 0;
     data.totalAmount = actualQuantity * unitPrice;
-  }` : ''}
+  }`
+    : ''}
 
-  ${manyToManyFields.length > 0 ? `
+  ${manyToManyFields.length > 0
+    ? `
   return db.transaction(async (tx) => {
     // Build update data with proper type handling
     const updateData: Record<string, unknown> = {};
@@ -1699,7 +1774,8 @@ export async function update${config.entityName}(
     }`).join('')}
 
     return updated${config.entityName};
-  });` : `
+  });`
+    : `
   // Build update data with proper type handling
   const updateData: Record<string, unknown> = {};
   ${updateLogic}
@@ -1721,7 +1797,8 @@ export async function update${config.entityName}(
  * 🆕 V4: Delete ${config.entityNameLower} with enhanced cascade handling
  */
 export async function delete${config.entityName}(id: number, ownerId: string): Promise<void> {
-  ${manyToManyFields.length > 0 ? `
+  ${manyToManyFields.length > 0
+    ? `
   await db.transaction(async (tx) => {
     // Delete many-to-many relations first
     ${manyToManyFields.map(field => `
@@ -1736,7 +1813,8 @@ export async function delete${config.entityName}(id: number, ownerId: string): P
     if (result.rowCount === 0) {
       throw new Error('${config.entityName} not found or access denied');
     }
-  });` : `
+  });`
+    : `
   const result = await db
     .delete(${config.entityNameLower}Schema)
     .where(and(eq(${config.entityNameLower}Schema.id, id), eq(${config.entityNameLower}Schema.ownerId, ownerId)));
@@ -1746,7 +1824,8 @@ export async function delete${config.entityName}(id: number, ownerId: string): P
   }`}
 }
 
-${relationFields.some(f => f.relation?.type === 'belongsTo' || f.relation?.type === 'manyToMany') ? `
+${relationFields.some(f => f.relation?.type === 'belongsTo' || f.relation?.type === 'manyToMany')
+  ? `
 /**
  * 🆕 V4: Get relation options with enhanced performance
  */
@@ -1771,7 +1850,8 @@ export async function get${config.entityName}RelationOptions(): Promise<${config
       .map(f => `${f.relation!.entityLower}s: ${f.relation!.entityLower}Options`)
       .join(',\n    ')}
   };
-}` : ''}
+}`
+  : ''}
 
 /**
  * 🆕 V4: Enhanced statistics with complex metrics
@@ -1794,7 +1874,8 @@ export async function get${config.entityName}Stats(ownerId: string): Promise<${c
     db.select({ count: count() }).from(${config.entityNameLower}Schema).where(
       and(eq(${config.entityNameLower}Schema.ownerId, ownerId), gte(${config.entityNameLower}Schema.createdAt, thisMonthStart))
     ),
-    ${config.fields.some(f => f.name === 'status') ? `
+    ${config.fields.some(f => f.name === 'status')
+      ? `
     // Status breakdown
     db.select({ 
       status: ${config.entityNameLower}Schema.status, 
@@ -1802,7 +1883,8 @@ export async function get${config.entityName}Stats(ownerId: string): Promise<${c
     })
     .from(${config.entityNameLower}Schema)
     .where(eq(${config.entityNameLower}Schema.ownerId, ownerId))
-    .groupBy(${config.entityNameLower}Schema.status),` : ''}
+    .groupBy(${config.entityNameLower}Schema.status),`
+      : ''}
   ]);
 
   return {
@@ -1810,14 +1892,16 @@ export async function get${config.entityName}Stats(ownerId: string): Promise<${c
     today: todayResult[0]?.count ?? 0,
     thisWeek: thisWeekResult[0]?.count ?? 0,
     thisMonth: thisMonthResult[0]?.count ?? 0,
-    ${config.fields.some(f => f.name === 'status') ? `
+    ${config.fields.some(f => f.name === 'status')
+      ? `
     byStatus: {
       draft: statusStats?.find(s => s.status === 'draft')?.count ?? 0,
       submitted: statusStats?.find(s => s.status === 'submitted')?.count ?? 0,
       approved: statusStats?.find(s => s.status === 'approved')?.count ?? 0,
       paid: statusStats?.find(s => s.status === 'paid')?.count ?? 0,
       cancelled: statusStats?.find(s => s.status === 'cancelled')?.count ?? 0,
-    },` : ''}
+    },`
+      : ''}
   };
 }
 
@@ -1853,11 +1937,13 @@ export async function batch${config.entityName}Operations(
 
         switch (action) {
           case 'delete':
-            ${manyToManyFields.length > 0 ? `
+            ${manyToManyFields.length > 0
+              ? `
             // Delete relations first
             ${manyToManyFields.map(field => `
             await tx.delete(${field.relation!.junctionTable}Schema)
-              .where(eq(${field.relation!.junctionTable}Schema.${field.relation!.junctionFields!.currentKey}, id));`).join('')}` : ''}
+              .where(eq(${field.relation!.junctionTable}Schema.${field.relation!.junctionFields!.currentKey}, id));`).join('')}`
+              : ''}
             
             await tx.delete(${config.entityNameLower}Schema)
               .where(eq(${config.entityNameLower}Schema.id, id));
@@ -1871,16 +1957,19 @@ export async function batch${config.entityName}Operations(
             await tx.update(${config.entityNameLower}Schema)
               .set({ 
                 status: newStatus,
-                ${config.fields.some(f => f.name === 'approvedBy') ? `
+                ${config.fields.some(f => f.name === 'approvedBy')
+                  ? `
                 ...(newStatus === 'approved' ? { 
                   approvedBy: ownerId, 
                   approvedAt: new Date() 
-                } : {}),` : ''}
+                } : {}),`
+                  : ''}
               })
               .where(eq(${config.entityNameLower}Schema.id, id));
             break;
 
-          ${config.fields.some(f => f.name === 'status') ? `
+          ${config.fields.some(f => f.name === 'status')
+            ? `
           case 'approve':
             await tx.update(${config.entityNameLower}Schema)
               .set({ 
@@ -1895,7 +1984,8 @@ export async function batch${config.entityName}Operations(
             await tx.update(${config.entityNameLower}Schema)
               .set({ status: 'cancelled' })
               .where(eq(${config.entityNameLower}Schema.id, id));
-            break;` : ''}
+            break;`
+            : ''}
 
           default:
             errors.push({ id, error: \`Unknown action: \${action}\` });
@@ -1930,7 +2020,7 @@ export async function batch${config.entityName}Operations(
  */
 function generateEnhancedAPIRouteContent(config: EntityConfig): string {
   const relationFields = config.fields.filter(f => f.relation);
-  
+
   return `/**
  * ${config.entityName} Enhanced API Routes with Complex Features
  * Generated by enhanced entity generator script V4
@@ -1972,10 +2062,12 @@ export async function GET(request: NextRequest) {
       sortOrder: searchParams.get('sortOrder') || 'desc',
       includeRelations: searchParams.get('includeRelations') === 'true',
       ${config.fields.some(f => f.name === 'status') ? `status: searchParams.get('status') || undefined,` : ''}
-      ${config.fields.some(f => f.name === 'workDate') ? `
+      ${config.fields.some(f => f.name === 'workDate')
+        ? `
       dateFrom: searchParams.get('dateFrom') || undefined,
-      dateTo: searchParams.get('dateTo') || undefined,` : ''}
-      ${relationFields.filter(f => f.relation?.type === 'belongsTo').map(f => {
+      dateTo: searchParams.get('dateTo') || undefined,`
+        : ''}
+      ${relationFields.filter(f => f.relation?.type === 'belongsTo').map((f) => {
         const fkType = f.relation!.foreignKeyType || 'integer';
         if (fkType === 'text') {
           return `${f.relation!.foreignKey}: searchParams.get('${f.relation!.foreignKey}') || undefined,`;
@@ -2052,11 +2144,13 @@ export async function POST(request: NextRequest) {
       message: '${config.entityName} created successfully',
       // 🆕 V4: Include metadata for client-side calculations
       metadata: {
-        ${config.fields.some(f => f.name === 'totalAmount') ? `
+        ${config.fields.some(f => f.name === 'totalAmount')
+          ? `
         calculations: {
           totalAmount: ${config.entityNameLower}.totalAmount,
           ${config.fields.some(f => f.name === 'actualQuantity') ? `unitPrice: ${config.entityNameLower}.unitPrice,` : ''}
-        },` : ''}
+        },`
+          : ''}
       }
     });
   } catch (error) {
@@ -2286,7 +2380,7 @@ export async function GET() {
  */
 function generateEnhancedRelationOptionsRouteContent(config: EntityConfig): string {
   const relationFields = config.fields.filter(f => f.relation);
-  
+
   if (relationFields.length === 0) {
     return '';
   }
@@ -2477,10 +2571,10 @@ function main() {
   }
 
   let config: EntityConfig;
-  
+
   // 🆕 V4: Enhanced entity name conversion
   const convertedNames = convertEntityName(entityName);
-  
+
   if (entityName.toLowerCase().includes('employee') && entityName.toLowerCase().includes('salary')) {
     // Use predefined EMPLOYEE_SALARY_ENTRY config
     config = employeeSalaryEntryConfig;
@@ -2490,26 +2584,26 @@ function main() {
       ...employeeSalaryEntryConfig,
       ...convertedNames,
       codeField: 'id', // Most entities don't have specific code fields
-      nameField: convertedNames.entityNameLower.includes('Date') ? 'createdAt' : convertedNames.entityNameLower + 'Name',
+      nameField: convertedNames.entityNameLower.includes('Date') ? 'createdAt' : `${convertedNames.entityNameLower}Name`,
       // Simplified fields for generic entities
       fields: [
         {
-          name: convertedNames.entityNameLower + 'Code',
+          name: `${convertedNames.entityNameLower}Code`,
           type: 'string',
           required: true,
           unique: true,
           maxLength: 50,
-          label: convertedNames.entityName + ' Code',
-          excelColumn: convertedNames.entityName + ' Code',
+          label: `${convertedNames.entityName} Code`,
+          excelColumn: `${convertedNames.entityName} Code`,
           dbColumnType: 'text',
         },
         {
-          name: convertedNames.entityNameLower + 'Name',
+          name: `${convertedNames.entityNameLower}Name`,
           type: 'string',
           required: true,
           maxLength: 255,
-          label: convertedNames.entityName + ' Name',
-          excelColumn: convertedNames.entityName + ' Name',
+          label: `${convertedNames.entityName} Name`,
+          excelColumn: `${convertedNames.entityName} Name`,
           dbColumnType: 'text',
         },
         {
@@ -2541,13 +2635,13 @@ function main() {
       ],
       complexConstraints: {
         uniqueIndexes: [{
-          name: convertedNames.entityNameLower + 'CodeOwnerIdx',
-          fields: [convertedNames.entityNameLower + 'Code', 'ownerId']
+          name: `${convertedNames.entityNameLower}CodeOwnerIdx`,
+          fields: [`${convertedNames.entityNameLower}Code`, 'ownerId'],
         }],
         compositeIndexes: [
           { name: 'statusIdx', fields: ['status'] },
         ],
-        checkConstraints: []
+        checkConstraints: [],
       },
     };
   }
@@ -2571,13 +2665,13 @@ function main() {
     ['', `src/app/api/${config.entityNamePlural}/route.ts`], // Enhanced main API route
     ['', `src/app/api/${config.entityNamePlural}/[id]/route.ts`], // Enhanced individual entity route
     ['', `src/app/api/${config.entityNamePlural}/stats/route.ts`], // Enhanced stats route
-    
+
     // V4 Enhanced API routes
     ['', `src/app/api/${config.entityNamePlural}/relations/options/route.ts`], // Enhanced relation options
-    
+
     // 🆕 V4: Enhanced React components (generated from scratch)
     ['', `src/features/${config.entityNameLower}/${config.entityName}Form.tsx`], // Enhanced Form Component with V4 features
-    
+
     // Legacy components (using template replacement for now)
     ['src/features/product/ProductList.tsx', `src/features/${config.entityNameLower}/${config.entityName}List.tsx`],
     ['src/features/product/ProductSkeleton.tsx', `src/features/${config.entityNameLower}/${config.entityName}Skeleton.tsx`],
@@ -2613,10 +2707,10 @@ function main() {
   console.log('✅ Performance Optimized Queries');
   console.log('✅ Advanced Statistics & Metrics');
   console.log('✅ Entity Name Conversion (SNAKE_CASE support)');
-  
+
   console.log('\n📋 Relations Generated:');
   const relationFields = config.fields.filter(f => f.relation);
-  relationFields.forEach(field => {
+  relationFields.forEach((field) => {
     const rel = field.relation!;
     const fkType = rel.foreignKeyType || 'integer';
     console.log(`✅ ${rel.type}: ${config.entityName} -> ${rel.entity} (${rel.displayField}) [${fkType} FK]`);
@@ -2624,10 +2718,10 @@ function main() {
 
   if (config.complexConstraints) {
     console.log('\n📋 Complex Constraints:');
-    config.complexConstraints.uniqueIndexes?.forEach(idx => {
+    config.complexConstraints.uniqueIndexes?.forEach((idx) => {
       console.log(`✅ Unique Index: ${idx.name} (${idx.fields.join(', ')})`);
     });
-    config.complexConstraints.checkConstraints?.forEach(constraint => {
+    config.complexConstraints.checkConstraints?.forEach((constraint) => {
       console.log(`✅ Check Constraint: ${constraint.name} (${constraint.sql})`);
     });
   }
@@ -2663,12 +2757,12 @@ function generateEnhancedFormComponentContent(config: EntityConfig): string {
   const relationFields = config.fields.filter(f => f.relation);
   const belongsToFields = relationFields.filter(f => f.relation?.type === 'belongsTo');
   const manyToManyFields = relationFields.filter(f => f.relation?.type === 'manyToMany');
-  const regularFields = config.fields.filter(f => 
-    !f.relation && 
-    f.name !== 'ownerId' && 
-    f.name !== 'id' && 
-    f.name !== 'createdAt' && 
-    f.name !== 'updatedAt'
+  const regularFields = config.fields.filter(f =>
+    !f.relation
+    && f.name !== 'ownerId'
+    && f.name !== 'id'
+    && f.name !== 'createdAt'
+    && f.name !== 'updatedAt',
   );
 
   return `/**
@@ -2687,11 +2781,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 ${belongsToFields.length > 0 || manyToManyFields.length > 0 ? `import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';` : ''}
 ${manyToManyFields.length > 0 ? `import { Checkbox } from '@/components/ui/checkbox';` : ''}
-${config.fields.some(f => f.type === 'date' || f.type === 'timestamp') ? `import { Calendar } from '@/components/ui/calendar';
+${config.fields.some(f => f.type === 'date' || f.type === 'timestamp')
+  ? `import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/libs/utils';` : ''}
+import { cn } from '@/libs/utils';`
+  : ''}
 
 import { ${config.entityNameLower}FormSchema } from '@/libs/validations/${config.entityNameLower}';
 import type { 
@@ -2713,17 +2809,19 @@ export function ${config.entityName}Form({
   isLoading = false,
   mode = 'create'
 }: ${config.entityName}FormProps) {
-  ${relationFields.length > 0 ? `const [relationOptions, setRelationOptions] = useState<${config.entityName}RelationOptions>({
+  ${relationFields.length > 0
+    ? `const [relationOptions, setRelationOptions] = useState<${config.entityName}RelationOptions>({
     ${relationFields
       .filter(f => f.relation?.type === 'belongsTo' || f.relation?.type === 'manyToMany')
       .map(f => `${f.relation!.entityLower}s: []`)
       .join(',\n    ')}
-  });` : ''}
+  });`
+    : ''}
 
   const form = useForm<${config.entityName}FormData>({
     resolver: zodResolver(${config.entityNameLower}FormSchema),
     defaultValues: {
-      ${regularFields.map(field => {
+      ${regularFields.map((field) => {
         if (field.type === 'boolean') {
           return `${field.name}: ${config.entityNameLower}?.${field.name} ?? false,`;
         } else if (field.type === 'number') {
@@ -2731,23 +2829,24 @@ export function ${config.entityName}Form({
         } else if (field.type === 'decimal') {
           return `${field.name}: ${config.entityNameLower}?.${field.name} ?? undefined,`;
         } else if (field.type === 'date') {
-          return `${field.name}: ${config.entityNameLower}?.${field.name} ? new Date(${config.entityNameLower}.${field.name}).toISOString().split('T')[0] : ${field.name === 'workDate' ? "new Date().toISOString().split('T')[0]" : 'undefined'},`;
+          return `${field.name}: ${config.entityNameLower}?.${field.name} ? new Date(${config.entityNameLower}.${field.name}).toISOString().split('T')[0] : ${field.name === 'workDate' ? 'new Date().toISOString().split(\'T\')[0]' : 'undefined'},`;
         } else if (field.type === 'timestamp') {
           return `${field.name}: ${config.entityNameLower}?.${field.name} ? new Date(${config.entityNameLower}.${field.name}).toISOString().slice(0, 16) : undefined,`;
         } else {
           return `${field.name}: ${config.entityNameLower}?.${field.name} ?? '',`;
         }
       }).join('\n      ')}
-      ${belongsToFields.map(field => 
-        `${field.relation!.foreignKey}: ${config.entityNameLower}?.${field.relation!.foreignKey} ?? undefined,`
+      ${belongsToFields.map(field =>
+        `${field.relation!.foreignKey}: ${config.entityNameLower}?.${field.relation!.foreignKey} ?? undefined,`,
       ).join('\n      ')}
-      ${manyToManyFields.map(field => 
-        `${field.name}: ${config.entityNameLower}?.${field.relation!.entityLower}s?.map(rel => rel.id) ?? [],`
+      ${manyToManyFields.map(field =>
+        `${field.name}: ${config.entityNameLower}?.${field.relation!.entityLower}s?.map(rel => rel.id) ?? [],`,
       ).join('\n      ')}
     },
   });
 
-  ${relationFields.length > 0 ? `
+  ${relationFields.length > 0
+    ? `
   // 🆕 V4: Load relation options with error handling
   useEffect(() => {
     const loadRelationOptions = async () => {
@@ -2765,9 +2864,11 @@ export function ${config.entityName}Form({
     };
 
     loadRelationOptions();
-  }, []);` : ''}
+  }, []);`
+    : ''}
 
-  ${config.fields.some(f => f.name === 'totalAmount') ? `
+  ${config.fields.some(f => f.name === 'totalAmount')
+    ? `
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' });
@@ -2777,9 +2878,11 @@ export function ${config.entityName}Form({
       const calculatedTotal = Number(actualQuantity) * Number(unitPrice);
       form.setValue('totalAmount', calculatedTotal);
     }
-  }, [actualQuantity, unitPrice, form]);` : ''}
+  }, [actualQuantity, unitPrice, form]);`
+    : ''}
 
-  ${config.fields.some(f => f.name === 'workDurationMinutes') ? `
+  ${config.fields.some(f => f.name === 'workDurationMinutes')
+    ? `
   // 🆕 V4: Auto-calculate work duration from start/end times
   const startTime = useWatch({ control: form.control, name: 'startTime' });
   const endTime = useWatch({ control: form.control, name: 'endTime' });
@@ -2794,7 +2897,8 @@ export function ${config.entityName}Form({
         form.setValue('workDurationMinutes', durationMinutes);
       }
     }
-  }, [startTime, endTime, form]);` : ''}
+  }, [startTime, endTime, form]);`
+    : ''}
 
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: ${config.entityName}FormData) => {
@@ -2821,7 +2925,7 @@ export function ${config.entityName}Form({
                 <FormLabel>${field.label}</FormLabel>
                 <Select 
                   onValueChange={(value) => {
-                    ${field.relation?.foreignKeyType === 'text' 
+                    ${field.relation?.foreignKeyType === 'text'
                       ? `formField.onChange(value);`
                       : `formField.onChange(Number(value));`}
                   }}
@@ -2846,7 +2950,7 @@ export function ${config.entityName}Form({
           />`).join('\n')}
 
           {/* 🆕 V4: Regular Fields with Enhanced Types */}
-          ${regularFields.map(field => {
+          ${regularFields.map((field) => {
             if (field.type === 'text') {
               return `
           <div className="md:col-span-2">

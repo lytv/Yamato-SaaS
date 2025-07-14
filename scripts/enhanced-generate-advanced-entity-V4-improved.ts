@@ -3,7 +3,7 @@
 /**
  * Enhanced Advanced Entity Generator Script V4 - IMPROVED VERSION
  * Creates complete CRUD entity with Excel import/export capabilities and database relationships
- * 
+ *
  * NEW FEATURES V4:
  * ✅ Fixed case-sensitivity issues
  * ✅ Enhanced hooks generation (export, import, filters, stats)
@@ -13,13 +13,13 @@
  * ✅ Dry-run mode and file backup
  * ✅ Progress tracking and better error messages
  * ✅ Enhanced template engine with conditional generation
- * 
+ *
  * Usage: npx tsx scripts/enhanced-generate-advanced-entity-V4-improved.ts [entityName] [configFile] [options]
  * Example: npx tsx scripts/enhanced-generate-advanced-entity-V4-improved.ts plandetail ./configs/plandetail-config.ts --dry-run
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
-import { join, dirname, basename } from 'node:path';
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // ===== TYPES AND INTERFACES =====
@@ -33,7 +33,7 @@ type FieldConfig = {
   label: string;
   excelColumn?: string;
   dbColumnType?: 'text' | 'integer' | 'decimal' | 'boolean' | 'date' | 'timestamp';
-  
+
   // Enhanced relationship properties
   relation?: {
     type: 'belongsTo' | 'hasMany' | 'manyToMany';
@@ -44,14 +44,14 @@ type FieldConfig = {
     displayField: string;
     nullable?: boolean;
     onDelete?: 'cascade' | 'restrict' | 'setNull';
-    
+
     // For many-to-many
     junctionTable?: string;
     junctionFields?: {
       currentKey: string;
       relatedKey: string;
     };
-    
+
     // NEW: For relation options
     optionsEndpoint?: string;
     searchField?: string;
@@ -83,7 +83,7 @@ export type EntityConfig = {
     exportModal: boolean;
   };
   uiType: 'table' | 'cards';
-  
+
   // NEW: Template customization
   templates?: {
     customSchema?: string;
@@ -140,22 +140,42 @@ class ConfigValidator {
     const errors: string[] = [];
 
     // Basic validation
-    if (!config.entityName) errors.push('entityName is required');
-    if (!config.entityNameLower) errors.push('entityNameLower is required');
-    if (!config.tableName) errors.push('tableName is required');
-    if (!config.fields || config.fields.length === 0) errors.push('fields array is required and cannot be empty');
+    if (!config.entityName) {
+      errors.push('entityName is required');
+    }
+    if (!config.entityNameLower) {
+      errors.push('entityNameLower is required');
+    }
+    if (!config.tableName) {
+      errors.push('tableName is required');
+    }
+    if (!config.fields || config.fields.length === 0) {
+      errors.push('fields array is required and cannot be empty');
+    }
 
     // Field validation
     config.fields.forEach((field, index) => {
-      if (!field.name) errors.push(`Field ${index}: name is required`);
-      if (!field.type) errors.push(`Field ${index}: type is required`);
-      if (!field.label) errors.push(`Field ${index}: label is required`);
+      if (!field.name) {
+        errors.push(`Field ${index}: name is required`);
+      }
+      if (!field.type) {
+        errors.push(`Field ${index}: type is required`);
+      }
+      if (!field.label) {
+        errors.push(`Field ${index}: label is required`);
+      }
 
       // Relation validation
       if (field.relation) {
-        if (!field.relation.entity) errors.push(`Field ${field.name}: relation.entity is required`);
-        if (!field.relation.foreignKey) errors.push(`Field ${field.name}: relation.foreignKey is required`);
-        if (!field.relation.displayField) errors.push(`Field ${field.name}: relation.displayField is required`);
+        if (!field.relation.entity) {
+          errors.push(`Field ${field.name}: relation.entity is required`);
+        }
+        if (!field.relation.foreignKey) {
+          errors.push(`Field ${field.name}: relation.foreignKey is required`);
+        }
+        if (!field.relation.displayField) {
+          errors.push(`Field ${field.name}: relation.displayField is required`);
+        }
       }
     });
 
@@ -167,7 +187,9 @@ class FileManager {
   constructor(private options: GenerationOptions, private logger: Logger) {}
 
   backupFile(filePath: string): void {
-    if (!this.options.backup || !existsSync(filePath)) return;
+    if (!this.options.backup || !existsSync(filePath)) {
+      return;
+    }
 
     const backupPath = `${filePath}.backup.${Date.now()}`;
     copyFileSync(filePath, backupPath);
@@ -225,7 +247,7 @@ async function loadEntityConfig(configPath: string, entityName: string, logger: 
     // Smart path resolution - check if we're already in scripts directory
     const currentDir = process.cwd();
     const isInScriptsDir = currentDir.endsWith('scripts') || currentDir.includes('\\scripts\\') || currentDir.includes('/scripts/');
-    
+
     let absolutePath: string;
     if (isInScriptsDir) {
       // Already in scripts directory, use configPath directly
@@ -234,11 +256,11 @@ async function loadEntityConfig(configPath: string, entityName: string, logger: 
       // Not in scripts directory, add scripts prefix
       absolutePath = join(currentDir, 'scripts', configPath);
     }
-    
+
     logger.debug(`Current directory: ${currentDir}`);
     logger.debug(`Is in scripts directory: ${isInScriptsDir}`);
     logger.debug(`Resolved config path: ${absolutePath}`);
-    
+
     if (!existsSync(absolutePath)) {
       throw new Error(`Config file not found: ${absolutePath}`);
     }
@@ -247,7 +269,7 @@ async function loadEntityConfig(configPath: string, entityName: string, logger: 
 
     // Import the config file
     const configModule = await import(pathToFileURL(absolutePath).href);
-    
+
     // Try multiple naming conventions
     const possibleKeys = [
       `${entityName}Config`,
@@ -259,11 +281,11 @@ async function loadEntityConfig(configPath: string, entityName: string, logger: 
       'plandetailConfig',
       'config',
       'entityConfig',
-      'default'
+      'default',
     ];
-    
+
     let config = configModule.default;
-    
+
     if (!config) {
       for (const key of possibleKeys) {
         if (configModule[key]) {
@@ -299,13 +321,13 @@ async function loadEntityConfig(configPath: string, entityName: string, logger: 
 class SchemaGenerator {
   static generate(config: EntityConfig): string {
     const relationFields = config.fields.filter(f => f.relation);
-    const regularFields = config.fields.filter(f => 
-      !f.relation && 
-      f.name !== 'id' && 
-      f.name !== 'createdAt' && 
-      f.name !== 'updatedAt'
+    const regularFields = config.fields.filter(f =>
+      !f.relation
+      && f.name !== 'id'
+      && f.name !== 'createdAt'
+      && f.name !== 'updatedAt',
     );
-    
+
     return `/**
  * ${config.entityName} Database Schema with Relations
  * Generated by enhanced entity generator script V4 (improved)
@@ -313,27 +335,29 @@ class SchemaGenerator {
 
 import { relations } from 'drizzle-orm';
 import { pgTable, serial, text, integer, timestamp, boolean, decimal, date } from 'drizzle-orm/pg-core';
-${relationFields.length > 0 ? `\n// Import related schemas\n${relationFields
+${relationFields.length > 0
+  ? `\n// Import related schemas\n${relationFields
     .map(f => `import { ${f.relation!.entityLower}Schema } from './${f.relation!.entityLower}';`)
-    .join('\n')}` : ''}
+    .join('\n')}`
+  : ''}
 
 export const ${config.entityNameLower}Schema = pgTable('${config.tableName}', {
   id: serial('id').primaryKey(),
   
   // Regular fields
-${regularFields.map(field => {
-    const column = this.getColumnDefinition(field);
-    return `  ${field.name}: ${column},`;
-  }).join('\n')}
+${regularFields.map((field) => {
+  const column = this.getColumnDefinition(field);
+  return `  ${field.name}: ${column},`;
+}).join('\n')}
 
   // Foreign key fields
 ${relationFields
-    .filter(f => f.relation?.type === 'belongsTo')
-    .map(field => {
-      const nullable = field.relation?.nullable ? '' : '.notNull()';
-      const onDelete = field.relation?.onDelete || 'restrict';
-      return `  ${field.relation!.foreignKey}: integer('${field.relation!.foreignKey}')${nullable}.references(() => ${field.relation!.entityLower}Schema.id, { onDelete: '${onDelete}' }),`;
-    }).join('\n')}
+  .filter(f => f.relation?.type === 'belongsTo')
+  .map((field) => {
+    const nullable = field.relation?.nullable ? '' : '.notNull()';
+    const onDelete = field.relation?.onDelete || 'restrict';
+    return `  ${field.relation!.foreignKey}: integer('${field.relation!.foreignKey}')${nullable}.references(() => ${field.relation!.entityLower}Schema.id, { onDelete: '${onDelete}' }),`;
+  }).join('\n')}
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -341,32 +365,32 @@ ${relationFields
 
 // Relations configuration
 export const ${config.entityNameLower}Relations = relations(${config.entityNameLower}Schema, ({ one, many }) => ({
-${relationFields.map(field => {
-    const rel = field.relation!;
-    if (rel.type === 'belongsTo') {
-      return `  ${rel.entityLower}: one(${rel.entityLower}Schema, {
+${relationFields.map((field) => {
+  const rel = field.relation!;
+  if (rel.type === 'belongsTo') {
+    return `  ${rel.entityLower}: one(${rel.entityLower}Schema, {
     fields: [${config.entityNameLower}Schema.${rel.foreignKey}],
     references: [${rel.entityLower}Schema.${rel.referenceKey || 'id'}],
     relationName: '${config.entityNameLower}_${rel.entityLower}',
   }),`;
-    } else if (rel.type === 'hasMany') {
-      return `  ${rel.entityLower}s: many(${rel.entityLower}Schema, {
+  } else if (rel.type === 'hasMany') {
+    return `  ${rel.entityLower}s: many(${rel.entityLower}Schema, {
     relationName: '${config.entityNameLower}_${rel.entityLower}s',
   }),`;
-    } else if (rel.type === 'manyToMany') {
-      return `  ${rel.entityLower}s: many(${rel.junctionTable}Schema, {
+  } else if (rel.type === 'manyToMany') {
+    return `  ${rel.entityLower}s: many(${rel.junctionTable}Schema, {
     relationName: '${config.entityNameLower}_${rel.entityLower}s',
   }),`;
-    }
-    return '';
-  }).filter(Boolean).join('\n')}
+  }
+  return '';
+}).filter(Boolean).join('\n')}
 }));${this.generateJunctionTables(config, relationFields)}`;
   }
 
   private static getColumnDefinition(field: FieldConfig): string {
     const nullable = field.required ? '.notNull()' : '';
     const unique = field.unique ? '.unique()' : '';
-    
+
     switch (field.dbColumnType) {
       case 'text':
         return `text('${field.name}')${nullable}${unique}`;
@@ -387,11 +411,13 @@ ${relationFields.map(field => {
 
   private static generateJunctionTables(config: EntityConfig, relationFields: FieldConfig[]): string {
     const manyToManyRelations = relationFields.filter(f => f.relation?.type === 'manyToMany');
-    
-    if (manyToManyRelations.length === 0) return '';
 
-    return `\n\n// Junction tables for many-to-many relations\n` +
-      manyToManyRelations.map(field => {
+    if (manyToManyRelations.length === 0) {
+      return '';
+    }
+
+    return `\n\n// Junction tables for many-to-many relations\n${
+      manyToManyRelations.map((field) => {
         const rel = field.relation!;
         return `
 export const ${rel.junctionTable}Schema = pgTable('${rel.junctionTable}', {
@@ -411,7 +437,7 @@ export const ${rel.junctionTable}Relations = relations(${rel.junctionTable}Schem
     references: [${rel.entityLower}Schema.id],
   }),
 }));`;
-      }).join('');
+      }).join('')}`;
   }
 }
 
@@ -422,7 +448,7 @@ class TypesGenerator {
     const createInputFields = this.generateTypeFields(config, false, false);
     const updateInputFields = this.generateTypeFields(config, false, false, true);
     const relationTypes = this.generateRelationTypes(config);
-    
+
     return `/**
  * ${config.entityName}-related TypeScript types and interfaces
  * Enhanced version with proper error handling, type safety and relationships support
@@ -430,9 +456,11 @@ class TypesGenerator {
  */
 
 import type { ${config.entityNameLower}Schema } from '@/models/Schema';
-${relationFields.length > 0 ? relationFields.map(f => 
-    `import type { ${f.relation!.entity} } from '@/types/${f.relation!.entityLower}';`
-  ).join('\n') : ''}
+${relationFields.length > 0
+  ? relationFields.map(f =>
+      `import type { ${f.relation!.entity} } from '@/types/${f.relation!.entityLower}';`,
+    ).join('\n')
+  : ''}
 
 // Infer the ${config.entityName}Db type from Drizzle schema
 export type ${config.entityName}Db = typeof ${config.entityNameLower}Schema.$inferSelect;
@@ -443,10 +471,12 @@ export type ${config.entityName} = Omit<${config.entityName}Db, 'createdAt' | 'u
   readonly updatedAt: string | Date;
 };
 
-${relationTypes ? `
+${relationTypes
+  ? `
 // ${config.entityName} with relations
 export type ${config.entityName}WithRelations = ${config.entityName} & {${relationTypes}
-};` : ''}
+};`
+  : ''}
 
 // Form data type for React Hook Form
 export type ${config.entityName}FormData = {
@@ -548,17 +578,20 @@ export type ${config.entityName}Filters = {
   search: string;
   sortBy: 'createdAt' | 'updatedAt' | '${config.nameField}' | '${config.codeField}';
   sortOrder: 'asc' | 'desc';
-  ${config.features.filters ? `
+  ${config.features.filters
+    ? `
   status?: string;
   priority?: number;
   dateRange?: {
     start: Date;
     end: Date;
   };
-  relations?: Record<string, any>;` : ''}
+  relations?: Record<string, any>;`
+    : ''}
 };
 
-${config.features.filters ? `
+${config.features.filters
+  ? `
 // Advanced filter options
 export type ${config.entityName}FilterOptions = {
   readonly statuses: readonly string[];
@@ -569,18 +602,27 @@ export type ${config.entityName}FilterOptions = {
     readonly start: Date;
     readonly end: Date;
   }[];
-  ${relationFields.length > 0 ? `readonly relations: {
+  ${relationFields.length > 0
+    ? `readonly relations: {
 ${relationFields.map(f => `    readonly ${f.relation!.entityLower}s: readonly Pick<${f.relation!.entity}, 'id' | '${f.relation!.displayField}'>[];`).join('\n')}
-  };` : ''}
-};` : ''}`;
+  };`
+    : ''}
+};`
+  : ''}`;
   }
 
   private static generateTypeFields(config: EntityConfig, includeId = false, includeOwner = false, allOptional = false): string {
     return config.fields
       .filter((f) => {
-        if (!includeId && f.name === 'id') return false;
-        if (!includeOwner && f.name === 'ownerId') return false;
-        if (f.name === 'createdAt' || f.name === 'updatedAt') return false;
+        if (!includeId && f.name === 'id') {
+          return false;
+        }
+        if (!includeOwner && f.name === 'ownerId') {
+          return false;
+        }
+        if (f.name === 'createdAt' || f.name === 'updatedAt') {
+          return false;
+        }
         return true;
       })
       .map((field) => {
@@ -607,22 +649,24 @@ ${relationFields.map(f => `    readonly ${f.relation!.entityLower}s: readonly Pi
 
   private static generateRelationTypes(config: EntityConfig): string {
     const relationFields = config.fields.filter(f => f.relation);
-    
-    if (relationFields.length === 0) return '';
+
+    if (relationFields.length === 0) {
+      return '';
+    }
 
     return `
 // Relations types
-${relationFields.map(field => {
-      const rel = field.relation!;
-      if (rel.type === 'belongsTo') {
-        return `  ${rel.entityLower}?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>;`;
-      } else if (rel.type === 'hasMany') {
-        return `  ${rel.entityLower}s?: ${rel.entity}[];`;
-      } else if (rel.type === 'manyToMany') {
-        return `  ${rel.entityLower}s?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>[];`;
-      }
-      return '';
-    }).filter(Boolean).join('\n')}`;
+${relationFields.map((field) => {
+  const rel = field.relation!;
+  if (rel.type === 'belongsTo') {
+    return `  ${rel.entityLower}?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>;`;
+  } else if (rel.type === 'hasMany') {
+    return `  ${rel.entityLower}s?: ${rel.entity}[];`;
+  } else if (rel.type === 'manyToMany') {
+    return `  ${rel.entityLower}s?: Pick<${rel.entity}, 'id' | '${rel.displayField}'>[];`;
+  }
+  return '';
+}).filter(Boolean).join('\n')}`;
   }
 
   private static generateRelationOptionsTypes(config: EntityConfig, relationFields: FieldConfig[]): string {
@@ -664,7 +708,7 @@ class QueriesGenerator {
   static generate(config: EntityConfig): string {
     const belongsToFields = config.fields.filter(f => f.relation?.type === 'belongsTo');
     const manyToManyFields = config.fields.filter(f => f.relation?.type === 'manyToMany');
-    
+
     return `/**
  * ${config.entityName} database queries using Drizzle ORM with Relations Support
  * Enhanced version with proper error handling, type safety and relationships
@@ -673,8 +717,8 @@ class QueriesGenerator {
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
-import { ${config.entityNameLower}Schema${belongsToFields.length > 0 ? ', ' + belongsToFields.map(f => `${f.relation!.entityLower}Schema`).join(', ') : ''} } from '@/models/Schema';
+import { db } from '@/libs/db';
+import { ${config.entityNameLower}Schema${belongsToFields.length > 0 ? `, ${belongsToFields.map(f => `${f.relation!.entityLower}Schema`).join(', ')}` : ''} } from '@/models/Schema';
 import type {
   Create${config.entityName}Input,
   ${config.entityName}Db,
@@ -933,7 +977,8 @@ export async function get${config.entityName}Stats(ownerId: string): Promise<${c
   };
 }
 
-${config.features.batchOperations ? `
+${config.features.batchOperations
+  ? `
 /**
  * Bulk create ${config.entityNamePlural}
  */
@@ -969,44 +1014,47 @@ export async function bulkDelete${config.entityName}s(
     ));
 
   return result.rowCount;
-}` : ''}
+}`
+  : ''}
 
-${manyToManyFields.length > 0 ? `
+${manyToManyFields.length > 0
+  ? `
 // Many-to-many relationship management
-${manyToManyFields.map(field => this.generateManyToManyMethods(config, field)).join('\n')}` : ''}`;
+${manyToManyFields.map(field => this.generateManyToManyMethods(config, field)).join('\n')}`
+  : ''}`;
   }
 
   private static generateInsertValues(config: EntityConfig, dataPrefix = 'data'): string {
-    const regularFields = config.fields.filter(f => 
-      !f.relation && 
-      f.name !== 'id' && 
-      f.name !== 'createdAt' && 
-      f.name !== 'updatedAt'
+    const regularFields = config.fields.filter(f =>
+      !f.relation
+      && f.name !== 'id'
+      && f.name !== 'createdAt'
+      && f.name !== 'updatedAt',
     );
-    
+
     const belongsToFields = config.fields.filter(f => f.relation?.type === 'belongsTo');
-    
+
     const allInsertFields = [
-      ...regularFields.map(field => {
+      ...regularFields.map((field) => {
         if (field.type === 'date') {
           return `${field.name}: ${dataPrefix}.${field.name} ? new Date(${dataPrefix}.${field.name}) : null`;
         }
         return `${field.name}: ${dataPrefix}.${field.name}`;
       }),
       ...belongsToFields.map(field => `${field.relation!.foreignKey}: ${dataPrefix}.${field.relation!.foreignKey}`),
-      `ownerId: ${dataPrefix}.ownerId`
+      `ownerId: ${dataPrefix}.ownerId`,
     ];
-    
-    return '      ' + allInsertFields.join(',\n      ');
+
+    return `      ${allInsertFields.join(',\n      ')}`;
   }
 
   private static generateUpdateValues(config: EntityConfig): string {
-    const updateFields = config.fields.filter(f => 
-      f.name !== 'id' && 
-      f.name !== 'ownerId' && 
-      f.name !== 'createdAt' && 
-      f.name !== 'updatedAt' &&
-      f.relation?.type !== 'manyToMany'
+    const updateFields = config.fields.filter(f =>
+      f.name !== 'id'
+      && f.name !== 'ownerId'
+      && f.name !== 'createdAt'
+      && f.name !== 'updatedAt'
+      && f.relation?.type !== 'manyToMany',
     );
 
     return updateFields.map((field) => {
@@ -1034,7 +1082,7 @@ ${manyToManyFields.map(field => this.generateManyToManyMethods(config, field)).j
 
   private static generateManyToManyMethods(config: EntityConfig, field: FieldConfig): string {
     const rel = field.relation!;
-    
+
     return `
 /**
  * Add ${rel.entityLower} relationship
@@ -1330,8 +1378,10 @@ export const ${config.entityNameLower}Keys = {
   details: () => [...${config.entityNameLower}Keys.all, 'detail'] as const,
   detail: (id: number) => [...${config.entityNameLower}Keys.details(), id] as const,
   stats: () => [...${config.entityNameLower}Keys.all, 'stats'] as const,
-${config.features.relationOptions ? `  relations: () => [...${config.entityNameLower}Keys.all, 'relations'] as const,
-  relationOptions: () => [...${config.entityNameLower}Keys.relations(), 'options'] as const,` : ''}
+${config.features.relationOptions
+  ? `  relations: () => [...${config.entityNameLower}Keys.all, 'relations'] as const,
+  relationOptions: () => [...${config.entityNameLower}Keys.relations(), 'options'] as const,`
+  : ''}
 } as const;
 
 /**
@@ -1637,7 +1687,9 @@ ${config.features.batchOperations ? this.generateBatchMutations(config) : ''}`;
   }
 
   static generateFiltersHook(config: EntityConfig): string {
-    if (!config.features.filters) return '';
+    if (!config.features.filters) {
+      return '';
+    }
 
     return `/**
  * ${config.entityName} filters hook with state management
@@ -1745,7 +1797,9 @@ export function use${config.entityName}Filters() {
   }
 
   static generateExportHook(config: EntityConfig): string {
-    if (!config.features.excelExport) return '';
+    if (!config.features.excelExport) {
+      return '';
+    }
 
     return `/**
  * ${config.entityName} export hook with progress tracking
@@ -1860,7 +1914,9 @@ export function use${config.entityName}Export() {
 
   private static generateRelationOptionsHook(config: EntityConfig): string {
     const relationFields = config.fields.filter(f => f.relation);
-    if (relationFields.length === 0) return '';
+    if (relationFields.length === 0) {
+      return '';
+    }
 
     return `
 /**
@@ -2344,7 +2400,9 @@ export async function GET(request: NextRequest) {
   }
 
   static generateExportRoute(config: EntityConfig): string {
-    if (!config.features.excelExport) return '';
+    if (!config.features.excelExport) {
+      return '';
+    }
 
     return `/**
  * ${config.entityName} Export API Route
@@ -2406,7 +2464,7 @@ export async function GET(request: NextRequest) {
     const exportData = ${config.entityNamePlural}.map(item => ({
 ${config.fields
   .filter(f => f.name !== 'id' && f.name !== 'ownerId')
-  .map(field => {
+  .map((field) => {
     if (field.relation?.type === 'belongsTo') {
       return `      '${field.relation.displayField}': item.${field.relation.entityLower}?.${field.relation.displayField} || '',`;
     }
@@ -2463,10 +2521,14 @@ ${config.fields
   }
 
   static generateRelationOptionsRoute(config: EntityConfig): string {
-    if (!config.features.relationOptions) return '';
+    if (!config.features.relationOptions) {
+      return '';
+    }
 
     const relationFields = config.fields.filter(f => f.relation);
-    if (relationFields.length === 0) return '';
+    if (relationFields.length === 0) {
+      return '';
+    }
 
     return `/**
  * ${config.entityName} Relation Options API Route
@@ -2477,7 +2539,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import { ${relationFields.map(f => `${f.relation!.entityLower}Schema`).join(', ')} } from '@/models/Schema';
 
 // GET /api/${config.entityNamePlural}/relations/options
@@ -2496,7 +2558,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Number(searchParams.get('limit')) || 50, 100);
 
     const results = await Promise.all([
-${relationFields.map(field => {
+${relationFields.map((field) => {
   const rel = field.relation!;
   return `      // ${rel.entity} options
       db
@@ -2580,7 +2642,7 @@ export async function DELETE(request: NextRequest) {
 class ComponentsGenerator {
   static generateForm(config: EntityConfig): string {
     const relationFields = config.fields.filter(f => f.relation?.type === 'belongsTo');
-    
+
     return `/**
  * ${config.entityName} Form Component with Enhanced Features
  * Generated by enhanced entity generator script V4 (improved)
@@ -2636,7 +2698,7 @@ export function ${config.entityName}Form({
     defaultValues: ${config.entityNameLower} || {
 ${config.fields
   .filter(f => !f.relation && f.name !== 'id' && f.name !== 'ownerId' && f.name !== 'createdAt' && f.name !== 'updatedAt')
-  .map(field => {
+  .map((field) => {
     if (field.type === 'string' || field.type === 'text') {
       return `      ${field.name}: '',`;
     } else if (field.type === 'number') {
@@ -2829,7 +2891,8 @@ export function ${config.entityName}List() {
     }
   };
 
-  ${config.features.batchOperations ? `
+  ${config.features.batchOperations
+    ? `
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
     
@@ -2839,7 +2902,8 @@ export function ${config.entityName}List() {
     } catch (error) {
       console.error('Bulk delete error:', error);
     }
-  };` : ''}
+  };`
+    : ''}
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -2909,7 +2973,8 @@ export function ${config.entityName}List() {
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <CardTitle>${config.entityName}s</CardTitle>
             <div className="flex gap-2">
-              ${config.features.excelExport ? `
+              ${config.features.excelExport
+                ? `
               <Button
                 variant="outline"
                 size="sm"
@@ -2918,7 +2983,8 @@ export function ${config.entityName}List() {
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export
-              </Button>` : ''}
+              </Button>`
+                : ''}
               
               <Button onClick={() => setIsFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -2931,7 +2997,8 @@ export function ${config.entityName}List() {
         <CardContent>
           {/* Search and Filters */}
           <div className="flex gap-4 mb-4">
-            ${config.features.filters ? `
+            ${config.features.filters
+              ? `
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -2948,7 +3015,8 @@ export function ${config.entityName}List() {
               <Button variant="outline" onClick={resetFilters}>
                 Clear Filters
               </Button>
-            )}` : `
+            )}`
+              : `
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -2960,7 +3028,8 @@ export function ${config.entityName}List() {
             </div>`}
           </div>
 
-          ${config.features.batchOperations ? `
+          ${config.features.batchOperations
+            ? `
           {/* Bulk Actions */}
           {selectedItems.length > 0 && (
             <div className="mb-4 p-3 bg-muted rounded-lg flex items-center justify-between">
@@ -2977,7 +3046,8 @@ export function ${config.entityName}List() {
                 Delete Selected
               </Button>
             </div>
-          )}` : ''}
+          )}`
+            : ''}
 
           {/* Table */}
           {isLoading ? (
@@ -2986,13 +3056,15 @@ export function ${config.entityName}List() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  ${config.features.batchOperations ? `
+                  ${config.features.batchOperations
+                    ? `
                   <TableHead className="w-12">
                     <Checkbox
                       checked={selectedItems.length === ${config.entityNamePlural}.length && ${config.entityNamePlural}.length > 0}
                       onCheckedChange={handleSelectAll}
                     />
-                  </TableHead>` : ''}
+                  </TableHead>`
+                    : ''}
                   <TableHead>${config.codeField}</TableHead>
                   <TableHead>${config.nameField}</TableHead>
 ${config.fields
@@ -3007,13 +3079,15 @@ ${config.fields
               <TableBody>
                 {${config.entityNamePlural}.map((item) => (
                   <TableRow key={item.id}>
-                    ${config.features.batchOperations ? `
+                    ${config.features.batchOperations
+                      ? `
                     <TableCell>
                       <Checkbox
                         checked={selectedItems.includes(item.id)}
                         onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
                       />
-                    </TableCell>` : ''}
+                    </TableCell>`
+                      : ''}
                     <TableCell className="font-medium">
                       {item.${config.codeField}}
                     </TableCell>
@@ -3228,11 +3302,12 @@ export function ${config.entityName}Skeleton() {
 
   private static generateRelationField(field: FieldConfig, config: EntityConfig): string {
     const rel = field.relation!;
-    
+
     return `          {/* ${field.label} */}
           <div className="space-y-2">
             <Label htmlFor="${rel.foreignKey}">${field.label}${field.required ? ' *' : ''}</Label>
-            ${config.features.relationOptions ? `
+            ${config.features.relationOptions
+              ? `
             {isLoadingOptions ? (
               <div className="h-10 bg-muted animate-pulse rounded" />
             ) : (
@@ -3251,7 +3326,8 @@ export function ${config.entityName}Skeleton() {
                   ))}
                 </SelectContent>
               </Select>
-            )}` : `
+            )}`
+              : `
             <Input
               id="${rel.foreignKey}"
               type="number"
@@ -3295,17 +3371,17 @@ class EntityGenerator {
     private config: EntityConfig,
     private options: GenerationOptions,
     private logger: Logger,
-    private fileManager: FileManager
+    private fileManager: FileManager,
   ) {}
 
   generate(): void {
     const fileMappings = this.getFileMappings();
-    
+
     this.logger.info(`Generating ${this.config.entityName} entity with ${fileMappings.length} files...`);
-    
+
     fileMappings.forEach((mapping, index) => {
       this.logger.progress(index + 1, fileMappings.length, mapping.target);
-      
+
       try {
         const content = this.generateFileContent(mapping);
         if (content) {
@@ -3318,7 +3394,7 @@ class EntityGenerator {
         }
       }
     });
-    
+
     this.logger.success(`Generated ${this.config.entityName} entity successfully!`);
     this.printSummary();
   }
@@ -3331,7 +3407,7 @@ class EntityGenerator {
     const currentDir = process.cwd();
     const isInScriptsDir = currentDir.endsWith('scripts') || currentDir.includes('\\scripts\\') || currentDir.includes('/scripts/');
     const srcPrefix = isInScriptsDir ? '../src/' : 'src/';
-    
+
     this.logger.debug(`Current directory: ${currentDir}`);
     this.logger.debug(`Is in scripts directory: ${isInScriptsDir}`);
     this.logger.debug(`Using src prefix: ${srcPrefix}`);
@@ -3365,7 +3441,7 @@ class EntityGenerator {
     if (this.config.features.excelExport) {
       mappings.push(
         { type: 'api-export', target: `${srcPrefix}app/api/${plural}/export/route.ts` },
-        { type: 'hook-export', target: `${srcPrefix}hooks/use${this.config.entityName}Export.ts` }
+        { type: 'hook-export', target: `${srcPrefix}hooks/use${this.config.entityName}Export.ts` },
       );
     }
 
@@ -3446,11 +3522,11 @@ export default function ${this.config.entityName}sPage() {
     this.logger.info('✅ Better type safety and validation');
     this.logger.info('✅ Improved error handling and logging');
     this.logger.info('✅ Enhanced template engine with conditional generation');
-    
+
     if (this.config.features.relationships) {
       this.logger.info('\n📋 Relations Generated:');
       const relationFields = this.config.fields.filter(f => f.relation);
-      relationFields.forEach(field => {
+      relationFields.forEach((field) => {
         const rel = field.relation!;
         this.logger.info(`✅ ${rel.type}: ${this.config.entityName} -> ${rel.entity} (${rel.displayField})`);
       });
@@ -3461,7 +3537,7 @@ export default function ${this.config.entityName}sPage() {
     this.logger.info('2. Run database migration if needed');
     this.logger.info('3. Run type check: npm run type-check');
     this.logger.info('4. Test the generated entity');
-    
+
     if (this.options.dryRun) {
       this.logger.info('\n⚠️  This was a DRY RUN - no files were actually created');
     }
@@ -3474,7 +3550,7 @@ async function main() {
   const args = process.argv.slice(2);
   const entityName = args[0];
   const configFile = args[1];
-  
+
   // Parse options
   const options: GenerationOptions = {
     dryRun: args.includes('--dry-run'),
@@ -3515,7 +3591,7 @@ Examples:
 
   try {
     logger.info(`🚀 Starting Enhanced Entity Generator V4 for: ${entityName}`);
-    
+
     if (options.dryRun) {
       logger.info('🔍 DRY RUN MODE - No files will be created');
     }
@@ -3616,4 +3692,4 @@ if (require.main === module) {
   });
 }
 
-export { EntityGenerator, type EntityConfig, type GenerationOptions };
+export { type EntityConfig, EntityGenerator, type GenerationOptions };

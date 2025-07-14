@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { noteSchema } from '@/models/Schema';
 import type {
   CreateNoteInput,

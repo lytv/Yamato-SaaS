@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import {
   outsourceOrderDetailSchema,
   outsourceOrderSchema,

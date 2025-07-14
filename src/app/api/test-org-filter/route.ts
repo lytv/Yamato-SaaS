@@ -3,11 +3,11 @@
  * NOTE: This is a debug endpoint - remove or restrict in production
  */
 import { auth } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { NextResponse } from 'next/server';
 
-import { db } from '@/libs/DB';
-import { planSchema, outsourceOrderDetailSchema } from '@/models/Schema';
+import { db } from '@/libs/db';
+import { outsourceOrderDetailSchema, planSchema } from '@/models/Schema';
 
 export async function GET() {
   try {
@@ -60,35 +60,34 @@ export async function GET() {
       debug: {
         auth: { userId, orgId, ownerId },
         filtering: {
-          'plans_with_userId_only': {
+          plans_with_userId_only: {
             count: plansWithUserId.length,
-            data: plansWithUserId
+            data: plansWithUserId,
           },
-          'plans_with_org_filter': {
+          plans_with_org_filter: {
             count: plansWithOrgFilter.length,
-            data: plansWithOrgFilter
+            data: plansWithOrgFilter,
           },
-          'order_details_with_org_filter': {
+          order_details_with_org_filter: {
             count: orderDetailsWithOrgFilter.length,
-            data: orderDetailsWithOrgFilter
-          }
+            data: orderDetailsWithOrgFilter,
+          },
         },
         comparison: {
           filter_difference: plansWithOrgFilter.length - plansWithUserId.length,
           using_org_filter: !!orgId,
-          effective_owner: ownerId
-        }
-      }
+          effective_owner: ownerId,
+        },
+      },
     };
 
     return NextResponse.json(result);
-
   } catch (error) {
     console.error('🚨 Organization Filter Test Error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     }, { status: 500 });
   }
 }

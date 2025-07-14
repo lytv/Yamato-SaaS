@@ -6,7 +6,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { db } from '@/libs/DB';
+import { db } from '@/libs/db';
 import {
   createTodo,
   deleteTodo,
@@ -21,7 +21,7 @@ import {
 import type { CreateTodoInput, TodoListParams } from '@/types/todo';
 
 // Mock the database
-vi.mock('@/libs/DB', () => ({
+vi.mock('@/libs/db', () => ({
   db: {
     insert: vi.fn(),
     select: vi.fn(),

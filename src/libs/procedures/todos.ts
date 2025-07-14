@@ -7,7 +7,7 @@
 
 import { sql } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import {
   validateStoredProcedurePaginated,
   validateStoredProcedureStats,

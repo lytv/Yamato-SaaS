@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { productionStepDetailSchema, productionStepSchema, productSchema } from '@/models/Schema';
 import type {
   CreateProductionStepDetailInput,

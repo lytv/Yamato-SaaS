@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, ilike, or } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { userSyncSchema } from '@/models/Schema';
 import type {
   CreateUserSyncInput,

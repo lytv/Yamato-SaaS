@@ -6,7 +6,7 @@
 
 import { and, asc, between, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 
-import { db } from '@/libs/DB';
+import { db } from '../db';
 import { employeeSalaryEntrySchema, planSchema, productionStepDetailSchema, productionStepSchema, productSchema, userSyncSchema } from '@/models/Schema';
 import type {
   CreateEmployeeSalaryEntryInput,
