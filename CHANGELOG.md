@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/lytv/Yamato-SaaS/compare/v1.2.1...v1.2.2) (2025-07-14)
+
+
+### Bug Fixes
+
+* update ([1fc06e8](https://github.com/lytv/Yamato-SaaS/commit/1fc06e88605cb6347aa8166ee3c06c6ea4586eec))
+
 ## [1.2.1](https://github.com/lytv/Yamato-SaaS/compare/v1.2.0...v1.2.1) (2025-07-14)
 
 
