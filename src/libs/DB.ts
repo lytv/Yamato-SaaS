@@ -15,7 +15,9 @@ import { Env } from './Env';
 let dbInstance: any = null;
 
 async function initializeDb() {
-  if (dbInstance) return dbInstance;
+  if (dbInstance) {
+    return dbInstance;
+  }
 
   let client;
   let drizzle;
@@ -51,4 +53,14 @@ async function initializeDb() {
   return drizzle;
 }
 
-export const db = await initializeDb();
+// Fix for build-time module resolution
+let db: any;
+
+if (typeof window === 'undefined') {
+  db = await initializeDb();
+} else {
+  // Client-side fallback
+  db = null;
+}
+
+export { db };
