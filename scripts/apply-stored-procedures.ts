@@ -5,7 +5,7 @@
 
 import { sql } from 'drizzle-orm';
 
-import { db } from '../src/libs/DB';
+import { db } from '../src/libs/db';
 
 async function applyStoredProcedures(): Promise<void> {
   try {

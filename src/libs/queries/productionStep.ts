@@ -293,7 +293,7 @@ export async function getProductionStepStats(ownerId: string): Promise<Productio
     today: todayResult?.count ?? 0,
     thisWeek: weekResult?.count ?? 0,
     thisMonth: monthResult?.count ?? 0,
-    stepGroups: stepGroupResults.map(group => ({
+    stepGroups: stepGroupResults.map((group: any) => ({
       name: group.name || 'Uncategorized',
       count: group.count,
     })),

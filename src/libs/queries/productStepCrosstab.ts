@@ -1,6 +1,5 @@
 import { and, count, eq, ilike, or } from 'drizzle-orm';
 
-import { db } from '../db';
 import {
   productionStepDetailSchema,
   productionStepSchema,
@@ -10,6 +9,8 @@ import type {
   ProductStepCrosstabParams,
   ProductStepCrosstabResult,
 } from '@/types/productStepCrosstab';
+
+import { db } from '../db';
 
 export async function getProductStepCrosstab(
   params: ProductStepCrosstabParams,
@@ -83,7 +84,7 @@ export async function getProductStepCrosstab(
 
   // Transform results to grouped format
   const groupedResults = results.reduce(
-    (acc: ProductStepCrosstabResult[], row) => {
+    (acc: ProductStepCrosstabResult[], row: { productCode: string; productName: string; stepCode: string; stepName: string; price: string | null; sequenceNumber: number }) => {
       let existing = acc.find(item => item.productCode === row.productCode);
 
       if (!existing) {
@@ -164,5 +165,5 @@ export async function getProductCodesForCrosstab(
     .orderBy(productSchema.productCode)
     .limit(20);
 
-  return results.map(r => r.productCode);
+  return results.map((r: { productCode: string }) => r.productCode);
 }

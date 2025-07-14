@@ -157,7 +157,7 @@ export async function getPlanDetailsByOwner(
     .offset(offset);
 
   if (includeRelations) {
-    return results.map((result) => {
+    return results.map((result: any) => {
       const { plan, ...rest } = result as any;
       return { ...rest, plan: plan ?? undefined };
     });
@@ -390,7 +390,7 @@ export async function getPlanDetailRelationOptions(): Promise<{
     return {
       plans: planOptions,
       products: productOptions,
-      locationCodes: locationOptions.filter(item => item.locationCode != null) as Array<{ locationCode: string; tableName?: string }>,
+      locationCodes: locationOptions.filter((item: any) => item.locationCode != null) as Array<{ locationCode: string; tableName?: string }>,
       productSubCodes: productSubOptions,
     };
   } catch (error) {

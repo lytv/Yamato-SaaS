@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { db } from '../src/libs/DB';
+import { db } from '../src/libs/db';
 import { Env } from '../src/libs/Env';
 import { userSyncSchema } from '../src/models/Schema';
 

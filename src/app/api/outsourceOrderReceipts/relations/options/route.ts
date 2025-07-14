@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (detailConditions.length > 0) {
-      // @ts-expect-error Drizzle type mismatch, safe to ignore
       outsourceOrderDetailsQuery = outsourceOrderDetailsQuery.where(and(...detailConditions));
     }
 

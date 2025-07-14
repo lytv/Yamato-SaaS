@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL, sum } from 'drizzle-orm';
 
-import { db } from '../db';
 import {
   outsourceOrderDetailSchema,
   outsourceOrderReceiptSchema,
@@ -20,6 +19,8 @@ import type {
   OutsourceOrderReceiptWithRelations,
   UpdateOutsourceOrderReceiptInput,
 } from '@/types/outsourceOrderReceipt';
+
+import { db } from '../db';
 
 /**
  * Create a new outsourceOrderReceipt with proper date and relation handling
@@ -513,7 +514,24 @@ export async function getOutsourceOrderReceiptsByOwner(
       .offset(offset)
       .limit(take || 1000);
 
-    return result.map(row => ({
+    return result.map((row: {
+      outsourceOrderReceipt: typeof outsourceOrderReceiptSchema.$inferSelect;
+      outsourceOrderDetail: {
+        id: number;
+        planCode: string | null;
+        planName: string | null;
+        productCode: string | null;
+        productName: string | null;
+        stepCode: string | null;
+        stepName: string | null;
+        orderedQuantity: number;
+        completedQuantity: number;
+      } | null;
+      receivedByUser: {
+        id: string;
+        fullName: string | null;
+      } | null;
+    }) => ({
       ...row.outsourceOrderReceipt,
       outsourceOrderDetail: row.outsourceOrderDetail,
       receivedByUser: row.receivedByUser ? { ...row.receivedByUser, id: Number(row.receivedByUser.id) } : undefined,

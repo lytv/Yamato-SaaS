@@ -38,7 +38,7 @@ export async function GET() {
     }).from(workTableSchema)
       .orderBy(asc(workTableSchema.locationCode));
 
-    const filteredLocationOptions = locationOptions.filter(item => !!item.locationCode);
+    const filteredLocationOptions = locationOptions.filter((item: any) => !!item.locationCode);
 
     // Get product sub codes
     const productSubOptions = await db.select({

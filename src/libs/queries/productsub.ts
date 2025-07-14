@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../db';
 import { productSubSchema } from '@/models/Schema';
 import type {
   CreateProductSubInput,
@@ -15,6 +14,8 @@ import type {
   ProductSubStats,
   UpdateProductSubInput,
 } from '@/types/productsub';
+
+import { db } from '../db';
 
 /**
  * Create a new productsubsub
@@ -318,7 +319,7 @@ export async function getProductSubStats(ownerId: string): Promise<ProductSubSta
     today: todayResult?.count ?? 0,
     thisWeek: weekResult?.count ?? 0,
     thisMonth: monthResult?.count ?? 0,
-    categories: categoryResults.map(cat => ({
+    categories: categoryResults.map((cat: { name: string | null; count: number }) => ({
       name: cat.name || 'Uncategorized',
       count: cat.count,
     })),

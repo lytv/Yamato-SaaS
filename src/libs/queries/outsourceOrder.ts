@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '../db';
 import { outsourceOrderSchema, userSyncSchema } from '@/models/Schema';
 import type {
   CreateOutsourceOrderInput,
@@ -16,6 +15,8 @@ import type {
   OutsourceOrderWithRelations,
   UpdateOutsourceOrderInput,
 } from '@/types/outsourceOrder';
+
+import { db } from '../db';
 
 /**
  * Create a new outsourceOrder with proper date and relation handling
@@ -293,7 +294,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
       .select({ count: count() })
       .from(outsourceOrderSchema)
       .where(eq(outsourceOrderSchema.ownerId, ownerId))
-      .then(res => res[0]?.count || 0),
+      .then((res: { count: number }[]) => res[0]?.count || 0),
 
     db
       .select({ count: count() })
@@ -302,7 +303,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
         eq(outsourceOrderSchema.ownerId, ownerId),
         gte(outsourceOrderSchema.createdAt, today),
       ))
-      .then(res => res[0]?.count || 0),
+      .then((res: { count: number }[]) => res[0]?.count || 0),
 
     db
       .select({ count: count() })
@@ -311,7 +312,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
         eq(outsourceOrderSchema.ownerId, ownerId),
         gte(outsourceOrderSchema.createdAt, thisWeek),
       ))
-      .then(res => res[0]?.count || 0),
+      .then((res: { count: number }[]) => res[0]?.count || 0),
 
     db
       .select({ count: count() })
@@ -320,7 +321,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
         eq(outsourceOrderSchema.ownerId, ownerId),
         gte(outsourceOrderSchema.createdAt, thisMonth),
       ))
-      .then(res => res[0]?.count || 0),
+      .then((res: { count: number }[]) => res[0]?.count || 0),
   ]);
 
   return {

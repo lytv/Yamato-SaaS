@@ -6,7 +6,6 @@
 
 import { and, asc, between, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 
-import { db } from '../db';
 import { employeeSalaryEntrySchema, planSchema, productionStepDetailSchema, productionStepSchema, productSchema, userSyncSchema } from '@/models/Schema';
 import type {
   CreateEmployeeSalaryEntryInput,
@@ -17,6 +16,8 @@ import type {
   EmployeeSalaryEntryStats,
   UpdateEmployeeSalaryEntryInput,
 } from '@/types/employeeSalaryEntry';
+
+import { db } from '../db';
 
 export type EmployeeSalaryEntry = {
   id: number;
@@ -349,7 +350,7 @@ export async function getEmployeeSalaryEntries(params: {
     .limit(limit)
     .offset(offset);
 
-  return results.map(r => ({
+  return results.map((r: any) => ({
     id: r.id,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
@@ -681,7 +682,7 @@ export async function getProductionStepDetailsByProduct(productId: number): Prom
     .where(eq(productionStepDetailSchema.productId, productId))
     .orderBy(asc(productionStepDetailSchema.id));
 
-  return results.map(r => ({
+  return results.map((r: { id: number; stepName: string | null }) => ({
     id: r.id,
     stepName: r.stepName || `Step ${r.id}`, // Fallback if stepName is null
   }));
@@ -768,11 +769,11 @@ export async function getEmployeeSalaryEntryStats(owner_id: string): Promise<Emp
     thisMonth: thisMonthResult[0]?.count ?? 0,
 
     byStatus: {
-      draft: statusStats?.find(s => s.status === 'draft')?.count ?? 0,
-      submitted: statusStats?.find(s => s.status === 'submitted')?.count ?? 0,
-      approved: statusStats?.find(s => s.status === 'approved')?.count ?? 0,
-      paid: statusStats?.find(s => s.status === 'paid')?.count ?? 0,
-      cancelled: statusStats?.find(s => s.status === 'cancelled')?.count ?? 0,
+      draft: statusStats?.find((s: { status: string | null; count: number }) => s.status === 'draft')?.count ?? 0,
+      submitted: statusStats?.find((s: { status: string | null; count: number }) => s.status === 'submitted')?.count ?? 0,
+      approved: statusStats?.find((s: { status: string | null; count: number }) => s.status === 'approved')?.count ?? 0,
+      paid: statusStats?.find((s: { status: string | null; count: number }) => s.status === 'paid')?.count ?? 0,
+      cancelled: statusStats?.find((s: { status: string | null; count: number }) => s.status === 'cancelled')?.count ?? 0,
     },
     financial: {
       totalAmount: 0,
@@ -797,7 +798,7 @@ export async function batchEmployeeSalaryEntryOperations(
 ): Promise<EmployeeSalaryEntryBatchResponse> {
   const { ids, action, newStatus, reason: _reason } = request;
 
-  return db.transaction(async (tx) => {
+  return db.transaction(async (tx: any) => {
     let processed = 0;
     const errors: { id: number; error: string }[] = [];
 

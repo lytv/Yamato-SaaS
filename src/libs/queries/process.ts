@@ -300,7 +300,7 @@ export async function getProcessStats(ownerId: string): Promise<ProcessStats> {
     today: todayResult?.count ?? 0,
     thisWeek: weekResult?.count ?? 0,
     thisMonth: monthResult?.count ?? 0,
-    categories: categoryResults.map(cat => ({
+    categories: categoryResults.map((cat: any) => ({
       name: cat.name || 'Uncategorized',
       count: cat.count,
     })),

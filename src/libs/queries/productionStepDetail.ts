@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../db';
 import { productionStepDetailSchema, productionStepSchema, productSchema } from '@/models/Schema';
 import type {
   CreateProductionStepDetailInput,
@@ -15,6 +14,8 @@ import type {
   ProductionStepDetailStats,
   UpdateProductionStepDetailInput,
 } from '@/types/productionStepDetail';
+
+import { db } from '../db';
 
 /**
  * Create a new production step detail
@@ -374,11 +375,11 @@ export async function getProductionStepDetailStats(ownerId: string): Promise<Pro
     today: todayResult?.count ?? 0,
     thisWeek: weekResult?.count ?? 0,
     thisMonth: monthResult?.count ?? 0,
-    byProduct: byProductResults.map(result => ({
+    byProduct: byProductResults.map((result: { productName: string | null; count: number }) => ({
       productName: result.productName ?? 'Unknown',
       count: result.count,
     })),
-    byProductionStep: byProductionStepResults.map(result => ({
+    byProductionStep: byProductionStepResults.map((result: { stepName: string | null; count: number }) => ({
       stepName: result.stepName ?? 'Unknown',
       count: result.count,
     })),

@@ -357,7 +357,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
     today: todayResult?.count ?? 0,
     thisWeek: weekResult?.count ?? 0,
     thisMonth: monthResult?.count ?? 0,
-    categories: statusResults.map(status => ({
+    categories: statusResults.map((status: any) => ({
       name: status.name || 'No Status',
       count: status.count,
     })),

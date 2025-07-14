@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, ilike, or } from 'drizzle-orm';
 
-import { db } from '../db';
 import { userSyncSchema } from '@/models/Schema';
 import type {
   CreateUserSyncInput,
@@ -15,6 +14,8 @@ import type {
   UserSyncListParamsWithOwner,
   UserSyncStats,
 } from '@/types/user_sync';
+
+import { db } from '../db';
 
 /**
  * Create a new user_sync
@@ -257,7 +258,7 @@ export async function getUserSyncStats(ownerId: string): Promise<UserSyncStats> 
     .from(userSyncSchema)
     .where(eq(userSyncSchema.ownerId, ownerId))
     .groupBy(userSyncSchema.role);
-  const roles = rolesRaw.map(r => ({ name: r.name ?? '', count: r.count }));
+  const roles = rolesRaw.map((r: { name: string | null; count: number }) => ({ name: r.name ?? '', count: r.count }));
   // Example: count by createdAt (today, thisWeek, thisMonth)
   // ...
   return {

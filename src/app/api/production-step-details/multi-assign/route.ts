@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
           inArray(productionStepDetailSchema.productionStepId, productionStepIds),
         ),
       );
-    const existingSet = new Set(existing.map(e => `${e.productId}|${e.productionStepId}`));
+    const existingSet = new Set(existing.map((e: { productId: number; productionStepId: number }) => `${e.productId}|${e.productionStepId}`));
 
     // Prepare all combinations
     const combinations: { productId: number; productionStepId: number; sequenceNumber: number }[] = [];
