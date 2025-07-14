@@ -276,7 +276,7 @@ export async function getMaintenanceSchedule(ownerId: string): Promise<Maintenan
     .from(workTableSchema)
     .where(eq(workTableSchema.ownerId, ownerId))
     .orderBy(asc(workTableSchema.nextMaintenanceDate));
-  return tables.map((table) => {
+  return tables.map((table: any) => {
     const dateObj = typeof table.lastMaintenanceDate === 'string' ? new Date(table.lastMaintenanceDate) : table.lastMaintenanceDate;
     const daysSinceLastMaintenance = dateObj ? Math.floor((today.getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24)) : null;
     const dateObjNext = typeof table.nextMaintenanceDate === 'string' ? new Date(table.nextMaintenanceDate) : table.nextMaintenanceDate;

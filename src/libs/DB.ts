@@ -12,34 +12,43 @@ import * as schema from '@/models/Schema';
 
 import { Env } from './Env';
 
-let client;
-let drizzle;
+let dbInstance: any = null;
 
-if (process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD && Env.DATABASE_URL) {
-  client = new Client({
-    connectionString: Env.DATABASE_URL,
-  });
-  await client.connect();
+async function initializeDb() {
+  if (dbInstance) return dbInstance;
 
-  drizzle = drizzlePg(client, { schema });
-  await migratePg(drizzle, {
-    migrationsFolder: path.join(process.cwd(), 'migrations'),
-  });
-} else {
-  // Stores the db connection in the global scope to prevent multiple instances due to hot reloading with Next.js
-  const global = globalThis as unknown as { client: PGlite; drizzle: PgliteDatabase<typeof schema> };
+  let client;
+  let drizzle;
 
-  if (!global.client) {
-    global.client = new PGlite();
-    await global.client.waitReady;
+  if (process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD && Env.DATABASE_URL) {
+    client = new Client({
+      connectionString: Env.DATABASE_URL,
+    });
+    await client.connect();
 
-    global.drizzle = drizzlePglite(global.client, { schema });
+    drizzle = drizzlePg(client, { schema });
+    await migratePg(drizzle, {
+      migrationsFolder: path.join(process.cwd(), 'migrations'),
+    });
+  } else {
+    // Stores the db connection in the global scope to prevent multiple instances due to hot reloading with Next.js
+    const global = globalThis as unknown as { client: PGlite; drizzle: PgliteDatabase<typeof schema> };
+
+    if (!global.client) {
+      global.client = new PGlite();
+      await global.client.waitReady;
+
+      global.drizzle = drizzlePglite(global.client, { schema });
+    }
+
+    drizzle = global.drizzle;
+    await migratePglite(global.drizzle, {
+      migrationsFolder: path.join(process.cwd(), 'migrations'),
+    });
   }
 
-  drizzle = global.drizzle;
-  await migratePglite(global.drizzle, {
-    migrationsFolder: path.join(process.cwd(), 'migrations'),
-  });
+  dbInstance = drizzle;
+  return drizzle;
 }
 
-export const db = drizzle;
+export const db = await initializeDb();
