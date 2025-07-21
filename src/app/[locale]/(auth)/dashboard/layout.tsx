@@ -129,6 +129,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 ],
               },
 
+              // Reports menu
+              {
+                label: t('reports'),
+                submenu: [
+                  {
+                    href: '/dashboard/employee-delivery-receipt-inventory',
+                    label: t('employee_delivery_receipt_inventory'),
+                  },
+                ],
+              },
+
               // Settings
               {
                 href: '/dashboard/organization-profile',
