@@ -1,8 +1,8 @@
 -- =============================================
 -- Store Procedure: Production Progress Report
--- Description: Detailed production progress tracking with total_made
+-- Description: Detailed production progress tracking with total_made and absolute remaining
 -- Input: Plan, Product Code, Production Step
--- Output: Employee work + Outsource delivery/receipt + Total Made
+-- Output: Employee work + Outsource delivery/receipt + Total Made + Absolute Remaining
 -- File: sp_production_progress_report.sql
 -- =============================================
 
@@ -52,7 +52,7 @@ BEGIN
             THEN ROUND((SUM(es.actual_quantity)::NUMERIC / SUM(es.planned_quantity)) * 100, 2)
             ELSE 0 
         END as completion_rate,
-        (COALESCE(SUM(es.planned_quantity), 0) - COALESCE(SUM(es.actual_quantity), 0))::INTEGER as remaining_quantity
+        ABS(COALESCE(SUM(es.planned_quantity), 0) - COALESCE(SUM(es.actual_quantity), 0))::INTEGER as remaining_quantity
     FROM employee_salary_entry es
     INNER JOIN user_sync us ON es.user_id = us.user_id
     INNER JOIN plan p ON es.plan_id = p.id
@@ -88,7 +88,7 @@ BEGIN
             THEN ROUND((SUM(oor.receipt_quantity)::NUMERIC / SUM(ood.ordered_quantity)) * 100, 2)
             ELSE 0 
         END as completion_rate,
-        (COALESCE(SUM(ood.ordered_quantity), 0) - COALESCE(SUM(oor.receipt_quantity), 0))::INTEGER as remaining_quantity
+        ABS(COALESCE(SUM(ood.ordered_quantity), 0) - COALESCE(SUM(oor.receipt_quantity), 0))::INTEGER as remaining_quantity
     FROM outsource_order oo
     INNER JOIN user_sync us ON oo.assigned_to_user_id = us.user_id
     INNER JOIN outsource_order_detail ood ON oo.id = ood.outsource_order_id
@@ -125,12 +125,10 @@ $$ LANGUAGE plpgsql;
 -- SELECT * FROM sp_production_progress_report();
 
 -- =============================================
--- Updated Output Format with total_made:
--- report_type | entity_name | total_planned | total_actual | total_assigned | total_received | total_made | completion_rate
--- EMPLOYEE_SUMMARY | Nguyễn Văn A | 2000 | 1500 | 0 | 0 | 1500 | 75.00
--- OUTSOURCE_DETAIL | Công ty X | 0 | 0 | 1000 | 900 | 900 | 90.00
--- OUTSOURCE_DETAIL | Công ty Y | 0 | 0 | 1000 | 900 | 900 | 90.00
-
+-- Updated Features:
+-- - Added total_made column = total_actual + total_received
+-- - Updated remaining_quantity to use ABS() for absolute values
+-- - Handles negative remaining quantities by converting to positive
 -- =============================================
 -- Migration Notes:
 -- Run this SQL file to create the stored procedure

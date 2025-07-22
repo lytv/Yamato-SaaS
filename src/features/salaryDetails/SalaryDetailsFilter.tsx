@@ -17,6 +17,7 @@ interface SalaryDetailsFilterProps {
   onClearFilters: () => void;
   onExport?: () => void;
   isLoading?: boolean;
+  isExporting?: boolean;
   userOptions?: { value: string; label: string; shortcut?: string; email: string; }[];
 }
 
@@ -26,6 +27,7 @@ export function SalaryDetailsFilter({
   onClearFilters,
   onExport,
   isLoading = false,
+  isExporting = false,
   userOptions = [],
 }: SalaryDetailsFilterProps) {
   const handleUserSelection = (userId: string) => {
@@ -51,10 +53,10 @@ export function SalaryDetailsFilter({
               variant="outline"
               size="sm"
               onClick={onExport}
-              disabled={isLoading}
+              disabled={isLoading || isExporting}
             >
               <Download className="w-4 h-4 mr-2" />
-              Xuất Excel
+              {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
             </Button>
           )}
           <Button

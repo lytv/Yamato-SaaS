@@ -56,6 +56,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/outsourceOrderDetails(.*)', // ✅ Add outsourceOrderDetails API routes
   '/api/outsourceOrderReceipts(.*)', // ✅ Add outsourceOrderReceipts API routes
   '/api/salary-details(.*)', // ✅ Add salary-details API routes for Clerk protection
+  '/api/employee-summary(.*)', // ✅ Add employee-summary API routes for Clerk protection
   '/api/employeeDeliveryReceiptInventory(.*)', // ✅ Add employeeDeliveryReceiptInventory API routes
   '/api/production-progress-report(.*)', // ✅ Add production-progress-report API routes
   '/api/protected(.*)',

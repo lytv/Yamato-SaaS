@@ -1,12 +1,19 @@
 /**
- * useEmployeeSalaryEntryExport Hook
- * Manages employeeSalaryEntry export functionality
- * Following TDD implementation and established hook patterns from useEmployeeSalaryEntrys/useEmployeeSalaryEntryMutations
+ * useEmployeeSummaryExport Hook  
+ * Manages employee summary export functionality
+ * Following established patterns from other export hooks
  */
 
 import { useCallback, useState } from 'react';
 
-import type { EmployeeSalaryEntryExportParams } from '@/types/employeeSalaryEntry';
+type EmployeeSummaryExportParams = {
+  search?: string;
+  userIds?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: string;
+};
 
 type ExportState = {
   isExporting: boolean;
@@ -15,11 +22,11 @@ type ExportState = {
 };
 
 type ExportReturn = ExportState & {
-  exportEmployeeSalaryEntrys: (params?: EmployeeSalaryEntryExportParams) => Promise<void>;
+  exportEmployeeSummary: (params?: EmployeeSummaryExportParams) => Promise<void>;
   clearError: () => void;
 };
 
-export function useEmployeeSalaryEntryExport(): ExportReturn {
+export function useEmployeeSummaryExport(): ExportReturn {
   const [state, setState] = useState<ExportState>({
     isExporting: false,
     exportError: null,
@@ -30,7 +37,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
     setState(prev => ({ ...prev, exportError: null }));
   }, []);
 
-  const exportEmployeeSalaryEntrys = useCallback(async (params?: EmployeeSalaryEntryExportParams): Promise<void> => {
+  const exportEmployeeSummary = useCallback(async (params?: EmployeeSummaryExportParams): Promise<void> => {
     setState(prev => ({ ...prev, isExporting: true, exportError: null }));
 
     try {
@@ -40,6 +47,15 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       if (params?.search) {
         searchParams.append('search', params.search);
       }
+      if (params?.userIds) {
+        searchParams.append('userIds', params.userIds);
+      }
+      if (params?.startDate) {
+        searchParams.append('startDate', params.startDate);
+      }
+      if (params?.endDate) {
+        searchParams.append('endDate', params.endDate);
+      }
       if (params?.sortBy) {
         searchParams.append('sortBy', params.sortBy);
       }
@@ -48,7 +64,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       }
 
       // Fetch export data
-      const response = await fetch(`/api/employeeSalaryEntries/export?${searchParams.toString()}`, {
+      const response = await fetch(`/api/employee-summary/export?${searchParams.toString()}`, {
         method: 'GET',
         headers: {
           Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -57,7 +73,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
 
       if (!response.ok) {
         // Try to get error details from JSON response
-        let errorMessage = 'Failed to export employeeSalaryEntrys';
+        let errorMessage = 'Failed to export employee summary';
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
@@ -70,7 +86,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       // Get filename from Content-Disposition header
       const contentDisposition = response.headers.get('Content-Disposition');
       const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch?.[1] || `employeeSalaryEntrys-export-${Date.now()}.xlsx`;
+      const filename = filenameMatch?.[1] || `employee-summary-export-${Date.now()}.xlsx`;
 
       // Convert response to blob
       const blob = await response.blob();
@@ -95,7 +111,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
         lastExportDate: new Date(),
       }));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export employeeSalaryEntrys';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export employee summary';
       setState(prev => ({
         ...prev,
         isExporting: false,
@@ -107,7 +123,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
 
   return {
     ...state,
-    exportEmployeeSalaryEntrys,
+    exportEmployeeSummary,
     clearError,
   };
 }

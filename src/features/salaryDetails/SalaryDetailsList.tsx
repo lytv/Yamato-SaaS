@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useSalaryDetails } from '@/hooks/useSalaryDetails';
 import { useSalaryDetailsFilters } from '@/hooks/useSalaryDetailsFilters';
 import { useSalaryDetailsUsers } from '@/hooks/useSalaryDetailsUsers';
+import { useSalaryDetailsExport } from '@/hooks/useSalaryDetailsExport';
+import { useEmployeeSummaryExport } from '@/hooks/useEmployeeSummaryExport';
 import { SalaryDetailsFilter } from './SalaryDetailsFilter';
 import { SalaryDetailsSkeleton } from './SalaryDetailsSkeleton';
 import { DataTable } from '@/components/ui/data-table';
@@ -14,11 +16,13 @@ import { ColumnDef } from '@tanstack/react-table';
 import { SalaryDetail, UserSummary } from '@/types/salaryDetails';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
 export function SalaryDetailsList() {
   const { filters, updateFilter, clearFilters, toggleSort } = useSalaryDetailsFilters();
   const [currentPage, setCurrentPage] = useState(1);
+  const { exportSalaryDetails, isExporting } = useSalaryDetailsExport();
+  const { exportEmployeeSummary, isExporting: isExportingSummary } = useEmployeeSummaryExport();
   
   // Fetch user options from API
   const { data: userOptions = [], isLoading: isLoadingUsers } = useSalaryDetailsUsers();
@@ -171,9 +175,35 @@ export function SalaryDetailsList() {
     },
   ];
 
-  const handleExport = () => {
-    // Implementation for Excel export
-    console.log('Export to Excel');
+  const handleExport = async () => {
+    try {
+      await exportSalaryDetails({
+        search: filters.search,
+        userIds: filters.userIds.join(','),
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        showAll: true, // Export all data
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handleEmployeeSummaryExport = async () => {
+    try {
+      await exportEmployeeSummary({
+        search: filters.search,
+        userIds: filters.userIds.join(','),
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+      });
+    } catch (error) {
+      console.error('Employee summary export failed:', error);
+    }
   };
 
   if (isLoading) {
@@ -204,6 +234,7 @@ export function SalaryDetailsList() {
         onClearFilters={clearFilters}
         onExport={handleExport}
         isLoading={isLoading || isLoadingUsers}
+        isExporting={isExporting}
         userOptions={userOptions}
       />
 
@@ -268,22 +299,50 @@ export function SalaryDetailsList() {
       {/* User Summary */}
       {data?.summary?.user_summary && data.summary.user_summary.length > 0 && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Tổng hợp theo nhân viên</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEmployeeSummaryExport}
+              disabled={isExportingSummary}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              {isExportingSummary ? 'Đang xuất...' : 'Xuất Excel'}
+            </Button>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.summary.user_summary.map((user: UserSummary) => (
-                <div key={user.user_id} className="p-4 border rounded-lg">
-                  <div className="font-medium">{user.full_name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {user.record_count} bản ghi
-                  </div>
-                  <div className="text-lg font-semibold text-green-600">
-                    {user.total_amount.toLocaleString('vi-VN')} ₫
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2 font-semibold">Nhân viên</th>
+                    <th className="text-right p-2 font-semibold">Tổng tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.summary.user_summary.map((user: UserSummary) => (
+                    <tr key={user.user_id} className="border-b hover:bg-gray-50">
+                      <td className="p-2">
+                        <div className="font-medium">{user.full_name}</div>
+                      </td>
+                      <td className="p-2 text-right">
+                        <div className="font-mono font-semibold text-green-600">
+                          {user.total_amount.toLocaleString('vi-VN')} ₫
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 font-semibold">
+                    <td className="p-2">Tổng cộng</td>
+                    <td className="p-2 text-right font-mono text-green-600">
+                      {data.summary.total_amount.toLocaleString('vi-VN')} ₫
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </CardContent>
         </Card>
