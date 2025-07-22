@@ -635,7 +635,9 @@ export function EmployeeSalaryEntryForm({
                   render={({ field: formField }) => (
                     <FormItem>
                       <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800">Kế hoạch</FormLabel>
+                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                          🔒 Kế hoạch
+                        </FormLabel>
                         {plannedQuantity && (
                           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                             📋 Tự động
@@ -647,8 +649,8 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 ${
-                            plannedQuantity ? 'border-blue-400 bg-blue-50' : 'border-orange-400'
+                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                            plannedQuantity ? 'border-blue-400 bg-blue-100 text-blue-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
                           onChange={e => {
@@ -656,6 +658,8 @@ export function EmployeeSalaryEntryForm({
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                          readOnly={true}
+                          disabled={true}
                         />
                       </FormControl>
                       <FormMessage />
@@ -671,7 +675,9 @@ export function EmployeeSalaryEntryForm({
                   render={({ field: formField }) => (
                     <FormItem>
                       <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800">Giới hạn</FormLabel>
+                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                          🔒 Giới hạn
+                        </FormLabel>
                         {quantityLimit && (
                           <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
                             🔄 Tự động
@@ -683,8 +689,8 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 ${
-                            quantityLimit ? 'border-green-400 bg-green-50' : 'border-orange-400'
+                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                            quantityLimit ? 'border-green-400 bg-green-100 text-green-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
                           onChange={e => {
@@ -692,6 +698,8 @@ export function EmployeeSalaryEntryForm({
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                          readOnly={true}
+                          disabled={true}
                         />
                       </FormControl>
                       <FormMessage />
@@ -707,7 +715,9 @@ export function EmployeeSalaryEntryForm({
                   render={({ field: formField }) => (
                     <FormItem>
                       <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800">Trước đó</FormLabel>
+                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                          🔒 Trước đó
+                        </FormLabel>
                         {previousQuantityData && (
                           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
                             📊 Tự động
@@ -719,8 +729,8 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 ${
-                            previousQuantityData ? 'border-purple-400 bg-purple-50' : 'border-orange-400'
+                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                            previousQuantityData ? 'border-purple-400 bg-purple-100 text-purple-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
                           onChange={e => {
@@ -728,6 +738,8 @@ export function EmployeeSalaryEntryForm({
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                          readOnly={true}
+                          disabled={true}
                         />
                       </FormControl>
                       <FormMessage />
