@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useCreateOutsourceOrder, useUpdateOutsourceOrder } from '@/hooks/useOutsourceOrderMutations';
 import { useOutsourceOrderRelationOptions } from '@/hooks/useOutsourceOrders';
 import { outsourceOrderFormSchema } from '@/libs/validations/outsourceOrder';
@@ -221,20 +220,6 @@ export function OutsourceOrderForm({
             <p className="text-sm text-destructive">{errors.orderCode?.message}</p>
           )}
         </div>
-        {/* Order Title */}
-        <div className="space-y-2">
-          <Label htmlFor="orderTitle">{t('order_title')}</Label>
-          <Input
-            id="orderTitle"
-            type="text"
-            placeholder={t('order_title_placeholder')}
-            {...register('orderTitle')}
-            className={errors.orderTitle ? 'border-destructive' : ''}
-          />
-          {errors.orderTitle && (
-            <p className="text-sm text-destructive">{errors.orderTitle?.message}</p>
-          )}
-        </div>
         {/* Order Date */}
         <div className="space-y-2">
           <Label htmlFor="orderDate">{t('order_date')}</Label>
@@ -247,75 +232,6 @@ export function OutsourceOrderForm({
           />
           {errors.orderDate && (
             <p className="text-sm text-destructive">{errors.orderDate?.message}</p>
-          )}
-        </div>
-        {/* Expected Completion Date */}
-        <div className="space-y-2">
-          <Label htmlFor="expectedCompletionDate">{t('expected_completion_date')}</Label>
-          <Input
-            id="expectedCompletionDate"
-            type="date"
-            {...register('expectedCompletionDate')}
-            onChange={handleDateChange('expectedCompletionDate')}
-            className={errors.expectedCompletionDate ? 'border-destructive' : ''}
-          />
-          {errors.expectedCompletionDate && (
-            <p className="text-sm text-destructive">{errors.expectedCompletionDate?.message}</p>
-          )}
-        </div>
-        {/* Actual Completion Date */}
-        <div className="space-y-2">
-          <Label htmlFor="actualCompletionDate">{t('actual_completion_date')}</Label>
-          <Input
-            id="actualCompletionDate"
-            type="date"
-            {...register('actualCompletionDate')}
-            onChange={handleDateChange('actualCompletionDate')}
-            className={errors.actualCompletionDate ? 'border-destructive' : ''}
-          />
-          {errors.actualCompletionDate && (
-            <p className="text-sm text-destructive">{errors.actualCompletionDate?.message}</p>
-          )}
-        </div>
-        {/* Total Amount */}
-        <div className="space-y-2">
-          <Label htmlFor="totalAmount">{t('total_amount')}</Label>
-          <Input
-            id="totalAmount"
-            type="number"
-            placeholder={t('total_amount_placeholder')}
-            {...register('totalAmount')}
-            className={errors.totalAmount ? 'border-destructive' : ''}
-          />
-          {errors.totalAmount && (
-            <p className="text-sm text-destructive">{errors.totalAmount?.message}</p>
-          )}
-        </div>
-        {/* Notes */}
-        <div className="space-y-2">
-          <Label htmlFor="notes">{t('notes')}</Label>
-          <Textarea
-            id="notes"
-            placeholder={t('notes_placeholder')}
-            {...register('notes')}
-            className={errors.notes ? 'border-destructive' : ''}
-          />
-          {errors.notes && (
-            <p className="text-sm text-destructive">{errors.notes?.message}</p>
-          )}
-        </div>
-        {/* Attachment */}
-        <div className="space-y-2">
-          <Label htmlFor="attachment">{t('attachment')}</Label>
-          <Input
-            id="attachment"
-            type="text"
-            placeholder={t('attachment_placeholder')}
-            {...register('attachment')}
-            className={errors.attachment ? 'border-destructive' : ''}
-          />
-          {errors.attachment && (
-            <p className="text-sm text-destructive">{errors.attachment?.message}</p>
           )}
         </div>
 

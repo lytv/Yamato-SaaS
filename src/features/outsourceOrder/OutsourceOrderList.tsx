@@ -193,12 +193,9 @@ export function OutsourceOrderList() {
                     <TableRow>
 
                       <TableHead>{t('table.order_code')}</TableHead>
-                      <TableHead>{t('table.order_title')}</TableHead>
                       <TableHead>{t('table.created_by')}</TableHead>
                       <TableHead>{t('table.assigned_to')}</TableHead>
                       <TableHead>{t('table.order_date')}</TableHead>
-                      <TableHead>{t('table.expected_completion_date')}</TableHead>
-                      <TableHead>{t('table.actual_completion_date')}</TableHead>
                       <TableHead className="w-32">{t('table.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -209,17 +206,10 @@ export function OutsourceOrderList() {
                         <TableCell className="font-medium">
                           {item.orderCode}
                         </TableCell>
-                        <TableCell>{item.orderTitle}</TableCell>
                         <TableCell>{item.createdByUser?.fullName || item.createdByUserId}</TableCell>
                         <TableCell>{item.assignedToUser?.fullName || item.assignedToUserId}</TableCell>
                         <TableCell>
                           {item.orderDate ? new Date(item.orderDate).toLocaleDateString() : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {item.expectedCompletionDate ? new Date(item.expectedCompletionDate).toLocaleDateString() : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {item.actualCompletionDate ? new Date(item.actualCompletionDate).toLocaleDateString() : '-'}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
