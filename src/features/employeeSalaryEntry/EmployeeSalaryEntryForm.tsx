@@ -264,10 +264,13 @@ export function EmployeeSalaryEntryForm({
         if (plannedData && plannedData.totalPlannedQuantity > 0) {
           // Automatically set the planned quantity from plan detail
           form.setValue('plannedQuantity', plannedData.totalPlannedQuantity);
+        } else {
+          // Reset to 0 if no planned quantity found or product not found
+          form.setValue('plannedQuantity', 0);
         }
       } else {
-        // Clear planned quantity when plan or product is not selected
-        form.setValue('plannedQuantity', undefined);
+        // Reset to 0 when plan or product is not selected
+        form.setValue('plannedQuantity', 0);
       }
     };
 
@@ -505,6 +508,48 @@ export function EmployeeSalaryEntryForm({
             {/* Right Column */}
             <div className="space-y-4">
               
+              {/* Plan Section */}
+              <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
+                <h3 className="mb-3 text-lg font-bold text-purple-900">📋 KẾ HOẠCH</h3>
+                <FormField
+                  control={form.control}
+                  name="planId"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-purple-800">Chọn kế hoạch</FormLabel>
+                      <Select
+                        onValueChange={(value) => formField.onChange(Number(value))}
+                        value={formField.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 text-lg border-2 border-purple-300">
+                            <SelectValue placeholder="Chọn kế hoạch..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {relationOptions.plans?.map(option => (
+                            <SelectItem key={option.id} value={option.id.toString()}>
+                              <span className="text-lg">{option.planName}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-purple-300">
+                  {(() => {
+                    const selected = relationOptions.plans.find(p => p.id === form.watch('planId'));
+                    return selected ? (
+                      <span className="text-xl font-bold text-purple-900">{selected.planName}</span>
+                    ) : (
+                      <span className="text-gray-400">Chưa chọn kế hoạch</span>
+                    );
+                  })()}
+                </div>
+              </div>
+
               {/* Production Step Section */}
               <div className="rounded-lg border-2 border-yellow-200 bg-yellow-50 p-3">
                 <h3 className="mb-3 text-lg font-bold text-yellow-900">⚙️ CÔNG ĐOẠN</h3>
@@ -547,48 +592,6 @@ export function EmployeeSalaryEntryForm({
                       <span className="text-xl font-bold text-yellow-900">{selected.stepName}</span>
                     ) : (
                       <span className="text-gray-400">Chưa chọn công đoạn</span>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Plan Section */}
-              <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
-                <h3 className="mb-3 text-lg font-bold text-purple-900">📋 KẾ HOẠCH</h3>
-                <FormField
-                  control={form.control}
-                  name="planId"
-                  render={({ field: formField }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-purple-800">Chọn kế hoạch</FormLabel>
-                      <Select
-                        onValueChange={(value) => formField.onChange(Number(value))}
-                        value={formField.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 text-lg border-2 border-purple-300">
-                            <SelectValue placeholder="Chọn kế hoạch..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {relationOptions.plans?.map(option => (
-                            <SelectItem key={option.id} value={option.id.toString()}>
-                              <span className="text-lg">{option.planName}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-purple-300">
-                  {(() => {
-                    const selected = relationOptions.plans.find(p => p.id === form.watch('planId'));
-                    return selected ? (
-                      <span className="text-xl font-bold text-purple-900">{selected.planName}</span>
-                    ) : (
-                      <span className="text-gray-400">Chưa chọn kế hoạch</span>
                     );
                   })()}
                 </div>
