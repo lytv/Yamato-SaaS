@@ -53,6 +53,13 @@ export function EmployeeSalaryEntryForm({
     stepName?: string;
   }[]>([]);
 
+  // 🆕 State for filtered products based on selected plan
+  const [filteredProducts, setFilteredProducts] = useState<{
+    id: number;
+    productCode: string;
+    productName: string;
+  }[]>([]);
+
   // 🆕 State for shortcut functionality
   const [shortcutValue, setShortcutValue] = useState('');
   const [shortcutMessage, setShortcutMessage] = useState('');
@@ -159,8 +166,8 @@ export function EmployeeSalaryEntryForm({
       return;
     }
 
-    // Find product by product code
-    const matchedProduct = relationOptions.products.find(
+    // Find product by product code from filtered products
+    const matchedProduct = filteredProducts.find(
       product => product.productCode && product.productCode.toLowerCase() === productCode.toLowerCase().trim(),
     );
 
@@ -171,7 +178,7 @@ export function EmployeeSalaryEntryForm({
     } else {
       setProductCodeError(`❌ No product found with code: "${productCode}"`);
     }
-  }, [relationOptions.products, form]);
+  }, [filteredProducts, form]);
 
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
@@ -192,6 +199,35 @@ export function EmployeeSalaryEntryForm({
       form.setValue('totalAmount', calculatedTotal);
     }
   }, [actualQuantity, unitPrice, form]);
+
+  // 🆕 Load filtered products when plan changes
+  useEffect(() => {
+    const loadFilteredProducts = async () => {
+      if (planId) {
+        try {
+          const response = await fetch(`/api/employeeSalaryEntries/relations/products-by-plan?planId=${planId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setFilteredProducts(data.data);
+            // Reset productId when plan changes
+            form.setValue('productId', null as any);
+          } else {
+            console.error('Failed to load products by plan:', response.statusText);
+            setFilteredProducts([]);
+          }
+        } catch (error) {
+          console.error('Error loading products by plan:', error);
+          setFilteredProducts([]);
+        }
+      } else {
+        // Clear filtered products if no plan selected
+        setFilteredProducts([]);
+        form.setValue('productId', null as any);
+      }
+    };
+
+    loadFilteredProducts();
+  }, [planId, form]);
 
   // 🆕 Load filtered production step details when product changes
   useEffect(() => {
@@ -472,14 +508,19 @@ export function EmployeeSalaryEntryForm({
                               setProductCodeError('');
                             }}
                             value={formField.value?.toString()}
+                            disabled={!planId}
                           >
                             <FormControl>
                               <SelectTrigger className="h-12 text-lg border-2 border-green-300">
-                                <SelectValue placeholder="Chọn..." />
+                                <SelectValue placeholder={
+                                  !planId ? "Chọn kế hoạch trước" : 
+                                  filteredProducts.length === 0 ? "Không có sản phẩm" : 
+                                  "Chọn sản phẩm..."
+                                } />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {relationOptions.products?.map(option => (
+                              {filteredProducts.map(option => (
                                 <SelectItem key={option.id} value={option.id.toString()}>
                                   <span className="text-lg">{option.productName} ({option.productCode})</span>
                                 </SelectItem>
@@ -494,7 +535,7 @@ export function EmployeeSalaryEntryForm({
                 </div>
                 <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-green-300">
                   {(() => {
-                    const selected = relationOptions.products.find(p => p.id === form.watch('productId'));
+                    const selected = filteredProducts.find(p => p.id === form.watch('productId'));
                     return selected ? (
                       <span className="text-xl font-bold text-green-900">{selected.productName}</span>
                     ) : (
@@ -785,6 +826,7 @@ export function EmployeeSalaryEntryForm({
               setProductCodeValue('');
               setProductCodeMessage('');
               setProductCodeError('');
+              setFilteredProducts([]);
               setFilteredProductionStepDetails([]);
             }}
           >
