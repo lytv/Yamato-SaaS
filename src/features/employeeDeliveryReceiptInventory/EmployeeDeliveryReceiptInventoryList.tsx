@@ -30,7 +30,7 @@ export function EmployeeDeliveryReceiptInventoryList({
   const { filters, getApiFilters } = useEmployeeDeliveryReceiptInventoryFilters();
   const { exportData, isExporting, exportError } = useEmployeeDeliveryReceiptInventoryExport();
 
-  const apiFilters = getApiFilters();
+  const apiFilters = React.useMemo(() => getApiFilters(), [getApiFilters]);
   const { data, summary, pagination, isLoading, error, refetch } = useEmployeeDeliveryReceiptInventory({
     ...apiFilters,
     page: currentPage,
@@ -41,10 +41,16 @@ export function EmployeeDeliveryReceiptInventoryList({
     setCurrentPage(page);
   }, []);
 
-  // Reset page when filters change
+  // Reset page when filters change and force data refetch
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+    // Force refetch when filters change to ensure data is reloaded
+    const timeoutId = setTimeout(() => {
+      refetch();
+    }, 100); // Small delay to ensure state is updated
+
+    return () => clearTimeout(timeoutId);
+  }, [filters, refetch]);
 
   // Handle export
   const handleExport = useCallback(async () => {
@@ -106,6 +112,7 @@ export function EmployeeDeliveryReceiptInventoryList({
           <p className="text-sm">{error}</p>
         </div>
         <button
+          type="button"
           onClick={refetch}
           className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
@@ -197,6 +204,7 @@ export function EmployeeDeliveryReceiptInventoryList({
       {/* Export Button */}
       <div className="flex justify-end">
         <button
+          type="button"
           onClick={handleExport}
           disabled={isExporting}
           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -301,6 +309,7 @@ export function EmployeeDeliveryReceiptInventoryList({
           <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
             <div className="flex flex-1 justify-between sm:hidden">
               <button
+                type="button"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage <= 1}
                 className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -308,6 +317,7 @@ export function EmployeeDeliveryReceiptInventoryList({
                 {t('previous')}
               </button>
               <button
+                type="button"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={!pagination.hasMore}
                 className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -336,6 +346,7 @@ export function EmployeeDeliveryReceiptInventoryList({
               <div>
                 <nav className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                   <button
+                    type="button"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
                     className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white p-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -348,6 +359,7 @@ export function EmployeeDeliveryReceiptInventoryList({
                     const pageNum = i + 1;
                     return (
                       <button
+                        type="button"
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
                         className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium ${
@@ -362,6 +374,7 @@ export function EmployeeDeliveryReceiptInventoryList({
                   })}
 
                   <button
+                    type="button"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={!pagination.hasMore}
                     className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white p-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -377,7 +390,7 @@ export function EmployeeDeliveryReceiptInventoryList({
 
       {/* Loading overlay for subsequent loads */}
       {isLoading && data.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-25">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25">
           <div className="rounded-lg bg-white p-4 shadow-lg">
             <div className="flex items-center space-x-3">
               <div className="size-6 animate-spin rounded-full border-b-2 border-indigo-600"></div>

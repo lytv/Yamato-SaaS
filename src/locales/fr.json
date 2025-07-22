@@ -133,7 +133,10 @@
     "salaries": "Salaires",
     "outsource_menu": "Sous-traitance",
     "outsource_order": "Commande",
-    "outsource_order_detail": "Détail de la commande"
+    "outsource_order_detail": "Détail de la commande",
+    "reports": "Rapports",
+    "employee_delivery_receipt_inventory": "Inventaire Livraison/Réception Employé",
+    "production_progress_report": "Rapport de Progrès de Production"
   },
   "Dashboard": {
     "meta_title": "Tableau de bord Yamato ERP",
@@ -171,6 +174,146 @@
     "message_state_title": "Paiement accepté",
     "message_state_description": "Votre paiement a été traité avec succès. Merci pour votre achat !",
     "message_state_button": "Revenir à la facturation"
+  },
+  "employeeDeliveryReceiptInventory": {
+    "page": {
+      "title": "Inventaire Livraison/Réception Employé",
+      "description": "Suivre le statut de livraison, réception et inventaire pour chaque employé"
+    },
+    "list": {
+      "employee": "Employé",
+      "plan": "Plan",
+      "product": "Produit",
+      "step": "Étape",
+      "assigned": "Assigné",
+      "received": "Reçu",
+      "inventory": "Inventaire",
+      "completion_rate": "Taux d'achèvement",
+      "total_employees": "Total employés",
+      "total_assigned": "Total assigné",
+      "total_received": "Total reçu",
+      "avg_completion_rate": "Taux moyen d'achèvement",
+      "export": "Exporter",
+      "exporting": "Exportation...",
+      "export_error": "Erreur d'export",
+      "error_title": "Erreur de chargement des données",
+      "retry": "Réessayer",
+      "no_data": "Aucune donnée disponible",
+      "no_data_description": "Aucune donnée d'inventaire trouvée avec les filtres actuels",
+      "loading": "Chargement...",
+      "showing": "Affichage",
+      "to": "à",
+      "of": "de",
+      "results": "résultats",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "filter": {
+      "search_placeholder": "Rechercher employés, plans, produits...",
+      "filters": "Filtres",
+      "apply_filters": "Appliquer les filtres",
+      "clear_all": "Effacer tout",
+      "plan": "Plan",
+      "all_plans": "Tous les plans",
+      "product": "Produit",
+      "all_products": "Tous les produits",
+      "production_step": "Étape de production",
+      "all_steps": "Toutes les étapes",
+      "employee": "Employé",
+      "all_employees": "Tous les employés",
+      "sort_by": "Trier par",
+      "sort_employee_name": "Nom employé",
+      "sort_plan_code": "Code plan",
+      "sort_product_code": "Code produit",
+      "sort_step_code": "Code étape",
+      "sort_total_assigned": "Total assigné",
+      "sort_total_received": "Total reçu",
+      "sort_completion_rate": "Taux d'achèvement",
+      "sort_order": "Ordre de tri",
+      "sort_ascending": "Croissant",
+      "sort_descending": "Décroissant"
+    }
+  },
+  "productionProgressReport": {
+    "page": {
+      "title": "Rapport de Progrès de Production",
+      "description": "Suivre le progrès de production avec données employé et sous-traitance"
+    },
+    "list": {
+      "title": "Rapport de Progrès de Production",
+      "columns": {
+        "reportType": "Type",
+        "entityName": "Entité",
+        "planCode": "Plan",
+        "productCode": "Produit",
+        "stepCode": "Étape",
+        "totalPlanned": "Planifié",
+        "totalActual": "Réel",
+        "totalAssigned": "Assigné",
+        "totalReceived": "Reçu",
+        "totalMade": "Fabriqué",
+        "completionRate": "Achèvement",
+        "remaining": "Restant"
+      },
+      "summary": {
+        "totalRecords": "Total enregistrements",
+        "totalEntities": "Total entités",
+        "totalMade": "Total fabriqué",
+        "avgCompletionRate": "Moy. achèvement"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Impossible de charger le rapport de progrès de production",
+      "retry": "Réessayer"
+    },
+    "filter": {
+      "title": "Filtres",
+      "clear": "Effacer",
+      "search": {
+        "placeholder": "Rechercher entités, plans, produits..."
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Sélectionner plan...",
+        "all": "Tous les plans"
+      },
+      "product": {
+        "label": "Produit",
+        "placeholder": "Sélectionner produit...",
+        "all": "Tous les produits"
+      },
+      "step": {
+        "label": "Étape de production",
+        "placeholder": "Sélectionner étape...",
+        "all": "Toutes les étapes"
+      },
+      "reportType": {
+        "label": "Type de rapport",
+        "placeholder": "Sélectionner type...",
+        "all": "Tous les rapports",
+        "employee": "Résumé employé",
+        "outsource": "Détail sous-traitance"
+      },
+      "sortBy": {
+        "label": "Trier par",
+        "placeholder": "Sélectionner champ...",
+        "planCode": "Code plan",
+        "productCode": "Code produit",
+        "entityName": "Nom entité",
+        "completionRate": "Taux d'achèvement",
+        "totalMade": "Total fabriqué"
+      },
+      "sortOrder": {
+        "label": "Ordre de tri",
+        "placeholder": "Sélectionner ordre...",
+        "asc": "Croissant",
+        "desc": "Décroissant"
+      },
+      "reset": "Réinitialiser",
+      "apply": "Appliquer filtres"
+    }
   },
   "DataTable": {
     "no_results": "Aucun résultat."

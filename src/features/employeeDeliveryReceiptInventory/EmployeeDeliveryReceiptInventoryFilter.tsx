@@ -9,10 +9,10 @@
 import { ChevronDown, Filter, Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useCallback, useState } from 'react';
-import { useDebounce } from 'use-debounce';
 
 import { useEmployeeDeliveryReceiptInventoryFilterOptions } from '@/hooks/useEmployeeDeliveryReceiptInventoryFilterOptions';
 import { useEmployeeDeliveryReceiptInventoryFilters } from '@/hooks/useEmployeeDeliveryReceiptInventoryFilters';
+import type { EmployeeDeliveryReceiptInventoryItem } from '@/types/employeeDeliveryReceiptInventory';
 
 type EmployeeDeliveryReceiptInventoryFilterProps = {
   className?: string;
@@ -23,11 +23,19 @@ export function EmployeeDeliveryReceiptInventoryFilter({
 }: EmployeeDeliveryReceiptInventoryFilterProps): JSX.Element {
   const t = useTranslations('employeeDeliveryReceiptInventory.filter');
   const [isExpanded, setIsExpanded] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [localFilters, setLocalFilters] = useState({
+    search: '',
+    plan_code: '',
+    product_code: '',
+    production_step_code: '',
+    employee_id: '',
+    sortBy: 'employee_name' as keyof EmployeeDeliveryReceiptInventoryItem,
+    sortOrder: 'asc' as 'asc' | 'desc',
+  });
 
   const {
     filters,
-    updateFilter,
+    applyFilters,
     resetFilters,
     hasActiveFilters,
     activeFilterCount,
@@ -38,31 +46,58 @@ export function EmployeeDeliveryReceiptInventoryFilter({
     isLoading: isLoadingOptions,
   } = useEmployeeDeliveryReceiptInventoryFilterOptions();
 
-  // Debounce search input to avoid too many API calls
-  const [debouncedSearch] = useDebounce(searchInput, 300);
-
-  // Update search filter when debounced value changes
+  // Initialize local filters from current applied filters
   React.useEffect(() => {
-    updateFilter('search', debouncedSearch);
-  }, [debouncedSearch, updateFilter]);
+    setLocalFilters({
+      search: filters.search,
+      plan_code: filters.plan_code,
+      product_code: filters.product_code,
+      production_step_code: filters.production_step_code,
+      employee_id: filters.employee_id,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    });
+  }, [filters]);
 
-  // Initialize search input from current filter
-  React.useEffect(() => {
-    setSearchInput(filters.search);
-  }, [filters.search]);
-
-  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(event.target.value);
+  const handleLocalFilterChange = useCallback((key: keyof typeof localFilters, value: string) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      [key]: value,
+    }));
   }, []);
 
-  const handleSelectChange = useCallback((key: keyof typeof filters, value: string) => {
-    updateFilter(key, value);
-  }, [updateFilter]);
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    handleLocalFilterChange('search', event.target.value);
+  }, [handleLocalFilterChange]);
+
+  const handleSelectChange = useCallback((key: keyof typeof localFilters, value: string) => {
+    handleLocalFilterChange(key, value);
+  }, [handleLocalFilterChange]);
+
+  const handleApplyFilters = useCallback(() => {
+    applyFilters(localFilters);
+  }, [applyFilters, localFilters]);
 
   const handleReset = useCallback(() => {
-    setSearchInput('');
+    const defaultFilters = {
+      search: '',
+      plan_code: '',
+      product_code: '',
+      production_step_code: '',
+      employee_id: '',
+      sortBy: 'employee_name' as keyof EmployeeDeliveryReceiptInventoryItem,
+      sortOrder: 'asc' as 'asc' | 'desc',
+    };
+    setLocalFilters(defaultFilters);
     resetFilters();
   }, [resetFilters]);
+
+  const hasUnappliedChanges = React.useMemo(() => {
+    return Object.keys(localFilters).some((key) => {
+      const filterKey = key as keyof typeof localFilters;
+      return localFilters[filterKey] !== filters[filterKey];
+    });
+  }, [localFilters, filters]);
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded(prev => !prev);
@@ -82,15 +117,15 @@ export function EmployeeDeliveryReceiptInventoryFilter({
               <input
                 type="text"
                 placeholder={t('search_placeholder')}
-                value={searchInput}
+                value={localFilters.search}
                 onChange={handleSearchChange}
                 className="block w-full rounded-md border border-gray-300 bg-white px-10 py-2 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
               />
-              {searchInput && (
+              {localFilters.search && (
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <button
                     type="button"
-                    onClick={() => setSearchInput('')}
+                    onClick={() => handleLocalFilterChange('search', '')}
                     className="text-gray-400 hover:text-gray-600"
                   >
                     <X className="size-4" />
@@ -100,8 +135,18 @@ export function EmployeeDeliveryReceiptInventoryFilter({
             </div>
           </div>
 
-          {/* Filter Toggle and Reset */}
+          {/* Apply, Reset and Filter Toggle */}
           <div className="flex items-center space-x-2">
+            {hasUnappliedChanges && (
+              <button
+                type="button"
+                onClick={handleApplyFilters}
+                className="inline-flex items-center rounded-md border border-indigo-600 bg-indigo-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                {t('apply_filters')}
+              </button>
+            )}
+
             {hasActiveFilters && (
               <button
                 type="button"
@@ -145,7 +190,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
               </label>
               <select
                 id="plan-filter"
-                value={filters.plan_code}
+                value={localFilters.plan_code}
                 onChange={e => handleSelectChange('plan_code', e.target.value)}
                 disabled={isLoadingOptions}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 sm:text-sm"
@@ -166,7 +211,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
               </label>
               <select
                 id="product-filter"
-                value={filters.product_code}
+                value={localFilters.product_code}
                 onChange={e => handleSelectChange('product_code', e.target.value)}
                 disabled={isLoadingOptions}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 sm:text-sm"
@@ -187,7 +232,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
               </label>
               <select
                 id="step-filter"
-                value={filters.production_step_code}
+                value={localFilters.production_step_code}
                 onChange={e => handleSelectChange('production_step_code', e.target.value)}
                 disabled={isLoadingOptions}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 sm:text-sm"
@@ -208,7 +253,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
               </label>
               <select
                 id="employee-filter"
-                value={filters.employee_id}
+                value={localFilters.employee_id}
                 onChange={e => handleSelectChange('employee_id', e.target.value)}
                 disabled={isLoadingOptions}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 sm:text-sm"
@@ -233,7 +278,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
                 </label>
                 <select
                   id="sort-by"
-                  value={filters.sortBy}
+                  value={localFilters.sortBy}
                   onChange={e => handleSelectChange('sortBy', e.target.value)}
                   className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                 >
@@ -254,7 +299,7 @@ export function EmployeeDeliveryReceiptInventoryFilter({
                 </label>
                 <select
                   id="sort-order"
-                  value={filters.sortOrder}
+                  value={localFilters.sortOrder}
                   onChange={e => handleSelectChange('sortOrder', e.target.value)}
                   className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                 >

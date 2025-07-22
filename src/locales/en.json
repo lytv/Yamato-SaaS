@@ -137,7 +137,8 @@
     "outsource_order": "Order",
     "outsource_order_detail": "Order Detail",
     "reports": "Reports",
-    "employee_delivery_receipt_inventory": "Employee Delivery Receipt Inventory"
+    "employee_delivery_receipt_inventory": "Employee Delivery Receipt Inventory",
+    "production_progress_report": "Production Progress Report"
   },
   "employeeDeliveryReceiptInventory": {
     "page": {
@@ -175,6 +176,7 @@
     "filter": {
       "search_placeholder": "Search employees, plans, products...",
       "filters": "Filters",
+      "apply_filters": "Apply Filters",
       "clear_all": "Clear All",
       "plan": "Plan",
       "all_plans": "All Plans",
@@ -195,6 +197,87 @@
       "sort_order": "Sort Order",
       "sort_ascending": "Ascending",
       "sort_descending": "Descending"
+    }
+  },
+  "productionProgressReport": {
+    "page": {
+      "title": "Production Progress Report",
+      "description": "Track production progress with employee and outsource data"
+    },
+    "list": {
+      "title": "Production Progress Report",
+      "columns": {
+        "reportType": "Type",
+        "entityName": "Entity",
+        "planCode": "Plan",
+        "productCode": "Product",
+        "stepCode": "Step",
+        "totalPlanned": "Planned",
+        "totalActual": "Actual",
+        "totalAssigned": "Assigned",
+        "totalReceived": "Received",
+        "totalMade": "Made",
+        "completionRate": "Completion",
+        "remaining": "Remaining"
+      },
+      "summary": {
+        "totalRecords": "Total Records",
+        "totalEntities": "Total Entities",
+        "totalMade": "Total Made",
+        "avgCompletionRate": "Avg Completion"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Failed to load production progress report",
+      "retry": "Retry"
+    },
+    "filter": {
+      "title": "Filters",
+      "clear": "Clear",
+      "search": {
+        "placeholder": "Search entities, plans, products..."
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Select plan...",
+        "all": "All Plans"
+      },
+      "product": {
+        "label": "Product",
+        "placeholder": "Select product...",
+        "all": "All Products"
+      },
+      "step": {
+        "label": "Production Step",
+        "placeholder": "Select step...",
+        "all": "All Steps"
+      },
+      "reportType": {
+        "label": "Report Type",
+        "placeholder": "Select type...",
+        "all": "All Reports",
+        "employee": "Employee Summary",
+        "outsource": "Outsource Detail"
+      },
+      "sortBy": {
+        "label": "Sort By",
+        "placeholder": "Select field...",
+        "planCode": "Plan Code",
+        "productCode": "Product Code",
+        "entityName": "Entity Name",
+        "completionRate": "Completion Rate",
+        "totalMade": "Total Made"
+      },
+      "sortOrder": {
+        "label": "Sort Order",
+        "placeholder": "Select order...",
+        "asc": "Ascending",
+        "desc": "Descending"
+      },
+      "reset": "Reset",
+      "apply": "Apply Filters"
     }
   },
   "Dashboard": {

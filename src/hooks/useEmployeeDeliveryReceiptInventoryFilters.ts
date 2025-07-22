@@ -4,7 +4,7 @@
  * Following Yamato-SaaS patterns and URL sync implementation
  */
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import type {
@@ -17,6 +17,7 @@ import { EMPLOYEE_DELIVERY_RECEIPT_INVENTORY_DEFAULTS } from '@/types/employeeDe
 type UseEmployeeDeliveryReceiptInventoryFiltersReturn = {
   filters: EmployeeDeliveryReceiptInventoryFilterState;
   setFilters: (filters: Partial<EmployeeDeliveryReceiptInventoryFilterState>) => void;
+  applyFilters: (newFilters: EmployeeDeliveryReceiptInventoryFilterState) => void;
   resetFilters: () => void;
   hasActiveFilters: boolean;
   activeFilterCount: number;
@@ -36,6 +37,7 @@ const DEFAULT_FILTERS: EmployeeDeliveryReceiptInventoryFilterState = {
 
 export function useEmployeeDeliveryReceiptInventoryFilters(): UseEmployeeDeliveryReceiptInventoryFiltersReturn {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Initialize filters from URL params
@@ -57,17 +59,18 @@ export function useEmployeeDeliveryReceiptInventoryFilters(): UseEmployeeDeliver
 
     // Only add non-empty values to URL
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value && value !== DEFAULT_FILTERS[key as keyof EmployeeDeliveryReceiptInventoryFilterState]) {
+      const defaultValue = DEFAULT_FILTERS[key as keyof EmployeeDeliveryReceiptInventoryFilterState];
+      if (value && value !== defaultValue) {
         params.set(key, value);
       }
     });
 
     const queryString = params.toString();
-    const newUrl = queryString ? `?${queryString}` : '';
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
     // Use replace to avoid adding to browser history for every filter change
     router.replace(newUrl, { scroll: false });
-  }, [router]);
+  }, [router, pathname]);
 
   // Set filters with URL sync
   const setFilters = useCallback((newFilters: Partial<EmployeeDeliveryReceiptInventoryFilterState>) => {
@@ -76,7 +79,13 @@ export function useEmployeeDeliveryReceiptInventoryFilters(): UseEmployeeDeliver
     updateURL(updatedFilters);
   }, [filters, updateURL]);
 
-  // Update single filter
+  // Apply filters - this is the manual trigger that updates both state and URL
+  const applyFilters = useCallback((newFilters: EmployeeDeliveryReceiptInventoryFilterState) => {
+    setFiltersState(newFilters);
+    updateURL(newFilters);
+  }, [updateURL]);
+
+  // Update single filter (deprecated - keeping for backward compatibility)
   const updateFilter = useCallback((key: keyof EmployeeDeliveryReceiptInventoryFilterState, value: string) => {
     setFilters({ [key]: value });
   }, [setFilters]);
@@ -137,6 +146,7 @@ export function useEmployeeDeliveryReceiptInventoryFilters(): UseEmployeeDeliver
   return {
     filters,
     setFilters,
+    applyFilters,
     resetFilters,
     hasActiveFilters,
     activeFilterCount,

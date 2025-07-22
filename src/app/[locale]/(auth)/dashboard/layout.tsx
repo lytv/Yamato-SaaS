@@ -137,6 +137,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/employee-delivery-receipt-inventory',
                     label: t('employee_delivery_receipt_inventory'),
                   },
+                  {
+                    href: '/dashboard/production-progress-report',
+                    label: t('production_progress_report'),
+                  },
                 ],
               },
 

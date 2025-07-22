@@ -109,7 +109,8 @@
     "outsource_order": "Đơn gia công",
     "outsource_order_detail": "Chi tiết đơn hàng",
     "reports": "Báo cáo",
-    "employee_delivery_receipt_inventory": "Báo cáo Giao/Nhận/Tồn Nhân viên"
+    "employee_delivery_receipt_inventory": "Báo cáo Giao/Nhận/Tồn Nhân viên",
+    "production_progress_report": "Báo cáo Tiến độ Sản xuất"
   },
   "employeeDeliveryReceiptInventory": {
     "page": {
@@ -147,6 +148,7 @@
     "filter": {
       "search_placeholder": "Tìm kiếm nhân viên, kế hoạch, sản phẩm...",
       "filters": "Bộ lọc",
+      "apply_filters": "Áp dụng bộ lọc",
       "clear_all": "Xóa tất cả",
       "plan": "Kế hoạch",
       "all_plans": "Tất cả kế hoạch",
@@ -167,6 +169,87 @@
       "sort_order": "Thứ tự sắp xếp",
       "sort_ascending": "Tăng dần",
       "sort_descending": "Giảm dần"
+    }
+  },
+  "productionProgressReport": {
+    "page": {
+      "title": "Báo cáo Tiến độ Sản xuất",
+      "description": "Theo dõi tiến độ sản xuất với dữ liệu nhân viên và gia công"
+    },
+    "list": {
+      "title": "Báo cáo Tiến độ Sản xuất",
+      "columns": {
+        "reportType": "Loại",
+        "entityName": "Đối tượng",
+        "planCode": "Kế hoạch",
+        "productCode": "Sản phẩm",
+        "stepCode": "Công đoạn",
+        "totalPlanned": "KH",
+        "totalActual": "Thực hiện",
+        "totalAssigned": "Giao",
+        "totalReceived": "Nhận",
+        "totalMade": "Làm được",
+        "completionRate": "Hoàn thành",
+        "remaining": "Còn lại"
+      },
+      "summary": {
+        "totalRecords": "Tổng bản ghi",
+        "totalEntities": "Tổng đối tượng",
+        "totalMade": "Tổng làm được",
+        "avgCompletionRate": "TB hoàn thành"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Không thể tải báo cáo tiến độ sản xuất",
+      "retry": "Thử lại"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "clear": "Xóa",
+      "search": {
+        "placeholder": "Tìm kiếm đối tượng, kế hoạch, sản phẩm..."
+      },
+      "plan": {
+        "label": "Kế hoạch",
+        "placeholder": "Chọn kế hoạch...",
+        "all": "Tất cả kế hoạch"
+      },
+      "product": {
+        "label": "Sản phẩm",
+        "placeholder": "Chọn sản phẩm...",
+        "all": "Tất cả sản phẩm"
+      },
+      "step": {
+        "label": "Công đoạn",
+        "placeholder": "Chọn công đoạn...",
+        "all": "Tất cả công đoạn"
+      },
+      "reportType": {
+        "label": "Loại báo cáo",
+        "placeholder": "Chọn loại...",
+        "all": "Tất cả báo cáo",
+        "employee": "Tổng hợp nhân viên",
+        "outsource": "Chi tiết gia công"
+      },
+      "sortBy": {
+        "label": "Sắp xếp theo",
+        "placeholder": "Chọn trường...",
+        "planCode": "Mã kế hoạch",
+        "productCode": "Mã sản phẩm",
+        "entityName": "Tên đối tượng",
+        "completionRate": "Tỷ lệ hoàn thành",
+        "totalMade": "Tổng làm được"
+      },
+      "sortOrder": {
+        "label": "Thứ tự",
+        "placeholder": "Chọn thứ tự...",
+        "asc": "Tăng dần",
+        "desc": "Giảm dần"
+      },
+      "reset": "Đặt lại",
+      "apply": "Áp dụng bộ lọc"
     }
   },
   "DashboardIndex": {
@@ -289,7 +372,7 @@
     "sort": {
       "createdAt": "Ngày tạo",
       "updatedAt": "Ngày cập nhật",
-      "title": "Tiêu đề"
+      "titleSort": "Tiêu đề"
     },
     "add_new": "Thêm việc cần làm mới",
     "delete_success": "Xóa việc cần làm thành công.",
@@ -622,7 +705,7 @@
     "sort": {
       "createdAt": "Ngày tạo",
       "updatedAt": "Ngày cập nhật",
-      "title": "Tiêu đề"
+      "titleSort": "Tiêu đề"
     },
     "add_new": "Thêm ghi chú mới",
     "deleteConfirmation": "Bạn có chắc muốn xóa ghi chú này?",
