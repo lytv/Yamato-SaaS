@@ -1,3 +1,10 @@
+## [1.2.14](https://github.com/lytv/Yamato-SaaS/compare/v1.2.13...v1.2.14) (2025-07-22)
+
+
+### Bug Fixes
+
+* nhap luong ([363c41c](https://github.com/lytv/Yamato-SaaS/commit/363c41cfff52d26c0ef23fe69ac8bd8266df7dad))
+
 ## [1.2.13](https://github.com/lytv/Yamato-SaaS/compare/v1.2.12...v1.2.13) (2025-07-22)
 
 
