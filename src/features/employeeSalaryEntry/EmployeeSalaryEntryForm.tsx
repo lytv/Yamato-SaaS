@@ -21,6 +21,7 @@ import type {
 } from '@/types/employeeSalaryEntry';
 import { useProductionStepDetailQuantityLimit } from '@/hooks/useProductionStepDetailQuantityLimit';
 import { usePlanDetailPlannedQuantity } from '@/hooks/usePlanDetailPlannedQuantity';
+import { useEmployeeSalaryEntryPreviousQuantity } from '@/hooks/useEmployeeSalaryEntryPreviousQuantity';
 
 type EmployeeSalaryEntryFormProps = {
   employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
@@ -70,6 +71,9 @@ export function EmployeeSalaryEntryForm({
 
   // 🆕 Hook for fetching plan detail planned quantity
   const { plannedQuantity, fetchPlannedQuantity } = usePlanDetailPlannedQuantity();
+
+  // 🆕 Hook for fetching previous entered quantity
+  const { previousQuantity: previousQuantityData, fetchPreviousQuantity } = useEmployeeSalaryEntryPreviousQuantity();
 
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
@@ -269,6 +273,31 @@ export function EmployeeSalaryEntryForm({
 
     updatePlannedQuantity();
   }, [planId, productId, fetchPlannedQuantity, form]);
+
+  // 🆕 Auto-update previous entered quantity when plan, product, and production step detail are selected
+  useEffect(() => {
+    const updatePreviousQuantity = async () => {
+      if (planId && productId && productionStepDetailId) {
+        // Pass the current record ID to exclude it from calculation if editing
+        const currentId = employeeSalaryEntry?.id;
+        const previousData = await fetchPreviousQuantity(
+          planId, 
+          productId, 
+          productionStepDetailId,
+          currentId
+        );
+        if (previousData) {
+          // Automatically set the previous entered quantity
+          form.setValue('previousEnteredQuantity', previousData.totalPreviousQuantity);
+        }
+      } else {
+        // Clear previous quantity when required fields are not selected
+        form.setValue('previousEnteredQuantity', undefined);
+      }
+    };
+
+    updatePreviousQuantity();
+  }, [planId, productId, productionStepDetailId, fetchPreviousQuantity, form, employeeSalaryEntry?.id]);
 
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: EmployeeSalaryEntryFormData) => {
@@ -677,13 +706,22 @@ export function EmployeeSalaryEntryForm({
                   name="previousEnteredQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold text-orange-800">Trước đó</FormLabel>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FormLabel className="text-sm font-bold text-orange-800">Trước đó</FormLabel>
+                        {previousQuantityData && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                            📊 Tự động
+                          </span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          className={`h-12 text-2xl font-bold text-center border-2 ${
+                            previousQuantityData ? 'border-purple-400 bg-purple-50' : 'border-orange-400'
+                          }`}
                           {...formField}
                           onChange={e => {
                             const value = e.target.value.replace(/[^0-9]/g, '');
