@@ -19,6 +19,7 @@ import type {
   EmployeeSalaryEntryRelationOptions,
   EmployeeSalaryEntryWithRelations,
 } from '@/types/employeeSalaryEntry';
+import { useProductionStepDetailQuantityLimit } from '@/hooks/useProductionStepDetailQuantityLimit';
 
 type EmployeeSalaryEntryFormProps = {
   employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
@@ -62,6 +63,9 @@ export function EmployeeSalaryEntryForm({
 
   // 🆕 State for form error
   const [formError, setFormError] = useState<string | null>(null);
+
+  // 🆕 Hook for fetching production step detail quantity limit
+  const { quantityLimit, fetchQuantityLimit } = useProductionStepDetailQuantityLimit();
 
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
@@ -167,6 +171,9 @@ export function EmployeeSalaryEntryForm({
 
   // 🆕 Watch for productId changes to load filtered production step details
   const productId = useWatch({ control: form.control, name: 'productId' });
+  
+  // 🆕 Watch for productionStepDetailId changes to update limit quantity
+  const productionStepDetailId = useWatch({ control: form.control, name: 'productionStepDetailId' });
 
   useEffect(() => {
     if (actualQuantity && unitPrice) {
@@ -219,6 +226,24 @@ export function EmployeeSalaryEntryForm({
       }
     }
   }, [startTime, endTime, form]);
+
+  // 🆕 Auto-update limit quantity when production step detail is selected
+  useEffect(() => {
+    const updateLimitQuantity = async () => {
+      if (productionStepDetailId) {
+        const limitData = await fetchQuantityLimit(productionStepDetailId);
+        if (limitData && limitData.effectiveLimit !== null) {
+          // Automatically set the limit quantity from production step detail
+          form.setValue('limitQuantity', limitData.effectiveLimit);
+        }
+      } else {
+        // Clear limit quantity when no production step detail is selected
+        form.setValue('limitQuantity', undefined);
+      }
+    };
+
+    updateLimitQuantity();
+  }, [productionStepDetailId, fetchQuantityLimit, form]);
 
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: EmployeeSalaryEntryFormData) => {
@@ -582,13 +607,22 @@ export function EmployeeSalaryEntryForm({
                   name="limitQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold text-orange-800">Giới hạn</FormLabel>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FormLabel className="text-sm font-bold text-orange-800">Giới hạn</FormLabel>
+                        {quantityLimit && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                            🔄 Tự động
+                          </span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          className={`h-12 text-2xl font-bold text-center border-2 ${
+                            quantityLimit ? 'border-green-400 bg-green-50' : 'border-orange-400'
+                          }`}
                           {...formField}
                           onChange={e => {
                             const value = e.target.value.replace(/[^0-9]/g, '');
