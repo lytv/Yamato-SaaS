@@ -1,3 +1,10 @@
+## [1.2.12](https://github.com/lytv/Yamato-SaaS/compare/v1.2.11...v1.2.12) (2025-07-22)
+
+
+### Bug Fixes
+
+* cap nhat gia cong và chi tiết gia công ([511af03](https://github.com/lytv/Yamato-SaaS/commit/511af030cd5834eb2a79c4e08946a578297c685f))
+
 ## [1.2.11](https://github.com/lytv/Yamato-SaaS/compare/v1.2.10...v1.2.11) (2025-07-22)
 
 
