@@ -20,6 +20,7 @@ import type {
   EmployeeSalaryEntryWithRelations,
 } from '@/types/employeeSalaryEntry';
 import { useProductionStepDetailQuantityLimit } from '@/hooks/useProductionStepDetailQuantityLimit';
+import { usePlanDetailPlannedQuantity } from '@/hooks/usePlanDetailPlannedQuantity';
 
 type EmployeeSalaryEntryFormProps = {
   employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
@@ -66,6 +67,9 @@ export function EmployeeSalaryEntryForm({
 
   // 🆕 Hook for fetching production step detail quantity limit
   const { quantityLimit, fetchQuantityLimit } = useProductionStepDetailQuantityLimit();
+
+  // 🆕 Hook for fetching plan detail planned quantity
+  const { plannedQuantity, fetchPlannedQuantity } = usePlanDetailPlannedQuantity();
 
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
@@ -175,6 +179,9 @@ export function EmployeeSalaryEntryForm({
   // 🆕 Watch for productionStepDetailId changes to update limit quantity
   const productionStepDetailId = useWatch({ control: form.control, name: 'productionStepDetailId' });
 
+  // 🆕 Watch for planId changes to update planned quantity
+  const planId = useWatch({ control: form.control, name: 'planId' });
+
   useEffect(() => {
     if (actualQuantity && unitPrice) {
       const calculatedTotal = Number(actualQuantity) * Number(unitPrice);
@@ -244,6 +251,24 @@ export function EmployeeSalaryEntryForm({
 
     updateLimitQuantity();
   }, [productionStepDetailId, fetchQuantityLimit, form]);
+
+  // 🆕 Auto-update planned quantity when plan and product are selected
+  useEffect(() => {
+    const updatePlannedQuantity = async () => {
+      if (planId && productId) {
+        const plannedData = await fetchPlannedQuantity(planId, productId);
+        if (plannedData && plannedData.totalPlannedQuantity > 0) {
+          // Automatically set the planned quantity from plan detail
+          form.setValue('plannedQuantity', plannedData.totalPlannedQuantity);
+        }
+      } else {
+        // Clear planned quantity when plan or product is not selected
+        form.setValue('plannedQuantity', undefined);
+      }
+    };
+
+    updatePlannedQuantity();
+  }, [planId, productId, fetchPlannedQuantity, form]);
 
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: EmployeeSalaryEntryFormData) => {
@@ -580,13 +605,22 @@ export function EmployeeSalaryEntryForm({
                   name="plannedQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold text-orange-800">Kế hoạch</FormLabel>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FormLabel className="text-sm font-bold text-orange-800">Kế hoạch</FormLabel>
+                        {plannedQuantity && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            📋 Tự động
+                          </span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          className={`h-12 text-2xl font-bold text-center border-2 ${
+                            plannedQuantity ? 'border-blue-400 bg-blue-50' : 'border-orange-400'
+                          }`}
                           {...formField}
                           onChange={e => {
                             const value = e.target.value.replace(/[^0-9]/g, '');

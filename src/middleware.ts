@@ -51,6 +51,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/user_syncs(.*)', // ✅ Add user_syncs API routes
   '/api/plans(.*)', // ✅ Add plans API routes
   '/api/plandetails(.*)', // ✅ Add plandetails API routes
+  '/api/plan-details(.*)', // ✅ Add plan-details API routes
   '/api/employeeSalaryEntries(.*)', // ✅ Add employeeSalaryEntries API routes
   '/api/outsourceOrders(.*)', // ✅ Add outsourceOrders API routes
   '/api/outsourceOrderDetails(.*)', // ✅ Add outsourceOrderDetails API routes
