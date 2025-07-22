@@ -82,20 +82,6 @@ function EmployeeSalaryEntryModal({
 
       {/* Modal content */}
       <div className="fixed inset-0 z-10 flex size-full max-w-none flex-col overflow-auto bg-white p-0">
-        <div className="flex items-center justify-between border-b p-6">
-          <h2 id="modal-title" className="text-xl font-semibold">
-            {modal.mode === 'create' ? 'Create EmployeeSalaryEntry' : 'Edit EmployeeSalaryEntry'}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
-          >
-            ✕
-          </Button>
-        </div>
 
         <div className="flex-1 overflow-auto p-6">
           <EmployeeSalaryEntryForm

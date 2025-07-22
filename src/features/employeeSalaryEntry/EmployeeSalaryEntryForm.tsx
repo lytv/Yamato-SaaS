@@ -5,30 +5,20 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { employeeSalaryEntryFormSchema } from '@/libs/validations/employeeSalaryEntry';
 import type {
   EmployeeSalaryEntryFormData,
   EmployeeSalaryEntryRelationOptions,
   EmployeeSalaryEntryWithRelations,
 } from '@/types/employeeSalaryEntry';
-
-// Hàm cn: nối className tiện dụng
-function cn(...args: (string | undefined | false | null)[]) {
-  return args.filter(Boolean).join(' ');
-}
 
 type EmployeeSalaryEntryFormProps = {
   employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
@@ -293,570 +283,408 @@ export function EmployeeSalaryEntryForm({
             })()}
           </div>
         )}
-        <div className="flex flex-col gap-6">
-
-          {/* Employee Section */}
-          <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-employee, #e0f2fe)' }}>
-            {/* 🆕 Shortcut Input Field */}
-            <div className="w-1/5 min-w-[180px]">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="employee-shortcut">{t('employee_shortcut')}</label>
-                <Input
-                  id="employee-shortcut"
-                  placeholder={t('employee_shortcut_placeholder')}
-                  value={shortcutValue}
-                  onChange={e => handleShortcutSearch(e.target.value)}
-                  className="text-sm"
-                />
-                {shortcutMessage && (
-                  <p className="text-xs font-medium text-green-600">{t('employee_shortcut_found', { name: shortcutMessage.replace('✅ Found: ', '') })}</p>
-                )}
-                {shortcutError && (
-                  <p className="text-xs font-medium text-red-600">{t('employee_shortcut_not_found', { shortcut: shortcutValue })}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="w-1/4 min-w-[220px]">
-              <FormField
-                control={form.control}
-                name="userId"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('employee')}</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        formField.onChange(value);
-                        // Clear shortcut messages when manually selecting
-                        setShortcutMessage('');
-                        setShortcutError('');
-                      }}
-                      value={formField.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('select_employee')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.userSyncs?.map(option => (
-                          <SelectItem key={option.userId} value={option.userId.toString()}>
-                            {option.fullName}
-                            {' '}
-                            {option.shortcut ? `(${option.shortcut})` : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
-              {/* Hiển thị tên nhân viên đã chọn, nổi bật, lớn hơn, căn phải */}
-              <div className="flex flex-1 items-center justify-end">
-                {(() => {
-                  const selected = relationOptions.userSyncs.find(u => u.userId.toString() === form.watch('userId'));
-                  if (selected && selected.fullName) {
-                    return <span className="text-2xl font-semibold text-gray-900">{selected.fullName}</span>;
-                  }
-                  return null;
-                })()}
-              </div>
-            </div>
-          </div>
-
-          {/* Product Section - moved up */}
-          <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-product, #f0fdf4)' }}>
-            {/* 🆕 Product Code Input Field */}
-            <div className="w-1/5 min-w-[180px]">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="product-code">{t('product_code')}</label>
-                <Input
-                  id="product-code"
-                  placeholder={t('product_code_placeholder')}
-                  value={productCodeValue}
-                  onChange={e => handleProductCodeSearch(e.target.value)}
-                  className="text-sm"
-                />
-                {productCodeMessage && (
-                  <p className="text-xs font-medium text-green-600">{t('product_code_found', { name: productCodeMessage.replace('✅ Found: ', '') })}</p>
-                )}
-                {productCodeError && (
-                  <p className="text-xs font-medium text-red-600">{t('product_code_not_found', { code: productCodeValue })}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="w-1/4 min-w-[220px]">
-              <FormField
-                control={form.control}
-                name="productId"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('product')}</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        formField.onChange(Number(value));
-                        // Clear product code messages when manually selecting
-                        setProductCodeMessage('');
-                        setProductCodeError('');
-                      }}
-                      value={formField.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('select_product')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.products?.map(option => (
-                          <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.productName}
-                            {' '}
-                            (
-                            {option.productCode}
-                            )
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
-              {/* Hiển thị tên product đã chọn, nổi bật, lớn hơn, căn phải */}
-              <div className="flex flex-1 items-center justify-end">
-                {(() => {
-                  const selected = relationOptions.products.find(p => p.id === form.watch('productId'));
-                  if (selected && selected.productName) {
-                    return <span className="text-2xl font-semibold text-gray-900">{selected.productName}</span>;
-                  }
-                  return null;
-                })()}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-step, #fef9c3)' }}>
-            <div className="w-1/4 min-w-[220px]">
-              <FormField
-                control={form.control}
-                name="productionStepDetailId"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('production_step_detail')}</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        formField.onChange(Number(value));
-                      }}
-                      value={formField.value?.toString()}
-                      disabled={!productId} // 🆕 Disable if no product selected
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={
-                            !productId
-                              ? t('select_product_first')
-                              : filteredProductionStepDetails.length === 0
-                                ? t('no_steps_available')
-                                : t('select_production_step_detail')
-                          }
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {filteredProductionStepDetails.map(option => (
-                          <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.stepName || `Step ${option.id}`}
-                            {' '}
-                            {/* 🆕 Show stepName */}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
-              {/* 🆕 Hiển thị step name đã chọn */}
-              <div className="flex flex-1 items-center justify-end">
-                {(() => {
-                  const selected = filteredProductionStepDetails.find(p => p.id === form.watch('productionStepDetailId'));
-                  if (selected && selected.stepName) {
-                    return <span className="text-lg font-semibold text-gray-900">{selected.stepName}</span>;
-                  }
-                  return null;
-                })()}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-row items-center gap-4 rounded-lg p-2" style={{ background: 'var(--field-bg-plan, #ede9fe)' }}>
-            <div className="w-1/4 min-w-[220px]">
-              <FormField
-                control={form.control}
-                name="planId"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('plan')}</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        formField.onChange(Number(value));
-                      }}
-                      value={formField.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('select_plan')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.plans?.map(option => (
-                          <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.planName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex h-full min-w-[200px] items-center text-sm text-muted-foreground">
-              {/* Hiển thị tên kế hoạch đã chọn */}
-              {(() => {
-                const selected = relationOptions.plans.find(p => p.id === form.watch('planId'));
-                return selected ? `Tên kế hoạch: ${selected.planName}` : '';
-              })()}
-            </div>
-          </div>
-
-          {/* 🆕 V4: Regular Fields with Enhanced Types */}
-
-          <div className="flex flex-row items-center gap-4">
-            <div className="w-1/4 min-w-[180px]">
-              <FormField
-                control={form.control}
-                name="workDate"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('work_date')}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !formField.value && 'text-muted-foreground',
-                            )}
+        <div className="grid grid-cols-1 gap-4 max-h-[85vh] overflow-hidden">
+          
+          {/* Main Content Grid - 2 columns layout */}
+          <div className="grid grid-cols-2 gap-6">
+            
+            {/* Left Column */}
+            <div className="space-y-4">
+              
+              {/* Employee Section - Compact */}
+              <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-3">
+                <h3 className="mb-3 text-lg font-bold text-blue-900">👤 NHÂN VIÊN</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-blue-800">Mã NV</label>
+                    <Input
+                      placeholder="Nhập mã..."
+                      value={shortcutValue}
+                      onChange={e => handleShortcutSearch(e.target.value)}
+                      className="h-12 text-lg font-bold border-2 border-blue-300"
+                    />
+                    {shortcutMessage && (
+                      <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
+                    )}
+                    {shortcutError && (
+                      <p className="mt-1 text-xs font-medium text-red-600">❌ Không tìm thấy</p>
+                    )}
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="userId"
+                      render={({ field: formField }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold text-blue-800">Chọn nhân viên</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              formField.onChange(value);
+                              setShortcutMessage('');
+                              setShortcutError('');
+                            }}
+                            value={formField.value?.toString()}
                           >
-                            {formField.value
-                              ? (
-                                  format(new Date(formField.value), 'PPP')
-                                )
-                              : (
-                                  <span>{t('pick_work_date')}</span>
-                                )}
-                            <CalendarIcon className="ml-auto size-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={formField.value ? new Date(formField.value) : undefined}
-                          onSelect={(date) => {
-                            formField.onChange(date ? date.toISOString().split('T')[0] : '');
-                          }}
-                          disabled={date =>
-                            date > new Date() || date < new Date('1900-01-01')}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-1/4 min-w-[180px]">
-              <FormField
-                control={form.control}
-                name="entryDate"
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{t('entry_date')}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !formField.value && 'text-muted-foreground',
-                            )}
+                            <FormControl>
+                              <SelectTrigger className="h-12 text-lg border-2 border-blue-300">
+                                <SelectValue placeholder="Chọn..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {relationOptions.userSyncs?.map(option => (
+                                <SelectItem key={option.userId} value={option.userId.toString()}>
+                                  <span className="text-lg">{option.fullName} {option.shortcut ? `(${option.shortcut})` : ''}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                {/* Selected Employee Display */}
+                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-blue-300">
+                  {(() => {
+                    const selected = relationOptions.userSyncs.find(u => u.userId.toString() === form.watch('userId'));
+                    return selected ? (
+                      <span className="text-xl font-bold text-blue-900">{selected.fullName}</span>
+                    ) : (
+                      <span className="text-gray-400">Chưa chọn nhân viên</span>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Product Section - Compact */}
+              <div className="rounded-lg border-2 border-green-200 bg-green-50 p-3">
+                <h3 className="mb-3 text-lg font-bold text-green-900">📦 SẢN PHẨM</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-green-800">Mã SP</label>
+                    <Input
+                      placeholder="Nhập mã..."
+                      value={productCodeValue}
+                      onChange={e => handleProductCodeSearch(e.target.value)}
+                      className="h-12 text-lg font-bold border-2 border-green-300"
+                    />
+                    {productCodeMessage && (
+                      <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
+                    )}
+                    {productCodeError && (
+                      <p className="mt-1 text-xs font-medium text-red-600">❌ Không tìm thấy</p>
+                    )}
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="productId"
+                      render={({ field: formField }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold text-green-800">Chọn sản phẩm</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              formField.onChange(Number(value));
+                              setProductCodeMessage('');
+                              setProductCodeError('');
+                            }}
+                            value={formField.value?.toString()}
                           >
-                            {formField.value
-                              ? (
-                                  format(new Date(formField.value), 'PPP')
-                                )
-                              : (
-                                  <span>{t('pick_entry_date')}</span>
-                                )}
-                            <CalendarIcon className="ml-auto size-4 opacity-50" />
-                          </Button>
+                            <FormControl>
+                              <SelectTrigger className="h-12 text-lg border-2 border-green-300">
+                                <SelectValue placeholder="Chọn..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {relationOptions.products?.map(option => (
+                                <SelectItem key={option.id} value={option.id.toString()}>
+                                  <span className="text-lg">{option.productName} ({option.productCode})</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-green-300">
+                  {(() => {
+                    const selected = relationOptions.products.find(p => p.id === form.watch('productId'));
+                    return selected ? (
+                      <span className="text-xl font-bold text-green-900">{selected.productName}</span>
+                    ) : (
+                      <span className="text-gray-400">Chưa chọn sản phẩm</span>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
+              
+              {/* Production Step Section */}
+              <div className="rounded-lg border-2 border-yellow-200 bg-yellow-50 p-3">
+                <h3 className="mb-3 text-lg font-bold text-yellow-900">⚙️ CÔNG ĐOẠN</h3>
+                <FormField
+                  control={form.control}
+                  name="productionStepDetailId"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-yellow-800">Chọn công đoạn</FormLabel>
+                      <Select
+                        onValueChange={(value) => formField.onChange(Number(value))}
+                        value={formField.value?.toString()}
+                        disabled={!productId}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 text-lg border-2 border-yellow-300">
+                            <SelectValue placeholder={
+                              !productId ? "Chọn sản phẩm trước" : 
+                              filteredProductionStepDetails.length === 0 ? "Không có công đoạn" : 
+                              "Chọn công đoạn..."
+                            } />
+                          </SelectTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={formField.value ? new Date(formField.value) : undefined}
-                          onSelect={(date) => {
-                            formField.onChange(date ? date.toISOString().split('T')[0] : '');
-                          }}
-                          disabled={false}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent>
+                          {filteredProductionStepDetails.map(option => (
+                            <SelectItem key={option.id} value={option.id.toString()}>
+                              <span className="text-lg">{option.stepName || `Bước ${option.id}`}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-yellow-300">
+                  {(() => {
+                    const selected = filteredProductionStepDetails.find(p => p.id === form.watch('productionStepDetailId'));
+                    return selected ? (
+                      <span className="text-xl font-bold text-yellow-900">{selected.stepName}</span>
+                    ) : (
+                      <span className="text-gray-400">Chưa chọn công đoạn</span>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Plan Section */}
+              <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
+                <h3 className="mb-3 text-lg font-bold text-purple-900">📋 KẾ HOẠCH</h3>
+                <FormField
+                  control={form.control}
+                  name="planId"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-purple-800">Chọn kế hoạch</FormLabel>
+                      <Select
+                        onValueChange={(value) => formField.onChange(Number(value))}
+                        value={formField.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 text-lg border-2 border-purple-300">
+                            <SelectValue placeholder="Chọn kế hoạch..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {relationOptions.plans?.map(option => (
+                            <SelectItem key={option.id} value={option.id.toString()}>
+                              <span className="text-lg">{option.planName}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-purple-300">
+                  {(() => {
+                    const selected = relationOptions.plans.find(p => p.id === form.watch('planId'));
+                    return selected ? (
+                      <span className="text-xl font-bold text-purple-900">{selected.planName}</span>
+                    ) : (
+                      <span className="text-gray-400">Chưa chọn kế hoạch</span>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-lg p-2" style={{ background: '#fef3c7' }}>
-            <FormField
-              control={form.control}
-              name="actualQuantity"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('actual_quantity')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={t('actual_quantity_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Quantity Fields - Horizontal Layout */}
+          <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
+            <h3 className="mb-4 text-lg font-bold text-orange-900">🔢 SỐ LƯỢNG</h3>
+            <div className="grid grid-cols-4 gap-4">
+              
+              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+                <FormField
+                  control={form.control}
+                  name="actualQuantity"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-bold text-orange-800">Thực tế</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          {...formField}
+                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+                <FormField
+                  control={form.control}
+                  name="plannedQuantity"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-bold text-orange-800">Kế hoạch</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          {...formField}
+                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+                <FormField
+                  control={form.control}
+                  name="limitQuantity"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-bold text-orange-800">Giới hạn</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          {...formField}
+                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+                <FormField
+                  control={form.control}
+                  name="previousEnteredQuantity"
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-bold text-orange-800">Trước đó</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          {...formField}
+                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-lg p-2" style={{ background: '#e0e7ff' }}>
-            <FormField
-              control={form.control}
-              name="plannedQuantity"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('planned_quantity')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={t('planned_quantity_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
 
-          <div className="rounded-lg p-2" style={{ background: '#fce7f3' }}>
-            <FormField
-              control={form.control}
-              name="limitQuantity"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('limit_quantity')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={t('limit_quantity_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
 
-          <div className="rounded-lg p-2" style={{ background: '#f1f5f9' }}>
-            <FormField
-              control={form.control}
-              name="previousEnteredQuantity"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('previous_entered_quantity')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={t('previous_entered_quantity_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="rounded-lg p-2" style={{ background: '#d1fae5' }}>
-            <FormField
-              control={form.control}
-              name="unitPrice"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('unit_price')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder={t('unit_price_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="rounded-lg p-2" style={{ background: '#fef08a' }}>
-            <FormField
-              control={form.control}
-              name="totalAmount"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('total_amount')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder={t('total_amount_placeholder')}
-                      {...formField}
-                      onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                      readOnly
-                      className="bg-gray-50"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <p className="text-xs text-muted-foreground">{t('auto_calculated')}</p>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div>
-            <FormField
-              control={form.control}
-              name="salaryNote"
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel>{t('salary_note')}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t('salary_note_placeholder')}
-                      className="min-h-[100px]"
-                      {...formField}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </div>
 
         {/* 🆕 V4: Many-to-Many Relation Fields */}
 
-        {/* 🆕 V4: Enhanced Action Buttons */}
-        <div className="flex justify-end gap-4 border-t pt-4">
+        {/* Enhanced Action Buttons - User Friendly */}
+        <div className="flex justify-center gap-6 border-t-4 border-gray-300 pt-6">
           <Button
             type="button"
             variant="outline"
+            size="lg"
+            className="h-14 px-8 text-lg font-bold border-2 border-gray-400 hover:bg-gray-100"
             onClick={() => {
               form.reset({
                 workDate: new Date().toISOString().split('T')[0],
                 entryDate: new Date().toISOString().split('T')[0],
                 actualQuantity: 0,
                 salaryNote: '',
-                status: 'draft', // Always keep draft
+                status: 'draft',
                 approvedBy: '',
                 userId: undefined,
                 productionStepDetailId: undefined,
                 planId: undefined,
-                productId: undefined, // 🆕 Add productId reset
+                productId: undefined,
               });
-              // 🆕 Reset shortcut state
               setShortcutValue('');
               setShortcutMessage('');
               setShortcutError('');
-              // 🆕 Reset product code state
               setProductCodeValue('');
               setProductCodeMessage('');
               setProductCodeError('');
-              // 🆕 Reset filtered production step details
               setFilteredProductionStepDetails([]);
             }}
           >
-            {t('reset')}
+            🔄 XÓA HẾT
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            size="lg"
+            className="h-14 px-12 text-xl font-bold bg-green-600 hover:bg-green-700 text-white border-2 border-green-700"
+          >
             {isLoading
               ? (
                   <>
-                    <div className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    {mode === 'create' ? t('creating') : t('updating')}
+                    <div className="mr-2 size-6 animate-spin rounded-full border-3 border-white border-t-transparent" />
+                    ⏳ ĐANG LƯU...
                   </>
                 )
               : (
-                  mode === 'create' ? t('create') : t('update')
+                  mode === 'create' ? '💾 LƯU MỚI' : '💾 CẬP NHẬT'
                 )}
           </Button>
+          
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              {t('cancel')}
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="lg"
+              className="h-14 px-8 text-lg font-bold border-2 border-red-400 text-red-600 hover:bg-red-50"
+              onClick={onCancel}
+            >
+              ❌ HỦY BỎ
             </Button>
           )}
         </div>
 
-        {/* 🆕 V4: Form Debug Info (Development Only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <details className="mt-4 rounded-md bg-gray-50 p-4">
-            <summary className="cursor-pointer text-sm font-medium">Debug Form State</summary>
-            <pre className="mt-2 overflow-auto text-xs">
-              {JSON.stringify(form.formState.errors, null, 2)}
-            </pre>
-            <pre className="mt-2 overflow-auto text-xs">
-              {JSON.stringify(form.getValues(), null, 2)}
-            </pre>
-          </details>
-        )}
       </form>
     </FormProvider>
   );
