@@ -1,3 +1,10 @@
+## [1.2.17](https://github.com/lytv/Yamato-SaaS/compare/v1.2.16...v1.2.17) (2025-07-22)
+
+
+### Bug Fixes
+
+* cập nhật tính lương ([fc42015](https://github.com/lytv/Yamato-SaaS/commit/fc4201523b7de02fb37043596f1e23a17454ba97))
+
 ## [1.2.16](https://github.com/lytv/Yamato-SaaS/compare/v1.2.15...v1.2.16) (2025-07-22)
 
 
