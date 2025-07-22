@@ -531,11 +531,15 @@ export function EmployeeSalaryEntryForm({
                       <FormLabel className="text-sm font-bold text-orange-800">Thực tế</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="0"
                           className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
                           {...formField}
-                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          onChange={e => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            formField.onChange(value ? Number(value) : undefined);
+                          }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
                         />
                       </FormControl>
@@ -554,11 +558,15 @@ export function EmployeeSalaryEntryForm({
                       <FormLabel className="text-sm font-bold text-orange-800">Kế hoạch</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="0"
                           className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
                           {...formField}
-                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          onChange={e => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            formField.onChange(value ? Number(value) : undefined);
+                          }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
                         />
                       </FormControl>
@@ -577,11 +585,15 @@ export function EmployeeSalaryEntryForm({
                       <FormLabel className="text-sm font-bold text-orange-800">Giới hạn</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="0"
                           className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
                           {...formField}
-                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          onChange={e => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            formField.onChange(value ? Number(value) : undefined);
+                          }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
                         />
                       </FormControl>
@@ -600,11 +612,15 @@ export function EmployeeSalaryEntryForm({
                       <FormLabel className="text-sm font-bold text-orange-800">Trước đó</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="0"
                           className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
                           {...formField}
-                          onChange={e => formField.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          onChange={e => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            formField.onChange(value ? Number(value) : undefined);
+                          }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
                         />
                       </FormControl>
