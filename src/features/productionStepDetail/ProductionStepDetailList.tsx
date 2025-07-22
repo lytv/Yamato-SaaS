@@ -61,15 +61,6 @@ export function ProductionStepDetailList(): JSX.Element {
   const productMap = new Map(products.map(p => [p.id, p]));
   const productionStepMap = new Map(productionSteps.map(ps => [ps.id, ps]));
 
-  // Format date for display
-  const formatDate = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   // Format price for display
   const formatPrice = (price?: string | null): string => {
@@ -366,8 +357,6 @@ export function ProductionStepDetailList(): JSX.Element {
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isFinalStep')}</th>
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isVtStep')}</th>
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.isParkingStep')}</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.created')}</th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.updated')}</th>
               <th className="px-4 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500">{t('table.actions')}</th>
             </tr>
           </thead>
@@ -430,36 +419,44 @@ export function ProductionStepDetailList(): JSX.Element {
                     {formatPrice(detail.calculatedPrice)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <div className="flex flex-wrap gap-1">
-                      {detail.isFinalStep && (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                          Final
-                        </span>
-                      )}
-                      {detail.isVtStep && (
-                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
-                          VT
-                        </span>
-                      )}
-                      {detail.isParkingStep && (
-                        <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800">
-                          Parking
-                        </span>
-                      )}
-                    </div>
+                    {detail.quantityLimit1 ?? '-'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {formatDate(detail.createdAt)}
+                    {detail.quantityLimit2 ?? '-'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {formatDate(detail.updatedAt)}
+                    {detail.isFinalStep ? (
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {detail.isVtStep ? (
+                      <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {detail.isParkingStep ? (
+                      <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800">
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No</span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
                         type="button"
                         onClick={() => { /* handle edit */ }}
-                        className="mr-2 rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
+                        className="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
                       >
                         {t('edit')}
                       </button>
