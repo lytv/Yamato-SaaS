@@ -329,7 +329,7 @@ export function OutsourceOrderIntegratedList() {
                               size="sm"
                               onClick={() => handleAddDetail(order.id)}
                               className="size-8 p-0"
-                              title="Add Detail"
+                              title={t('add_detail_tooltip')}
                             >
                               <Plus className="size-4" />
                             </Button>
@@ -362,7 +362,7 @@ export function OutsourceOrderIntegratedList() {
 
                     {/* Detail Controls */}
                     <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                      <h3 className="text-md font-semibold text-indigo-700">📋 Order Details</h3>
+                      <h3 className="text-md font-semibold text-indigo-700">📋 {t('order_details_title')}</h3>
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -371,14 +371,14 @@ export function OutsourceOrderIntegratedList() {
                           disabled={isExportingDetails}
                         >
                           <Download className="mr-2 size-4" />
-                          Export Details
+                          {t('export_details')}
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleAddDetail(order.id)}
                         >
                           <Plus className="mr-2 size-4" />
-                          Add Detail
+                          {t('add_detail')}
                         </Button>
                       </div>
                     </div>
@@ -388,7 +388,7 @@ export function OutsourceOrderIntegratedList() {
                       <div className="relative max-w-md">
                         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
                         <Input
-                          placeholder="Search details..."
+                          placeholder={t('search_details_placeholder')}
                           value={detailSearch}
                           onChange={e => setDetailSearch(e.target.value)}
                           className="pl-10"
@@ -404,17 +404,13 @@ export function OutsourceOrderIntegratedList() {
                         <Table className="bg-white">
                         <TableHeader>
                           <TableRow className="bg-indigo-100">
-                            <TableHead className="text-indigo-800 font-semibold">#</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">Plan</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">Product</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">Production Step</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">Ordered Qty</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">Completed</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">Unit Price</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">Total Price</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">Expected Date</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">Status</TableHead>
-                            <TableHead className="w-24 text-center text-indigo-800 font-semibold">Actions</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.sequence')}</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.plan')}</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.product')}</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.production_step')}</TableHead>
+                            <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.ordered_qty')}</TableHead>
+                            <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.completed')}</TableHead>
+                            <TableHead className="w-24 text-center text-indigo-800 font-semibold">{t('detail_table.actions')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -437,30 +433,6 @@ export function OutsourceOrderIntegratedList() {
                               <TableCell className="text-right text-sm font-medium text-green-600">
                                 {item.completedQuantity || 0}
                               </TableCell>
-                              <TableCell className="text-right text-sm">
-                                {item.unitPrice
-                                  ? `₫ ${(typeof item.unitPrice === 'string' ? Number(item.unitPrice) : item.unitPrice).toLocaleString()}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell className="text-right text-sm font-medium">
-                                {item.totalPrice
-                                  ? `₫ ${(typeof item.totalPrice === 'string' ? Number(item.totalPrice) : item.totalPrice).toLocaleString()}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell className="text-sm">
-                                {item.expectedCompletionDate ? new Date(item.expectedCompletionDate).toLocaleDateString() : '-'}
-                              </TableCell>
-                              <TableCell>
-                                <span className={`rounded-full px-2 py-1 text-xs ${
-                                  item.status === 'completed'
-                                    ? 'bg-green-100 text-green-800'
-                                    : item.status === 'in_progress'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {item.status}
-                                </span>
-                              </TableCell>
                               <TableCell>
                                 <div className="flex justify-center gap-1">
                                   <Button
@@ -468,7 +440,7 @@ export function OutsourceOrderIntegratedList() {
                                     size="sm"
                                     onClick={() => router.push(`/dashboard/outsourceOrders/${order.id}/details/${item.id}/receipts`)}
                                     className="size-8 p-0"
-                                    title="Manage Receipts"
+                                    title={t('manage_receipts_tooltip')}
                                   >
                                     <Package className="size-4" />
                                   </Button>
@@ -499,7 +471,7 @@ export function OutsourceOrderIntegratedList() {
 
                     {filteredDetails.length === 0 && !detailsLoading && (
                       <div className="py-8 text-center text-muted-foreground bg-indigo-25 rounded-lg border-2 border-indigo-200" style={{ backgroundColor: '#f0f9ff' }}>
-                        {detailSearch ? '🔍 No details found matching search criteria' : '📭 No details found'}
+                        {detailSearch ? t('detail_empty_search') : t('detail_empty')}
                       </div>
                     )}
                   </div>
@@ -577,11 +549,11 @@ export function OutsourceOrderIntegratedList() {
       {deleteDetailId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h3 className="mb-2 text-lg font-bold">Are you sure?</h3>
-            <p className="mb-4">This action cannot be undone. This will permanently delete the detail item.</p>
+            <h3 className="mb-2 text-lg font-bold">{t('detail_delete_confirm_title')}</h3>
+            <p className="mb-4">{t('detail_delete_confirm_desc')}</p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteDetailId(null)}>Cancel</Button>
-              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteDetailId && handleDeleteDetail(deleteDetailId)}>Delete</Button>
+              <Button variant="outline" onClick={() => setDeleteDetailId(null)}>{t('cancel')}</Button>
+              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteDetailId && handleDeleteDetail(deleteDetailId)}>{t('delete')}</Button>
             </div>
           </div>
         </div>

@@ -1011,7 +1011,30 @@
       "delete_confirm_title": "Bạn chắc chắn?",
       "delete_confirm_desc": "Hành động này không thể hoàn tác. Đơn gia công sẽ bị xóa vĩnh viễn.",
       "cancel": "Hủy",
-      "delete": "Xóa"
+      "delete": "Xóa",
+      "order_details_title": "Thông tin chi tiết đơn hàng",
+      "export_details": "Xuất chi tiết", 
+      "add_detail": "Thêm chi tiết",
+      "search_details_placeholder": "Tìm kiếm chi tiết...",
+      "detail_table": {
+        "sequence": "#",
+        "plan": "Kế hoạch",
+        "product": "Sản phẩm", 
+        "production_step": "Công đoạn sản xuất",
+        "ordered_qty": "SL Đặt hàng",
+        "completed": "SL Hoàn thành",
+        "unit_price": "Đơn giá",
+        "total_price": "Thành tiền",
+        "expected_date": "Ngày dự kiến",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "detail_empty_search": "🔍 Không tìm thấy chi tiết nào phù hợp với tiêu chí tìm kiếm",
+      "detail_empty": "📭 Không tìm thấy chi tiết nào",
+      "detail_delete_confirm_title": "Bạn có chắc chắn?",
+      "detail_delete_confirm_desc": "Hành động này không thể hoàn tác. Mục chi tiết sẽ bị xóa vĩnh viễn.",
+      "add_detail_tooltip": "Thêm Chi tiết",
+      "manage_receipts_tooltip": "Quản lý Phiếu nhập"
     },
     "form": {
       "edit_title": "Chỉnh sửa {title}",

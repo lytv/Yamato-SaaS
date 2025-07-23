@@ -669,7 +669,30 @@
       "delete_confirm_title": "Êtes-vous sûr ?",
       "delete_confirm_desc": "Cette action est irréversible. La commande sera supprimée définitivement.",
       "cancel": "Annuler",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "order_details_title": "Détails de la commande",
+      "export_details": "Exporter les détails", 
+      "add_detail": "Ajouter un détail",
+      "search_details_placeholder": "Rechercher des détails...",
+      "detail_table": {
+        "sequence": "#",
+        "plan": "Plan",
+        "product": "Produit", 
+        "production_step": "Étape de production",
+        "ordered_qty": "Qté commandée",
+        "completed": "Terminé",
+        "unit_price": "Prix unitaire",
+        "total_price": "Prix total",
+        "expected_date": "Date prévue",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "detail_empty_search": "🔍 Aucun détail trouvé correspondant aux critères de recherche",
+      "detail_empty": "📭 Aucun détail trouvé",
+      "detail_delete_confirm_title": "Êtes-vous sûr ?",
+      "detail_delete_confirm_desc": "Cette action est irréversible. L'élément de détail sera supprimé définitivement.",
+      "add_detail_tooltip": "Ajouter un détail",
+      "manage_receipts_tooltip": "Gérer les reçus"
     },
     "form": {
       "edit_title": "Modifier {title}",

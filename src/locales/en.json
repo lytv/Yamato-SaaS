@@ -1098,7 +1098,30 @@
       "delete_confirm_title": "Are you sure?",
       "delete_confirm_desc": "This action cannot be undone. This will permanently delete the outsourceOrder.",
       "cancel": "Cancel",
-      "delete": "Delete"
+      "delete": "Delete",
+      "order_details_title": "Order Details",
+      "export_details": "Export Details", 
+      "add_detail": "Add Detail",
+      "search_details_placeholder": "Search details...",
+      "detail_table": {
+        "sequence": "#",
+        "plan": "Plan",
+        "product": "Product", 
+        "production_step": "Production Step",
+        "ordered_qty": "Ordered Qty",
+        "completed": "Completed",
+        "unit_price": "Unit Price",
+        "total_price": "Total Price",
+        "expected_date": "Expected Date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "detail_empty_search": "🔍 No details found matching search criteria",
+      "detail_empty": "📭 No details found",
+      "detail_delete_confirm_title": "Are you sure?",
+      "detail_delete_confirm_desc": "This action cannot be undone. This will permanently delete the detail item.",
+      "add_detail_tooltip": "Add Detail",
+      "manage_receipts_tooltip": "Manage Receipts"
     },
     "form": {
       "edit_title": "Edit {title}",
