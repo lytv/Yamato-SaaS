@@ -4,10 +4,11 @@
  * Generated based on existing pattern from outsourceOrder queries
  */
 
-import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, or, sum, type SQL } from 'drizzle-orm';
 
 import {
   outsourceOrderDetailSchema,
+  outsourceOrderReceiptSchema,
   outsourceOrderSchema,
   planSchema,
   productionStepSchema,
@@ -416,12 +417,21 @@ export async function getOutsourceOrderDetailById(
     if (!row) {
       return null;
     }
+
+    // Get receipt quantity for this detail item
+    const receiptQuantity = await db
+      .select({ sum: sum(outsourceOrderReceiptSchema.receiptQuantity) })
+      .from(outsourceOrderReceiptSchema)
+      .where(eq(outsourceOrderReceiptSchema.outsourceOrderDetailId, row.outsourceOrderDetail.id));
+
     return {
       ...row.outsourceOrderDetail,
       outsourceOrder: row.outsourceOrder,
       plan: row.plan,
       product: row.product,
       productionStep: row.productionStep,
+      // Override completedQuantity with actual receipt quantity
+      completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
     } as OutsourceOrderDetailWithRelations;
   }
 
@@ -542,19 +552,33 @@ export async function getOutsourceOrderDetailsByOwner(
       .offset(offset)
       .limit(take || 1000);
 
-    return result.map((row: {
-      outsourceOrderDetail: typeof outsourceOrderDetailSchema.$inferSelect;
-      outsourceOrder: { id: number; orderCode: string; orderTitle: string; status: string };
-      plan: { id: number; planCode: string; planName: string };
-      product: { id: number; productCode: string; productName: string };
-      productionStep: { id: number; stepCode: string; stepName: string };
-    }) => ({
-      ...row.outsourceOrderDetail,
-      outsourceOrder: row.outsourceOrder,
-      plan: row.plan,
-      product: row.product,
-      productionStep: row.productionStep,
-    } as OutsourceOrderDetailWithRelations));
+    // Manually calculate receipt quantities for each item
+    const itemsWithReceipts = await Promise.all(
+      result.map(async (row: {
+        outsourceOrderDetail: typeof outsourceOrderDetailSchema.$inferSelect;
+        outsourceOrder: { id: number; orderCode: string; orderTitle: string; status: string };
+        plan: { id: number; planCode: string; planName: string };
+        product: { id: number; productCode: string; productName: string };
+        productionStep: { id: number; stepCode: string; stepName: string };
+      }) => {
+        const receiptQuantity = await db
+          .select({ sum: sum(outsourceOrderReceiptSchema.receiptQuantity) })
+          .from(outsourceOrderReceiptSchema)
+          .where(eq(outsourceOrderReceiptSchema.outsourceOrderDetailId, row.outsourceOrderDetail.id));
+        
+        return {
+          ...row.outsourceOrderDetail,
+          outsourceOrder: row.outsourceOrder,
+          plan: row.plan,
+          product: row.product,
+          productionStep: row.productionStep,
+          // Override completedQuantity with actual receipt quantity
+          completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
+        } as OutsourceOrderDetailWithRelations;
+      })
+    );
+
+    return itemsWithReceipts;
   }
 
   const result = await db
@@ -681,10 +705,43 @@ export async function getOutsourceOrderDetailStats(
       gte(outsourceOrderDetailSchema.createdAt, thisMonthStart),
     ));
 
+  // Get total ordered quantity from outsourceOrderDetail
+  const orderedQuantityStats = await db
+    .select({
+      totalOrderedQuantity: sum(outsourceOrderDetailSchema.orderedQuantity),
+    })
+    .from(outsourceOrderDetailSchema)
+    .where(baseWhere);
+
+  const totalOrderedQuantity = Number(orderedQuantityStats[0]?.totalOrderedQuantity) || 0;
+
+  // Get total completed quantity from outsourceOrderReceipt (sum of all receipt quantities)
+  const completedConditions = [eq(outsourceOrderDetailSchema.ownerId, ownerId)];
+  if (outsourceOrderId) {
+    completedConditions.push(eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderId));
+  }
+
+  const completedQuantityStats = await db
+    .select({
+      totalCompletedQuantity: sum(outsourceOrderReceiptSchema.receiptQuantity),
+    })
+    .from(outsourceOrderReceiptSchema)
+    .innerJoin(outsourceOrderDetailSchema, eq(outsourceOrderReceiptSchema.outsourceOrderDetailId, outsourceOrderDetailSchema.id))
+    .where(and(...completedConditions));
+  const totalCompletedQuantity = Number(completedQuantityStats[0]?.totalCompletedQuantity) || 0;
+  
+  // Calculate completion rate
+  const completionRate = totalOrderedQuantity > 0 
+    ? totalCompletedQuantity / totalOrderedQuantity 
+    : 0;
+
   return {
     total: totalResult?.count || 0,
     today: todayResult?.count || 0,
     thisWeek: thisWeekResult?.count || 0,
     thisMonth: thisMonthResult?.count || 0,
+    totalOrderedQuantity,
+    totalCompletedQuantity,
+    completionRate,
   };
 }

@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/table';
 import { useOutsourceOrderDetailExport } from '@/hooks/useOutsourceOrderDetailExport';
 import { useDeleteOutsourceOrderDetail } from '@/hooks/useOutsourceOrderDetailMutations';
-import { useOutsourceOrderDetailsByOrderId, useOutsourceOrderDetailStats } from '@/hooks/useOutsourceOrderDetails';
+import { useOutsourceOrderDetailsByOrderId } from '@/hooks/useOutsourceOrderDetails';
 import { useOutsourceOrderExport } from '@/hooks/useOutsourceOrderExport';
 import { useOutsourceOrderFilters } from '@/hooks/useOutsourceOrderFilters';
 import { useDeleteOutsourceOrder } from '@/hooks/useOutsourceOrderMutations';
@@ -136,7 +136,7 @@ export function OutsourceOrderIntegratedList() {
     refetch: refetchDetails,
   } = useOutsourceOrderDetailsByOrderId(expandedOrderId || 0, expandedOrderId !== null);
 
-  const { data: detailStats } = useOutsourceOrderDetailStats(expandedOrderId || 0);
+  // const { data: detailStats } = useOutsourceOrderDetailStats(expandedOrderId || 0);
   
   const deleteDetailMutation = useDeleteOutsourceOrderDetail();
   const { exportData: exportDetails, isExporting: isExportingDetails } = useOutsourceOrderDetailExport();
@@ -359,70 +359,6 @@ export function OutsourceOrderIntegratedList() {
                 {/* Expanded Details Section */}
                 {expandedOrderId === order.id && (
                   <div className="border-t bg-amber-25 p-6" style={{ backgroundColor: '#fffbeb' }}>
-                    {/* Order Summary */}
-                    <div className="mb-6">
-                      <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3 lg:grid-cols-5">
-                        <div>
-                          <span className="text-amber-700 font-medium">Order Date</span>
-                          <div className="font-medium">
-                            {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-amber-700 font-medium">Expected Date</span>
-                          <div className="font-medium">
-                            {order.expectedCompletionDate ? new Date(order.expectedCompletionDate).toLocaleDateString() : '-'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-amber-700 font-medium">Status</span>
-                          <div>
-                            <span className="rounded-full bg-amber-200 px-2 py-1 text-xs text-amber-800 font-medium">
-                              {order.status}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-amber-700 font-medium">Priority</span>
-                          <div className="font-medium">
-                            {order.priority ? `Priority ${order.priority}` : '-'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-amber-700 font-medium">Total Amount</span>
-                          <div className="font-medium text-green-600">
-                            {(() => {
-                              const amount = Number(order.totalAmount);
-                              return !isNaN(amount) && isFinite(amount) ? `₫ ${amount.toLocaleString()}` : '-';
-                            })()}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Detail Stats */}
-                    {detailStats && (
-                      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-                        <div className="rounded-lg border-2 border-indigo-200 bg-indigo-50 p-3 shadow-sm">
-                          <div className="text-lg font-bold text-indigo-700">{detailStats.total}</div>
-                          <p className="text-xs text-indigo-600 font-medium">Total Items</p>
-                        </div>
-                        <div className="rounded-lg border-2 border-green-200 bg-green-50 p-3 shadow-sm">
-                          <div className="text-lg font-bold text-green-700">{detailStats.totalCompletedQuantity || 0}</div>
-                          <p className="text-xs text-green-600 font-medium">Completed Qty</p>
-                        </div>
-                        <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-3 shadow-sm">
-                          <div className="text-lg font-bold text-orange-700">{detailStats.totalOrderedQuantity || 0}</div>
-                          <p className="text-xs text-orange-600 font-medium">Ordered Qty</p>
-                        </div>
-                        <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-3 shadow-sm">
-                          <div className="text-lg font-bold text-purple-700">
-                            {detailStats.completionRate ? `${(detailStats.completionRate * 100).toFixed(1)}%` : '0%'}
-                          </div>
-                          <p className="text-xs text-purple-600 font-medium">Completion Rate</p>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Detail Controls */}
                     <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
