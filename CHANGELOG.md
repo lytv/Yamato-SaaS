@@ -1,3 +1,10 @@
+## [1.2.22](https://github.com/lytv/Yamato-SaaS/compare/v1.2.21...v1.2.22) (2025-07-23)
+
+
+### Bug Fixes
+
+* product add ([2329552](https://github.com/lytv/Yamato-SaaS/commit/232955266e729b66df784645ae940b9eda946f4d))
+
 ## [1.2.21](https://github.com/lytv/Yamato-SaaS/compare/v1.2.20...v1.2.21) (2025-07-23)
 
 
