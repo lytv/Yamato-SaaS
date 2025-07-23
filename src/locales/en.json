@@ -570,7 +570,15 @@
       "delete_confirm_desc": "This action cannot be undone.",
       "delete_cancel": "Cancel",
       "delete_confirm": "Delete",
-      "delete_deleting": "Deleting..."
+      "delete_deleting": "Deleting...",
+      "product_label": "Product:",
+      "product_aria": "Filter by product",
+      "all_products": "All products",
+      "step_label": "Step:",
+      "step_aria": "Filter by step",
+      "all_steps": "All steps",
+      "search_results_for": "Search results for",
+      "showing": "Showing {count} of {total} production step details"
     },
     "form": {
       "title": "Create Production Step Detail",
