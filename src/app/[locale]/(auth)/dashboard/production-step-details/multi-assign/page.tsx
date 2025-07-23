@@ -10,7 +10,9 @@ import { MultiAssignConfigForm } from '@/features/productionStep/MultiAssignConf
 import { MultiAssignPreview } from '@/features/productionStep/MultiAssignPreview';
 import { MultiAssignProgress } from '@/features/productionStep/MultiAssignProgress';
 import { ProductMultiSelect } from '@/features/productionStep/ProductMultiSelect';
+import { ProductSelectionModal } from '@/features/productionStep/ProductSelectionModal';
 import { StepMultiSelect } from '@/features/productionStep/StepMultiSelect';
+import { StepSelectionModal } from '@/features/productionStep/StepSelectionModal';
 import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types/product';
@@ -41,6 +43,8 @@ export default function MultiAssignPage() {
   const [stepPage, setStepPage] = useState(1);
   const [stepSearch, setStepSearch] = useState('');
   const [stepGroup, setStepGroup] = useState('');
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showStepModal, setShowStepModal] = useState(false);
 
   const { products, pagination: productPagination, isLoading: loadingProducts } = useProducts({
     page: productPage,
@@ -164,7 +168,17 @@ export default function MultiAssignPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Products Selection */}
         <div className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-semibold">{t('productsSelection')}</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">{t('productsSelection')}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowProductModal(true)}
+              className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+            >
+              📋 Chọn từ danh sách đầy đủ
+            </Button>
+          </div>
           <div className="mb-2 flex gap-2">
             <input
               className="w-full rounded border px-2 py-1"
@@ -186,11 +200,16 @@ export default function MultiAssignPage() {
               <option value="">{t('categoryFilter')}</option>
             </select>
           </div>
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllProducts} onChange={handleSelectAllProducts} />
-              {t('selectAllProducts')}
+              {t('selectAllProducts')} (trang hiện tại)
             </label>
+            {selectedProducts.length > 0 && (
+              <span className="text-sm text-blue-600 font-medium">
+                ✅ {selectedProducts.length} sản phẩm đã chọn
+              </span>
+            )}
           </div>
           <div className="mb-2 min-h-[120px]">
             {loadingProducts
@@ -237,7 +256,17 @@ export default function MultiAssignPage() {
         </div>
         {/* Steps Selection */}
         <div className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-semibold">{t('stepsSelection')}</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">{t('stepsSelection')}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowStepModal(true)}
+              className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
+            >
+              🔧 Chọn từ danh sách đầy đủ
+            </Button>
+          </div>
           <div className="mb-2 flex gap-2">
             <input
               className="w-full rounded border px-2 py-1"
@@ -259,11 +288,16 @@ export default function MultiAssignPage() {
               <option value="">{t('groupFilter')}</option>
             </select>
           </div>
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllSteps} onChange={handleSelectAllSteps} />
-              {t('selectAllSteps')}
+              {t('selectAllSteps')} (trang hiện tại)
             </label>
+            {selectedSteps.length > 0 && (
+              <span className="text-sm text-green-600 font-medium">
+                ✅ {selectedSteps.length} công đoạn đã chọn
+              </span>
+            )}
           </div>
           <div className="mb-2 min-h-[120px]">
             {loadingSteps
@@ -355,6 +389,29 @@ export default function MultiAssignPage() {
       <div>
         <MultiAssignProgress {...progress} />
       </div>
+
+      {/* Modals */}
+      <ProductSelectionModal
+        isOpen={showProductModal}
+        onClose={() => setShowProductModal(false)}
+        selectedProducts={selectedProducts}
+        onConfirm={(products) => {
+          setSelectedProducts(products);
+          setSelectAllProducts(false);
+        }}
+        ownerId={ownerId}
+      />
+
+      <StepSelectionModal
+        isOpen={showStepModal}
+        onClose={() => setShowStepModal(false)}
+        selectedSteps={selectedSteps}
+        onConfirm={(steps) => {
+          setSelectedSteps(steps);
+          setSelectAllSteps(false);
+        }}
+        ownerId={ownerId}
+      />
     </div>
   );
 }
