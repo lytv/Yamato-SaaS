@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ProductionStepDetailForm } from '@/features/productionStepDetail/ProductionStepDetailForm';
 import { ProductionStepDetailList } from '@/features/productionStepDetail/ProductionStepDetailList';
+import { PriceImportModal } from '@/features/productionStep/PriceImportModal';
 import { useProductionStepDetailMutations } from '@/hooks/useProductionStepDetailMutations';
 import type { ProductionStepDetail } from '@/types/productionStepDetail';
 
@@ -108,6 +109,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
     isOpen: false,
     mode: 'create',
   });
+  const [showImportModal, setShowImportModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -157,7 +159,7 @@ export default function ProductionStepDetailsPage(): JSX.Element {
             </p>
           </div>
 
-          <div className="mt-3 flex gap-2 sm:ml-4 sm:mt-0">
+          <div className="mt-3 flex flex-wrap gap-2 sm:ml-4 sm:mt-0">
             <Button
               onClick={handleCreateProductionStepDetail}
               disabled={isCreating}
@@ -175,6 +177,14 @@ export default function ProductionStepDetailsPage(): JSX.Element {
                 {isMobile ? t('bulk_add_mobile') : t('bulk_add')}
               </Button>
             </a>
+            <Button
+              onClick={() => setShowImportModal(true)}
+              variant="outline"
+              size={isMobile ? 'sm' : 'default'}
+              className="w-full sm:w-auto bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
+            >
+              📊 {isMobile ? 'Import giá' : 'Import đơn giá'}
+            </Button>
           </div>
         </div>
       </div>
@@ -190,6 +200,13 @@ export default function ProductionStepDetailsPage(): JSX.Element {
       <ProductionStepDetailModal
         modal={modal}
         onClose={handleCloseModal}
+        onSuccess={handleSuccess}
+      />
+
+      {/* Price Import Modal */}
+      <PriceImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
         onSuccess={handleSuccess}
       />
     </div>

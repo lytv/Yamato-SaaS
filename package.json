@@ -117,6 +117,7 @@
     "@types/node-fetch": "^2.6.12",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.23",
+    "@types/xlsx": "^0.0.35",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/coverage-v8": "^2.1.9",
     "@vitest/expect": "^2.1.9",
