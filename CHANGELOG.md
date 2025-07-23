@@ -1,3 +1,10 @@
+## [1.2.19](https://github.com/lytv/Yamato-SaaS/compare/v1.2.18...v1.2.19) (2025-07-23)
+
+
+### Bug Fixes
+
+* gia cong ve tinh ([6706113](https://github.com/lytv/Yamato-SaaS/commit/67061132ef5b7429033e15114d71f5935a4bfe14))
+
 ## [1.2.18](https://github.com/lytv/Yamato-SaaS/compare/v1.2.17...v1.2.18) (2025-07-22)
 
 
