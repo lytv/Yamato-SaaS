@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
       owner_id: userId,
     });
 
+
     // Get total count for pagination (performance optimized)
     const totalCountParams = { ...params, page: 1, limit: 999999 };
     const totalResults = await getEmployeeSalaryEntries({

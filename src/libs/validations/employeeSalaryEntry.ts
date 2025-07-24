@@ -59,6 +59,20 @@ export const employeeSalaryEntryFormSchema = employeeSalaryEntryFormObject.refin
 }, {
   message: 'Total amount must equal actual quantity × unit price',
   path: ['totalAmount'],
+}).refine((data) => {
+  // 🆕 Validate quantity constraint: Thực tế + Trước đó <= Kế hoạch + Giới hạn
+  const actualQuantity = data.actualQuantity || 0;
+  const previousQuantity = data.previousEnteredQuantity || 0;
+  const plannedQuantity = data.plannedQuantity || 0;
+  const limitQuantity = data.limitQuantity || 0;
+
+  const totalUsed = actualQuantity + previousQuantity;
+  const totalAllowed = plannedQuantity + limitQuantity;
+
+  return totalUsed <= totalAllowed;
+}, {
+  message: 'Số lượng vượt quá giới hạn cho phép (Thực tế + Trước đó > Kế hoạch + Giới hạn)',
+  path: ['actualQuantity'],
 });
 
 // Create employeeSalaryEntry schema (same as form + ownerId + required fields validation)

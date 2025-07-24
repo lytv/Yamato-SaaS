@@ -338,6 +338,11 @@ export function EmployeeSalaryEntryForm({
     updatePreviousQuantity();
   }, [planId, productId, productionStepDetailId, fetchPreviousQuantity, form, employeeSalaryEntry?.id]);
 
+  // 🆕 Watch form values for validation display
+  const watchedPlannedQuantity = form.watch('plannedQuantity');
+  const watchedLimitQuantity = form.watch('limitQuantity');
+  const watchedPreviousQuantity = form.watch('previousEnteredQuantity');
+
   // 🆕 V4: Enhanced form submission with validation
   const handleSubmit = useCallback(async (data: EmployeeSalaryEntryFormData) => {
     try {
@@ -356,6 +361,24 @@ export function EmployeeSalaryEntryForm({
       }
       if (!data.productId) {
         setFormError('Please select a Product');
+        return;
+      }
+
+      // 🆕 Validate quantity constraint: Thực tế + Trước đó <= Kế hoạch + Giới hạn
+      const actualQuantity = data.actualQuantity || 0;
+      const previousQuantity = data.previousEnteredQuantity || 0;
+      const plannedQuantity = data.plannedQuantity || 0;
+      const limitQuantity = data.limitQuantity || 0;
+
+      const totalUsed = actualQuantity + previousQuantity;
+      const totalAllowed = plannedQuantity + limitQuantity;
+
+      if (totalUsed > totalAllowed) {
+        setFormError(
+          `Số lượng vượt quá giới hạn cho phép!\n` +
+          `Thực tế (${actualQuantity}) + Trước đó (${previousQuantity}) = ${totalUsed}\n` +
+          `Không được vượt quá: Kế hoạch (${plannedQuantity}) + Giới hạn (${limitQuantity}) = ${totalAllowed}`
+        );
         return;
       }
 
@@ -670,6 +693,31 @@ export function EmployeeSalaryEntryForm({
                     </FormItem>
                   )}
                 />
+                
+                {/* Quantity validation info */}
+                {(actualQuantity || 0) > 0 && (watchedPlannedQuantity || watchedLimitQuantity || watchedPreviousQuantity) && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                    <div className="font-semibold text-blue-800 mb-1">📊 Kiểm tra số lượng:</div>
+                    <div className="text-blue-700">
+                      <div>• Thực tế: {actualQuantity || 0}</div>
+                      <div>• Trước đó: {watchedPreviousQuantity || 0}</div>
+                      <div>• Tổng sử dụng: {(actualQuantity || 0) + (watchedPreviousQuantity || 0)}</div>
+                      <div className="border-t border-blue-300 mt-1 pt-1">
+                        • Kế hoạch: {watchedPlannedQuantity || 0}</div>
+                      <div>• Giới hạn: {watchedLimitQuantity || 0}</div>
+                      <div>• Tổng cho phép: {(watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)}</div>
+                      <div className={`font-semibold mt-1 ${
+                        (actualQuantity || 0) + (watchedPreviousQuantity || 0) <= (watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)
+                          ? 'text-green-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {(actualQuantity || 0) + (watchedPreviousQuantity || 0) <= (watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)
+                          ? '✅ Hợp lệ' 
+                          : '❌ Vượt quá giới hạn'}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-lg bg-white border-2 border-orange-300 p-3">

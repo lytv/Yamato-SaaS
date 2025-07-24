@@ -28,7 +28,7 @@ export type PlanDetailFormData = {
   locationCode: string;
   locationType?: string;
   productCode: string;
-  productSubCode: string;
+  productSubCode?: string;
   plannedQuantity: number;
   actualQuantity?: number;
   plannedStartDate?: Date | string;
@@ -47,7 +47,7 @@ export type CreatePlanDetailInput = {
   locationCode: string;
   locationType?: string;
   productCode: string;
-  productSubCode: string;
+  productSubCode?: string;
   plannedQuantity: number;
   actualQuantity?: number;
   plannedStartDate?: Date | string;

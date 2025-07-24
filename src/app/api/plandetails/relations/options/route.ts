@@ -4,7 +4,7 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { asc } from 'drizzle-orm';
+import { asc, isNotNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/libs/DB';
@@ -36,9 +36,18 @@ export async function GET() {
       locationCode: workTableSchema.locationCode,
       tableName: workTableSchema.tableName,
     }).from(workTableSchema)
+      .where(isNotNull(workTableSchema.locationCode))
       .orderBy(asc(workTableSchema.locationCode));
 
-    const filteredLocationOptions = locationOptions.filter((item: any) => !!item.locationCode);
+    // Remove duplicates manually
+    type LocationItem = { locationCode: string | null; tableName: string | null };
+    const uniqueLocationMap = new Map<string, LocationItem>();
+    (locationOptions as LocationItem[]).forEach(item => {
+      if (item.locationCode && !uniqueLocationMap.has(item.locationCode)) {
+        uniqueLocationMap.set(item.locationCode, item);
+      }
+    });
+    const filteredLocationOptions = Array.from(uniqueLocationMap.values());
 
     // Get product sub codes
     const productSubOptions = await db.select({

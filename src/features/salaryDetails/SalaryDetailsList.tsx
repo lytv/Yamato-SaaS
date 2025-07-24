@@ -18,6 +18,15 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
+// Utility function to safely format numbers
+const formatNumber = (value: number | null | undefined): string => {
+  return (value || 0).toLocaleString('vi-VN');
+};
+
+const formatCurrency = (value: number | null | undefined): string => {
+  return `${formatNumber(value)} ₫`;
+};
+
 export function SalaryDetailsList() {
   const { filters, updateFilter, clearFilters, toggleSort } = useSalaryDetailsFilters();
   const [currentPage, setCurrentPage] = useState(1);
@@ -135,7 +144,7 @@ export function SalaryDetailsList() {
       ),
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {(row.getValue('quantity') as number).toLocaleString('vi-VN')}
+          {formatNumber(row.getValue('quantity') as number)}
         </div>
       ),
     },
@@ -152,7 +161,7 @@ export function SalaryDetailsList() {
       ),
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {(row.getValue('unit_price') as number).toLocaleString('vi-VN')} ₫
+          {formatCurrency(row.getValue('unit_price') as number)}
         </div>
       ),
     },
@@ -169,7 +178,7 @@ export function SalaryDetailsList() {
       ),
       cell: ({ row }) => (
         <div className="text-right font-mono font-semibold">
-          {(row.getValue('line_total') as number).toLocaleString('vi-VN')} ₫
+          {formatCurrency(row.getValue('line_total') as number)}
         </div>
       ),
     },
@@ -249,7 +258,7 @@ export function SalaryDetailsList() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {data.summary.total_records.toLocaleString('vi-VN')}
+                {formatNumber(data.summary.total_records)}
               </div>
             </CardContent>
           </Card>
@@ -262,7 +271,7 @@ export function SalaryDetailsList() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {data.summary.total_amount.toLocaleString('vi-VN')} ₫
+                {formatCurrency(data.summary.total_amount)}
               </div>
             </CardContent>
           </Card>
@@ -328,7 +337,7 @@ export function SalaryDetailsList() {
                       </td>
                       <td className="p-2 text-right">
                         <div className="font-mono font-semibold text-green-600">
-                          {user.total_amount.toLocaleString('vi-VN')} ₫
+                          {formatCurrency(user.total_amount)}
                         </div>
                       </td>
                     </tr>
@@ -338,7 +347,7 @@ export function SalaryDetailsList() {
                   <tr className="border-t-2 font-semibold">
                     <td className="p-2">Tổng cộng</td>
                     <td className="p-2 text-right font-mono text-green-600">
-                      {data.summary.total_amount.toLocaleString('vi-VN')} ₫
+                      {formatCurrency(data.summary.total_amount)}
                     </td>
                   </tr>
                 </tfoot>

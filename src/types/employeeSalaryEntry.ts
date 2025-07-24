@@ -51,7 +51,7 @@ export type EmployeeSalaryEntryWithRelations = {
   };
   productionStepDetail?: {
     id: number;
-    stepName?: string;
+    stepName?: string | null;
   };
   product?: {
     id: number;

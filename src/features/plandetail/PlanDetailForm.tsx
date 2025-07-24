@@ -15,6 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, MapPin, Package, Settings, FileText, AlertCircle } from 'lucide-react';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
 import { plandetailFormSchema } from '@/libs/validations/plandetail';
 import type {
@@ -122,20 +126,49 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     loadRelationOptions();
   }, []);
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <Tabs defaultValue="required" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="required">{t('tabs.required')}</TabsTrigger>
-            <TabsTrigger value="location">{t('tabs.location')}</TabsTrigger>
-            <TabsTrigger value="dates">{t('tabs.dates')}</TabsTrigger>
-            <TabsTrigger value="other">{t('tabs.other')}</TabsTrigger>
-          </TabsList>
+  // Prepare product options for combobox
+  const productOptions: ComboboxOption[] = relationOptions.products?.map(product => ({
+    value: product.productCode,
+    label: `${product.productCode} - ${product.productName}`,
+    searchText: `${product.productCode} ${product.productName}`
+  })) || [];
 
-          {/* Tab 1: Required Fields */}
-          <TabsContent value="required" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {plandetail ? t('form.updatePlanDetail') : t('form.createPlanDetail')}
+        </h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+          {t('form.planDetailDescription')}
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <Tabs defaultValue="required" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 h-12">
+              <TabsTrigger value="required" className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {t('tabs.required')}
+              </TabsTrigger>
+              <TabsTrigger value="location" className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {t('tabs.location')}
+              </TabsTrigger>
+              <TabsTrigger value="dates" className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                {t('tabs.dates')}
+              </TabsTrigger>
+              <TabsTrigger value="other" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                {t('tabs.other')}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Tab 1: Required Fields */}
+            <TabsContent value="required" className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="planId"
@@ -201,84 +234,105 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="productCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('form.productCode')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <Select
-                      onValueChange={value => field.onChange(value)}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('form.selectProduct')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.products?.map(option => (
-                          <SelectItem key={option.id} value={option.productCode}>
-                            {option.productCode}
+                    <FormField
+                      control={form.control}
+                      name="productCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            {t('form.productCode')}
                             {' '}
-                            -
-                            {option.productName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            *
+                          </FormLabel>
+                          <FormControl>
+                            <Combobox
+                              options={productOptions}
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Clear productSubCode when product changes
+                                form.setValue('productSubCode', '');
+                              }}
+                              placeholder={t('form.selectProduct')}
+                              searchPlaceholder="Tìm kiếm sản phẩm..."
+                              emptyMessage="Không tìm thấy sản phẩm nào"
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-              <FormField
-                control={form.control}
-                name="productSubCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('form.productSubCode')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <Select
-                      onValueChange={value => field.onChange(value)}
-                      value={field.value}
-                      disabled={!productCode}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={productCode ? t('form.selectProductSub') : t('form.selectProductFirst')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {filteredProductSubCodes?.length > 0
-                          ? (
-                              filteredProductSubCodes.map(option => (
-                                <SelectItem key={option.productSubCode} value={option.productSubCode}>
-                                  {option.productSubCode}
-                                  {' '}
-                                  -
-                                  {option.productSubDetail}
-                                </SelectItem>
-                              ))
-                            )
-                          : (
-                              <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                {productCode ? t('form.noProductSubAvailable') : t('form.pleaseSelectProductFirst')}
-                              </div>
-                            )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                      control={form.control}
+                      name="productSubCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            {t('form.productSubCode')}
+                            {!productCode ? (
+                              <Badge variant="outline" className="text-xs">
+                                Chọn sản phẩm trước
+                              </Badge>
+                            ) : filteredProductSubCodes?.length === 0 ? (
+                              <Badge variant="secondary" className="text-xs">
+                                Tùy chọn
+                              </Badge>
+                            ) : null}
+                          </FormLabel>
+                          <Select
+                            onValueChange={value => field.onChange(value)}
+                            value={field.value}
+                            disabled={!productCode}
+                          >
+                            <FormControl>
+                              <SelectTrigger className={!productCode ? "bg-muted text-muted-foreground" : ""}>
+                                <SelectValue 
+                                  placeholder={
+                                    !productCode 
+                                      ? "Vui lòng chọn sản phẩm trước" 
+                                      : filteredProductSubCodes?.length > 0
+                                        ? "Chọn phân loại sản phẩm..."
+                                        : "Không có phân loại"
+                                  } 
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredProductSubCodes?.length > 0
+                                ? (
+                                    filteredProductSubCodes.map(option => (
+                                      <SelectItem key={option.productSubCode} value={option.productSubCode}>
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{option.productSubCode}</span>
+                                          <span className="text-xs text-muted-foreground">{option.productSubDetail}</span>
+                                        </div>
+                                      </SelectItem>
+                                    ))
+                                  )
+                                : productCode ? (
+                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                      Không có phân loại sản phẩm
+                                    </div>
+                                  ) : (
+                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                      Vui lòng chọn sản phẩm trước
+                                    </div>
+                                  )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          {productCode && filteredProductSubCodes?.length === 0 && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              💡 Sản phẩm này không có phân loại con
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
 
               <FormField
                 control={form.control}
@@ -292,22 +346,31 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        type="text"
                         placeholder={t('form.enterPlannedQuantity')}
                         {...field}
-                        onChange={e => field.onChange(Number(e.target.value))}
+                        onChange={e => field.onChange(Number(e.target.value) || 0)}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-          </TabsContent>
+              </div>
+            </TabsContent>
 
-          {/* Tab 2: Location Type & Actual Quantity */}
-          <TabsContent value="location" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Tab 2: Location Type & Actual Quantity */}
+            <TabsContent value="location" className="space-y-6">
+              <Card className="border-green-200 dark:border-green-800">
+                <CardHeader className="bg-green-50 dark:bg-green-950/20">
+                  <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                    <MapPin className="h-5 w-5" />
+                    {t('tabs.location')}
+                    <Badge variant="secondary" className="ml-auto">Optional</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="locationType"
@@ -343,12 +406,23 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                   </FormItem>
                 )}
               />
-            </div>
-          </TabsContent>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Tab 3: Date Fields */}
-          <TabsContent value="dates" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Tab 3: Date Fields */}
+            <TabsContent value="dates" className="space-y-6">
+              <Card className="border-blue-200 dark:border-blue-800">
+                <CardHeader className="bg-blue-50 dark:bg-blue-950/20">
+                  <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+                    <CalendarDays className="h-5 w-5" />
+                    {t('tabs.dates')}
+                    <Badge variant="secondary" className="ml-auto">Planning</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="plannedStartDate"
@@ -420,12 +494,23 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                   </FormItem>
                 )}
               />
-            </div>
-          </TabsContent>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Tab 4: Other Fields */}
-          <TabsContent value="other" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Tab 4: Other Fields */}
+            <TabsContent value="other" className="space-y-6">
+              <Card className="border-purple-200 dark:border-purple-800">
+                <CardHeader className="bg-purple-50 dark:bg-purple-950/20">
+                  <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
+                    <Settings className="h-5 w-5" />
+                    {t('tabs.other')}
+                    <Badge variant="secondary" className="ml-auto">Additional</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="status"
@@ -463,37 +548,64 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                   </FormItem>
                 )}
               />
-            </div>
+                  </div>
 
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('form.note')}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t('form.enterNote')}
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </TabsContent>
-        </Tabs>
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t('form.note')}
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder={t('form.enterNote')}
+                            className="min-h-[100px] resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-            {t('form.cancel')}
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? t('form.saving') : plandetail ? t('form.updatePlanDetail') : t('form.createPlanDetail')}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardContent className="pt-6">
+              <div className="flex justify-end gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel} 
+                  disabled={isLoading}
+                  className="min-w-[100px]"
+                >
+                  {t('form.cancel')}
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      {t('form.saving')}
+                    </div>
+                  ) : (
+                    plandetail ? t('form.updatePlanDetail') : t('form.createPlanDetail')
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
+    </div>
   );
 }

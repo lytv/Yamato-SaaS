@@ -4,7 +4,7 @@
  * 🆕 Features: Text FK Support, Complex Relations, Enhanced Error Handling
  */
 
-import { and, asc, between, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
+import { and, asc, between, count, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
 
 import { employeeSalaryEntrySchema, planSchema, productionStepDetailSchema, productionStepSchema, productSchema, userSyncSchema } from '@/models/Schema';
 import type {
@@ -46,7 +46,7 @@ export type EmployeeSalaryEntry = {
 
 export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
   userSync?: { userId: string; fullName: string | null; shortcut: string | null };
-  productionStepDetail?: { id: number };
+  productionStepDetail?: { id: number; stepName: string | null };
   plan?: { id: number; planName: string };
   product?: { id: number; productCode: string; productName: string };
 };
@@ -230,6 +230,7 @@ export async function getEmployeeSalaryEntries(params: {
         ? {
             productionStepDetail: {
               id: productionStepDetailSchema.id,
+              stepName: productionStepSchema.stepName,
             },
           }
         : {}),
@@ -264,6 +265,10 @@ export async function getEmployeeSalaryEntries(params: {
       eq(employeeSalaryEntrySchema.production_step_detail_id, productionStepDetailSchema.id),
     )
     .leftJoin(
+      productionStepSchema,
+      eq(productionStepDetailSchema.productionStepId, productionStepSchema.id),
+    )
+    .leftJoin(
       planSchema,
       eq(employeeSalaryEntrySchema.plan_id, planSchema.id),
     )
@@ -279,20 +284,33 @@ export async function getEmployeeSalaryEntries(params: {
     conditions.push(eq(employeeSalaryEntrySchema.owner_id, owner_id));
   }
   if (typeof search === 'string' && search.trim() !== '') {
-    conditions.push(ilike(employeeSalaryEntrySchema.work_date, `%${search}%`));
-    conditions.push(ilike(employeeSalaryEntrySchema.salary_note, `%${search}%`));
-    conditions.push(ilike(userSyncSchema.fullName, `%${search}%`));
-    conditions.push(ilike(productionStepDetailSchema.id, `%${search}%`));
-    conditions.push(ilike(planSchema.planName, `%${search}%`));
-    // 🆕 Add product search conditions
-    conditions.push(ilike(productSchema.productCode, `%${search}%`));
-    conditions.push(ilike(productSchema.productName, `%${search}%`));
+    // Create search conditions with proper type handling
+    const searchConditions = [
+      // Search in text fields
+      ilike(employeeSalaryEntrySchema.salary_note, `%${search}%`),
+      ilike(userSyncSchema.fullName, `%${search}%`),
+      ilike(userSyncSchema.shortcut, `%${search}%`),
+      ilike(planSchema.planName, `%${search}%`),
+      ilike(productSchema.productCode, `%${search}%`),
+      ilike(productSchema.productName, `%${search}%`),
+      ilike(productionStepSchema.stepName, `%${search}%`),
+      // Search in date field (cast to text)
+      sql`CAST(${employeeSalaryEntrySchema.work_date} AS TEXT) ILIKE ${`%${search}%`}`,
+      // Search in numeric fields (cast to text) - only if search is numeric or contains digits
+      ...(search.match(/\d/) ? [
+        sql`CAST(${employeeSalaryEntrySchema.actual_quantity} AS TEXT) ILIKE ${`%${search}%`}`,
+        sql`CAST(${productionStepDetailSchema.id} AS TEXT) ILIKE ${`%${search}%`}`,
+      ] : [])
+    ];
+    
+    // Use OR condition for search (any field can match)
+    conditions.push(or(...searchConditions));
   }
   if (status) {
     conditions.push(eq(employeeSalaryEntrySchema.status, status));
   }
 
-  let whereConditions = conditions.length > 1 ? and(...conditions) : conditions[0];
+  let whereConditions = conditions.length > 0 ? (conditions.length === 1 ? conditions[0] : and(...conditions)) : undefined;
 
   // Date range filter
   if (dateFrom && dateTo) {
@@ -350,6 +368,7 @@ export async function getEmployeeSalaryEntries(params: {
     .limit(limit)
     .offset(offset);
 
+
   return results.map((r: any) => ({
     id: r.id,
     createdAt: r.created_at,
@@ -389,6 +408,7 @@ export async function getEmployeeSalaryEntries(params: {
     productionStepDetail: r.productionStepDetail
       ? {
           id: r.productionStepDetail.id,
+          stepName: r.productionStepDetail.stepName,
         }
       : undefined,
     product: r.product
@@ -453,6 +473,7 @@ export async function getEmployeeSalaryEntryByIdWithRelations(id: number, owner_
       },
       productionStepDetail: {
         id: productionStepDetailSchema.id,
+        stepName: productionStepSchema.stepName,
       },
       plan: {
         id: planSchema.id,
@@ -472,6 +493,10 @@ export async function getEmployeeSalaryEntryByIdWithRelations(id: number, owner_
     .leftJoin(
       productionStepDetailSchema,
       eq(employeeSalaryEntrySchema.production_step_detail_id, productionStepDetailSchema.id),
+    )
+    .leftJoin(
+      productionStepSchema,
+      eq(productionStepDetailSchema.productionStepId, productionStepSchema.id),
     )
     .leftJoin(
       planSchema,
