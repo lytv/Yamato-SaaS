@@ -61,6 +61,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/employee-summary(.*)', // ✅ Add employee-summary API routes for Clerk protection
   '/api/employeeDeliveryReceiptInventory(.*)', // ✅ Add employeeDeliveryReceiptInventory API routes
   '/api/production-progress-report(.*)', // ✅ Add production-progress-report API routes
+  '/api/production-progress-pivot(.*)', // ✅ Add production-progress-pivot API routes
   '/api/protected(.*)',
   '/api/organization-profile/sync-users', // Bảo vệ API đồng bộ user
   // Add other protected API routes here

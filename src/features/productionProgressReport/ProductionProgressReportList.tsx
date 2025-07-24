@@ -14,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ProductionProgressReportSkeleton } from '@/features/productionProgressReport/ProductionProgressReportSkeleton';
 import { useProductionProgressReport } from '@/hooks/useProductionProgressReport';
 import { useProductionProgressReportExport } from '@/hooks/useProductionProgressReportExport';
@@ -39,7 +38,6 @@ export function ProductionProgressReportList({
   // Fetch data with current filters
   const {
     data,
-    summary,
     isLoading,
     isError,
     refetch,
@@ -213,64 +211,6 @@ export function ProductionProgressReportList({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {t('summary.totalRecords', { defaultValue: 'Total Records' })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : summary.total_records.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {t('summary.totalEntities', { defaultValue: 'Total Entities' })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : summary.total_entities.toLocaleString()}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {summary.employee_count} employees, {summary.outsource_count} outsources
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {t('summary.totalMade', { defaultValue: 'Total Made' })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : summary.total_made.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {t('summary.avgCompletionRate', { defaultValue: 'Avg Completion' })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : `${summary.average_completion_rate.toFixed(1)}%`}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Data Table */}
       <Card>
         <CardHeader>

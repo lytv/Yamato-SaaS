@@ -202,7 +202,11 @@
   "productionProgressReport": {
     "page": {
       "title": "Production Progress Report",
-      "description": "Track production progress with employee and outsource data"
+      "description": "Track production progress with employee and outsource data",
+      "tabs": {
+        "detailed": "Detailed Report",
+        "pivot": "Summary Report"
+      }
     },
     "list": {
       "title": "Production Progress Report",
@@ -278,6 +282,61 @@
       },
       "reset": "Reset",
       "apply": "Apply Filters"
+    }
+  },
+  "productionProgressPivot": {
+    "list": {
+      "title": "Production Progress Report - Pivot",
+      "refresh": "Refresh",
+      "columns": {
+        "productCode": "Product Code",
+        "productName": "Product Name",
+        "planCode": "Plan",
+        "plannedQuantity": "Planned Qty",
+        "totalCompleted": "Total Completed",
+        "completionRate": "Completion %"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Failed to load pivot report",
+      "retry": "Retry"
+    },
+    "filter": {
+      "title": "Filters",
+      "clear": "Clear",
+      "search": {
+        "placeholder": "Search products, plans..."
+      },
+      "product": {
+        "label": "Product",
+        "placeholder": "Select product...",
+        "all": "All Products"
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Select plan...",
+        "all": "All Plans"
+      },
+      "sortBy": {
+        "label": "Sort By",
+        "placeholder": "Select field...",
+        "productCode": "Product Code",
+        "productName": "Product Name",
+        "planCode": "Plan Code",
+        "plannedQuantity": "Planned Quantity",
+        "totalCompleted": "Total Completed",
+        "completionRate": "Completion Rate"
+      },
+      "sortOrder": {
+        "label": "Sort Order",
+        "placeholder": "Select order...",
+        "asc": "Ascending",
+        "desc": "Descending"
+      },
+      "reset": "Reset",
+      "apply": "Apply"
     }
   },
   "Dashboard": {

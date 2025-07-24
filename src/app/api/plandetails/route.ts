@@ -89,6 +89,18 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating plandetail:', error);
+    
+    // Check if it's a unique constraint violation
+    if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      return NextResponse.json(
+        {
+          error: 'Đã tồn tại Plan Detail với cùng Kế hoạch, Vị trí và Phân loại sản phẩm này',
+          code: 'DUPLICATE_ENTRY',
+        },
+        { status: 400 },
+      );
+    }
+    
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to create plandetail',

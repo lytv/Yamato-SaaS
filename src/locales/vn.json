@@ -174,7 +174,11 @@
   "productionProgressReport": {
     "page": {
       "title": "Báo cáo Tiến độ Sản xuất",
-      "description": "Theo dõi tiến độ sản xuất với dữ liệu nhân viên và gia công"
+      "description": "Theo dõi tiến độ sản xuất với dữ liệu nhân viên và gia công",
+      "tabs": {
+        "detailed": "Báo cáo Chi tiết",
+        "pivot": "Báo cáo Tổng hợp"
+      }
     },
     "list": {
       "title": "Báo cáo Tiến độ Sản xuất",
@@ -250,6 +254,115 @@
       },
       "reset": "Đặt lại",
       "apply": "Áp dụng bộ lọc"
+    }
+  },
+  "productionProgressPivot": {
+    "list": {
+      "title": "Báo cáo Tiến độ Sản xuất - Pivot",
+      "columns": {
+        "productCode": "Mã SP",
+        "productName": "Tên SP",
+        "planCode": "Kế hoạch",
+        "plannedQuantity": "SL Kế hoạch",
+        "totalCompleted": "Tổng HT",
+        "completionRate": "Tỷ lệ %"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Không thể tải báo cáo pivot",
+      "retry": "Thử lại"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "clear": "Xóa",
+      "search": {
+        "placeholder": "Tìm kiếm sản phẩm, kế hoạch..."
+      },
+      "product": {
+        "label": "Sản phẩm",
+        "placeholder": "Chọn sản phẩm...",
+        "all": "Tất cả sản phẩm"
+      },
+      "plan": {
+        "label": "Kế hoạch",
+        "placeholder": "Chọn kế hoạch...",
+        "all": "Tất cả kế hoạch"
+      },
+      "sortBy": {
+        "label": "Sắp xếp theo",
+        "placeholder": "Chọn trường...",
+        "productCode": "Mã sản phẩm",
+        "productName": "Tên sản phẩm",
+        "planCode": "Mã kế hoạch",
+        "plannedQuantity": "SL kế hoạch",
+        "totalCompleted": "Tổng hoàn thành",
+        "completionRate": "Tỷ lệ hoàn thành"
+      },
+      "sortOrder": {
+        "label": "Thứ tự",
+        "placeholder": "Chọn thứ tự...",
+        "asc": "Tăng dần",
+        "desc": "Giảm dần"
+      },
+      "reset": "Đặt lại",
+      "apply": "Áp dụng"
+    }
+  },
+  "productionProgressPivot": {
+    "list": {
+      "title": "Báo cáo Tiến độ Sản xuất - Pivot",
+      "refresh": "Làm mới",
+      "columns": {
+        "productCode": "Mã sản phẩm",
+        "productName": "Tên sản phẩm",
+        "planCode": "Kế hoạch",
+        "plannedQuantity": "SL Kế hoạch",
+        "totalCompleted": "Tổng hoàn thành",
+        "completionRate": "Tỷ lệ hoàn thành"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Không thể tải báo cáo pivot",
+      "retry": "Thử lại"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "clear": "Xóa",
+      "search": {
+        "placeholder": "Tìm kiếm sản phẩm, kế hoạch..."
+      },
+      "product": {
+        "label": "Sản phẩm",
+        "placeholder": "Chọn sản phẩm...",
+        "all": "Tất cả sản phẩm"
+      },
+      "plan": {
+        "label": "Kế hoạch",
+        "placeholder": "Chọn kế hoạch...",
+        "all": "Tất cả kế hoạch"
+      },
+      "sortBy": {
+        "label": "Sắp xếp theo",
+        "placeholder": "Chọn trường...",
+        "productCode": "Mã sản phẩm",
+        "productName": "Tên sản phẩm",
+        "planCode": "Mã kế hoạch",
+        "plannedQuantity": "SL kế hoạch",
+        "totalCompleted": "Tổng hoàn thành",
+        "completionRate": "Tỷ lệ hoàn thành"
+      },
+      "sortOrder": {
+        "label": "Thứ tự",
+        "placeholder": "Chọn thứ tự...",
+        "asc": "Tăng dần",
+        "desc": "Giảm dần"
+      },
+      "reset": "Đặt lại",
+      "apply": "Áp dụng"
     }
   },
   "DashboardIndex": {

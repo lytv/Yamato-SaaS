@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, MapPin, Package, Settings, FileText, AlertCircle } from 'lucide-react';
@@ -44,6 +43,7 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     locationCodes: [],
     productSubCodes: [],
   });
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<PlanDetailFormData>({
     resolver: zodResolver(plandetailFormSchema),
@@ -91,6 +91,7 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
   // Handle form submission
   const handleSubmit = async (data: PlanDetailFormData) => {
     try {
+      setSubmitError(null);
       let result;
       if (plandetail) {
         result = await updatePlanDetail(plandetail.id, data);
@@ -105,7 +106,11 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
       onSuccess(result);
     } catch (error) {
       console.error('Form submission error:', error);
-      // Optionally, you can show an error message to the user
+      if (error && typeof error === 'object' && 'message' in error) {
+        setSubmitError(error.message as string);
+      } else {
+        setSubmitError('Có lỗi xảy ra khi lưu dữ liệu');
+      }
     }
   };
 
@@ -126,12 +131,6 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     loadRelationOptions();
   }, []);
 
-  // Prepare product options for combobox
-  const productOptions: ComboboxOption[] = relationOptions.products?.map(product => ({
-    value: product.productCode,
-    label: `${product.productCode} - ${product.productName}`,
-    searchText: `${product.productCode} ${product.productName}`
-  })) || [];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -146,7 +145,16 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <Tabs defaultValue="required" className="w-full">
+          {submitError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <p className="text-sm font-medium text-red-800">Lỗi</p>
+              </div>
+              <p className="mt-1 text-sm text-red-700">{submitError}</p>
+            </div>
+          )}
+          <Tabs defaultValue="required" className="w-full relative">
             <TabsList className="grid w-full grid-cols-4 h-12">
               <TabsTrigger value="required" className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
@@ -169,193 +177,208 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
             {/* Tab 1: Required Fields */}
             <TabsContent value="required" className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="planId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('form.plan')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <Select
-                      onValueChange={value => field.onChange(Number(value))}
-                      value={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('form.selectPlan')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.plans?.map(option => (
-                          <SelectItem key={option.id} value={option.id.toString()}>
-                            {option.planCode}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="planId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t('form.plan')}
+                        {' '}
+                        *
+                      </FormLabel>
+                      <Select
+                        onValueChange={value => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('form.selectPlan')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {relationOptions.plans?.map(option => (
+                            <SelectItem key={option.id} value={option.id.toString()}>
+                              {option.planCode}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="locationCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('form.locationCode')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <Select
-                      onValueChange={value => field.onChange(value)}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('form.selectLocation')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {relationOptions.locationCodes?.map(option => (
-                          <SelectItem key={option.locationCode} value={option.locationCode}>
-                            {option.locationCode}
-                            {option.tableName && ` - ${option.tableName}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="locationCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t('form.locationCode')}
+                        {' '}
+                        *
+                      </FormLabel>
+                      <Select
+                        onValueChange={value => field.onChange(value)}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('form.selectLocation')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {relationOptions.locationCodes?.map(option => (
+                            <SelectItem key={option.locationCode} value={option.locationCode}>
+                              {option.locationCode}
+                              {option.tableName && ` - ${option.tableName}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="productCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            {t('form.productCode')}
-                            {' '}
-                            *
-                          </FormLabel>
-                          <FormControl>
-                            <Combobox
-                              options={productOptions}
-                              value={field.value}
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                // Clear productSubCode when product changes
-                                form.setValue('productSubCode', '');
-                              }}
-                              placeholder={t('form.selectProduct')}
-                              searchPlaceholder="Tìm kiếm sản phẩm..."
-                              emptyMessage="Không tìm thấy sản phẩm nào"
-                              className="w-full"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="productSubCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            {t('form.productSubCode')}
-                            {!productCode ? (
-                              <Badge variant="outline" className="text-xs">
-                                Chọn sản phẩm trước
-                              </Badge>
-                            ) : filteredProductSubCodes?.length === 0 ? (
-                              <Badge variant="secondary" className="text-xs">
-                                Tùy chọn
-                              </Badge>
-                            ) : null}
-                          </FormLabel>
-                          <Select
-                            onValueChange={value => field.onChange(value)}
-                            value={field.value}
-                            disabled={!productCode}
-                          >
-                            <FormControl>
-                              <SelectTrigger className={!productCode ? "bg-muted text-muted-foreground" : ""}>
-                                <SelectValue 
-                                  placeholder={
-                                    !productCode 
-                                      ? "Vui lòng chọn sản phẩm trước" 
-                                      : filteredProductSubCodes?.length > 0
-                                        ? "Chọn phân loại sản phẩm..."
-                                        : "Không có phân loại"
-                                  } 
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {filteredProductSubCodes?.length > 0
-                                ? (
-                                    filteredProductSubCodes.map(option => (
-                                      <SelectItem key={option.productSubCode} value={option.productSubCode}>
-                                        <div className="flex flex-col">
-                                          <span className="font-medium">{option.productSubCode}</span>
-                                          <span className="text-xs text-muted-foreground">{option.productSubDetail}</span>
-                                        </div>
-                                      </SelectItem>
-                                    ))
-                                  )
-                                : productCode ? (
-                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                      Không có phân loại sản phẩm
-                                    </div>
-                                  ) : (
-                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                      Vui lòng chọn sản phẩm trước
-                                    </div>
-                                  )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                          {productCode && filteredProductSubCodes?.length === 0 && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              💡 Sản phẩm này không có phân loại con
-                            </p>
+                <FormField
+                  control={form.control}
+                  name="productCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        {t('form.productCode')}
+                        {' '}
+                        *
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Clear productSubCode when product changes
+                          form.setValue('productSubCode', '');
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('form.selectProduct')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {relationOptions.products?.length > 0 ? (
+                            relationOptions.products.map(option => (
+                              <SelectItem 
+                                key={option.productCode} 
+                                value={option.productCode}
+                              >
+                                {option.productCode} - {option.productName}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-gray-500">
+                              Đang tải sản phẩm...
+                            </div>
                           )}
-                        </FormItem>
-                      )}
-                    />
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="plannedQuantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('form.plannedQuantity')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder={t('form.enterPlannedQuantity')}
-                        {...field}
-                        onChange={e => field.onChange(Number(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="productSubCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        {t('form.productSubCode')}
+                        {!productCode ? (
+                          <Badge variant="outline" className="text-xs">
+                            Chọn sản phẩm trước
+                          </Badge>
+                        ) : filteredProductSubCodes?.length === 0 ? (
+                          <Badge variant="secondary" className="text-xs">
+                            Tùy chọn
+                          </Badge>
+                        ) : null}
+                      </FormLabel>
+                      <Select
+                        onValueChange={value => field.onChange(value)}
+                        value={field.value}
+                        disabled={!productCode}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={!productCode ? "bg-muted text-muted-foreground" : ""}>
+                            <SelectValue 
+                              placeholder={
+                                !productCode 
+                                  ? "Vui lòng chọn sản phẩm trước" 
+                                  : filteredProductSubCodes?.length > 0
+                                    ? "Chọn phân loại sản phẩm..."
+                                    : "Không có phân loại"
+                              } 
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filteredProductSubCodes?.length > 0
+                            ? (
+                                filteredProductSubCodes.map(option => (
+                                  <SelectItem key={option.productSubCode} value={option.productSubCode}>
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{option.productSubCode}</span>
+                                      <span className="text-xs text-muted-foreground">{option.productSubDetail}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              )
+                            : productCode ? (
+                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                  Không có phân loại sản phẩm
+                                </div>
+                              ) : (
+                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                  Vui lòng chọn sản phẩm trước
+                                </div>
+                              )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                      {productCode && filteredProductSubCodes?.length === 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          💡 Sản phẩm này không có phân loại con
+                        </p>
+                      )}
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="plannedQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t('form.plannedQuantity')}
+                        {' '}
+                        *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder={t('form.enterPlannedQuantity')}
+                          {...field}
+                          onChange={e => field.onChange(Number(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </TabsContent>
 

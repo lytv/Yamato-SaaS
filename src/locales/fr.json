@@ -237,7 +237,11 @@
   "productionProgressReport": {
     "page": {
       "title": "Rapport de Progrès de Production",
-      "description": "Suivre le progrès de production avec données employé et sous-traitance"
+      "description": "Suivre le progrès de production avec données employé et sous-traitance",
+      "tabs": {
+        "detailed": "Rapport Détaillé",
+        "pivot": "Rapport de Synthèse"
+      }
     },
     "list": {
       "title": "Rapport de Progrès de Production",
@@ -313,6 +317,61 @@
       },
       "reset": "Réinitialiser",
       "apply": "Appliquer filtres"
+    }
+  },
+  "productionProgressPivot": {
+    "list": {
+      "title": "Rapport de Progrès de Production - Pivot",
+      "refresh": "Actualiser",
+      "columns": {
+        "productCode": "Code Produit",
+        "productName": "Nom Produit",
+        "planCode": "Plan",
+        "plannedQuantity": "Qty Planifiée",
+        "totalCompleted": "Total Complété",
+        "completionRate": "Taux %"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Échec du chargement rapport pivot",
+      "retry": "Réessayer"
+    },
+    "filter": {
+      "title": "Filtres",
+      "clear": "Effacer",
+      "search": {
+        "placeholder": "Rechercher produits, plans..."
+      },
+      "product": {
+        "label": "Produit",
+        "placeholder": "Sélectionner produit...",
+        "all": "Tous Produits"
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Sélectionner plan...",
+        "all": "Tous Plans"
+      },
+      "sortBy": {
+        "label": "Trier Par",
+        "placeholder": "Sélectionner champ...",
+        "productCode": "Code Produit",
+        "productName": "Nom Produit",
+        "planCode": "Code Plan",
+        "plannedQuantity": "Quantité Planifiée",
+        "totalCompleted": "Total Complété",
+        "completionRate": "Taux de Completion"
+      },
+      "sortOrder": {
+        "label": "Ordre de Tri",
+        "placeholder": "Sélectionner ordre...",
+        "asc": "Croissant",
+        "desc": "Décroissant"
+      },
+      "reset": "Réinitialiser",
+      "apply": "Appliquer"
     }
   },
   "DataTable": {
