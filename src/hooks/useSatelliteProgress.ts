@@ -70,9 +70,18 @@ export function useSatelliteProgress(
       };
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 2 * 60 * 1000, // 2 minutes (shorter for main data)
+    retry: (failureCount, error: any) => {
+      // Retry more aggressively for connection pool errors
+      if (error?.message?.includes('too many clients') && failureCount < 5) {
+        return true;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => {
+      // Progressive delay for connection pool errors
+      return Math.min(2000 * (2 ** attemptIndex), 15000);
+    },
   });
 
   return {

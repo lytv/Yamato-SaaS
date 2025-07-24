@@ -6,11 +6,33 @@
 
 import { sql } from 'drizzle-orm';
 
+import { connectionManager } from '@/libs/connectionPool';
 import {
   validateSatelliteProgressItem,
   validateSatelliteProgressSummary,
   validateSatelliteProgressFilterOptions,
 } from '@/libs/validations/satelliteProgress';
+
+/**
+ * Utility function to execute database queries with connection management and retry logic
+ */
+async function executeWithRetry(query: any, maxRetries = 3) {
+  return connectionManager.execute(async () => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await db.execute(query);
+      } catch (error: any) {
+        if (error.code === '53300' && i < maxRetries - 1) {
+          // Too many clients - wait and retry with exponential backoff
+          console.warn(`Database connection pool full, retrying in ${1000 * (2 ** i)}ms... (attempt ${i + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (2 ** i)));
+          continue;
+        }
+        throw error;
+      }
+    }
+  });
+}
 import type {
   SatelliteProgressFilterOptions,
   SatelliteProgressFiltersWithOwner,
@@ -50,12 +72,13 @@ export async function getSatelliteProgress(
 
   try {
     // Call satellite progress stored procedure with parameters
-    const rawResults = await db.execute(sql`
+    const rawResults = await executeWithRetry(sql`
       SELECT * FROM sp_satellite_progress_pivot(
         ${product_code || null},
         ${plan_code || null},
         ${assigned_user_id || null}
       )
+      LIMIT ${Math.min(limit || 20, 100)}
     `);
 
     // Validate and transform raw results
@@ -219,22 +242,6 @@ function calculateSummaryStatistics(
  */
 export async function getSatelliteProgressFilterOptions(ownerId?: string): Promise<SatelliteProgressFilterOptions> {
   try {
-    // Add retry logic and timeout for connection issues
-    const executeWithRetry = async (query: any, maxRetries = 2) => {
-      for (let i = 0; i < maxRetries; i++) {
-        try {
-          return await db.execute(query);
-        } catch (error: any) {
-          if (error.code === '53300' && i < maxRetries - 1) {
-            // Too many clients - wait and retry
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-            continue;
-          }
-          throw error;
-        }
-      }
-    };
-
     // Use basic queries instead of complex stored procedure calls to reduce connection time
     const [rawResults, usersResults] = await Promise.all([
       executeWithRetry(sql`
