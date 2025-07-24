@@ -19,7 +19,7 @@ import { ProductionProgressPivotSkeleton } from '@/features/productionProgressPi
 
 export default function ProductionProgressReportPage(): JSX.Element {
   const t = useTranslations('productionProgressReport.page');
-  const [activeTab, setActiveTab] = useState('detailed');
+  const [activeTab, setActiveTab] = useState('pivot');
 
   return (
     <div className="space-y-6">
@@ -36,23 +36,13 @@ export default function ProductionProgressReportPage(): JSX.Element {
       {/* Tabs Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="detailed">
-            {t('tabs.detailed', { defaultValue: 'Báo cáo Chi tiết' })}
-          </TabsTrigger>
           <TabsTrigger value="pivot">
             {t('tabs.pivot', { defaultValue: 'Báo cáo Tổng hợp' })}
           </TabsTrigger>
+          <TabsTrigger value="detailed">
+            {t('tabs.detailed', { defaultValue: 'Báo cáo Chi tiết' })}
+          </TabsTrigger>
         </TabsList>
-
-        {/* Detailed Report Tab */}
-        <TabsContent value="detailed" className="space-y-6">
-          <Suspense fallback={<ProductionProgressReportSkeleton />}>
-            <div className="space-y-6">
-              <ProductionProgressReportFilter />
-              <ProductionProgressReportList />
-            </div>
-          </Suspense>
-        </TabsContent>
 
         {/* Pivot Report Tab */}
         <TabsContent value="pivot" className="space-y-6">
@@ -64,6 +54,16 @@ export default function ProductionProgressReportPage(): JSX.Element {
               </div>
             </Suspense>
           </ProductionProgressPivotProvider>
+        </TabsContent>
+
+        {/* Detailed Report Tab */}
+        <TabsContent value="detailed" className="space-y-6">
+          <Suspense fallback={<ProductionProgressReportSkeleton />}>
+            <div className="space-y-6">
+              <ProductionProgressReportFilter />
+              <ProductionProgressReportList />
+            </div>
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
