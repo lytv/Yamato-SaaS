@@ -110,7 +110,8 @@
     "outsource_order_detail": "Chi tiết đơn hàng",
     "reports": "Báo cáo",
     "employee_delivery_receipt_inventory": "Báo cáo Giao/Nhận/Tồn Nhân viên",
-    "production_progress_report": "Báo cáo Tiến độ Sản xuất"
+    "production_progress_report": "Báo cáo Tiến độ Sản xuất",
+    "satellite_progress": "Báo cáo Tiến độ Vệ tinh"
   },
   "employeeDeliveryReceiptInventory": {
     "page": {
@@ -1718,6 +1719,54 @@
       "create_first_user_sync": "Tạo đồng bộ người dùng đầu tiên để bắt đầu",
       "error": "Lỗi tải đồng bộ người dùng",
       "showing": "Hiển thị {from} đến {to} trong tổng số {total} đồng bộ người dùng"
+    }
+  },
+  "satelliteProgress": {
+    "list": {
+      "title": "Báo cáo Tiến độ Vệ tinh",
+      "refresh": "Làm mới",
+      "columns": {
+        "productCode": "Mã sản phẩm",
+        "productName": "Tên sản phẩm",
+        "planCode": "Kế hoạch",
+        "assignedUser": "Nhân viên vệ tinh",
+        "plannedQuantity": "SL Kế hoạch",
+        "totalCompleted": "Tổng hoàn thành",
+        "completionRate": "Tỷ lệ hoàn thành"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Không thể tải dữ liệu tiến độ vệ tinh",
+      "retry": "Thử lại"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "description": "Lọc dữ liệu tiến độ vệ tinh",
+      "search": {
+        "label": "Tìm kiếm",
+        "placeholder": "Tìm kiếm sản phẩm, kế hoạch, nhân viên..."
+      },
+      "product": {
+        "label": "Sản phẩm",
+        "placeholder": "Chọn sản phẩm...",
+        "all": "Tất cả sản phẩm"
+      },
+      "plan": {
+        "label": "Kế hoạch",
+        "placeholder": "Chọn kế hoạch...",
+        "all": "Tất cả kế hoạch"
+      },
+      "user": {
+        "label": "Nhân viên vệ tinh",
+        "placeholder": "Chọn nhân viên...",
+        "all": "Tất cả nhân viên"
+      },
+      "sort": {
+        "label": "Sắp xếp"
+      },
+      "reset": "Xóa bộ lọc"
     }
   }
 }

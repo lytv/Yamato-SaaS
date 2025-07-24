@@ -141,6 +141,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/production-progress-report',
                     label: t('production_progress_report'),
                   },
+                  {
+                    href: '/dashboard/satellite-progress',
+                    label: t('satellite_progress'),
+                  },
                 ],
               },
 

@@ -136,7 +136,8 @@
     "outsource_order_detail": "Détail de la commande",
     "reports": "Rapports",
     "employee_delivery_receipt_inventory": "Inventaire Livraison/Réception Employé",
-    "production_progress_report": "Rapport de Progrès de Production"
+    "production_progress_report": "Rapport de Progrès de Production",
+    "satellite_progress": "Rapport de Progression Satellite"
   },
   "Dashboard": {
     "meta_title": "Tableau de bord Yamato ERP",
@@ -1335,6 +1336,54 @@
       "create_first_user_sync": "Créez votre première synchronisation utilisateur pour commencer",
       "error": "Erreur de chargement des synchronisations utilisateur",
       "showing": "Affichage de {from} à {to} sur {total} synchronisations utilisateur"
+    }
+  },
+  "satelliteProgress": {
+    "list": {
+      "title": "Rapport de Progression Satellite",
+      "refresh": "Actualiser",
+      "columns": {
+        "productCode": "Code Produit",
+        "productName": "Nom du Produit",
+        "planCode": "Plan",
+        "assignedUser": "Personnel Satellite",
+        "plannedQuantity": "Qté Prévue",
+        "totalCompleted": "Total Terminé",
+        "completionRate": "% Terminé"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Échec du chargement des données de progression satellite",
+      "retry": "Réessayer"
+    },
+    "filter": {
+      "title": "Filtres",
+      "description": "Filtrer les données de progression satellite",
+      "search": {
+        "label": "Rechercher",
+        "placeholder": "Rechercher produits, plans, personnel..."
+      },
+      "product": {
+        "label": "Produit",
+        "placeholder": "Sélectionner un produit...",
+        "all": "Tous les Produits"
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Sélectionner un plan...",
+        "all": "Tous les Plans"
+      },
+      "user": {
+        "label": "Personnel Satellite",
+        "placeholder": "Sélectionner un personnel...",
+        "all": "Tout le Personnel"
+      },
+      "sort": {
+        "label": "Trier"
+      },
+      "reset": "Effacer les Filtres"
     }
   }
 }

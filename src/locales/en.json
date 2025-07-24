@@ -138,7 +138,8 @@
     "outsource_order_detail": "Order Detail",
     "reports": "Reports",
     "employee_delivery_receipt_inventory": "Employee Delivery Receipt Inventory",
-    "production_progress_report": "Production Progress Report"
+    "production_progress_report": "Production Progress Report",
+    "satellite_progress": "Satellite Progress Report"
   },
   "employeeDeliveryReceiptInventory": {
     "page": {
@@ -1663,6 +1664,54 @@
       "title": "Work Tables",
       "description": "Manage your production work tables and equipment",
       "add_new": "Add Work Table"
+    }
+  },
+  "satelliteProgress": {
+    "list": {
+      "title": "Satellite Progress Report",
+      "refresh": "Refresh",
+      "columns": {
+        "productCode": "Product Code",
+        "productName": "Product Name",
+        "planCode": "Plan",
+        "assignedUser": "Satellite Staff",
+        "plannedQuantity": "Planned Qty",
+        "totalCompleted": "Total Completed",
+        "completionRate": "Completion %"
+      },
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "error": "Failed to load satellite progress data",
+      "retry": "Retry"
+    },
+    "filter": {
+      "title": "Filters",
+      "description": "Filter satellite progress data",
+      "search": {
+        "label": "Search",
+        "placeholder": "Search products, plans, staff..."
+      },
+      "product": {
+        "label": "Product",
+        "placeholder": "Select product...",
+        "all": "All Products"
+      },
+      "plan": {
+        "label": "Plan",
+        "placeholder": "Select plan...",
+        "all": "All Plans"
+      },
+      "user": {
+        "label": "Satellite Staff",
+        "placeholder": "Select staff...",
+        "all": "All Staff"
+      },
+      "sort": {
+        "label": "Sort"
+      },
+      "reset": "Clear Filters"
     }
   }
 }
