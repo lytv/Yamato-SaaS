@@ -44,7 +44,18 @@ export function useSatelliteProgressFilterOptions() {
     },
     enabled: !!userId,
     staleTime: 10 * 60 * 1000, // 10 minutes (filter options don't change often)
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: (failureCount, error: any) => {
+      // Retry up to 5 times for connection pool errors
+      if (error?.message?.includes('too many clients') && failureCount < 5) {
+        return true;
+      }
+      // Regular retry for other errors (max 3 times)
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => {
+      // Longer delay for connection pool errors
+      const baseDelay = 1000 * (2 ** attemptIndex);
+      return Math.min(baseDelay, 10000);
+    },
   });
 }

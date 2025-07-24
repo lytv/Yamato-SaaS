@@ -30,7 +30,7 @@ export async function GET() {
     }
 
     // Fetch filter options
-    const filterOptions = await getSatelliteProgressFilterOptions();
+    const filterOptions = await getSatelliteProgressFilterOptions(userId);
 
     // Return successful response
     const response: SatelliteProgressFilterOptionsResponse = {

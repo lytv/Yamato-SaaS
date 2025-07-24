@@ -217,32 +217,58 @@ function calculateSummaryStatistics(
  * Get filter options for dropdowns
  * @returns Promise resolving to filter options
  */
-export async function getSatelliteProgressFilterOptions(): Promise<SatelliteProgressFilterOptions> {
+export async function getSatelliteProgressFilterOptions(ownerId?: string): Promise<SatelliteProgressFilterOptions> {
   try {
-    // Get all unique values from the satellite progress stored procedure result
-    const rawResults = await db.execute(sql`
-      SELECT DISTINCT
-        product_code,
-        product_name,
-        plan_code,
-        plan_name,
-        assigned_user_name,
-        step_data
-      FROM sp_satellite_progress_pivot(NULL, NULL, NULL)
-      ORDER BY product_code, plan_code
-    `);
+    // Add retry logic and timeout for connection issues
+    const executeWithRetry = async (query: any, maxRetries = 2) => {
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          return await db.execute(query);
+        } catch (error: any) {
+          if (error.code === '53300' && i < maxRetries - 1) {
+            // Too many clients - wait and retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            continue;
+          }
+          throw error;
+        }
+      }
+    };
 
-    // Get users from the helper function
-    const usersResults = await db.execute(sql`
-      SELECT * FROM sp_satellite_progress_filter_users()
-      ORDER BY user_name
-    `);
+    // Use basic queries instead of complex stored procedure calls to reduce connection time
+    const [rawResults, usersResults] = await Promise.all([
+      executeWithRetry(sql`
+        SELECT DISTINCT
+          p.product_code,
+          p.product_name,
+          pl.plan_code,
+          pl.plan_name
+        FROM outsource_order oo
+        JOIN outsource_order_detail ood ON oo.outsource_order_id = ood.outsource_order_id
+        JOIN product p ON ood.product_id = p.product_id
+        JOIN plan pl ON ood.plan_id = pl.plan_id
+        WHERE oo.owner_id = ${ownerId || 'default'}
+        ORDER BY p.product_code, pl.plan_code
+        LIMIT 200
+      `),
+      executeWithRetry(sql`
+        SELECT DISTINCT
+          oo.assigned_to_user_id as user_id,
+          us.user_name
+        FROM outsource_order oo
+        LEFT JOIN user_sync us ON oo.assigned_to_user_id = us.user_id
+        WHERE oo.owner_id = ${ownerId || 'default'}
+          AND oo.assigned_to_user_id IS NOT NULL
+        ORDER BY us.user_name
+        LIMIT 100
+      `)
+    ]);
 
     const plans = new Map<string, string>();
     const products = new Map<string, string>();
-    const steps = new Map<string, string>();
     const users = new Map<string, string>();
 
+    // Process products and plans from simplified query
     if (rawResults.rows) {
       rawResults.rows.forEach((row: any) => {
         if (row.product_code) {
@@ -250,17 +276,6 @@ export async function getSatelliteProgressFilterOptions(): Promise<SatelliteProg
         }
         if (row.plan_code) {
           plans.set(row.plan_code, row.plan_name || row.plan_code);
-        }
-        
-        // Parse JSON step data to collect all step codes and names
-        if (row.step_data) {
-          const stepData = row.step_data || {};
-          Object.keys(stepData).forEach(stepCode => {
-            const stepInfo = stepData[stepCode];
-            if (stepInfo && typeof stepInfo === 'object' && stepInfo.step_name) {
-              steps.set(stepCode, stepInfo.step_name);
-            }
-          });
         }
       });
     }
@@ -278,7 +293,7 @@ export async function getSatelliteProgressFilterOptions(): Promise<SatelliteProg
       plans: Array.from(plans.entries()).map(([code, name]) => ({ code, name })),
       products: Array.from(products.entries()).map(([code, name]) => ({ code, name })),
       users: Array.from(users.entries()).map(([user_id, user_name]) => ({ user_id, user_name })),
-      steps: Array.from(steps.entries()).map(([code, name]) => ({ code, name })),
+      steps: [], // Simplified to reduce connection time
     });
   } catch (error) {
     console.error('Error fetching satellite progress filter options:', error);
