@@ -1,3 +1,10 @@
+## [1.2.24](https://github.com/lytv/Yamato-SaaS/compare/v1.2.23...v1.2.24) (2025-07-24)
+
+
+### Bug Fixes
+
+* cap nhat ([87c9d1d](https://github.com/lytv/Yamato-SaaS/commit/87c9d1d7ca60014d2aa3f0e08ab404f0f9ebf65d))
+
 ## [1.2.23](https://github.com/lytv/Yamato-SaaS/compare/v1.2.22...v1.2.23) (2025-07-23)
 
 
