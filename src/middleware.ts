@@ -63,6 +63,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/production-progress-report(.*)', // ✅ Add production-progress-report API routes
   '/api/production-progress-pivot(.*)', // ✅ Add production-progress-pivot API routes
   '/api/satellite-progress(.*)', // ✅ Add satellite-progress API routes
+  '/api/price-summary(.*)', // ✅ Add price-summary API routes
   '/api/protected(.*)',
   '/api/organization-profile/sync-users', // Bảo vệ API đồng bộ user
   // Add other protected API routes here

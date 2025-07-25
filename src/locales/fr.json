@@ -137,7 +137,57 @@
     "reports": "Rapports",
     "employee_delivery_receipt_inventory": "Inventaire Livraison/Réception Employé",
     "production_progress_report": "Rapport de Progrès de Production",
-    "satellite_progress": "Rapport de Progression Satellite"
+    "satellite_progress": "Rapport de Progression Satellite",
+    "price_summary": "Résumé des Prix"
+  },
+  "priceSummary": {
+    "page": {
+      "title": "Résumé des Prix",
+      "description": "Rapport complet des prix par étapes de production avec pivot dynamique et export de données"
+    },
+    "filter": {
+      "title": "Filtres",
+      "reset": "Réinitialiser",
+      "search": {
+        "label": "Rechercher",
+        "placeholder": "Rechercher par code, nom de produit..."
+      },
+      "product": {
+        "label": "Produit",
+        "placeholder": "Sélectionner un produit",
+        "all": "Tous les produits"
+      },
+      "priceType": {
+        "label": "Type de prix"
+      },
+      "sort": {
+        "label": "Trier",
+        "productCode": "Code produit",
+        "productName": "Nom du produit",
+        "totalSteps": "Total étapes",
+        "totalPrice": "Prix total"
+      },
+      "pricing": {
+        "label": "Affichage",
+        "onlyWithPricing": "Seulement avec prix"
+      },
+      "activeFilters": "Filtres actifs:"
+    },
+    "list": {
+      "title": "Résumé des Prix",
+      "error": "Échec du chargement des données de résumé des prix",
+      "retry": "Réessayer",
+      "refresh": "Actualiser",
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "columns": {
+        "productName": "Produit",
+        "totalSteps": "Total étapes",
+        "totalPrice": "Prix total"
+      }
+    }
   },
   "Dashboard": {
     "meta_title": "Tableau de bord Yamato ERP",

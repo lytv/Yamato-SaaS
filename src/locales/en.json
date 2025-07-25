@@ -139,7 +139,57 @@
     "reports": "Reports",
     "employee_delivery_receipt_inventory": "Employee Delivery Receipt Inventory",
     "production_progress_report": "Production Progress Report",
-    "satellite_progress": "Satellite Progress Report"
+    "satellite_progress": "Satellite Progress Report",
+    "price_summary": "Price Summary"
+  },
+  "priceSummary": {
+    "page": {
+      "title": "Price Summary",
+      "description": "Comprehensive price summary report by production steps with dynamic pivot and data export"
+    },
+    "filter": {
+      "title": "Filters",
+      "reset": "Reset",
+      "search": {
+        "label": "Search",
+        "placeholder": "Search by product code, name..."
+      },
+      "product": {
+        "label": "Product",
+        "placeholder": "Select product",
+        "all": "All products"
+      },
+      "priceType": {
+        "label": "Price type"
+      },
+      "sort": {
+        "label": "Sort",
+        "productCode": "Product code",
+        "productName": "Product name",
+        "totalSteps": "Total steps",
+        "totalPrice": "Total price"
+      },
+      "pricing": {
+        "label": "Display",
+        "onlyWithPricing": "Only with pricing"
+      },
+      "activeFilters": "Active filters:"
+    },
+    "list": {
+      "title": "Price Summary",
+      "error": "Failed to load price summary data",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "columns": {
+        "productName": "Product",
+        "totalSteps": "Total steps",
+        "totalPrice": "Total price"
+      }
+    }
   },
   "employeeDeliveryReceiptInventory": {
     "page": {

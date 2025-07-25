@@ -111,7 +111,57 @@
     "reports": "Báo cáo",
     "employee_delivery_receipt_inventory": "Báo cáo Giao/Nhận/Tồn Nhân viên",
     "production_progress_report": "Báo cáo Tiến độ Sản xuất",
-    "satellite_progress": "Báo cáo Tiến độ Vệ tinh"
+    "satellite_progress": "Báo cáo Tiến độ Vệ tinh",
+    "price_summary": "Tổng Hợp Đơn Giá"
+  },
+  "priceSummary": {
+    "page": {
+      "title": "Tổng Hợp Đơn Giá",
+      "description": "Báo cáo tổng hợp đơn giá theo công đoạn với khả năng pivot động và xuất dữ liệu"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "reset": "Đặt lại",
+      "search": {
+        "label": "Tìm kiếm",
+        "placeholder": "Tìm theo mã, tên sản phẩm..."
+      },
+      "product": {
+        "label": "Sản phẩm",
+        "placeholder": "Chọn sản phẩm",
+        "all": "Tất cả sản phẩm"
+      },
+      "priceType": {
+        "label": "Loại đơn giá"
+      },
+      "sort": {
+        "label": "Sắp xếp",
+        "productCode": "Mã sản phẩm",
+        "productName": "Tên sản phẩm",
+        "totalSteps": "Số công đoạn",
+        "totalPrice": "Tổng giá trị"
+      },
+      "pricing": {
+        "label": "Hiển thị",
+        "onlyWithPricing": "Chỉ có đơn giá"
+      },
+      "activeFilters": "Bộ lọc đang áp dụng:"
+    },
+    "list": {
+      "title": "Tổng Hợp Đơn Giá",
+      "error": "Không thể tải dữ liệu tổng hợp đơn giá",
+      "retry": "Thử lại",
+      "refresh": "Làm mới",
+      "export": {
+        "excel": "Excel",
+        "csv": "CSV"
+      },
+      "columns": {
+        "productName": "Sản phẩm",
+        "totalSteps": "Số công đoạn",
+        "totalPrice": "Tổng giá trị"
+      }
+    }
   },
   "employeeDeliveryReceiptInventory": {
     "page": {
