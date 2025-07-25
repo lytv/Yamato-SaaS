@@ -27,7 +27,7 @@ export type ProductionStepDetailListParams = {
   readonly page?: number;
   readonly limit?: number;
   readonly search?: string;
-  readonly sortBy?: 'createdAt' | 'updatedAt' | 'sequenceNumber' | 'factoryPrice' | 'calculatedPrice';
+  readonly sortBy?: 'createdAt' | 'updatedAt' | 'sequenceNumber' | 'factoryPrice' | 'calculatedPrice' | 'retailPrice';
   readonly sortOrder?: 'asc' | 'desc';
   readonly productId?: number; // Filter by specific product
   readonly productionStepId?: number; // Filter by specific production step
@@ -45,6 +45,7 @@ export type ProductionStepDetailFormData = {
   sequenceNumber: number;
   factoryPrice?: string;
   calculatedPrice?: string;
+  retailPrice?: string;
   quantityLimit1?: number;
   quantityLimit2?: number;
   isFinalStep: boolean;
@@ -60,6 +61,7 @@ export type CreateProductionStepDetailInput = {
   sequenceNumber: number;
   factoryPrice?: string;
   calculatedPrice?: string;
+  retailPrice?: string;
   quantityLimit1?: number;
   quantityLimit2?: number;
   isFinalStep?: boolean;
@@ -71,6 +73,7 @@ export type UpdateProductionStepDetailInput = {
   sequenceNumber?: number;
   factoryPrice?: string;
   calculatedPrice?: string;
+  retailPrice?: string;
   quantityLimit1?: number;
   quantityLimit2?: number;
   isFinalStep?: boolean;
@@ -127,7 +130,7 @@ export type ProductionStepDetailStatsResponse = {
 // ✅ Filter state for productionStepDetail list components
 export type ProductionStepDetailFilters = {
   search: string;
-  sortBy: 'createdAt' | 'updatedAt' | 'sequenceNumber' | 'factoryPrice' | 'calculatedPrice';
+  sortBy: 'createdAt' | 'updatedAt' | 'sequenceNumber' | 'factoryPrice' | 'calculatedPrice' | 'retailPrice';
   sortOrder: 'asc' | 'desc';
   productId?: number;
   productionStepId?: number;
@@ -164,6 +167,7 @@ export type BulkCreateProductionStepDetailInput = {
     readonly sequenceNumber: number;
     readonly factoryPrice?: string;
     readonly calculatedPrice?: string;
+    readonly retailPrice?: string;
     readonly quantityLimit1?: number;
     readonly quantityLimit2?: number;
     readonly isFinalStep?: boolean;

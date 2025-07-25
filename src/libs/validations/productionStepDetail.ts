@@ -38,7 +38,7 @@ export const productionStepDetailListParamsSchema = z.object({
   // ✅ Sort validation with strict types and defaults
   sortBy: z.union([z.string(), z.undefined(), z.null()])
     .transform((val: string | undefined | null) =>
-      val && ['createdAt', 'updatedAt', 'sequenceNumber', 'factoryPrice', 'calculatedPrice'].includes(val) ? val : 'createdAt',
+      val && ['createdAt', 'updatedAt', 'sequenceNumber', 'factoryPrice', 'calculatedPrice', 'retailPrice'].includes(val) ? val : 'createdAt',
     ),
 
   sortOrder: z.union([z.string(), z.undefined(), z.null()])
@@ -93,14 +93,16 @@ export const productionStepDetailFormSchema = z.object({
 
   calculatedPrice: priceSchema,
 
+  retailPrice: priceSchema,
+
   quantityLimit1: z.number()
     .int()
-    .min(0, 'Quantity limit 1 must be non-negative')
+    .positive('Quantity Limit 1 must be a positive integer')
     .optional(),
 
   quantityLimit2: z.number()
     .int()
-    .min(0, 'Quantity limit 2 must be non-negative')
+    .positive('Quantity Limit 2 must be a positive integer')
     .optional(),
 
   isFinalStep: z.boolean(),
@@ -124,14 +126,16 @@ export const updateProductionStepDetailSchema = z.object({
 
   calculatedPrice: priceSchema,
 
+  retailPrice: priceSchema,
+
   quantityLimit1: z.number()
     .int()
-    .min(0, 'Quantity limit 1 must be non-negative')
+    .positive('Quantity Limit 1 must be a positive integer')
     .optional(),
 
   quantityLimit2: z.number()
     .int()
-    .min(0, 'Quantity limit 2 must be non-negative')
+    .positive('Quantity Limit 2 must be a positive integer')
     .optional(),
 
   isFinalStep: z.boolean().optional(),
@@ -143,6 +147,7 @@ export const updateProductionStepDetailSchema = z.object({
   data => data.sequenceNumber !== undefined
     || data.factoryPrice !== undefined
     || data.calculatedPrice !== undefined
+    || data.retailPrice !== undefined
     || data.quantityLimit1 !== undefined
     || data.quantityLimit2 !== undefined
     || data.isFinalStep !== undefined

@@ -1,0 +1,1 @@
+ALTER TABLE "production_step_detail" ADD COLUMN "retail_price" numeric(10, 2);

@@ -8,12 +8,14 @@ import { useAuth } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
+import { ProductionStepDetailForm } from '@/features/productionStepDetail/ProductionStepDetailForm';
 import { ProductionStepDetailSkeleton } from '@/features/productionStepDetail/ProductionStepDetailSkeleton';
 import { useProductionStepDetailFilters } from '@/hooks/useProductionStepDetailFilters';
 import { useProductionStepDetailMutations } from '@/hooks/useProductionStepDetailMutations';
 import { useProductionStepDetails } from '@/hooks/useProductionStepDetails';
 import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { useProducts } from '@/hooks/useProducts';
+import type { ProductionStepDetail } from '@/types/productionStepDetail';
 
 export function ProductionStepDetailList(): JSX.Element {
   const t = useTranslations('productionStepDetail.list');
@@ -22,6 +24,9 @@ export function ProductionStepDetailList(): JSX.Element {
   const [searchInput, setSearchInput] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDetail, setEditingDetail] = useState<ProductionStepDetail | undefined>(undefined);
+  const [deletingDetailId, setDeletingDetailId] = useState<number | null>(null);
 
   const {
     search,
@@ -120,7 +125,12 @@ export function ProductionStepDetailList(): JSX.Element {
 
   // Xử lý chọn từng dòng
   const handleSelectRow = (id: number) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    console.log('☑️ Selecting/deselecting item ID:', id);
+    setSelectedIds(prev => {
+      const newSelection = prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id];
+      console.log('☑️ Updated selectedIds:', newSelection);
+      return newSelection;
+    });
   };
 
   // Xử lý xóa nhiều dòng
@@ -132,10 +142,15 @@ export function ProductionStepDetailList(): JSX.Element {
   };
 
   const confirmDeleteSelected = async () => {
+    console.log('🗑️ Deleting items:', selectedIds);
     for (const id of selectedIds) {
       try {
+        console.log('🗑️ Deleting item ID:', id);
         await deleteProductionStepDetail(id);
-      } catch {}
+        console.log('✅ Successfully deleted item ID:', id);
+      } catch (error) {
+        console.error('❌ Failed to delete item ID:', id, error);
+      }
     }
     setSelectedIds([]);
     refresh();
@@ -144,6 +159,50 @@ export function ProductionStepDetailList(): JSX.Element {
 
   const cancelDeleteSelected = () => {
     setShowDeleteConfirm(false);
+  };
+
+  // Xử lý xóa từng dòng đơn lẻ
+  const handleDeleteSingle = (id: number) => {
+    setDeletingDetailId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSingle = async () => {
+    if (!deletingDetailId) return;
+    
+    console.log('🗑️ Deleting single item:', deletingDetailId);
+    try {
+      await deleteProductionStepDetail(deletingDetailId);
+      console.log('✅ Successfully deleted item ID:', deletingDetailId);
+      refresh();
+    } catch (error) {
+      console.error('❌ Failed to delete item ID:', deletingDetailId, error);
+    } finally {
+      setDeletingDetailId(null);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const cancelDeleteSingle = () => {
+    setDeletingDetailId(null);
+    setShowDeleteConfirm(false);
+  };
+
+  // Edit handlers
+  const handleEdit = (detail: ProductionStepDetail) => {
+    setEditingDetail(detail);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = (_updatedDetail: ProductionStepDetail) => {
+    setShowEditModal(false);
+    setEditingDetail(undefined);
+    refresh(); // Refresh the list to show updated data
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setEditingDetail(undefined);
   };
 
   // Loading state
@@ -290,6 +349,7 @@ export function ProductionStepDetailList(): JSX.Element {
                 <option value="sequenceNumber">{t('sort_sequenceNumber')}</option>
                 <option value="factoryPrice">{t('sort_factoryPrice')}</option>
                 <option value="calculatedPrice">{t('sort_calculatedPrice')}</option>
+                <option value="retailPrice">{t('sort_retailPrice')}</option>
                 <option value="product">{t('sort_product')}</option>
                 <option value="productionStep">{t('sort_productionStep')}</option>
               </select>
@@ -593,41 +653,62 @@ export function ProductionStepDetailList(): JSX.Element {
                       </h4>
                     </div>
 
-                    {/* Factory Price */}
-                    <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-100 p-4 border border-green-200">
-                      <div className="text-center">
-                        <div className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">{t('table.factoryPrice')}</div>
-                        <div className="text-2xl font-bold text-green-900">
-                          {detail.factoryPrice ? (
-                            <span className="flex items-center justify-center">
-                              <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-                              </svg>
-                              {formatPrice(detail.factoryPrice)}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Factory Price */}
+                      <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-100 p-3 border border-green-200">
+                        <div className="text-center">
+                          <div className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">{t('table.factoryPrice')}</div>
+                          <div className="text-lg font-bold text-green-900">
+                            {detail.factoryPrice ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                                </svg>
+                                {formatPrice(detail.factoryPrice)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Calculated Price */}
-                    <div className="rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 p-4 border border-orange-200">
-                      <div className="text-center">
-                        <div className="text-xs font-semibold text-orange-700 uppercase tracking-wide mb-1">{t('table.calculatedPrice')}</div>
-                        <div className="text-2xl font-bold text-orange-900">
-                          {detail.calculatedPrice ? (
-                            <span className="flex items-center justify-center">
-                              <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 1a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm4-4a1 1 0 100 2h.01a1 1 0 100-2H13zM9 9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zM7 8a1 1 0 000 2h.01a1 1 0 000-2H7z" clipRule="evenodd" />
-                              </svg>
-                              {formatPrice(detail.calculatedPrice)}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
+                      {/* Calculated Price */}
+                      <div className="rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 p-3 border border-orange-200">
+                        <div className="text-center">
+                          <div className="text-xs font-semibold text-orange-700 uppercase tracking-wide mb-1">{t('table.calculatedPrice')}</div>
+                          <div className="text-lg font-bold text-orange-900">
+                            {detail.calculatedPrice ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 1a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm4-4a1 1 0 100 2h.01a1 1 0 100-2H13zM9 9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zM7 8a1 1 0 000 2h.01a1 1 0 000-2H7z" clipRule="evenodd" />
+                                </svg>
+                                {formatPrice(detail.calculatedPrice)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Retail Price */}
+                      <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-3 border border-purple-200">
+                        <div className="text-center">
+                          <div className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">{t('table.retailPrice')}</div>
+                          <div className="text-lg font-bold text-purple-900">
+                            {detail.retailPrice ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                {formatPrice(detail.retailPrice)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -737,7 +818,7 @@ export function ProductionStepDetailList(): JSX.Element {
                     <div className="flex flex-col space-y-2 pt-2">
                       <button
                         type="button"
-                        onClick={() => { /* handle edit */ }}
+                        onClick={() => handleEdit(detail)}
                         className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -747,8 +828,9 @@ export function ProductionStepDetailList(): JSX.Element {
                       </button>
                       <button
                         type="button"
-                        onClick={() => { /* handle delete */ }}
+                        onClick={() => handleDeleteSingle(detail.id)}
                         className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-red-500 to-pink-600 px-3 py-2 text-sm font-medium text-white shadow-lg hover:from-red-600 hover:to-pink-700 transition-all duration-200"
+                        disabled={isDeleting}
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -801,11 +883,72 @@ export function ProductionStepDetailList(): JSX.Element {
           <div className="rounded bg-white p-6 shadow-xl">
             <h3 className="mb-2 text-lg font-medium text-gray-900">{t('delete_confirm_title')}</h3>
             <p className="mb-4 text-sm text-gray-600">
-              {t('delete_confirm_desc')}
+              {deletingDetailId 
+                ? `Bạn có chắc chắn muốn xóa mục này? Hành động này không thể hoàn tác.`
+                : t('delete_confirm_desc')
+              }
             </p>
             <div className="flex justify-end space-x-3">
-              <button type="button" onClick={cancelDeleteSelected} className="rounded border px-4 py-2">{t('delete_cancel')}</button>
-              <button type="button" onClick={confirmDeleteSelected} className="rounded bg-red-600 px-4 py-2 text-white">{isDeleting ? t('delete_deleting') : t('delete_confirm')}</button>
+              <button 
+                type="button" 
+                onClick={deletingDetailId ? cancelDeleteSingle : cancelDeleteSelected} 
+                className="rounded border px-4 py-2"
+              >
+                {t('delete_cancel')}
+              </button>
+              <button 
+                type="button" 
+                onClick={deletingDetailId ? confirmDeleteSingle : confirmDeleteSelected} 
+                className="rounded bg-red-600 px-4 py-2 text-white"
+                disabled={isDeleting}
+              >
+                {isDeleting ? t('delete_deleting') : t('delete_confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && editingDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="max-w-4xl w-full mx-4 bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">{t('edit_detail_title')}</h3>
+                    <p className="text-blue-100 text-sm">
+                      ID: {editingDetail.id} | Thứ tự: {editingDetail.sequenceNumber}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleEditCancel}
+                  className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/20 transition-all duration-200"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <ProductionStepDetailForm
+                productionStepDetail={editingDetail}
+                onSuccess={handleEditSuccess}
+                onCancel={handleEditCancel}
+              />
             </div>
           </div>
         </div>

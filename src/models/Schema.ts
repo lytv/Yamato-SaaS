@@ -170,6 +170,7 @@ export const productionStepDetailSchema = pgTable('production_step_detail', {
   // Pricing Information
   factoryPrice: decimal('factory_price', { precision: 10, scale: 2 }), // don_gia_xuong
   calculatedPrice: decimal('calculated_price', { precision: 10, scale: 2 }), // don_gia_ve_tinh
+  retailPrice: decimal('retail_price', { precision: 10, scale: 2 }), // don_gia_ban_le
 
   // Capacity Limits
   quantityLimit1: integer('quantity_limit_1'), // so_luong_gio_han_01

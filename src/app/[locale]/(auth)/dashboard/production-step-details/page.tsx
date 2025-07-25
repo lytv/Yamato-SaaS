@@ -56,7 +56,7 @@ function ProductionStepDetailModal({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
@@ -70,8 +70,8 @@ function ProductionStepDetailModal({
         aria-hidden="true"
       />
 
-      {/* Modal content */}
-      <div className="relative z-10 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+      {/* Modal content - Wider and scrollable */}
+      <div className="relative z-10 w-full max-w-6xl rounded-lg bg-white p-6 shadow-xl my-8 max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-xl font-semibold">
             {modal.mode === 'create' ? t('title') : t('edit_title')}
