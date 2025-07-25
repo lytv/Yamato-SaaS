@@ -1,3 +1,15 @@
+## [1.2.26](https://github.com/lytv/Yamato-SaaS/compare/v1.2.25...v1.2.26) (2025-07-25)
+
+
+### Bug Fixes
+
+* câp nhật đơn giá ([4e50866](https://github.com/lytv/Yamato-SaaS/commit/4e5086661f822ecb6ac102b2a0038b0aff404ce5))
+* câp nhật đơn giá xóa sửa ([7173171](https://github.com/lytv/Yamato-SaaS/commit/71731711e5f4aae1fc5908a797fcc799f5f85e26))
+* Giải quyết lỗi PostgreSQL connection pool 'too many clients' ([9ee95a0](https://github.com/lytv/Yamato-SaaS/commit/9ee95a098faf3676d6e6e5feeab127c58004d144))
+* Sửa lỗi Select empty value trong SatelliteProgressFilter ([92a71e4](https://github.com/lytv/Yamato-SaaS/commit/92a71e48ecfad478d3b53b73ed3846061822c8b1))
+* Thêm Connection Pool Manager và cải thiện retry logic ([7c31afb](https://github.com/lytv/Yamato-SaaS/commit/7c31afb8fe22f8bab67230faf29ccbd5ba219ecf))
+* thêm report chi tiết 1 ([e789ca2](https://github.com/lytv/Yamato-SaaS/commit/e789ca2d049e278cb3047d96f5d4b709a644cc04))
+
 <<<<<<< HEAD
 ## [1.2.24](https://github.com/lytv/Yamato-SaaS/compare/v1.2.23...v1.2.24) (2025-07-24)
 
