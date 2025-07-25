@@ -6,33 +6,11 @@
 
 import { sql } from 'drizzle-orm';
 
-import { connectionManager } from '@/libs/connectionPool';
 import {
   validateSatelliteProgressItem,
   validateSatelliteProgressSummary,
   validateSatelliteProgressFilterOptions,
 } from '@/libs/validations/satelliteProgress';
-
-/**
- * Utility function to execute database queries with connection management and retry logic
- */
-async function executeWithRetry(query: any, maxRetries = 3) {
-  return connectionManager.execute(async () => {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        return await db.execute(query);
-      } catch (error: any) {
-        if (error.code === '53300' && i < maxRetries - 1) {
-          // Too many clients - wait and retry with exponential backoff
-          console.warn(`Database connection pool full, retrying in ${1000 * (2 ** i)}ms... (attempt ${i + 1}/${maxRetries})`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * (2 ** i)));
-          continue;
-        }
-        throw error;
-      }
-    }
-  });
-}
 import type {
   SatelliteProgressFilterOptions,
   SatelliteProgressFiltersWithOwner,
@@ -41,6 +19,7 @@ import type {
 } from '@/types/satelliteProgress';
 
 import { db } from '../DB';
+
 
 /**
  * Get satellite progress pivot data using stored procedure
@@ -72,7 +51,7 @@ export async function getSatelliteProgress(
 
   try {
     // Call satellite progress stored procedure with parameters
-    const rawResults = await executeWithRetry(sql`
+    const rawResults = await db.execute(sql`
       SELECT * FROM sp_satellite_progress_pivot(
         ${product_code || null},
         ${plan_code || null},
@@ -240,71 +219,112 @@ function calculateSummaryStatistics(
  * Get filter options for dropdowns
  * @returns Promise resolving to filter options
  */
-export async function getSatelliteProgressFilterOptions(ownerId?: string): Promise<SatelliteProgressFilterOptions> {
+export async function getSatelliteProgressFilterOptions(_ownerId?: string): Promise<SatelliteProgressFilterOptions> {
   try {
-    // Use basic queries instead of complex stored procedure calls to reduce connection time
-    const [rawResults, usersResults] = await Promise.all([
-      executeWithRetry(sql`
-        SELECT DISTINCT
-          p.product_code,
-          p.product_name,
-          pl.plan_code,
-          pl.plan_name
-        FROM outsource_order oo
-        JOIN outsource_order_detail ood ON oo.outsource_order_id = ood.outsource_order_id
-        JOIN product p ON ood.product_id = p.product_id
-        JOIN plan pl ON ood.plan_id = pl.plan_id
-        WHERE oo.owner_id = ${ownerId || 'default'}
-        ORDER BY p.product_code, pl.plan_code
-        LIMIT 200
-      `),
-      executeWithRetry(sql`
-        SELECT DISTINCT
-          oo.assigned_to_user_id as user_id,
-          us.user_name
-        FROM outsource_order oo
-        LEFT JOIN user_sync us ON oo.assigned_to_user_id = us.user_id
-        WHERE oo.owner_id = ${ownerId || 'default'}
-          AND oo.assigned_to_user_id IS NOT NULL
-        ORDER BY us.user_name
-        LIMIT 100
-      `)
-    ]);
+    // Get data from the same source as the main data - the stored procedure
+    // This ensures consistency between filter options and actual data
+    const rawResults = await db.execute(sql`
+      SELECT * FROM sp_satellite_progress_pivot(
+        ${null}, -- No product filter
+        ${null}, -- No plan filter  
+        ${null}  -- No user filter
+      )
+      LIMIT 500
+    `);
 
     const plans = new Map<string, string>();
     const products = new Map<string, string>();
     const users = new Map<string, string>();
 
-    // Process products and plans from simplified query
-    if (rawResults.rows) {
+    // Extract unique values from stored procedure results
+    if (rawResults.rows && rawResults.rows.length > 0) {
       rawResults.rows.forEach((row: any) => {
-        if (row.product_code) {
-          products.set(row.product_code, row.product_name || row.product_code);
+        // Extract products
+        if (row.product_code && row.product_name) {
+          products.set(row.product_code, row.product_name);
         }
-        if (row.plan_code) {
-          plans.set(row.plan_code, row.plan_name || row.plan_code);
+        
+        // Extract plans
+        if (row.plan_code && row.plan_name) {
+          plans.set(row.plan_code, row.plan_name);
+        }
+        
+        // Extract users - we'll need to get user_id from a lookup
+        if (row.assigned_user_name) {
+          users.set(row.assigned_user_name, row.assigned_user_name);
         }
       });
     }
 
-    // Add users from the helper function
-    if (usersResults.rows) {
-      usersResults.rows.forEach((row: any) => {
-        if (row.user_id) {
-          users.set(row.user_id, row.user_name || row.user_id);
+    // Always get users from user_sync table for proper user_id mapping
+    try {
+      const usersResult = await db.execute(sql`
+        SELECT DISTINCT user_id, user_name 
+        FROM user_sync 
+        WHERE user_name IS NOT NULL 
+        ORDER BY user_name
+        LIMIT 100
+      `);
+      
+      if (usersResult.rows) {
+        users.clear(); // Clear the users from stored procedure
+        usersResult.rows.forEach((row: any) => {
+          if (row.user_id && row.user_name) {
+            users.set(row.user_id, row.user_name);
+          }
+        });
+      }
+    } catch (userError) {
+      console.warn('Failed to fetch users:', userError);
+    }
+
+    // If no data from stored procedure, fallback to direct queries
+    if (products.size === 0 || plans.size === 0) {
+      try {
+        // Simple direct queries as fallback
+        const [productsResult, plansResult] = await Promise.all([
+          db.execute(sql`SELECT DISTINCT product_code, product_name FROM product WHERE product_code IS NOT NULL LIMIT 100`),
+          db.execute(sql`SELECT DISTINCT plan_code, plan_name FROM plan WHERE plan_code IS NOT NULL LIMIT 100`)
+        ]);
+
+        // Process fallback results
+        if (productsResult.rows) {
+          productsResult.rows.forEach((row: any) => {
+            if (row.product_code) {
+              products.set(row.product_code, row.product_name || row.product_code);
+            }
+          });
         }
-      });
+
+        if (plansResult.rows) {
+          plansResult.rows.forEach((row: any) => {
+            if (row.plan_code) {
+              plans.set(row.plan_code, row.plan_name || row.plan_code);
+            }
+          });
+        }
+
+      } catch (fallbackError) {
+        console.warn('Fallback queries also failed:', fallbackError);
+      }
     }
 
     return validateSatelliteProgressFilterOptions({
       plans: Array.from(plans.entries()).map(([code, name]) => ({ code, name })),
       products: Array.from(products.entries()).map(([code, name]) => ({ code, name })),
       users: Array.from(users.entries()).map(([user_id, user_name]) => ({ user_id, user_name })),
-      steps: [], // Simplified to reduce connection time
+      steps: [], // Will be populated from step_data if needed
     });
   } catch (error) {
     console.error('Error fetching satellite progress filter options:', error);
-    throw new Error('Failed to fetch satellite progress filter options');
+    
+    // Last resort: return empty structure to prevent UI crash
+    return validateSatelliteProgressFilterOptions({
+      plans: [],
+      products: [],
+      users: [],
+      steps: [],
+    });
   }
 }
 
