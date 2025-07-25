@@ -1,3 +1,10 @@
+## [1.2.27](https://github.com/lytv/Yamato-SaaS/compare/v1.2.26...v1.2.27) (2025-07-25)
+
+
+### Bug Fixes
+
+* thêm report tổng hợp đơn giá ([cd1abf7](https://github.com/lytv/Yamato-SaaS/commit/cd1abf7db74ad9ca2c787d13464928cb1930b326))
+
 ## [1.2.26](https://github.com/lytv/Yamato-SaaS/compare/v1.2.25...v1.2.26) (2025-07-25)
 
 
