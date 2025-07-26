@@ -1,3 +1,10 @@
+## [1.2.30](https://github.com/lytv/Yamato-SaaS/compare/v1.2.29...v1.2.30) (2025-07-26)
+
+
+### Bug Fixes
+
+* update ui cho user managerment ([fa8d9aa](https://github.com/lytv/Yamato-SaaS/commit/fa8d9aa1064bc25da5b8b9603f8245bec71f9216))
+
 ## [1.2.29](https://github.com/lytv/Yamato-SaaS/compare/v1.2.28...v1.2.29) (2025-07-26)
 
 
