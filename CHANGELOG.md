@@ -1,3 +1,10 @@
+## [1.2.29](https://github.com/lytv/Yamato-SaaS/compare/v1.2.28...v1.2.29) (2025-07-26)
+
+
+### Bug Fixes
+
+* tạo user id tự động ([4b1b4f0](https://github.com/lytv/Yamato-SaaS/commit/4b1b4f0fe01a4b3a461a9050b4722a543ccb3f51))
+
 ## [1.2.28](https://github.com/lytv/Yamato-SaaS/compare/v1.2.27...v1.2.28) (2025-07-26)
 
 
