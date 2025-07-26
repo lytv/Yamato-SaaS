@@ -109,10 +109,10 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
             <User className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {isEditing ? 'Edit User Sync' : 'Create New User Sync'}
+            {isEditing ? t('editTitle') : t('createTitle')}
           </h2>
           <p className="text-gray-600">
-            {isEditing ? 'Update user synchronization details' : 'Add a new user to sync with your system'}
+            {isEditing ? t('editDescription') : t('createDescription')}
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
                   type="button"
                   onClick={toggleUserIdVisibility}
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  title={showUserId ? 'Hide User ID' : 'Show User ID'}
+                  title={showUserId ? t('hideUserId') : t('showUserId')}
                 >
                   {showUserId ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -166,7 +166,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
                     className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-all duration-200 transform hover:scale-105"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    <span>Generate</span>
+                    <span>{t('generateButton')}</span>
                   </button>
                 )}
               </div>
@@ -186,7 +186,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
                 <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center mr-2">
                   <span className="text-blue-600 text-xs">i</span>
                 </span>
-                User ID sẽ được tạo tự động theo format của Clerk (ví dụ: user_2xouUagR4XVgnf578Xo23YAp40r)
+                {t('userIdInfo')}
               </p>
             </div>
           )}
@@ -341,7 +341,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 <span className="ml-3 text-sm text-gray-600">
-                  {watch('isActive') ? 'Active' : 'Inactive'}
+                  {watch('isActive') ? t('active') : t('inactive')}
                 </span>
               </label>
             </div>
@@ -354,7 +354,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
             onClick={onCancel}
             className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             type="button"
@@ -362,7 +362,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
             className="inline-flex justify-center items-center px-6 py-3 border border-orange-300 rounded-lg text-sm font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Reset
+            {t('reset')}
           </button>
           <button
             type="submit"
@@ -380,17 +380,8 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
               </>
             ) : (
               <>
-                {isEditing ? (
-                  <>
-                    <User className="w-4 h-4 mr-2" />
-                    {t('update')}
-                  </>
-                ) : (
-                  <>
-                    <User className="w-4 h-4 mr-2" />
-                    {t('create')}
-                  </>
-                )}
+                <User className="w-4 h-4 mr-2" />
+                {isEditing ? t('update') : t('create')}
               </>
             )}
           </button>

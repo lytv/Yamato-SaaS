@@ -140,8 +140,8 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   if (isLoading) {
     return (
       <div>
-        <div role="status" aria-label="Loading user_syncs" className="sr-only">
-          Loading user_syncs...
+        <div role="status" aria-label={t('loadingUsers')} className="sr-only">
+          {t('loadingUsers')}
         </div>
         <UserSyncSkeleton data-testid="user_sync-list-skeleton" />
       </div>
@@ -158,7 +158,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           onClick={refresh}
           className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          Retry
+          {t('retry')}
         </button>
       </div>
     );
@@ -168,9 +168,9 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   if (user_syncs.length === 0 && !search) {
     return (
       <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No user_syncs found</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noUsersFound')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Create your first user_sync to get started.
+          {t('createFirstUser')}
         </p>
       </div>
     );
@@ -280,7 +280,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
       {exportError && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-800">
-            Export failed:
+            {t('exportFailed')}:
             {' '}
             {exportError}
             <button
@@ -288,7 +288,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               onClick={clearError}
               className="ml-2 underline hover:no-underline"
             >
-              Dismiss
+              {t('dismiss')}
             </button>
           </div>
         </div>
@@ -297,7 +297,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
       {/* Search Results Info */}
       {search && (
         <div className="text-sm text-gray-600">
-          Search results for "
+          {t('searchResultsFor')} "
           {search}
           "
         </div>
@@ -305,19 +305,19 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
 
       {/* UserSync Count */}
       <div className="text-sm text-gray-600">
-        Showing
+        {t('showing')}
         {' '}
         {user_syncs.length}
         {' '}
-        of
+        {t('of')}
         {' '}
         {pagination?.total || 0}
         {' '}
-        user_syncs
+        {t('users')}
         {pagination?.page && (
           <span>
             {' '}
-            • Page
+            • {t('page')}
             {pagination.page}
           </span>
         )}
@@ -348,7 +348,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {user_sync.fullName || 'No Name'}
+                    {user_sync.fullName || t('noName')}
                   </h3>
                   <p className="text-sm text-gray-500 truncate flex items-center">
                     <Mail className="w-3 h-3 mr-1" />
@@ -367,12 +367,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                   {user_sync.isActive ? (
                     <>
                       <UserCheck className="w-3 h-3 mr-1" />
-                      Active
+                      {t('active')}
                     </>
                   ) : (
                     <>
                       <UserX className="w-3 h-3 mr-1" />
-                      Inactive
+                      {t('inactive')}
                     </>
                   )}
                 </div>
@@ -383,7 +383,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             <div className="space-y-3 mb-4">
               {/* User ID */}
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">User ID</span>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('user_id')}</span>
                 <code className="text-xs text-gray-700 bg-white px-2 py-1 rounded border">
                   {user_sync.userId.length > 20 ? `${user_sync.userId.substring(0, 20)}...` : user_sync.userId}
                 </code>
@@ -410,7 +410,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               {/* Shortcut */}
               {user_sync.shortcut && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-medium text-gray-500">Shortcut:</span>
+                  <span className="text-xs font-medium text-gray-500">{t('shortcut')}:</span>
                   <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                     {user_sync.shortcut}
                   </span>
@@ -421,10 +421,10 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               <div className="flex justify-between text-xs text-gray-500">
                 <div className="flex items-center">
                   <Calendar className="w-3 h-3 mr-1" />
-                  Created: {formatDate(user_sync.createdAt)}
+                  {t('created')}: {formatDate(user_sync.createdAt)}
                 </div>
                 <div>
-                  Updated: {formatDate(user_sync.updatedAt)}
+                  {t('updated')}: {formatDate(user_sync.updatedAt)}
                 </div>
               </div>
             </div>
@@ -438,7 +438,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Edit className="w-4 h-4 mr-1" />
-                Edit
+                {t('edit')}
               </button>
               <button
                 type="button"
@@ -447,7 +447,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4 mr-1" />
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>
@@ -461,7 +461,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
             <div>
               <p className="text-sm text-gray-700 flex items-center">
                 <Eye className="w-4 h-4 mr-2 text-gray-400" />
-                Showing <span className="font-semibold mx-1">{user_syncs.length}</span> of <span className="font-semibold mx-1">{pagination.total}</span> user_syncs
+                {t('showing')} <span className="font-semibold mx-1">{user_syncs.length}</span> {t('of')} <span className="font-semibold mx-1">{pagination.total}</span> {t('users')}
               </p>
             </div>
             <div className="flex items-center space-x-3">
@@ -474,7 +474,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                 ← {t('previous')}
               </button>
               <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-blue-50 border border-blue-200 rounded-lg">
-                Page {page}
+                {t('page')} {page}
               </span>
               <button
                 type="button"
@@ -500,12 +500,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               </div>
               
               {/* Title */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Deletion</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('confirmDeletion')}</h3>
               
               {/* Content */}
               <div className="mb-6">
                 <p className="text-sm text-gray-600 mb-4">
-                  Are you sure you want to delete this user sync?
+                  {t('deleteConfirmMessage')}
                 </p>
                 
                 {/* User Info */}
@@ -526,7 +526,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {deleteConfirmUserSync.fullName || 'No Name'}
+                        {deleteConfirmUserSync.fullName || t('noName')}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {deleteConfirmUserSync.email}
@@ -536,7 +536,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                 </div>
                 
                 <p className="text-xs text-red-600 mt-3 font-medium">
-                  This action cannot be undone.
+                  {t('actionCannotBeUndone')}
                 </p>
                 
                 {deleteError && (
@@ -553,7 +553,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                   onClick={handleDeleteCancel}
                   className="flex-1 inline-flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="button"
@@ -564,12 +564,12 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
                   {isDeleting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Deleting...
+                      {t('deleting')}
                     </>
                   ) : (
                     <>
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Confirm Delete
+                      {t('confirmDelete')}
                     </>
                   )}
                 </button>
