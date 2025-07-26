@@ -22,6 +22,7 @@ import { db } from '../DB';
  * Create a new outsourceOrder with proper date and relation handling
  */
 export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Promise<OutsourceOrderDb> {
+  
   // Validate foreign keys exist
 
   if (data.createdByUserId) {
@@ -47,9 +48,7 @@ export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Pro
     }
   }
 
-  const [outsourceOrder] = await db
-    .insert(outsourceOrderSchema)
-    .values({
+  const insertValues = {
       orderCode: data.orderCode,
       orderTitle: data.orderTitle,
       orderDate: data.orderDate ? (typeof data.orderDate === 'string' ? data.orderDate : data.orderDate.toISOString().slice(0, 10)) : null,
@@ -61,15 +60,22 @@ export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Pro
       currency: data.currency,
       notes: data.notes,
       attachment: data.attachment,
+      applyRetailPrice: data.applyRetailPrice !== undefined && data.applyRetailPrice !== null ? Number(data.applyRetailPrice) : 2,
       createdByUserId: data.createdByUserId,
       assignedToUserId: data.assignedToUserId,
       ownerId: data.ownerId,
-    } as typeof outsourceOrderSchema.$inferInsert)
+    } as typeof outsourceOrderSchema.$inferInsert;
+
+
+  const [outsourceOrder] = await db
+    .insert(outsourceOrderSchema)
+    .values(insertValues)
     .returning();
 
   if (!outsourceOrder) {
     throw new Error('Failed to create outsourceOrder');
   }
+
 
   return outsourceOrder;
 }
@@ -171,6 +177,9 @@ export async function updateOutsourceOrder(
   if (data.attachment !== undefined) {
     updateData.attachment = data.attachment;
   }
+  if (data.applyRetailPrice !== undefined) {
+    updateData.applyRetailPrice = data.applyRetailPrice;
+  }
 
   const [updatedOutsourceOrder] = await db
     .update(outsourceOrderSchema)
@@ -262,7 +271,6 @@ export async function getOutsourceOrdersByOwner(
   };
 
   const result = await db.query.outsourceOrderSchema.findMany(queryOptions);
-
   return result as OutsourceOrderWithRelations[];
 }
 

@@ -39,6 +39,7 @@ export type OutsourceOrderFormData = {
   currency?: string;
   notes?: string;
   attachment?: string;
+  applyRetailPrice: number;
 };
 
 // Input types for CRUD operations with proper validation
@@ -57,6 +58,7 @@ export type CreateOutsourceOrderInput = {
   totalAmount?: number;
   currency?: string;
   attachment?: string;
+  applyRetailPrice: number;
 };
 
 export type UpdateOutsourceOrderInput = {
@@ -73,6 +75,7 @@ export type UpdateOutsourceOrderInput = {
   currency?: string;
   notes?: string;
   attachment?: string;
+  applyRetailPrice?: number;
 };
 
 // Relation options for dropdowns and selectors

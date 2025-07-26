@@ -69,6 +69,7 @@ function toOrderFormData(item: OutsourceOrderWithRelations | null): OutsourceOrd
     currency: item.currency ?? undefined,
     notes: item.notes ?? undefined,
     attachment: item.attachment ?? undefined,
+    applyRetailPrice: item.applyRetailPrice ?? 2,
   };
 }
 
@@ -295,6 +296,7 @@ export function OutsourceOrderIntegratedList() {
                         <TableHead>{t('table.created_by')}</TableHead>
                         <TableHead>{t('table.assigned_to')}</TableHead>
                         <TableHead>{t('table.order_date')}</TableHead>
+                        <TableHead>{t('table.apply_retail_price')}</TableHead>
                         <TableHead className="w-32">{t('table.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -321,6 +323,16 @@ export function OutsourceOrderIntegratedList() {
                         <TableCell className="font-medium text-blue-700">{order.assignedToUser?.fullName || order.assignedToUserId}</TableCell>
                         <TableCell className="font-medium text-blue-700">
                           {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            order.applyRetailPrice === 3 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {/* Debug display */}
+                            [{order.applyRetailPrice}] {order.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
+                          </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">

@@ -115,7 +115,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const validation = validateCreateOutsourceOrder({ ...body, ownerId: userId, status: body.status || 'draft' });
+    const validationInput = { ...body, ownerId: userId, status: body.status || 'draft' };
+    const validation = validateCreateOutsourceOrder(validationInput);
+    
     if (!validation.success) {
       return NextResponse.json(
         {

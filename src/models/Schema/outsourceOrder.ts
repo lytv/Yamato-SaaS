@@ -25,6 +25,7 @@ export const outsourceOrderSchema = pgTable('outsource_order', {
   currency: text('currency'),
   notes: text('notes'),
   attachment: text('attachment'),
+  applyRetailPrice: integer('apply_retail_price').notNull().default(2),
 
   // Foreign key fields
   createdByUserId: text('created_by_user_id').notNull().references(() => userSyncSchema.userId, { onDelete: 'restrict' }),

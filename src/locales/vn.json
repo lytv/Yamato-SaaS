@@ -1233,6 +1233,7 @@
         "order_date": "Ngày giao",
         "expected_completion_date": "Ngày dự kiến hoàn thành",
         "actual_completion_date": "Ngày hoàn thành thực tế",
+        "apply_retail_price": "Áp dụng giá",
         "actions": "Thao tác"
       },
       "empty": "Không có đơn gia công nào. Hãy tạo mới!",
@@ -1264,7 +1265,9 @@
       "detail_delete_confirm_title": "Bạn có chắc chắn?",
       "detail_delete_confirm_desc": "Hành động này không thể hoàn tác. Mục chi tiết sẽ bị xóa vĩnh viễn.",
       "add_detail_tooltip": "Thêm Chi tiết",
-      "manage_receipts_tooltip": "Quản lý Phiếu nhập"
+      "manage_receipts_tooltip": "Quản lý Phiếu nhập",
+      "price_type_normal": "Giá thường",
+      "price_type_retail": "Giá lẻ"
     },
     "form": {
       "edit_title": "Chỉnh sửa {title}",
@@ -1288,6 +1291,10 @@
       "attachment_placeholder": "Nhập tệp đính kèm...",
       "created_by": "Người tạo *",
       "created_by_placeholder": "Chọn người tạo...",
+      "apply_retail_price": "Áp dụng giá lẻ",
+      "apply_retail_price_placeholder": "Chọn loại giá...",
+      "normal_price": "Giá thường (2)",
+      "retail_price": "Giá lẻ (3)",
       "cancel": "Hủy",
       "update": "Cập nhật",
       "create": "Tạo mới",

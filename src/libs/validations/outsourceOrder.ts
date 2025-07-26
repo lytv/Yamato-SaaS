@@ -46,6 +46,17 @@ export const outsourceOrderFormSchema = z.object({
   currency: z.string().trim().max(10, 'Currency must be 10 characters or less').optional(),
   notes: z.string().trim().optional(),
   attachment: z.string().trim().optional(),
+  applyRetailPrice: z.preprocess(
+    (val) => {
+      // Convert string to number if needed
+      if (typeof val === 'string') {
+        const num = parseInt(val, 10);
+        return Number.isNaN(num) ? undefined : num;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(3)
+  ),
 });
 
 // Create outsourceOrder schema (same as form + ownerId)
@@ -93,6 +104,17 @@ export const updateOutsourceOrderSchema = z.object({
   currency: z.string().trim().max(10, 'Currency must be 10 characters or less').optional(),
   notes: z.string().trim().optional(),
   attachment: z.string().trim().optional(),
+  applyRetailPrice: z.preprocess(
+    (val) => {
+      // Convert string to number if needed
+      if (typeof val === 'string') {
+        const num = parseInt(val, 10);
+        return Number.isNaN(num) ? undefined : num;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(3)
+  ).optional(),
 });
 
 // List parameters validation

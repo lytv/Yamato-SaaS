@@ -1,17 +1,10 @@
--- =============================================
--- Store Procedure: Product Price Pivot Report (Bảng giá theo công đoạn)
--- Description: Dynamic pivot table showing product prices by production steps
--- Input: Product Code Filter, Price Type (factory_price/calculated_price/retail_price)
--- Output: Product | All Dynamic Step Prices | Total Steps | Total Price
--- File: sp_product_price_pivot.sql
--- =============================================
-
--- Drop existing function first
 DROP FUNCTION IF EXISTS sp_product_price_pivot(TEXT, TEXT);
+DROP FUNCTION IF EXISTS sp_product_price_pivot_price_types();
+DROP FUNCTION IF EXISTS sp_product_price_pivot_filter_products();
 
 CREATE OR REPLACE FUNCTION sp_product_price_pivot(
     filter_product_code TEXT DEFAULT NULL,
-    price_type TEXT DEFAULT 'factory_price' -- factory_price, calculated_price, retail_price
+    price_type TEXT DEFAULT 'factory_price'
 )
 RETURNS TABLE (
     product_code TEXT,
@@ -22,15 +15,12 @@ RETURNS TABLE (
     has_pricing BOOLEAN
 ) AS $$
 BEGIN
-    -- Validate price_type parameter
     IF price_type NOT IN ('factory_price', 'calculated_price', 'retail_price') THEN
         RAISE EXCEPTION 'Invalid price_type. Must be one of: factory_price, calculated_price, retail_price';
     END IF;
 
-    -- Product Price Pivot Report using JSON for flexibility
     RETURN QUERY
     WITH base_data AS (
-        -- Get all products with their basic info
         SELECT DISTINCT
             prod.product_code AS base_product_code,
             prod.product_name AS base_product_name,
@@ -42,7 +32,6 @@ BEGIN
             AND prod.product_name IS NOT NULL
     ),
     step_prices AS (
-        -- Get step prices based on selected price type
         SELECT 
             prod.product_code AS step_product_code,
             prod.id AS step_product_id,
@@ -66,7 +55,6 @@ BEGIN
             )
     ),
     final_aggregation AS (
-        -- Create JSON object for each product with all step prices
         SELECT 
             bd.base_product_code,
             bd.base_product_name,
@@ -105,12 +93,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- =============================================
--- Helper Function: Get Available Price Types
--- =============================================
-
-DROP FUNCTION IF EXISTS sp_product_price_pivot_price_types();
-
+-- Function lấy danh sách loại giá
 CREATE OR REPLACE FUNCTION sp_product_price_pivot_price_types()
 RETURNS TABLE (
     price_type TEXT,
@@ -136,12 +119,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- =============================================
--- Helper Function: Get Products Filter Options
--- =============================================
-
-DROP FUNCTION IF EXISTS sp_product_price_pivot_filter_products();
-
+-- Function lấy danh sách sản phẩm để filter
 CREATE OR REPLACE FUNCTION sp_product_price_pivot_filter_products()
 RETURNS TABLE (
     product_code TEXT,
@@ -164,58 +142,3 @@ BEGIN
     ORDER BY prod.product_code;
 END;
 $$ LANGUAGE plpgsql;
-
--- =============================================
--- Test SQL Commands
--- =============================================
-
--- Test 1: Get all products with factory prices
--- SELECT * FROM sp_product_price_pivot(NULL, 'factory_price') LIMIT 5;
-
--- Test 2: Get specific product with calculated prices
--- SELECT * FROM sp_product_price_pivot('NHA01', 'calculated_price') LIMIT 5;
-
--- Test 3: Get all products with retail prices
--- SELECT * FROM sp_product_price_pivot(NULL, 'retail_price') LIMIT 5;
-
--- Test 4: Get available price types
--- SELECT * FROM sp_product_price_pivot_price_types();
-
--- Test 5: Get products for filter dropdown
--- SELECT * FROM sp_product_price_pivot_filter_products() LIMIT 10;
-
--- Test 6: Check JSON structure for a specific product
--- SELECT 
---     product_code, 
---     product_name,
---     total_steps,
---     has_pricing,
---     jsonb_pretty(step_data) as formatted_step_data
--- FROM sp_product_price_pivot('NHA01', 'factory_price')
--- WHERE step_data != '{}'::jsonb;
-
--- =============================================
--- Usage Examples:
--- =============================================
--- 1. Get all products with factory prices:
--- SELECT * FROM sp_product_price_pivot(NULL, 'factory_price');
--- 
--- 2. Get specific product with calculated prices:
--- SELECT * FROM sp_product_price_pivot('ABC123', 'calculated_price');
---
--- 3. Get all products with retail prices:
--- SELECT * FROM sp_product_price_pivot(NULL, 'retail_price');
---
--- 4. Get price type options for dropdown:
--- SELECT * FROM sp_product_price_pivot_price_types();
---
--- 5. Get product options for dropdown:
--- SELECT * FROM sp_product_price_pivot_filter_products();
---
--- =============================================
--- Migration Notes:
--- This procedure focuses on production_step_detail table
--- Uses JSONB for dynamic step columns supporting unlimited production steps
--- Includes price_type parameter validation
--- Returns structured data for frontend pivot table display
--- =============================================

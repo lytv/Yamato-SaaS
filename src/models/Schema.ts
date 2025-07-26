@@ -477,6 +477,9 @@ export const outsourceOrderSchema = pgTable('outsource_order', {
   // Documentation
   notes: text('notes'), // Ghi chú
   attachment: text('attachment'), // Link file đính kèm
+  
+  // Pricing Configuration
+  applyRetailPrice: integer('apply_retail_price').notNull().default(2), // 2=normal price, 3=retail price
 
   updatedAt: timestamp('updated_at', { mode: 'date' })
     .defaultNow()

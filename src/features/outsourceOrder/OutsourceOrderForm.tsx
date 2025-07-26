@@ -69,6 +69,7 @@ export function OutsourceOrderForm({
       attachment: '',
       createdByUserId: outsourceOrder?.createdByUserId || userId || '',
       assignedToUserId: '',
+      applyRetailPrice: 2,
     },
     mode: 'onChange',
   });
@@ -92,6 +93,7 @@ export function OutsourceOrderForm({
         actualCompletionDate: formatDate(outsourceOrder.actualCompletionDate),
         totalAmount: outsourceOrder.totalAmount !== undefined && outsourceOrder.totalAmount !== null ? Number(outsourceOrder.totalAmount) : undefined,
         priority: typeof outsourceOrder.priority === 'number' ? outsourceOrder.priority : 0,
+        applyRetailPrice: outsourceOrder.applyRetailPrice !== undefined && outsourceOrder.applyRetailPrice !== null ? outsourceOrder.applyRetailPrice : 2,
       });
     }
   }, [outsourceOrder, isEditing, reset]);
@@ -107,6 +109,8 @@ export function OutsourceOrderForm({
       expectedCompletionDate: toDate(data.expectedCompletionDate),
       actualCompletionDate: toDate(data.actualCompletionDate),
     };
+
+
 
     try {
       if (isEditing && outsourceOrder && 'id' in outsourceOrder) {
@@ -232,6 +236,29 @@ export function OutsourceOrderForm({
           />
           {errors.orderDate && (
             <p className="text-sm text-destructive">{errors.orderDate?.message}</p>
+          )}
+        </div>
+
+        {/* Apply Retail Price */}
+        <div className="space-y-2">
+          <Label htmlFor="applyRetailPrice">{t('apply_retail_price')}</Label>
+          <Select
+            value={watch('applyRetailPrice')?.toString() || '2'}
+            onValueChange={value => {
+              const numericValue = parseInt(value, 10);
+              setValue('applyRetailPrice', numericValue, { shouldValidate: true });
+            }}
+          >
+            <SelectTrigger className={errors.applyRetailPrice ? 'border-destructive' : ''}>
+              <SelectValue placeholder={t('apply_retail_price_placeholder')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">{t('normal_price')}</SelectItem>
+              <SelectItem value="3">{t('retail_price')}</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.applyRetailPrice && (
+            <p className="text-sm text-destructive">{errors.applyRetailPrice?.message}</p>
           )}
         </div>
 
