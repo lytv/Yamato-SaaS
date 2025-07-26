@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 
 import { useUserSyncMutations } from '@/hooks/useUserSyncMutations';
 import { userSyncFormSchema } from '@/libs/validations/user_sync';
+import { generateUserId } from '@/libs/utils/generateUserId';
 import type { UserSync, UserSyncFormData } from '@/types/user_sync';
 
 type UserSyncFormProps = {
@@ -30,6 +31,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
     formState: { errors, isValid },
     reset,
     watch,
+    setValue,
   } = useForm<UserSyncFormData>({
     resolver: zodResolver(userSyncFormSchema),
     defaultValues: user_sync
@@ -44,7 +46,7 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
           isActive: typeof user_sync.isActive === 'boolean' ? user_sync.isActive : false,
         }
       : {
-          userId: '',
+          userId: generateUserId(), // Auto-generate User ID for new users
           email: '',
           fullName: '',
           avatarUrl: '',
@@ -85,6 +87,11 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
     clearError();
   };
 
+  const handleGenerateUserId = (): void => {
+    const newUserId = generateUserId();
+    setValue('userId', newUserId, { shouldValidate: true });
+  };
+
   const isSubmitting = isCreating || isUpdating;
 
   return (
@@ -98,17 +105,34 @@ export function UserSyncForm({ user_sync, onSuccess, onCancel }: UserSyncFormPro
       {/* User ID Field */}
       <div>
         <label htmlFor="userId" className="block text-sm font-medium text-gray-700">{t('user_id_label')}</label>
-        <input
-          id="userId"
-          type="text"
-          {...register('userId')}
-          aria-required="true"
-          aria-describedby={errors.userId ? 'userId-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.userId ? 'border-red-300' : ''}`}
-          placeholder={t('user_id_placeholder')}
-        />
+        <div className="mt-1 flex rounded-md shadow-sm">
+          <input
+            id="userId"
+            type="text"
+            {...register('userId')}
+            aria-required="true"
+            aria-describedby={errors.userId ? 'userId-error' : undefined}
+            className={`flex-1 block w-full rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.userId ? 'border-red-300' : ''}`}
+            placeholder={t('user_id_placeholder')}
+            readOnly={isEditing} // Không cho phép edit User ID khi đang sửa
+          />
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={handleGenerateUserId}
+              className="relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              🔄 Generate
+            </button>
+          )}
+        </div>
         {errors.userId && (
           <p id="userId-error" className="mt-2 text-sm text-red-600">{errors.userId.message}</p>
+        )}
+        {!isEditing && (
+          <p className="mt-1 text-xs text-gray-500">
+            User ID sẽ được tạo tự động theo format của Clerk (ví dụ: user_2xouUagR4XVgnf578Xo23YAp40r)
+          </p>
         )}
       </div>
       {/* Email Field */}
