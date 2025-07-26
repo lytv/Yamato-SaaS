@@ -54,7 +54,7 @@ function UserSyncModal({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-300"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
@@ -62,29 +62,14 @@ function UserSyncModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={handleBackdropClick}
         data-testid="modal-backdrop"
         aria-hidden="true"
       />
 
       {/* Modal content */}
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="modal-title" className="text-xl font-semibold">
-            {modal.mode === 'create' ? 'Create UserSync' : 'Edit UserSync'}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
-          >
-            ✕
-          </Button>
-        </div>
-
+      <div className="relative z-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         <UserSyncForm
           user_sync={modal.user_sync}
           onSuccess={(_user_sync) => {
@@ -157,27 +142,42 @@ export default function UserSyncsPage(): JSX.Element {
   };
 
   return (
-    <main className="container mx-auto max-w-6xl space-y-8 p-6">
+    <main className="container mx-auto max-w-7xl space-y-8 p-6">
       {/* Page Header */}
-      <header data-testid="user_syncs-header">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {t('user_sync.pageTitle', { default: 'UserSyncs' })}
+      <header data-testid="user_syncs-header" className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl p-8 text-white shadow-lg">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold tracking-tight mb-2">
+              {t('user_sync.pageTitle', { default: 'User Syncs' })}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-blue-100 text-lg">
               {t('user_sync.pageDescription', {
-                default: 'Manage your user_syncs and inventory',
+                default: 'Manage user synchronization and maintain your user base',
               })}
             </p>
+            <div className="flex items-center space-x-6 mt-4 text-sm text-blue-100">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                Real-time sync
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
+                Auto-generated IDs
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-pink-400 rounded-full mr-2"></div>
+                Role management
+              </div>
+            </div>
           </div>
 
           <Button
             onClick={handleCreateUserSync}
             disabled={isCreating}
-            className="shrink-0"
+            className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 disabled:transform-none"
           >
-            {t('user_sync.createNew', { default: 'Create UserSync' })}
+            <span className="text-lg mr-2">+</span>
+            {t('user_sync.createNew', { default: 'Create New User' })}
           </Button>
         </div>
       </header>
