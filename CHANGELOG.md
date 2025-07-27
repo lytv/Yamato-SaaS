@@ -1,3 +1,10 @@
+## [1.2.35](https://github.com/lytv/Yamato-SaaS/compare/v1.2.34...v1.2.35) (2025-07-27)
+
+
+### Bug Fixes
+
+* update user import ([9421b5b](https://github.com/lytv/Yamato-SaaS/commit/9421b5be640075b956c97b364a71d3c66fe49355))
+
 ## [1.2.34](https://github.com/lytv/Yamato-SaaS/compare/v1.2.33...v1.2.34) (2025-07-27)
 
 
