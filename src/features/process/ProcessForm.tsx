@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { Settings, FileText, Tag, AlertCircle, RefreshCw } from 'lucide-react';
 
 import { useProcessMutations } from '@/hooks/useProcessMutations';
 import { processFormSchema } from '@/libs/validations/process';
@@ -80,148 +81,197 @@ export function ProcessForm({ process, onSuccess, onCancel }: ProcessFormProps):
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Error Display */}
-      {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+    <div className="bg-gradient-to-br from-slate-50 to-gray-50 p-6 rounded-xl">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* Form Header */}
+        <div className="text-center pb-6 border-b border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-slate-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Settings className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {isEditing ? (t('updateProcess') || 'Edit Process') : (t('createProcess') || 'Create Process')}
+          </h2>
+          <p className="text-gray-600">
+            {isEditing 
+              ? (t('updateProcessDescription') || 'Update process configuration and specifications') 
+              : (t('processDescription') || 'Define a new production process with detailed specifications')}
+          </p>
         </div>
-      )}
 
-      {/* Process Code Field */}
-      <div>
-        <label
-          htmlFor="processCode"
-          className="block text-sm font-medium text-gray-700"
-        >
-          {t('processCode_label')}
-        </label>
-        <input
-          id="processCode"
-          type="text"
-          {...register('processCode')}
-          aria-required="true"
-          aria-describedby={errors.processCode ? 'processCode-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.processCode ? 'border-red-300' : ''
-          }`}
-          placeholder={t('processCode_placeholder')}
-        />
-        {errors.processCode && (
-          <p id="processCode-error" className="mt-2 text-sm text-red-600">
-            {errors.processCode.message}
-          </p>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Error Display */}
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <p className="text-sm font-medium text-red-800">Error</p>
+              </div>
+              <p className="mt-1 text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Main Fields Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Process Code Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="processCode"
+                className="flex items-center text-sm font-medium text-gray-700"
+              >
+                <Settings className="w-4 h-4 mr-2 text-slate-500" />
+                {t('processCode_label') || 'Process Code'}
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <input
+                id="processCode"
+                type="text"
+                {...register('processCode')}
+                aria-required="true"
+                aria-describedby={errors.processCode ? 'processCode-error' : undefined}
+                className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 ${
+                  errors.processCode 
+                    ? 'border-red-300 bg-red-50' 
+                    : 'border-gray-200 bg-white hover:border-gray-300 focus:border-slate-500'
+                }`}
+                placeholder={t('processCode_placeholder') || 'Enter process code (e.g., PROC001)'}
+              />
+              {errors.processCode && (
+                <div className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.processCode.message}
+                </div>
+              )}
+            </div>
+
+            {/* Process Name Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="processName"
+                className="flex items-center text-sm font-medium text-gray-700"
+              >
+                <FileText className="w-4 h-4 mr-2 text-slate-500" />
+                {t('processName_label') || 'Process Name'}
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <input
+                id="processName"
+                type="text"
+                {...register('processName')}
+                aria-required="true"
+                aria-describedby={errors.processName ? 'processName-error' : undefined}
+                className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 ${
+                  errors.processName 
+                    ? 'border-red-300 bg-red-50' 
+                    : 'border-gray-200 bg-white hover:border-gray-300 focus:border-slate-500'
+                }`}
+                placeholder={t('processName_placeholder') || 'Enter process name'}
+              />
+              {errors.processName && (
+                <div className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.processName.message}
+                </div>
+              )}
+            </div>
+
+            {/* Process Category Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="processCategory"
+                className="flex items-center text-sm font-medium text-gray-700"
+              >
+                <Tag className="w-4 h-4 mr-2 text-slate-500" />
+                {t('processCategory_label') || 'Process Category'}
+              </label>
+              <input
+                id="processCategory"
+                type="text"
+                {...register('processCategory')}
+                aria-describedby={errors.processCategory ? 'processCategory-error' : undefined}
+                className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 ${
+                  errors.processCategory 
+                    ? 'border-red-300 bg-red-50' 
+                    : 'border-gray-200 bg-white hover:border-gray-300 focus:border-slate-500'
+                }`}
+                placeholder={t('processCategory_placeholder') || 'Enter process category (optional)'}
+              />
+              {errors.processCategory && (
+                <div className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.processCategory.message}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Description Field */}
+          <div className="space-y-2">
+            <label
+              htmlFor="description"
+              className="flex items-center text-sm font-medium text-gray-700"
+            >
+              <FileText className="w-4 h-4 mr-2 text-slate-500" />
+              {t('description_label') || 'Description'}
+            </label>
+            <textarea
+              id="description"
+              rows={4}
+              {...register('description')}
+              aria-describedby={errors.description ? 'description-error' : undefined}
+              className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none ${
+                errors.description 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-white hover:border-gray-300 focus:border-slate-500'
+              }`}
+              placeholder={t('description_placeholder') || 'Enter detailed process description, steps, requirements, etc.'}
+            />
+            {errors.description && (
+              <div className="flex items-center gap-1 text-sm text-red-600">
+                <AlertCircle className="w-3 h-3" />
+                {errors.description.message}
+              </div>
+            )}
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            >
+              {t('cancel') || 'Cancel'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={isSubmitting}
+              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            >
+              {t('reset') || 'Reset'}
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !isValid}
+              className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSubmitting && (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              {isSubmitting
+                ? isEditing
+                  ? (t('updating') || 'Updating...')
+                  : (t('creating') || 'Creating...')
+                : isEditing
+                  ? (t('update') || 'Update Process')
+                  : (t('create') || 'Create Process')}
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Process Name Field */}
-      <div>
-        <label
-          htmlFor="processName"
-          className="block text-sm font-medium text-gray-700"
-        >
-          {t('processName_label')}
-        </label>
-        <input
-          id="processName"
-          type="text"
-          {...register('processName')}
-          aria-required="true"
-          aria-describedby={errors.processName ? 'processName-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.processName ? 'border-red-300' : ''
-          }`}
-          placeholder={t('processName_placeholder')}
-        />
-        {errors.processName && (
-          <p id="processName-error" className="mt-2 text-sm text-red-600">
-            {errors.processName.message}
-          </p>
-        )}
-      </div>
-
-      {/* Process Category Field */}
-      <div>
-        <label
-          htmlFor="processCategory"
-          className="block text-sm font-medium text-gray-700"
-        >
-          {t('processCategory_label')}
-        </label>
-        <input
-          id="processCategory"
-          type="text"
-          {...register('processCategory')}
-          aria-describedby={errors.processCategory ? 'processCategory-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.processCategory ? 'border-red-300' : ''
-          }`}
-          placeholder={t('processCategory_placeholder')}
-        />
-        {errors.processCategory && (
-          <p id="processCategory-error" className="mt-2 text-sm text-red-600">
-            {errors.processCategory.message}
-          </p>
-        )}
-      </div>
-
-      {/* Description Field */}
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700"
-        >
-          {t('description_label')}
-        </label>
-        <textarea
-          id="description"
-          rows={4}
-          {...register('description')}
-          aria-describedby={errors.description ? 'description-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.description ? 'border-red-300' : ''
-          }`}
-          placeholder={t('description_placeholder')}
-        />
-        {errors.description && (
-          <p id="description-error" className="mt-2 text-sm text-red-600">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
-
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          {t('cancel')}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleReset}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          {t('reset')}
-        </button>
-
-        <button
-          type="submit"
-          disabled={isSubmitting || !isValid}
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSubmitting
-            ? isEditing
-              ? t('updating')
-              : t('creating')
-            : isEditing
-              ? t('update')
-              : t('create')}
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }

@@ -5,11 +5,11 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CalendarDays, FileText, Target, Clock, Calendar, Users, StickyNote, CheckCircle, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlanMutations } from '@/hooks/usePlanMutations';
 import { planFormSchema } from '@/libs/validations/plan';
 import type { Plan, PlanFormData } from '@/types/plan';
@@ -118,32 +118,38 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Error Display */}
-      {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+    <div className="bg-gradient-to-br from-slate-50 to-green-50 p-6 rounded-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Form Header */}
+        <div className="text-center pb-6 border-b border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CalendarDays className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {isEditing ? (t('edit_plan') || 'Edit Plan') : (t('create_plan') || 'Create Plan')}
+          </h2>
+          <p className="text-gray-600">
+            {isEditing 
+              ? (t('update_plan_description') || 'Update production plan configuration') 
+              : (t('create_plan_description') || 'Create a new production plan and schedule')}
+          </p>
         </div>
-      )}
 
-      <Tabs defaultValue="required" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="required">{t('tab_required')}</TabsTrigger>
-          <TabsTrigger value="dates">{t('tab_dates')}</TabsTrigger>
-          <TabsTrigger value="notes">{t('tab_notes')}</TabsTrigger>
-        </TabsList>
+        {/* Error Display */}
+        {error && (
+          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+            <div className="text-sm text-red-700">Error: {error}</div>
+          </div>
+        )}
 
-        {/* Tab 1: Required Fields */}
-        <TabsContent value="required" className="space-y-4">
+        {/* Form Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Plan Code Field */}
-          <div>
-            <label
-              htmlFor="planCode"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_code')}
-              {' '}
-              *
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <FileText className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_code') || 'Plan Code'}
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="planCode"
@@ -151,28 +157,30 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planCode')}
               aria-required="true"
               aria-describedby={errors.planCode ? 'planCode-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planCode ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planCode 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('plan_code_placeholder')}
+              placeholder={t('plan_code_placeholder') || 'e.g., 012025'}
               onBlur={handlePlanCodeBlur}
             />
             {errors.planCode && (
-              <p id="planCode-error" className="mt-2 text-sm text-red-600">
+              <p id="planCode-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planCode.message}
               </p>
             )}
           </div>
 
           {/* Plan Name Field */}
-          <div>
-            <label
-              htmlFor="planName"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_name')}
-              {' '}
-              *
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <CalendarDays className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_name') || 'Plan Name'}
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="planName"
@@ -180,27 +188,29 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planName')}
               aria-required="true"
               aria-describedby={errors.planName ? 'planName-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planName ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planName 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('plan_name_placeholder')}
+              placeholder={t('plan_name_placeholder') || 'Enter plan name'}
             />
             {errors.planName && (
-              <p id="planName-error" className="mt-2 text-sm text-red-600">
+              <p id="planName-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planName.message}
               </p>
             )}
           </div>
 
           {/* Plan Year Field */}
-          <div>
-            <label
-              htmlFor="planYear"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_year')}
-              {' '}
-              *
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_year') || 'Plan Year'}
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="planYear"
@@ -208,27 +218,29 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planYear', { valueAsNumber: true })}
               aria-required="true"
               aria-describedby={errors.planYear ? 'planYear-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planYear ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planYear 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('plan_year_placeholder')}
+              placeholder={t('plan_year_placeholder') || '2025'}
             />
             {errors.planYear && (
-              <p id="planYear-error" className="mt-2 text-sm text-red-600">
+              <p id="planYear-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planYear.message}
               </p>
             )}
           </div>
 
           {/* Plan Month Field */}
-          <div>
-            <label
-              htmlFor="planMonth"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_month')}
-              {' '}
-              *
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Clock className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_month') || 'Plan Month'}
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="planMonth"
@@ -236,249 +248,281 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planMonth', { valueAsNumber: true })}
               aria-required="true"
               aria-describedby={errors.planMonth ? 'planMonth-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planMonth ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planMonth 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('plan_month_placeholder')}
+              placeholder={t('plan_month_placeholder') || '1-12'}
             />
             {errors.planMonth && (
-              <p id="planMonth-error" className="mt-2 text-sm text-red-600">
+              <p id="planMonth-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planMonth.message}
               </p>
             )}
           </div>
 
           {/* Total Target Quantity Field */}
-          <div>
-            <label
-              htmlFor="totalTargetQuantity"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('total_target_quantity')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Target className="w-4 h-4 mr-2 text-green-500" />
+              {t('total_target_quantity') || 'Target Quantity'}
             </label>
             <input
               id="totalTargetQuantity"
               type="number"
               {...register('totalTargetQuantity', { valueAsNumber: true })}
               aria-describedby={errors.totalTargetQuantity ? 'totalTargetQuantity-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.totalTargetQuantity ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.totalTargetQuantity 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('total_target_quantity_placeholder')}
+              placeholder={t('total_target_quantity_placeholder') || 'e.g., 1000'}
             />
             {errors.totalTargetQuantity && (
-              <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600">
+              <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.totalTargetQuantity.message}
               </p>
             )}
           </div>
 
           {/* Total Actual Quantity Field */}
-          <div>
-            <label
-              htmlFor="totalActualQuantity"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('total_actual_quantity')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+              {t('total_actual_quantity') || 'Actual Quantity'}
             </label>
             <input
               id="totalActualQuantity"
               type="number"
               {...register('totalActualQuantity', { valueAsNumber: true })}
               aria-describedby={errors.totalActualQuantity ? 'totalActualQuantity-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.totalActualQuantity ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.totalActualQuantity 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('total_actual_quantity_placeholder')}
+              placeholder={t('total_actual_quantity_placeholder') || 'e.g., 850'}
             />
             {errors.totalActualQuantity && (
-              <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600">
+              <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.totalActualQuantity.message}
               </p>
             )}
           </div>
 
           {/* Status Field */}
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('status')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+              {t('status') || 'Status'}
             </label>
             <input
               id="status"
               type="text"
               {...register('status')}
               aria-describedby={errors.status ? 'status-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.status ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.status 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('status_placeholder')}
+              placeholder={t('status_placeholder') || 'e.g., In Progress, Completed'}
             />
             {errors.status && (
-              <p id="status-error" className="mt-2 text-sm text-red-600">
+              <p id="status-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.status.message}
               </p>
             )}
           </div>
-        </TabsContent>
 
-        {/* Tab 2: Dates */}
-        <TabsContent value="dates" className="space-y-4">
           {/* Plan Start Date Field */}
-          <div>
-            <label
-              htmlFor="planStartDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_start_date')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_start_date') || 'Start Date'}
             </label>
             <input
               id="planStartDate"
               type="date"
               {...register('planStartDate')}
               aria-describedby={errors.planStartDate ? 'planStartDate-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planStartDate ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planStartDate 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
             />
             {errors.planStartDate && (
-              <p id="planStartDate-error" className="mt-2 text-sm text-red-600">
+              <p id="planStartDate-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planStartDate.message}
               </p>
             )}
           </div>
 
           {/* Plan End Date Field */}
-          <div>
-            <label
-              htmlFor="planEndDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('plan_end_date')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+              {t('plan_end_date') || 'End Date'}
             </label>
             <input
               id="planEndDate"
               type="date"
               {...register('planEndDate')}
               aria-describedby={errors.planEndDate ? 'planEndDate-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.planEndDate ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.planEndDate 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
             />
             {errors.planEndDate && (
-              <p id="planEndDate-error" className="mt-2 text-sm text-red-600">
+              <p id="planEndDate-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.planEndDate.message}
               </p>
             )}
           </div>
 
           {/* Approved By Field */}
-          <div>
-            <label
-              htmlFor="approvedBy"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('approved_by')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Users className="w-4 h-4 mr-2 text-green-500" />
+              {t('approved_by') || 'Approved By'}
             </label>
             <input
               id="approvedBy"
               type="text"
               {...register('approvedBy')}
               aria-describedby={errors.approvedBy ? 'approvedBy-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.approvedBy ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.approvedBy 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('approved_by_placeholder')}
+              placeholder={t('approved_by_placeholder') || 'Enter approver name'}
             />
             {errors.approvedBy && (
-              <p id="approvedBy-error" className="mt-2 text-sm text-red-600">
+              <p id="approvedBy-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.approvedBy.message}
               </p>
             )}
           </div>
 
           {/* Approved At Field */}
-          <div>
-            <label
-              htmlFor="approvedAt"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('approved_at')}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+              {t('approved_at') || 'Approved Date'}
             </label>
             <input
               id="approvedAt"
               type="date"
               {...register('approvedAt')}
               aria-describedby={errors.approvedAt ? 'approvedAt-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.approvedAt ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.approvedAt 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
             />
             {errors.approvedAt && (
-              <p id="approvedAt-error" className="mt-2 text-sm text-red-600">
+              <p id="approvedAt-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.approvedAt.message}
               </p>
             )}
           </div>
-        </TabsContent>
 
-        {/* Tab 3: Notes */}
-        <TabsContent value="notes" className="space-y-4">
-          {/* Note Field */}
-          <div>
-            <label
-              htmlFor="note"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('note')}
+          {/* Notes Field - Full Width */}
+          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <StickyNote className="w-4 h-4 mr-2 text-green-500" />
+              {t('note') || 'Notes'}
             </label>
             <textarea
               id="note"
-              rows={6}
+              rows={4}
               {...register('note')}
               aria-describedby={errors.note ? 'note-error' : undefined}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.note ? 'border-red-300' : ''
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none ${
+                errors.note 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
               }`}
-              placeholder={t('note_placeholder')}
+              placeholder={t('note_placeholder') || 'Additional notes about the plan...'}
             />
             {errors.note && (
-              <p id="note-error" className="mt-2 text-sm text-red-600">
+              <p id="note-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
                 {errors.note.message}
               </p>
             )}
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
 
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3 pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          {t('cancel')}
-        </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          {t('reset')}
-        </button>
-        <button
-          type="submit"
-          disabled={!isValid || isSubmitting}
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSubmitting ? t('saving') : isEditing ? t('update') : t('create')}
-          {' '}
-          {t('plan')}
-        </button>
-      </div>
-    </form>
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+          >
+            {t('cancel') || 'Cancel'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+          >
+            {t('reset') || 'Reset'}
+          </button>
+
+          <button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting && (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            )}
+            {isSubmitting
+              ? isEditing
+                ? (t('updating') || 'Updating...')
+                : (t('creating') || 'Creating...')
+              : isEditing
+                ? (t('update_plan') || 'Update Plan')
+                : (t('create_plan') || 'Create Plan')}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

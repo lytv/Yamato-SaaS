@@ -9,7 +9,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, MapPin, Package, Settings, FileText, AlertCircle } from 'lucide-react';
+import { CalendarDays, MapPin, Package, Settings, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
 import { plandetailFormSchema } from '@/libs/validations/plandetail';
 import type {
@@ -133,15 +132,22 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
 
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-950/20 dark:to-indigo-950/20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {plandetail ? t('form.updatePlanDetail') : t('form.createPlanDetail')}
-        </h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-          {t('form.planDetailDescription')}
-        </p>
-      </div>
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* Form Header */}
+        <div className="text-center pb-6 border-b border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CalendarDays className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {plandetail ? (t('form.updatePlanDetail') || 'Edit Plan Detail') : (t('form.createPlanDetail') || 'Create Plan Detail')}
+          </h2>
+          <p className="text-gray-600">
+            {plandetail 
+              ? (t('form.updatePlanDetailDescription') || 'Update plan detail configuration and progress') 
+              : (t('form.planDetailDescription') || 'Create a new plan detail with product allocation and schedule')}
+          </p>
+        </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -598,37 +604,35 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
             </TabsContent>
           </Tabs>
 
-          <Card className="border-gray-200 dark:border-gray-700">
-            <CardContent className="pt-6">
-              <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={onCancel} 
-                  disabled={isLoading}
-                  className="min-w-[100px]"
-                >
-                  {t('form.cancel')}
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      {t('form.saving')}
-                    </div>
-                  ) : (
-                    plandetail ? t('form.updatePlanDetail') : t('form.createPlanDetail')
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Form Actions */}
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isLoading}
+              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            >
+              {t('form.cancel') || 'Cancel'}
+            </button>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isLoading && (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              {isLoading
+                ? (t('form.saving') || 'Saving...')
+                : plandetail
+                  ? (t('form.updatePlanDetail') || 'Update Plan Detail')
+                  : (t('form.createPlanDetail') || 'Create Plan Detail')}
+            </button>
+          </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 }
