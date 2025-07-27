@@ -1,3 +1,10 @@
+## [1.2.39](https://github.com/lytv/Yamato-SaaS/compare/v1.2.38...v1.2.39) (2025-07-27)
+
+
+### Bug Fixes
+
+* update ui for plan ([5cbeb45](https://github.com/lytv/Yamato-SaaS/commit/5cbeb451a292b87c2e6e29f54bf1aec5984c39db))
+
 ## [1.2.38](https://github.com/lytv/Yamato-SaaS/compare/v1.2.37...v1.2.38) (2025-07-27)
 
 
