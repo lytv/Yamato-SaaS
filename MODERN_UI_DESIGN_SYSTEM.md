@@ -11,9 +11,10 @@ Hệ thống thiết kế UI hiện đại được áp dụng thành công cho 
 2. [Color System](#color-system)
 3. [Layout Patterns](#layout-patterns)
 4. [Component Patterns](#component-patterns)
-5. [Animation System](#animation-system)
-6. [Responsive Design](#responsive-design)
-7. [Implementation Guide](#implementation-guide)
+5. [View Toggle Patterns](#view-toggle-patterns)
+6. [Animation System](#animation-system)
+7. [Responsive Design](#responsive-design)
+8. [Implementation Guide](#implementation-guide)
 
 ---
 
