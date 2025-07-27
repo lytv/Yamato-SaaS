@@ -27,7 +27,7 @@ function convertRequiredDateToISO(date: Date | string): string {
 
 export async function GET(request: NextRequest): Promise<NextResponse<WorkTablesResponse | WorkTableErrorResponse>> {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
@@ -35,9 +35,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<WorkTables
       );
     }
 
+    // Use orgId for organization work-tables, fallback to userId for personal work-tables
+    const ownerId = orgId || userId;
+
     const { searchParams } = new URL(request.url);
     const validatedParams = validateWorkTableListParams(Object.fromEntries(searchParams));
-    const params = { ...validatedParams, ownerId: userId };
+    const params = { ...validatedParams, ownerId, userId };
 
     const workTables = await getWorkTablesByOwner(params);
     const total = workTables.length; // In a real app, you'd get total count separately
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WorkTables
 
 export async function POST(request: NextRequest): Promise<NextResponse<WorkTableResponse | WorkTableErrorResponse>> {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
@@ -79,9 +82,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<WorkTable
       );
     }
 
+    // Use orgId for organization work-tables, fallback to userId for personal work-tables
+    const ownerId = orgId || userId;
+
     // Chỉ nhận 4 trường: tableCode, tableName, tableDetail, tableType (và ownerId)
     const body = await request.json();
-    const validatedData = validateCreateWorkTable({ ...body, ownerId: userId });
+    const validatedData = validateCreateWorkTable({ ...body, ownerId });
 
     const workTable = await createWorkTable(validatedData as any);
 

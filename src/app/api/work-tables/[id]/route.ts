@@ -30,7 +30,7 @@ export async function GET(
   { params }: { params: { id: string } },
 ): Promise<NextResponse<WorkTableResponse | WorkTableErrorResponse>> {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
@@ -38,8 +38,11 @@ export async function GET(
       );
     }
 
+    // Use orgId for organization work-tables, fallback to userId for personal work-tables
+    const ownerId = orgId || userId;
+
     const { id } = validateWorkTableId({ id: params.id });
-    const workTable = await getWorkTableById(id, userId);
+    const workTable = await getWorkTableById(id, ownerId, userId);
 
     if (!workTable) {
       return NextResponse.json(
@@ -74,7 +77,7 @@ export async function PUT(
   { params }: { params: { id: string } },
 ): Promise<NextResponse<WorkTableResponse | WorkTableErrorResponse>> {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
@@ -82,13 +85,16 @@ export async function PUT(
       );
     }
 
+    // Use orgId for organization work-tables, fallback to userId for personal work-tables
+    const ownerId = orgId || userId;
+
     const { id } = validateWorkTableId({ id: params.id });
     const body = await request.json();
     const validatedData = validateUpdateWorkTable(body);
 
     const patch = { ...validatedData };
 
-    const workTable = await updateWorkTable(id, userId, patch as any);
+    const workTable = await updateWorkTable(id, ownerId, patch as any, userId);
 
     return NextResponse.json({
       success: true,
@@ -123,7 +129,7 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ): Promise<NextResponse<{ success: true; message: string } | WorkTableErrorResponse>> {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' },
@@ -131,8 +137,11 @@ export async function DELETE(
       );
     }
 
+    // Use orgId for organization work-tables, fallback to userId for personal work-tables
+    const ownerId = orgId || userId;
+
     const { id } = validateWorkTableId({ id: params.id });
-    const deleted = await deleteWorkTable(id, userId);
+    const deleted = await deleteWorkTable(id, ownerId, userId);
 
     if (!deleted) {
       return NextResponse.json(

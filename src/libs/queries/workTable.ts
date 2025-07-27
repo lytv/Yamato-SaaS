@@ -32,9 +32,10 @@ export async function createWorkTable(data: CreateWorkTableInput): Promise<WorkT
   return workTable;
 }
 
-export async function getWorkTablesByOwner(params: WorkTableListParams): Promise<WorkTableDb[]> {
+export async function getWorkTablesByOwner(params: WorkTableListParams & { userId?: string }): Promise<WorkTableDb[]> {
   const {
     ownerId,
+    userId,
     page,
     limit,
     search,
@@ -59,11 +60,36 @@ export async function getWorkTablesByOwner(params: WorkTableListParams): Promise
     maxEfficiencyRating,
   } = params;
   const offset = (page - 1) * limit;
-  let whereConditions: any = eq(workTableSchema.ownerId, ownerId);
+  
+  // Support both org-level and user-level access
+  // Include data created with orgId (new) and userId (legacy)
+  let whereConditions: any;
+  if (userId && userId !== ownerId) {
+    // If we have both orgId and userId, include both in query
+    whereConditions = or(
+      eq(workTableSchema.ownerId, ownerId), // New org-level data
+      eq(workTableSchema.ownerId, userId)   // Legacy user-level data
+    );
+  } else {
+    // Fallback to simple ownerId filter
+    whereConditions = eq(workTableSchema.ownerId, ownerId);
+  }
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
+    
+    // Build search condition based on our whereConditions
+    let ownerCondition;
+    if (userId && userId !== ownerId) {
+      ownerCondition = or(
+        eq(workTableSchema.ownerId, ownerId),
+        eq(workTableSchema.ownerId, userId)
+      );
+    } else {
+      ownerCondition = eq(workTableSchema.ownerId, ownerId);
+    }
+    
     const searchCondition = and(
-      eq(workTableSchema.ownerId, ownerId),
+      ownerCondition,
       or(
         ilike(workTableSchema.tableName, searchTerm),
         ilike(workTableSchema.tableCode, searchTerm),
@@ -176,17 +202,32 @@ export async function getWorkTableByCode(tableCode: string, ownerId: string): Pr
   return workTable ?? null;
 }
 
-export async function getWorkTableById(id: number, ownerId: string): Promise<WorkTableDb | null> {
+export async function getWorkTableById(id: number, ownerId: string, userId?: string): Promise<WorkTableDb | null> {
+  let whereCondition;
+  if (userId && userId !== ownerId) {
+    // Support both org-level and user-level access
+    whereCondition = and(
+      eq(workTableSchema.id, id),
+      or(
+        eq(workTableSchema.ownerId, ownerId), // New org-level data
+        eq(workTableSchema.ownerId, userId)   // Legacy user-level data
+      )
+    );
+  } else {
+    // Fallback to simple ownerId filter
+    whereCondition = and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, ownerId));
+  }
+  
   const [workTable] = await db
     .select()
     .from(workTableSchema)
-    .where(and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, ownerId)))
+    .where(whereCondition)
     .limit(1);
   return workTable ?? null;
 }
 
-export async function updateWorkTable(id: number, ownerId: string, data: UpdateWorkTableInput): Promise<WorkTableDb> {
-  const existingTable = await getWorkTableById(id, ownerId);
+export async function updateWorkTable(id: number, ownerId: string, data: UpdateWorkTableInput, userId?: string): Promise<WorkTableDb> {
+  const existingTable = await getWorkTableById(id, ownerId, userId);
   if (!existingTable) {
     throw new Error('Work table not found or access denied');
   }
@@ -199,7 +240,7 @@ export async function updateWorkTable(id: number, ownerId: string, data: UpdateW
   const [updatedTable] = await db
     .update(workTableSchema)
     .set({ ...existingTable, ...data, updatedAt: new Date() })
-    .where(and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, ownerId)))
+    .where(and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, existingTable.ownerId)))
     .returning();
   if (!updatedTable) {
     throw new Error('Failed to update work table');
@@ -207,14 +248,15 @@ export async function updateWorkTable(id: number, ownerId: string, data: UpdateW
   return updatedTable;
 }
 
-export async function deleteWorkTable(id: number, ownerId: string): Promise<boolean> {
-  const existingTable = await getWorkTableById(id, ownerId);
+export async function deleteWorkTable(id: number, ownerId: string, userId?: string): Promise<boolean> {
+  const existingTable = await getWorkTableById(id, ownerId, userId);
   if (!existingTable) {
     throw new Error('Work table not found or access denied');
   }
+  // Use the actual ownerId from the found record to ensure consistency
   await db
     .delete(workTableSchema)
-    .where(and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, ownerId)));
+    .where(and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, existingTable.ownerId)));
   return true;
 }
 
