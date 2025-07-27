@@ -5,7 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Search, Filter, Layers, Edit, Trash2, Calendar, Tag, FileText, Grid3X3, List, Package } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { ProductSubSkeleton } from '@/features/productsub/ProductSubSkeleton';
@@ -33,6 +33,7 @@ export function ProductSubList({ onEdit, onDelete }: ProductSubListProps): JSX.E
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   const {
     search,
@@ -187,106 +188,134 @@ export function ProductSubList({ onEdit, onDelete }: ProductSubListProps): JSX.E
 
   return (
     <div className="space-y-6">
-      {/* Search and Filter Controls */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div className="flex flex-1 items-center space-x-4">
-          <div className="relative max-w-lg flex-1">
-            <input
-              type="text"
-              placeholder="Search productsubs..."
-              value={search}
-              onChange={handleSearchInputChange}
-              aria-label="Search productsubs"
-              className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 leading-5 placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:placeholder:text-gray-400 sm:text-sm"
-            />
-          </div>
-          <div className="flex items-center space-x-2 pt-5">
-            <input
-              type="checkbox"
-              id="showAll"
-              checked={showAll}
-              onChange={e => setShowAll(e.target.checked)}
-              className="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label htmlFor="showAll" className="text-sm font-medium text-gray-700">
-              Show All
+      {/* Control Panel */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          {/* Search Section */}
+          <div className="flex flex-1 items-center space-x-4">
+            <div className="relative max-w-lg flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search product subs..."
+                value={search}
+                onChange={handleSearchInputChange}
+                aria-label="Search product subs"
+                className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+              />
+            </div>
+            
+            {/* Show All Toggle */}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={showAll}
+                onChange={e => setShowAll(e.target.checked)}
+                className="sr-only peer" 
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">
+                Show All
+              </span>
             </label>
           </div>
-        </div>
 
-        <div className="flex items-center space-x-4">
-          {/* Sort Controls */}
-          <div className="flex items-center space-x-2">
-            <label htmlFor="sortBy" className="text-sm font-medium text-gray-700">
-              Sort by:
-            </label>
-            <select
-              id="sortBy"
-              value={sortBy}
-              onChange={handleSortFieldChange}
-              aria-label="Sort by"
-              className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="createdAt">Created Date</option>
-              <option value="updatedAt">Updated Date</option>
-              <option value="productSubName">ProductSub Name</option>
-              <option value="productSubCode">ProductSub Code</option>
-            </select>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                type="button"
+                onClick={() => setViewMode('card')}
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'card'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+                title="Card View"
+              >
+                <Grid3X3 className="h-4 w-4 mr-1" />
+                Cards
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'list'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+                title="List View"
+              >
+                <List className="h-4 w-4 mr-1" />
+                List
+              </button>
+            </div>
 
+            {/* Filter dropdown */}
+            <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <select
+                value={sortBy}
+                onChange={handleSortFieldChange}
+                className="bg-transparent border-0 text-sm font-medium text-gray-700 focus:outline-none focus:ring-0"
+              >
+                <option value="createdAt">Sort by Created</option>
+                <option value="updatedAt">Sort by Updated</option>
+                <option value="productSubName">Sort by Name</option>
+                <option value="productSubCode">Sort by Code</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleSortOrderToggle}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                {sortOrder === 'desc' ? '↓' : '↑'}
+              </button>
+            </div>
+
+            {/* Export button */}
             <button
               type="button"
-              onClick={handleSortOrderToggle}
-              aria-label="Sort order"
-              className="inline-flex items-center rounded-md border border-gray-300 bg-white p-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={handleExportProductSubs}
+              disabled={isExporting || productsubs.length === 0}
+              className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {sortOrder === 'desc' ? '↓' : '↑'}
+              <Download className="mr-2 h-4 w-4" />
+              {isExporting ? 'Exporting...' : 'Export'}
             </button>
+
+            {/* Import button */}
+            <button
+              type="button"
+              onClick={() => setImportModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-all duration-200 transform hover:scale-105"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </button>
+
+            {/* Clear Search */}
+            {search && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="text-xs text-gray-500 underline hover:text-gray-700"
+              >
+                Clear
+              </button>
+            )}
           </div>
-
-          {/* Export Button */}
-          <button
-            type="button"
-            onClick={handleExportProductSubs}
-            disabled={isExporting || productsubs.length === 0}
-            aria-label="Export productsubs to Excel"
-            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Download className="mr-2 size-4" />
-            {isExporting ? 'Exporting...' : 'Export'}
-          </button>
-
-          {/* Import Button */}
-          <button
-            type="button"
-            onClick={() => setImportModalOpen(true)}
-            aria-label="Import productsubs from Excel"
-            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            <Upload className="mr-2 size-4" />
-            Import
-          </button>
-
-          {/* Clear Search */}
-          {search && (
-            <button
-              type="button"
-              onClick={resetFilters}
-              aria-label="Clear search"
-              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Clear search
-            </button>
-          )}
         </div>
       </div>
 
       {/* Export Error Display */}
       {exportError && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-800">
-            Export failed:
-            {' '}
-            {exportError}
+        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+          <div className="text-sm text-red-700">
+            Export failed: {exportError}
             <button
               type="button"
               onClick={clearError}
@@ -301,104 +330,228 @@ export function ProductSubList({ onEdit, onDelete }: ProductSubListProps): JSX.E
       {/* Search Results Info */}
       {search && (
         <div className="text-sm text-gray-600">
-          Search results for "
-          {search}
-          "
+          Search results for "{search}"
         </div>
       )}
 
-      {/* ProductSub Count */}
-      <div className="text-sm text-gray-600">
-        Showing
-        {' '}
-        {productsubs.length}
-        {' '}
-        of
-        {' '}
-        {pagination?.total || 0}
-        {' '}
-        productsubs
-        {pagination?.page && (
-          <span>
-            {' '}
-            • Page
-            {pagination.page}
-          </span>
-        )}
-      </div>
+      {/* Product Subs Display */}
+      {viewMode === 'card' ? (
+        /* Card View */
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {productsubs.map(productsub => {
+            const product = products.find(p => p.id === productsub.productId);
+            return (
+              <div key={productsub.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+                {/* Card Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    {/* ProductSub Icon */}
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                      <Layers className="w-6 h-6 text-white" />
+                    </div>
 
-      {/* ProductSubs Table */}
-      <div className="overflow-x-auto">
-        <table role="table" className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Product Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">ProductSub Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Updated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {productsubs.map((productsub) => {
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">{productsub.productSubDetail}</h3>
+                      <p className="text-sm text-gray-500 truncate font-mono">
+                        {productsub.productSubCode}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Category Badge */}
+                  {productsub.subCategory && (
+                    <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                      <Tag className="w-3 h-3 mr-1" />
+                      {productsub.subCategory}
+                    </div>
+                  )}
+                </div>
+
+                {/* Card Content */}
+                <div className="space-y-3 mb-4">
+                  {/* Parent Product */}
+                  {product && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Package className="w-4 h-4 mr-2 text-purple-500" />
+                      <span className="font-medium">Product:</span>
+                      <span className="ml-1">{product.productName}</span>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {productsub.note && (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-start">
+                        <FileText className="w-4 h-4 mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {productsub.note}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timestamps */}
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Created: {formatDate(productsub.createdAt)}
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Updated: {formatDate(productsub.updatedAt)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="flex justify-end space-x-2 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(productsub)}
+                    disabled={isDeleting}
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClick(productsub)}
+                    disabled={isDeleting}
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* List View */
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* List Header */}
+          <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+            <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <div className="col-span-3">Product Sub</div>
+              <div className="col-span-2">Parent Product</div>
+              <div className="col-span-2">Category</div>
+              <div className="col-span-3">Notes</div>
+              <div className="col-span-1">Created</div>
+              <div className="col-span-1">Actions</div>
+            </div>
+          </div>
+
+          {/* List Items */}
+          <div className="divide-y divide-gray-100">
+            {productsubs.map(productsub => {
               const product = products.find(p => p.id === productsub.productId);
               return (
-                <tr key={productsub.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{product ? product.productName : ''}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{productsub.productSubDetail}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{productsub.subCategory}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatDate(productsub.createdAt)}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatDate(productsub.updatedAt)}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(productsub)}
-                        disabled={isDeleting}
-                        className="text-indigo-600 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteClick(productsub)}
-                        disabled={isDeleting}
-                        className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
+                <div key={productsub.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    {/* Product Sub Info */}
+                    <div className="col-span-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Layers className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{productsub.productSubDetail}</p>
+                          <p className="text-xs text-gray-500 font-mono truncate">{productsub.productSubCode}</p>
+                        </div>
+                      </div>
                     </div>
-                  </td>
-                </tr>
+
+                    {/* Parent Product */}
+                    <div className="col-span-2">
+                      {product ? (
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Package className="w-3 h-3 mr-1 text-purple-500" />
+                          {product.productName}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </div>
+
+                    {/* Category */}
+                    <div className="col-span-2">
+                      {productsub.subCategory ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <Tag className="w-3 h-3 mr-1" />
+                          {productsub.subCategory}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </div>
+
+                    {/* Notes */}
+                    <div className="col-span-3">
+                      {productsub.note ? (
+                        <div className="flex items-center text-sm text-gray-600">
+                          <FileText className="w-3 h-3 mr-1 text-gray-400" />
+                          <span className="truncate">{productsub.note}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </div>
+
+                    {/* Created Date */}
+                    <div className="col-span-1">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {formatDate(productsub.createdAt)}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-1">
+                      <div className="flex items-center space-x-1">
+                        <button
+                          type="button"
+                          onClick={() => onEdit(productsub)}
+                          disabled={isDeleting}
+                          className="p-1 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded transition-all duration-200"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClick(productsub)}
+                          disabled={isDeleting}
+                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-all duration-200"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {!showAll && pagination && pagination.total > 0 && (
-        <div className="mt-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Showing
-              {' '}
-              {productsubs.length}
-              {' '}
-              of
-              {' '}
-              {pagination.total}
-              {' '}
-              productsubs
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between pt-4 text-sm">
+          <span>
+            Showing {productsubs.length} of {pagination.total} product subs
+            {pagination.page && ` • Page ${pagination.page}`}
+          </span>
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
@@ -406,7 +559,7 @@ export function ProductSubList({ onEdit, onDelete }: ProductSubListProps): JSX.E
               type="button"
               onClick={() => setPage(page + 1)}
               disabled={!pagination?.hasMore}
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -416,38 +569,62 @@ export function ProductSubList({ onEdit, onDelete }: ProductSubListProps): JSX.E
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirmProductSub && (
-        <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-gray-600/50">
-          <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Confirm deletion</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "
-                  {deleteConfirmProductSub.productSubDetail}
-                  "? This action cannot be undone.
-                </p>
-                {deleteError && (
-                  <div className="mt-2 text-sm text-red-600">{deleteError}</div>
-                )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="relative mx-4 w-full max-w-md transform rounded-xl bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="text-center">
+              {/* Icon */}
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
+                <Trash2 className="h-8 w-8 text-red-600" />
               </div>
-              <div className="items-center px-4 py-3">
-                <div className="flex justify-center space-x-3">
-                  <button
-                    type="button"
-                    onClick={handleDeleteCancel}
-                    className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-500 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteConfirm}
-                    disabled={isDeleting}
-                    className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Confirm delete'}
-                  </button>
+              
+              {/* Title & Content */}
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Deletion</h3>
+              
+              {/* ProductSub preview */}
+              <div className="bg-gray-50 rounded-lg p-4 text-left mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                    <Layers className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{deleteConfirmProductSub.productSubDetail}</h4>
+                    <p className="text-sm text-gray-500 font-mono">{deleteConfirmProductSub.productSubCode}</p>
+                    {deleteConfirmProductSub.subCategory && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                        {deleteConfirmProductSub.subCategory}
+                      </span>
+                    )}
+                  </div>
                 </div>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to delete this product sub? This action cannot be undone.
+              </p>
+
+              {deleteError && (
+                <div className="mt-2 p-3 text-sm text-red-600 bg-red-50 rounded-lg">{deleteError}</div>
+              )}
+              
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button
+                  type="button"
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="flex-1 inline-flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="flex-1 inline-flex justify-center items-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-all duration-200 disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                </button>
               </div>
             </div>
           </div>

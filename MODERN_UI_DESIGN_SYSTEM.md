@@ -330,6 +330,266 @@ Hệ thống thiết kế UI hiện đại được áp dụng thành công cho 
 
 ---
 
+## 🔄 View Toggle Patterns
+
+### Purpose
+Provide users with flexibility to view data in different formats (card view for visual scanning, list view for detailed information) while maintaining consistent design patterns and smooth transitions.
+
+### Implementation Components
+
+#### 1. View Mode State Management
+```tsx
+// React state for view mode
+const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+
+// Toggle between views
+const toggleView = (mode: 'card' | 'list') => {
+  setViewMode(mode);
+};
+```
+
+#### 2. Toggle Control Component
+```tsx
+{/* View Mode Toggle */}
+<div className="flex items-center bg-gray-100 rounded-lg p-1">
+  <button
+    type="button"
+    onClick={() => setViewMode('card')}
+    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+      viewMode === 'card'
+        ? 'bg-white text-indigo-600 shadow-sm'
+        : 'text-gray-600 hover:text-gray-800'
+    }`}
+    title="Card View"
+  >
+    <Grid3X3 className="h-4 w-4 mr-1" />
+    Cards
+  </button>
+  <button
+    type="button"
+    onClick={() => setViewMode('list')}
+    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+      viewMode === 'list'
+        ? 'bg-white text-indigo-600 shadow-sm'
+        : 'text-gray-600 hover:text-gray-800'
+    }`}
+    title="List View"
+  >
+    <List className="h-4 w-4 mr-1" />
+    List
+  </button>
+</div>
+```
+
+#### 3. Card View Pattern
+```tsx
+{/* Card View - Grid Layout */}
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  {items.map(item => (
+    <div key={item.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+      {/* Card Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          {/* Icon/Avatar */}
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full flex items-center justify-center">
+            <IconComponent className="w-6 h-6 text-white" />
+          </div>
+          
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">{item.title}</h3>
+            <p className="text-sm text-gray-500 truncate">{item.subtitle}</p>
+          </div>
+        </div>
+        
+        {/* Status Badge */}
+        <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+          <TagIcon className="w-3 h-3 mr-1" />
+          {item.status}
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="space-y-3 mb-4">
+        {/* Item details */}
+      </div>
+
+      {/* Card Actions */}
+      <div className="flex justify-end space-x-2 pt-4 border-t border-gray-100">
+        <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-all duration-200">
+          <Edit className="w-4 h-4 mr-1" />
+          Edit
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+```
+
+#### 4. List View Pattern
+```tsx
+{/* List View - Table-like Structure */}
+<div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  {/* List Header */}
+  <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+    <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="col-span-3">Title</div>
+      <div className="col-span-2">Category</div>
+      <div className="col-span-2">Status</div>
+      <div className="col-span-3">Details</div>
+      <div className="col-span-1">Date</div>
+      <div className="col-span-1">Actions</div>
+    </div>
+  </div>
+
+  {/* List Items */}
+  <div className="divide-y divide-gray-100">
+    {items.map(item => (
+      <div key={item.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+        <div className="grid grid-cols-12 gap-4 items-center">
+          {/* Title */}
+          <div className="col-span-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <IconComponent className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
+                <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Other columns */}
+          <div className="col-span-2">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              {item.category}
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="col-span-1">
+            <div className="flex items-center space-x-1">
+              <button className="p-1 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded transition-all duration-200">
+                <Edit className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+#### 5. Conditional Rendering Logic
+```tsx
+{/* Main Content with View Toggle */}
+{viewMode === 'card' ? (
+  /* Card View */
+  <CardViewComponent />
+) : (
+  /* List View */
+  <ListViewComponent />
+)}
+```
+
+### Design Guidelines
+
+#### Visual Hierarchy
+- **Toggle Control**: Positioned in Control Panel, right section
+- **Active State**: White background with colored text and shadow
+- **Inactive State**: Transparent background with gray text
+- **Icons**: Use Grid3X3 for card view, List for list view
+
+#### Color Coding
+```css
+/* Active toggle button */
+.toggle-active {
+  background: white;
+  color: theme-color; /* indigo-600, blue-600, etc. */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Inactive toggle button */
+.toggle-inactive {
+  background: transparent;
+  color: #6b7280; /* gray-600 */
+}
+
+/* Hover states */
+.toggle-inactive:hover {
+  color: #374151; /* gray-800 */
+}
+```
+
+#### Responsive Considerations
+- **Mobile**: Toggle remains accessible, buttons stack appropriately
+- **Tablet**: Grid adjusts to 2 columns for card view
+- **Desktop**: Full 3-column grid for optimal space usage
+
+#### Accessibility Features
+- **ARIA Labels**: Clear button titles and roles
+- **Keyboard Navigation**: Full keyboard support
+- **Screen Readers**: Proper state announcements
+- **Color Contrast**: WCAG compliant color combinations
+
+### Usage Examples
+
+#### Production Steps Implementation
+```tsx
+// State management
+const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+
+// In Control Panel
+<div className="flex items-center bg-gray-100 rounded-lg p-1">
+  <button
+    onClick={() => setViewMode('card')}
+    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+      viewMode === 'card' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'
+    }`}
+  >
+    <Grid3X3 className="h-4 w-4 mr-1" />
+    Cards
+  </button>
+  <button
+    onClick={() => setViewMode('list')}
+    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+      viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'
+    }`}
+  >
+    <List className="h-4 w-4 mr-1" />
+    List
+  </button>
+</div>
+
+// Conditional rendering
+{viewMode === 'card' ? (
+  <CardGridComponent />
+) : (
+  <ListTableComponent />
+)}
+```
+
+### Best Practices
+
+1. **Default View**: Start with card view for better visual appeal
+2. **State Persistence**: Consider persisting user preference in localStorage
+3. **Consistent Icons**: Use Grid3X3 and List icons across all implementations
+4. **Smooth Transitions**: Apply 200ms transitions for state changes
+5. **Feature Parity**: Ensure both views support all actions (edit, delete, etc.)
+6. **Performance**: Use React.memo for view components to prevent unnecessary re-renders
+
+### Feature-Specific Theming
+
+Adapt colors based on feature domain:
+- **Products**: Blue theme (`text-blue-600`, `bg-blue-100`)
+- **Production Steps**: Indigo theme (`text-indigo-600`, `bg-indigo-100`)
+- **Users**: Purple theme (`text-purple-600`, `bg-purple-100`)
+- **Orders**: Green theme (`text-green-600`, `bg-green-100`)
+
+---
+
 ## 🎬 Animation System
 
 ### Hover Effects

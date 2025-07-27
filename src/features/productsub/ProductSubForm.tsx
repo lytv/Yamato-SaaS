@@ -5,6 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Layers, FileText, Tag, StickyNote, Package, RefreshCw } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -112,180 +113,227 @@ export function ProductSubForm({ productsub, onSuccess, onCancel }: ProductSubFo
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Error Display */}
-      {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+    <div className="bg-gradient-to-br from-slate-50 to-purple-50 p-6 rounded-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Form Header */}
+        <div className="text-center pb-6 border-b border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Layers className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {isEditing ? 'Edit Product Sub' : 'Create Product Sub'}
+          </h2>
+          <p className="text-gray-600">
+            {isEditing ? 'Update product sub configuration' : 'Create a new product sub-component'}
+          </p>
         </div>
-      )}
 
-      {/* ProductSub Code Field */}
-      <div>
-        <label
-          htmlFor="productsubCode"
-          className="block text-sm font-medium text-gray-700"
-        >
-          ProductSub Code *
-        </label>
-        <input
-          id="productsubCode"
-          type="text"
-          {...register('productsubCode')}
-          aria-required="true"
-          aria-describedby={errors.productsubCode ? 'productsubCode-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.productsubCode ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., PROD-001"
-        />
-        {errors.productsubCode && (
-          <p id="productsubCode-error" className="mt-2 text-sm text-red-600">
-            {errors.productsubCode.message}
-          </p>
+        {/* Error Display */}
+        {error && (
+          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+            <div className="text-sm text-red-700">Error: {error}</div>
+          </div>
         )}
-      </div>
 
-      {/* ProductSub Name Field */}
-      <div>
-        <label
-          htmlFor="productsubName"
-          className="block text-sm font-medium text-gray-700"
-        >
-          ProductSub Name *
-        </label>
-        <input
-          id="productsubName"
-          type="text"
-          {...register('productsubName')}
-          aria-required="true"
-          aria-describedby={errors.productsubName ? 'productsubName-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.productsubName ? 'border-red-300' : ''
-          }`}
-          placeholder="Enter productsub name"
-        />
-        {errors.productsubName && (
-          <p id="productsubName-error" className="mt-2 text-sm text-red-600">
-            {errors.productsubName.message}
-          </p>
-        )}
-      </div>
+        {/* Form Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* ProductSub Code Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <FileText className="w-4 h-4 mr-2 text-purple-500" />
+              ProductSub Code
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              id="productsubCode"
+              type="text"
+              {...register('productsubCode')}
+              aria-required="true"
+              aria-describedby={errors.productsubCode ? 'productsubCode-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.productsubCode 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder="e.g., PROD-SUB-001"
+            />
+            {errors.productsubCode && (
+              <p id="productsubCode-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.productsubCode.message}
+              </p>
+            )}
+          </div>
 
-      {/* Category Field */}
-      <div>
-        <label
-          htmlFor="category"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Category
-        </label>
-        <input
-          id="category"
-          type="text"
-          {...register('category')}
-          aria-describedby={errors.category ? 'category-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.category ? 'border-red-300' : ''
-          }`}
-          placeholder="e.g., Electronics, Software"
-        />
-        {errors.category && (
-          <p id="category-error" className="mt-2 text-sm text-red-600">
-            {errors.category.message}
-          </p>
-        )}
-      </div>
+          {/* ProductSub Name Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Layers className="w-4 h-4 mr-2 text-purple-500" />
+              ProductSub Name
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              id="productsubName"
+              type="text"
+              {...register('productsubName')}
+              aria-required="true"
+              aria-describedby={errors.productsubName ? 'productsubName-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.productsubName 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder="Enter product sub name"
+            />
+            {errors.productsubName && (
+              <p id="productsubName-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.productsubName.message}
+              </p>
+            )}
+          </div>
 
-      {/* Notes Field */}
-      <div>
-        <label
-          htmlFor="notes"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Notes
-        </label>
-        <textarea
-          id="notes"
-          rows={4}
-          {...register('notes')}
-          aria-describedby={errors.notes ? 'notes-error' : undefined}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-            errors.notes ? 'border-red-300' : ''
-          }`}
-          placeholder="Additional notes about the productsub..."
-        />
-        {errors.notes && (
-          <p id="notes-error" className="mt-2 text-sm text-red-600">
-            {errors.notes.message}
-          </p>
-        )}
-      </div>
+          {/* Category Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Tag className="w-4 h-4 mr-2 text-purple-500" />
+              Category
+            </label>
+            <input
+              id="category"
+              type="text"
+              {...register('category')}
+              aria-describedby={errors.category ? 'category-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.category 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder="e.g., Components, Accessories"
+            />
+            {errors.category && (
+              <p id="category-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.category.message}
+              </p>
+            )}
+          </div>
 
-      {/* Product Select Field */}
-      <div>
-        <label htmlFor="productId" className="block text-sm font-medium text-gray-700">
-          Product *
-        </label>
-        <select
-          id="productId"
-          {...register('productId', { valueAsNumber: true })}
-          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.productId ? 'border-red-300' : ''}`}
-          disabled={loadingProducts}
-        >
-          <option value="">Select a product</option>
-          {products.map(p => (
-            <option key={p.id} value={p.id}>
-              {p.productName}
-              {' '}
-              (
-              {p.productCode}
-              )
-            </option>
-          ))}
-        </select>
-        {errors.productId && (
-          <p id="productId-error" className="mt-2 text-sm text-red-600">
-            {errors.productId.message}
-          </p>
-        )}
-        {productError && (
-          <p className="mt-2 text-sm text-red-600">{productError}</p>
-        )}
-      </div>
+          {/* Product Select Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Package className="w-4 h-4 mr-2 text-purple-500" />
+              Parent Product
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <select
+              id="productId"
+              {...register('productId', { valueAsNumber: true })}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.productId 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              disabled={loadingProducts}
+            >
+              <option value="">
+                {loadingProducts ? 'Loading products...' : 'Select a parent product'}
+              </option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.productName} ({p.productCode})
+                </option>
+              ))}
+            </select>
+            {errors.productId && (
+              <p id="productId-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.productId.message}
+              </p>
+            )}
+            {productError && (
+              <p className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {productError}
+              </p>
+            )}
+          </div>
 
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          Cancel
-        </button>
+          {/* Notes Field - Full Width */}
+          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <StickyNote className="w-4 h-4 mr-2 text-purple-500" />
+              Notes
+            </label>
+            <textarea
+              id="notes"
+              rows={4}
+              {...register('notes')}
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none ${
+                errors.notes 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder="Additional notes about the product sub..."
+            />
+            {errors.notes && (
+              <p id="notes-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.notes.message}
+              </p>
+            )}
+          </div>
+        </div>
 
-        <button
-          type="button"
-          onClick={handleReset}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          Reset
-        </button>
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+          >
+            Cancel
+          </button>
 
-        <button
-          type="submit"
-          disabled={isSubmitting || !isValid}
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSubmitting
-            ? isEditing
-              ? 'Updating...'
-              : 'Creating...'
-            : isEditing
-              ? 'Update ProductSub'
-              : 'Create ProductSub'}
-        </button>
-      </div>
-    </form>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+          >
+            Reset
+          </button>
+
+          <button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting && (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            )}
+            {isSubmitting
+              ? isEditing
+                ? 'Updating...'
+                : 'Creating...'
+              : isEditing
+                ? 'Update ProductSub'
+                : 'Create ProductSub'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

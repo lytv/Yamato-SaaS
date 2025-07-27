@@ -50,14 +50,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/production-step-details',
                     label: t('production_step_details'),
                   },
-                  {
-                    href: '/dashboard/price-summary',
-                    label: t('price_summary'),
-                  },
                 ],
               },
 
-              // Thêm menu Salaries với submenu Employee Salary Entries
+              // Salaries menu - moved price-summary here
               {
                 label: t('salaries'),
                 submenu: [
@@ -68,6 +64,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                   {
                     href: '/dashboard/salary-details',
                     label: t('salary_details'),
+                  },
+                  {
+                    href: '/dashboard/price-summary',
+                    label: t('price_summary'),
                   },
                 ],
               },
