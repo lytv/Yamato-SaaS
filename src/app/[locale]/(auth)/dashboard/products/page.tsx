@@ -8,6 +8,7 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { Package } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -54,7 +55,7 @@ function ProductModal({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
@@ -62,35 +63,34 @@ function ProductModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0"
         onClick={handleBackdropClick}
         data-testid="modal-backdrop"
         aria-hidden="true"
       />
 
       {/* Modal content */}
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-          aria-label="Close"
-        >
-          ✕
-        </Button>
-        <div className="mb-4">
-          {/* Tiêu đề đã nằm trong ProductForm, không cần lặp lại ở đây */}
-        </div>
+      <div className="relative mx-4 w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+        <div className="bg-white rounded-xl shadow-2xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="absolute right-4 top-4 z-10 text-gray-500 hover:text-gray-700"
+            aria-label="Close"
+          >
+            ✕
+          </Button>
 
-        <ProductForm
-          product={modal.product}
-          onSuccess={(_product) => {
-            onSuccess();
-            onClose();
-          }}
-          onCancel={onClose}
-        />
+          <ProductForm
+            product={modal.product}
+            onSuccess={(_product) => {
+              onSuccess();
+              onClose();
+            }}
+            onCancel={onClose}
+          />
+        </div>
       </div>
     </div>
   );
@@ -155,36 +155,50 @@ export default function ProductsPage(): JSX.Element {
   };
 
   return (
-    <main className="container mx-auto max-w-6xl space-y-8 p-6">
-      {/* Page Header */}
-      <header data-testid="products-header">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
+    <main className="container mx-auto max-w-7xl space-y-8 p-6">
+      {/* Hero Header */}
+      <header className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl p-8 text-white shadow-lg" data-testid="products-header">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold tracking-tight mb-2">
               {t('product.pageTitle', { default: 'Products' })}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-blue-100 text-lg">
               {t('product.pageDescription', {
-                default: 'Manage your products and inventory',
+                default: 'Manage your products and inventory with modern tools',
               })}
             </p>
+            {/* Feature indicators */}
+            <div className="flex items-center space-x-6 mt-4 text-sm text-blue-100">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                Product Management
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
+                Category Organization
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-pink-400 rounded-full mr-2"></div>
+                Inventory Tracking
+              </div>
+            </div>
           </div>
 
+          {/* Primary CTA */}
           <Button
             onClick={handleCreateProduct}
             disabled={isCreating}
-            className="shrink-0"
+            className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
           >
+            <Package className="w-5 h-5 mr-2" />
             {t('product.createNew', { default: 'Create Product' })}
           </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <div
-        data-testid="products-content"
-        className="space-y-6"
-      >
+      <div className="space-y-8 bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
         {/* Responsive Layout Indicators */}
         {isMobile
           ? (

@@ -5,6 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Package, FileText, Tag, StickyNote } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -80,128 +81,153 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps):
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <>
-      <h2 className="mb-6 text-xl font-semibold">{isEditing ? t('edit_title') : t('title')}</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Form Header */}
+        <div className="text-center pb-6 border-b border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {isEditing ? t('edit_title') : t('title')}
+          </h2>
+          <p className="text-gray-600">
+            {isEditing ? 'Update product information' : 'Create a new product'}
+          </p>
+        </div>
+
         {/* Error Display */}
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
+          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
             <div className="text-sm text-red-700">{t('error')}</div>
           </div>
         )}
 
-        {/* Product Code Field */}
-        <div>
-          <label
-            htmlFor="productCode"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('productCode')}
-            {' '}
-            *
-          </label>
-          <input
-            id="productCode"
-            type="text"
-            {...register('productCode')}
-            aria-required="true"
-            aria-describedby={errors.productCode ? 'productCode-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.productCode ? 'border-red-300' : ''
-            }`}
-            placeholder={t('productCode_placeholder')}
-          />
-          {errors.productCode && (
-            <p id="productCode-error" className="mt-2 text-sm text-red-600">
-              {errors.productCode.message}
-            </p>
-          )}
-        </div>
+        {/* Form Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Product Code Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <FileText className="w-4 h-4 mr-2 text-blue-500" />
+              {t('productCode')}
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              id="productCode"
+              type="text"
+              {...register('productCode')}
+              aria-required="true"
+              aria-describedby={errors.productCode ? 'productCode-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.productCode 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder={t('productCode_placeholder')}
+            />
+            {errors.productCode && (
+              <p id="productCode-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.productCode.message}
+              </p>
+            )}
+          </div>
 
-        {/* Product Name Field */}
-        <div>
-          <label
-            htmlFor="productName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('productName')}
-            {' '}
-            *
-          </label>
-          <input
-            id="productName"
-            type="text"
-            {...register('productName')}
-            aria-required="true"
-            aria-describedby={errors.productName ? 'productName-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.productName ? 'border-red-300' : ''
-            }`}
-            placeholder={t('productName_placeholder')}
-          />
-          {errors.productName && (
-            <p id="productName-error" className="mt-2 text-sm text-red-600">
-              {errors.productName.message}
-            </p>
-          )}
-        </div>
+          {/* Product Name Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Package className="w-4 h-4 mr-2 text-blue-500" />
+              {t('productName')}
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              id="productName"
+              type="text"
+              {...register('productName')}
+              aria-required="true"
+              aria-describedby={errors.productName ? 'productName-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.productName 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder={t('productName_placeholder')}
+            />
+            {errors.productName && (
+              <p id="productName-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.productName.message}
+              </p>
+            )}
+          </div>
 
-        {/* Category Field */}
-        <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('category')}
-          </label>
-          <input
-            id="category"
-            type="text"
-            {...register('category')}
-            aria-describedby={errors.category ? 'category-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.category ? 'border-red-300' : ''
-            }`}
-            placeholder={t('category_placeholder')}
-          />
-          {errors.category && (
-            <p id="category-error" className="mt-2 text-sm text-red-600">
-              {errors.category.message}
-            </p>
-          )}
-        </div>
+          {/* Category Field */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <Tag className="w-4 h-4 mr-2 text-blue-500" />
+              {t('category')}
+            </label>
+            <input
+              id="category"
+              type="text"
+              {...register('category')}
+              aria-describedby={errors.category ? 'category-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.category 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder={t('category_placeholder')}
+            />
+            {errors.category && (
+              <p id="category-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.category.message}
+              </p>
+            )}
+          </div>
 
-        {/* Notes Field */}
-        <div>
-          <label
-            htmlFor="notes"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('notes')}
-          </label>
-          <textarea
-            id="notes"
-            rows={4}
-            {...register('notes')}
-            aria-describedby={errors.notes ? 'notes-error' : undefined}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-              errors.notes ? 'border-red-300' : ''
-            }`}
-            placeholder={t('notes_placeholder')}
-          />
-          {errors.notes && (
-            <p id="notes-error" className="mt-2 text-sm text-red-600">
-              {errors.notes.message}
-            </p>
-          )}
+          {/* Notes Field - Full Width */}
+          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
+              <StickyNote className="w-4 h-4 mr-2 text-blue-500" />
+              {t('notes')}
+            </label>
+            <textarea
+              id="notes"
+              rows={4}
+              {...register('notes')}
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
+              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ${
+                errors.notes 
+                  ? 'border-red-300 bg-red-50' 
+                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              }`}
+              placeholder={t('notes_placeholder')}
+            />
+            {errors.notes && (
+              <p id="notes-error" className="mt-2 text-sm text-red-600 flex items-center">
+                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-red-600 text-xs">!</span>
+                </span>
+                {errors.notes.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
           >
             {t('cancel')}
           </button>
@@ -209,7 +235,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps):
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
           >
             {t('reset')}
           </button>
@@ -217,8 +243,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps):
           <button
             type="submit"
             disabled={isSubmitting || !isValid}
-            className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {isSubmitting && (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            )}
             {isSubmitting
               ? isEditing
                 ? t('updating')
@@ -229,6 +258,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps):
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 }
