@@ -1,3 +1,10 @@
+## [1.2.31](https://github.com/lytv/Yamato-SaaS/compare/v1.2.30...v1.2.31) (2025-07-26)
+
+
+### Bug Fixes
+
+* update ui tiếng việt ([a2cac85](https://github.com/lytv/Yamato-SaaS/commit/a2cac85e23093c2d50fb9a3f87e4395b02deba73))
+
 ## [1.2.30](https://github.com/lytv/Yamato-SaaS/compare/v1.2.29...v1.2.30) (2025-07-26)
 
 
