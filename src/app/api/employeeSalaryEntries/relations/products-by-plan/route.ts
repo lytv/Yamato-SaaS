@@ -3,19 +3,19 @@
  * Used for filtering product selection based on selected plan
  */
 
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
-import { productSchema, planDetailSchema } from '@/models/Schema';
+import { productSchema, planDetailSchema, planSchema } from '@/models/Schema';
 
 // GET /api/employeeSalaryEntries/relations/products-by-plan?planId=X
 export async function GET(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const { userId, orgId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -29,7 +29,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log(`🔍 [products-by-plan] planId: ${planId}, ownerId: ${orgId || userId}`);
+    
+    // First, let's check if planDetail exists for this plan (through plan's orgId)
+    const planDetailCount = await db
+      .select({ count: sql`count(*)`.as('count') })
+      .from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .where(
+        and(
+          eq(planDetailSchema.planId, Number(planId)),
+          eq(planSchema.ownerId, orgId || userId)
+        )
+      );
+    
+    console.log(`📊 [products-by-plan] PlanDetail records found: ${planDetailCount[0]?.count || 0}`);
+    
     // Query products that are associated with the selected plan through plan_detail
+    // Filter by plan's orgId (organization-wide access)
     const productsInPlan = await db
       .selectDistinct({
         id: productSchema.id,
@@ -41,13 +58,17 @@ export async function GET(request: NextRequest) {
         planDetailSchema,
         eq(productSchema.productCode, planDetailSchema.productCode)
       )
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
       .where(
         and(
           eq(planDetailSchema.planId, Number(planId)),
-          eq(planDetailSchema.ownerId, user.id)
+          eq(planSchema.ownerId, orgId || userId),
+          eq(productSchema.ownerId, orgId || userId)
         )
       )
       .orderBy(productSchema.productName);
+
+    console.log(`✅ [products-by-plan] Found ${productsInPlan.length} products:`, productsInPlan);
 
     return NextResponse.json({
       success: true,

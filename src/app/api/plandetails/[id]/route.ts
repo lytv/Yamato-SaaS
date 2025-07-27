@@ -23,16 +23,19 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Use orgId for organization plandetails, fallback to userId for personal plandetails
+    const ownerId = orgId || userId;
 
     const { id } = validatePlanDetailId({ id: params.id });
     const { searchParams } = new URL(request.url);
     const includeRelations = searchParams.get('includeRelations') === 'true';
 
-    const plandetail = await getPlanDetailById(id, userId, includeRelations);
+    const plandetail = await getPlanDetailById(id, ownerId, includeRelations);
 
     if (!plandetail) {
       return NextResponse.json(
@@ -60,16 +63,19 @@ export async function PUT(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Use orgId for organization plandetails, fallback to userId for personal plandetails
+    const ownerId = orgId || userId;
 
     const { id } = validatePlanDetailId({ id: params.id });
     const body = await request.json();
     const validatedData = validateUpdatePlanDetail(body);
 
-    const plandetail = await updatePlanDetail(id, userId, validatedData);
+    const plandetail = await updatePlanDetail(id, ownerId, validatedData);
 
     return NextResponse.json({
       success: true,
@@ -94,14 +100,17 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Use orgId for organization plandetails, fallback to userId for personal plandetails
+    const ownerId = orgId || userId;
 
     const { id } = validatePlanDetailId({ id: params.id });
 
-    await deletePlanDetail(id, userId);
+    await deletePlanDetail(id, ownerId);
 
     return NextResponse.json({
       success: true,

@@ -12,7 +12,7 @@ import { getProductionStepDetailsByProduct } from '@/libs/queries/employeeSalary
 // GET /api/employeeSalaryEntries/relations/production-step-details?productId=X
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
     }
 
-    const productionStepDetails = await getProductionStepDetailsByProduct(Number(productId));
+    const productionStepDetails = await getProductionStepDetailsByProduct(Number(productId), orgId || userId);
 
     return NextResponse.json({
       success: true,

@@ -22,7 +22,7 @@ import {
 // GET /api/employeeSalaryEntries
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     const employeeSalaryEntries = await getEmployeeSalaryEntries({
       ...params,
-      owner_id: userId,
+      owner_id: orgId || userId,
     });
 
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const totalCountParams = { ...params, page: 1, limit: 999999 };
     const totalResults = await getEmployeeSalaryEntries({
       ...totalCountParams,
-      owner_id: userId,
+      owner_id: orgId || userId,
     });
 
     const total = Array.isArray(totalResults) ? totalResults.length : 0;
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 // POST /api/employeeSalaryEntries
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     // 🆕 V4: Enhanced validation with detailed error messages
     const dataToValidate = {
       ...body,
-      ownerId: userId, // Add ownerId from auth
+      ownerId: orgId || userId, // Add ownerId from auth (orgId prioritized)
     };
     
     console.log('🔍 Data to validate:', JSON.stringify(dataToValidate, null, 2));
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
 // 🆕 V4: PATCH /api/employeeSalaryEntries/batch - Batch operations
 export async function PATCH(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -172,7 +172,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const validatedData = validateEmployeeSalaryEntryBatch(body);
 
-    const result = await batchEmployeeSalaryEntryOperations(validatedData, userId);
+    const result = await batchEmployeeSalaryEntryOperations(validatedData, orgId || userId);
 
     return NextResponse.json({
       success: result.success,

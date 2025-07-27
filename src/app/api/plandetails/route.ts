@@ -19,10 +19,13 @@ import {
 // GET /api/plandetails
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Use orgId for organization plandetails, fallback to userId for personal plandetails
+    const ownerId = orgId || userId;
 
     const { searchParams } = new URL(request.url);
     const params = validatePlanDetailListParams({
@@ -36,13 +39,13 @@ export async function GET(request: NextRequest) {
 
     const plandetails = await getPlanDetailsByOwner({
       ...params,
-      ownerId: userId,
+      ownerId,
     });
 
     // Get total count for pagination
     const total = await getPlanDetailsByOwner({
       ...params,
-      ownerId: userId,
+      ownerId,
       page: 1,
       limit: 999999,
     });
@@ -69,15 +72,18 @@ export async function GET(request: NextRequest) {
 // POST /api/plandetails
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Use orgId for organization plandetails, fallback to userId for personal plandetails
+    const ownerId = orgId || userId;
 
     const body = await request.json();
     const validatedData = validateCreatePlanDetail({
       ...body,
-      ownerId: userId,
+      ownerId,
     });
 
     const plandetail = await createPlanDetail(validatedData);

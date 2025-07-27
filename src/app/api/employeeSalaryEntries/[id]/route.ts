@@ -24,7 +24,7 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -35,9 +35,9 @@ export async function GET(
 
     let employeeSalaryEntry;
     if (includeRelations) {
-      employeeSalaryEntry = await getEmployeeSalaryEntryByIdWithRelations(id, userId);
+      employeeSalaryEntry = await getEmployeeSalaryEntryByIdWithRelations(id, orgId || userId);
     } else {
-      employeeSalaryEntry = await getEmployeeSalaryEntryByIdRaw(id, userId);
+      employeeSalaryEntry = await getEmployeeSalaryEntryByIdRaw(id, orgId || userId);
     }
 
     if (!employeeSalaryEntry) {
@@ -66,7 +66,7 @@ export async function PUT(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -75,7 +75,7 @@ export async function PUT(
     const body = await request.json();
     const validatedData = validateUpdateEmployeeSalaryEntry(body);
 
-    const updatedEmployeeSalaryEntry = await updateEmployeeSalaryEntry(id, userId, validatedData);
+    const updatedEmployeeSalaryEntry = await updateEmployeeSalaryEntry(id, orgId || userId, validatedData);
 
     return NextResponse.json({
       success: true,
@@ -100,14 +100,14 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = validateEmployeeSalaryEntryId({ id: params.id });
 
-    await deleteEmployeeSalaryEntry(id, userId);
+    await deleteEmployeeSalaryEntry(id, orgId || userId);
 
     return NextResponse.json({
       success: true,

@@ -64,13 +64,14 @@ export async function createPlanDetail(data: CreatePlanDetailInput): Promise<Pla
 }
 
 /**
- * Get plandetails by owner with enhanced filtering and relations
+ * Get plandetails by organization through plan relationship
+ * Shows plandetails that belong to plans accessible by the organization
  */
 export async function getPlanDetailsByOwner(
   params: PlanDetailListParamsWithOwner,
 ): Promise<PlanDetailDb[] | PlanDetailWithRelations[]> {
   const {
-    ownerId,
+    ownerId: orgId, // ownerId is now actually orgId from the route
     page = 1,
     limit = 10,
     search,
@@ -108,11 +109,12 @@ export async function getPlanDetailsByOwner(
       },
     }).from(planDetailSchema).leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
   } else {
-    baseQuery = db.select().from(planDetailSchema);
+    baseQuery = db.select().from(planDetailSchema).innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
   }
 
   // Build where conditions safely
-  const whereConditions: (SQL | undefined)[] = [eq(planDetailSchema.ownerId, ownerId)];
+  // Filter by plan's ownerId instead of plandetail's ownerId to get org-wide access
+  const whereConditions: (SQL | undefined)[] = [eq(planSchema.ownerId, orgId)];
 
   if (search) {
     const searchTerm = `%${search}%`;
@@ -121,9 +123,9 @@ export async function getPlanDetailsByOwner(
       ilike(planDetailSchema.productSubCode, searchTerm),
     ];
 
-    if (includeRelations) {
-      searchConditions.push(ilike(planSchema.planCode, searchTerm));
-    }
+    // Always include plan search since we now always JOIN with plan
+    searchConditions.push(ilike(planSchema.planCode, searchTerm));
+    searchConditions.push(ilike(planSchema.planName, searchTerm));
 
     const validSearchConditions = searchConditions.filter((c): c is SQL => !!c);
     if (validSearchConditions.length > 0) {
@@ -171,7 +173,7 @@ export async function getPlanDetailsByOwner(
  */
 export async function getPlanDetailById(
   id: number,
-  ownerId: string,
+  orgId: string,
   includeRelations = false,
 ): Promise<PlanDetailDb | PlanDetailWithRelations | undefined> {
   let baseQuery;
@@ -201,13 +203,13 @@ export async function getPlanDetailById(
       },
     }).from(planDetailSchema).leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
   } else {
-    baseQuery = db.select().from(planDetailSchema);
+    baseQuery = db.select().from(planDetailSchema).innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
   }
 
   const [result] = await baseQuery
     .where(and(
       eq(planDetailSchema.id, id),
-      eq(planDetailSchema.ownerId, ownerId),
+      eq(planSchema.ownerId, orgId),
     ))
     .limit(1);
 
@@ -228,11 +230,11 @@ export async function getPlanDetailById(
  */
 export async function updatePlanDetail(
   id: number,
-  ownerId: string,
+  orgId: string,
   data: UpdatePlanDetailInput,
 ): Promise<PlanDetailDb> {
   // Get existing entity for conditional updates
-  const existingPlanDetail = await getPlanDetailById(id, ownerId);
+  const existingPlanDetail = await getPlanDetailById(id, orgId);
   if (!existingPlanDetail) {
     throw new Error('PlanDetail not found or access denied');
   }
@@ -327,7 +329,7 @@ export async function updatePlanDetail(
   const [updatedPlanDetail] = await db
     .update(planDetailSchema)
     .set(updateData as any)
-    .where(and(eq(planDetailSchema.id, id), eq(planDetailSchema.ownerId, ownerId)))
+    .where(eq(planDetailSchema.id, id))
     .returning();
 
   if (!updatedPlanDetail) {
@@ -340,13 +342,19 @@ export async function updatePlanDetail(
 /**
  * Delete plandetail with ownership check and cascade handling
  */
-export async function deletePlanDetail(id: number, ownerId: string): Promise<void> {
+export async function deletePlanDetail(id: number, orgId: string): Promise<void> {
+  // First check if plandetail exists and user has access through plan ownership
+  const existingPlanDetail = await getPlanDetailById(id, orgId);
+  if (!existingPlanDetail) {
+    throw new Error('PlanDetail not found or access denied');
+  }
+
   const result = await db
     .delete(planDetailSchema)
-    .where(and(eq(planDetailSchema.id, id), eq(planDetailSchema.ownerId, ownerId)));
+    .where(eq(planDetailSchema.id, id));
 
   if (!result) {
-    throw new Error('PlanDetail not found or access denied');
+    throw new Error('Failed to delete PlanDetail');
   }
 }
 
@@ -407,7 +415,7 @@ export async function getPlanDetailRelationOptions(): Promise<{
 /**
  * Get plandetail statistics
  */
-export async function getPlanDetailStats(ownerId: string): Promise<PlanDetailStats> {
+export async function getPlanDetailStats(orgId: string): Promise<PlanDetailStats> {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thisWeekStart = new Date(today);
@@ -415,16 +423,22 @@ export async function getPlanDetailStats(ownerId: string): Promise<PlanDetailSta
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const [totalResult, todayResult, thisWeekResult, thisMonthResult] = await Promise.all([
-    db.select({ count: count() }).from(planDetailSchema).where(eq(planDetailSchema.ownerId, ownerId)),
-    db.select({ count: count() }).from(planDetailSchema).where(
-      and(eq(planDetailSchema.ownerId, ownerId), gte(planDetailSchema.createdAt, today)),
-    ),
-    db.select({ count: count() }).from(planDetailSchema).where(
-      and(eq(planDetailSchema.ownerId, ownerId), gte(planDetailSchema.createdAt, thisWeekStart)),
-    ),
-    db.select({ count: count() }).from(planDetailSchema).where(
-      and(eq(planDetailSchema.ownerId, ownerId), gte(planDetailSchema.createdAt, thisMonthStart)),
-    ),
+    db.select({ count: count() })
+      .from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .where(eq(planSchema.ownerId, orgId)),
+    db.select({ count: count() })
+      .from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .where(and(eq(planSchema.ownerId, orgId), gte(planDetailSchema.createdAt, today))),
+    db.select({ count: count() })
+      .from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .where(and(eq(planSchema.ownerId, orgId), gte(planDetailSchema.createdAt, thisWeekStart))),
+    db.select({ count: count() })
+      .from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .where(and(eq(planSchema.ownerId, orgId), gte(planDetailSchema.createdAt, thisMonthStart))),
   ]);
 
   return {

@@ -11,12 +11,14 @@ import { getEmployeeSalaryEntryRelationOptions } from '@/libs/queries/employeeSa
 // GET /api/employeeSalaryEntries/relations/options
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const relationOptions = await getEmployeeSalaryEntryRelationOptions();
+    const relationOptions = await getEmployeeSalaryEntryRelationOptions(orgId || userId);
+
+    console.log(`🔍 [relation-options] ownerId: ${orgId || userId}, plans: ${relationOptions.plans.length}, products: ${relationOptions.products.length}`);
 
     return NextResponse.json({
       success: true,

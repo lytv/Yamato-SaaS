@@ -690,7 +690,7 @@ export async function deleteEmployeeSalaryEntry(id: number, owner_id: string): P
 /**
  * 🆕 V4: Get production step details by product with step names
  */
-export async function getProductionStepDetailsByProduct(productId: number): Promise<{
+export async function getProductionStepDetailsByProduct(productId: number, ownerId: string): Promise<{
   id: number;
   stepName: string;
 }[]> {
@@ -704,7 +704,10 @@ export async function getProductionStepDetailsByProduct(productId: number): Prom
       productionStepSchema,
       eq(productionStepDetailSchema.productionStepId, productionStepSchema.id),
     )
-    .where(eq(productionStepDetailSchema.productId, productId))
+    .where(and(
+      eq(productionStepDetailSchema.productId, productId),
+      eq(productionStepDetailSchema.ownerId, ownerId)
+    ))
     .orderBy(asc(productionStepDetailSchema.id));
 
   return results.map((r: { id: number; stepName: string | null }) => ({
@@ -716,30 +719,38 @@ export async function getProductionStepDetailsByProduct(productId: number): Prom
 /**
  * 🆕 V4: Get relation options with enhanced performance
  */
-export async function getEmployeeSalaryEntryRelationOptions(): Promise<EmployeeSalaryEntryRelationOptions> {
+export async function getEmployeeSalaryEntryRelationOptions(ownerId: string): Promise<EmployeeSalaryEntryRelationOptions> {
   const [userSyncOptions, productionStepDetailOptions, planOptions, productOptions] = await Promise.all([
 
     db.select({
       userId: userSyncSchema.userId,
       fullName: userSyncSchema.fullName,
       shortcut: userSyncSchema.shortcut,
-    }).from(userSyncSchema).orderBy(asc(userSyncSchema.fullName)),
+    }).from(userSyncSchema)
+    .where(eq(userSyncSchema.ownerId, ownerId))
+    .orderBy(asc(userSyncSchema.fullName)),
 
     db.select({
       id: productionStepDetailSchema.id,
-    }).from(productionStepDetailSchema).orderBy(asc(productionStepDetailSchema.id)),
+    }).from(productionStepDetailSchema)
+    .where(eq(productionStepDetailSchema.ownerId, ownerId))
+    .orderBy(asc(productionStepDetailSchema.id)),
 
     db.select({
       id: planSchema.id,
       planName: planSchema.planName,
-    }).from(planSchema).orderBy(asc(planSchema.planName)),
+    }).from(planSchema)
+    .where(eq(planSchema.ownerId, ownerId))
+    .orderBy(asc(planSchema.planName)),
 
-    // 🆕 Add product options query
+    // 🆕 Add product options query with ownerId filter
     db.select({
       id: productSchema.id,
       productCode: productSchema.productCode,
       productName: productSchema.productName,
-    }).from(productSchema).orderBy(asc(productSchema.productName)),
+    }).from(productSchema)
+    .where(eq(productSchema.ownerId, ownerId))
+    .orderBy(asc(productSchema.productName)),
   ]);
 
   console.log('userSyncOptions:', userSyncOptions);

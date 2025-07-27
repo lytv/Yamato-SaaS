@@ -49,13 +49,14 @@ export async function createPlan(data: CreatePlanInput): Promise<PlanDb> {
 }
 
 /**
- * Get plans by owner with pagination and filtering
- * @param params - Query parameters including ownerId, pagination, and filters
+ * Get plans by organization with pagination and filtering
+ * Now filters by organization members instead of just owner
+ * @param params - Query parameters including orgId, pagination, and filters
  * @returns Promise resolving to array of plans
  */
 export async function getPlansByOwner(params: PlanListParamsWithOwner): Promise<PlanDb[]> {
   const {
-    ownerId,
+    ownerId: orgId, // ownerId is now actually orgId from the route
     page = 1,
     limit = 10,
     search,
@@ -65,14 +66,15 @@ export async function getPlansByOwner(params: PlanListParamsWithOwner): Promise<
   } = params;
   const offset = (page - 1) * limit;
 
-  // Build where conditions
-  let whereConditions = eq(planSchema.ownerId, ownerId);
+  // Build where conditions - filter by orgId instead of specific ownerId
+  // This allows all org members to see all plans created by anyone in the org
+  let whereConditions = eq(planSchema.ownerId, orgId);
 
   // Add search filter if provided
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
     const searchCondition = and(
-      eq(planSchema.ownerId, ownerId),
+      eq(planSchema.ownerId, orgId),
       or(
         ilike(planSchema.planCode, searchTerm),
         ilike(planSchema.planName, searchTerm),
@@ -121,19 +123,19 @@ export async function getPlansByOwner(params: PlanListParamsWithOwner): Promise<
 
 /**
  * Get total count of plans for pagination
- * @param ownerId - Owner ID (userId or organizationId)
+ * @param orgId - Organization ID to filter plans
  * @param search - Optional search term
  * @returns Promise resolving to total count
  */
-export async function getPlansCount(ownerId: string, search?: string): Promise<number> {
+export async function getPlansCount(orgId: string, search?: string): Promise<number> {
   // Build where conditions
-  let whereConditions = eq(planSchema.ownerId, ownerId);
+  let whereConditions = eq(planSchema.ownerId, orgId);
 
   // Add search filter if provided
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
     const searchCondition = and(
-      eq(planSchema.ownerId, ownerId),
+      eq(planSchema.ownerId, orgId),
       or(
         ilike(planSchema.planCode, searchTerm),
         ilike(planSchema.planName, searchTerm),
@@ -158,17 +160,17 @@ export async function getPlansCount(ownerId: string, search?: string): Promise<n
 /**
  * Get a single plan by ID with ownership check
  * @param id - Plan ID
- * @param ownerId - Owner ID for authorization
+ * @param orgId - Organization ID for authorization
  * @returns Promise resolving to plan or null if not found
  */
-export async function getPlanById(id: number, ownerId: string): Promise<PlanDb | null> {
+export async function getPlanById(id: number, orgId: string): Promise<PlanDb | null> {
   const [plan] = await db
     .select()
     .from(planSchema)
     .where(
       and(
         eq(planSchema.id, id),
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
       ),
     )
     .limit(1);
@@ -179,17 +181,17 @@ export async function getPlanById(id: number, ownerId: string): Promise<PlanDb |
 /**
  * Get a plan by planCode with ownership check (for duplicate detection)
  * @param planCode - Plan code to check
- * @param ownerId - Owner ID for authorization
+ * @param orgId - Organization ID for authorization
  * @returns Promise resolving to plan or null if not found
  */
-export async function getPlanByCode(planCode: string, ownerId: string): Promise<PlanDb | null> {
+export async function getPlanByCode(planCode: string, orgId: string): Promise<PlanDb | null> {
   const [plan] = await db
     .select()
     .from(planSchema)
     .where(
       and(
         eq(planSchema.planCode, planCode),
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
       ),
     )
     .limit(1);
@@ -200,17 +202,17 @@ export async function getPlanByCode(planCode: string, ownerId: string): Promise<
 /**
  * Update a plan with ownership check
  * @param id - Plan ID
- * @param ownerId - Owner ID for authorization
+ * @param orgId - Organization ID for authorization
  * @param data - Update data
  * @returns Promise resolving to updated plan
  */
 export async function updatePlan(
   id: number,
-  ownerId: string,
+  orgId: string,
   data: UpdatePlanInput,
 ): Promise<PlanDb> {
   // First check if plan exists and belongs to owner
-  const existingPlan = await getPlanById(id, ownerId);
+  const existingPlan = await getPlanById(id, orgId);
   if (!existingPlan) {
     throw new Error('Plan not found or access denied');
   }
@@ -254,7 +256,7 @@ export async function updatePlan(
     .where(
       and(
         eq(planSchema.id, id),
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
       ),
     )
     .returning();
@@ -269,12 +271,12 @@ export async function updatePlan(
 /**
  * Delete a plan with ownership check
  * @param id - Plan ID
- * @param ownerId - Owner ID for authorization
+ * @param orgId - Organization ID for authorization
  * @returns Promise resolving to boolean indicating success
  */
-export async function deletePlan(id: number, ownerId: string): Promise<boolean> {
+export async function deletePlan(id: number, orgId: string): Promise<boolean> {
   // First check if plan exists and belongs to owner
-  const existingPlan = await getPlanById(id, ownerId);
+  const existingPlan = await getPlanById(id, orgId);
   if (!existingPlan) {
     throw new Error('Plan not found or access denied');
   }
@@ -284,7 +286,7 @@ export async function deletePlan(id: number, ownerId: string): Promise<boolean> 
     .where(
       and(
         eq(planSchema.id, id),
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
       ),
     );
 
@@ -293,10 +295,10 @@ export async function deletePlan(id: number, ownerId: string): Promise<boolean> 
 
 /**
  * Get plan statistics for dashboard
- * @param ownerId - Owner ID to get stats for
+ * @param orgId - Organization ID to get stats for
  * @returns Promise resolving to plan statistics
  */
-export async function getPlanStats(ownerId: string): Promise<PlanStats> {
+export async function getPlanStats(orgId: string): Promise<PlanStats> {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -306,7 +308,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
   const [totalResult] = await db
     .select({ count: count() })
     .from(planSchema)
-    .where(eq(planSchema.ownerId, ownerId));
+    .where(eq(planSchema.ownerId, orgId));
 
   // Get today's count
   const [todayResult] = await db
@@ -314,7 +316,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
     .from(planSchema)
     .where(
       and(
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
         gte(planSchema.createdAt, today),
       ),
     );
@@ -325,7 +327,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
     .from(planSchema)
     .where(
       and(
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
         gte(planSchema.createdAt, thisWeek),
       ),
     );
@@ -336,7 +338,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
     .from(planSchema)
     .where(
       and(
-        eq(planSchema.ownerId, ownerId),
+        eq(planSchema.ownerId, orgId),
         gte(planSchema.createdAt, thisMonth),
       ),
     );
@@ -348,7 +350,7 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
       count: count(),
     })
     .from(planSchema)
-    .where(eq(planSchema.ownerId, ownerId))
+    .where(eq(planSchema.ownerId, orgId))
     .groupBy(planSchema.status)
     .orderBy(desc(count()));
 
@@ -367,11 +369,11 @@ export async function getPlanStats(ownerId: string): Promise<PlanStats> {
 /**
  * Check if a plan exists with ownership check
  * @param id - Plan ID
- * @param ownerId - Owner ID
+ * @param orgId - Organization ID
  * @returns Promise resolving to boolean
  */
-export async function planExists(id: number, ownerId: string): Promise<boolean> {
-  const plan = await getPlanById(id, ownerId);
+export async function planExists(id: number, orgId: string): Promise<boolean> {
+  const plan = await getPlanById(id, orgId);
   return plan !== null;
 }
 

@@ -11,12 +11,12 @@ import { getEmployeeSalaryEntryStats } from '@/libs/queries/employeeSalaryEntry'
 // GET /api/employeeSalaryEntries/stats
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const stats = await getEmployeeSalaryEntryStats(userId);
+    const stats = await getEmployeeSalaryEntryStats(orgId || userId);
 
     return NextResponse.json({
       success: true,
