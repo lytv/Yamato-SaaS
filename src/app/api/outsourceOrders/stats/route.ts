@@ -12,7 +12,7 @@ import { getOutsourceOrderStats } from '@/libs/queries/outsourceOrder';
 // GET /api/outsourceOrders/stats
 export async function GET(_request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
@@ -20,7 +20,10 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const stats = await getOutsourceOrderStats(userId);
+    // Use orgId for organization outsource orders, fallback to userId for personal outsource orders
+    const ownerId = orgId || userId;
+
+    const stats = await getOutsourceOrderStats(ownerId, userId);
 
     return NextResponse.json({
       success: true,

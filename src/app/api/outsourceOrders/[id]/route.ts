@@ -23,7 +23,7 @@ type RouteParams = {
 // GET /api/outsourceOrders/[id]
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
@@ -39,10 +39,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Use orgId for organization outsource orders, fallback to userId for personal outsource orders
+    const ownerId = orgId || userId;
+
     const { searchParams } = new URL(request.url);
     const includeRelations = searchParams.get('includeRelations') === 'true';
 
-    const outsourceOrder = await getOutsourceOrderById(id, userId, includeRelations);
+    const outsourceOrder = await getOutsourceOrderById(id, ownerId, includeRelations, userId);
 
     if (!outsourceOrder) {
       return NextResponse.json(
@@ -71,9 +74,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/outsourceOrders/[id]
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    console.log('🐛 API PUT called with params:', params);
-    
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
@@ -90,7 +91,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    console.log('🐛 Request body:', JSON.stringify(body));
 
     // Check if body is valid object
     if (!body || typeof body !== 'object') {
@@ -106,7 +106,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const validation = validateUpdateOutsourceOrder(body);
     if (!validation.success) {
-      console.log('🐛 Validation failed:', validation.error);
       return NextResponse.json(
         {
           success: false,
@@ -118,9 +117,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.log('🐛 About to call updateOutsourceOrder');
-    const updatedOutsourceOrder = await updateOutsourceOrder(id, validation.data, userId);
-    console.log('🐛 updateOutsourceOrder completed successfully');
+    // Use orgId for organization outsource orders, fallback to userId for personal outsource orders
+    const ownerId = orgId || userId;
+
+    const updatedOutsourceOrder = await updateOutsourceOrder(id, validation.data, ownerId, userId);
 
     return NextResponse.json({
       success: true,
@@ -160,7 +160,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/outsourceOrders/[id]
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
@@ -176,7 +176,10 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const success = await deleteOutsourceOrder(id, userId);
+    // Use orgId for organization outsource orders, fallback to userId for personal outsource orders
+    const ownerId = orgId || userId;
+
+    const success = await deleteOutsourceOrder(id, ownerId, userId);
 
     if (!success) {
       return NextResponse.json(

@@ -87,9 +87,10 @@ export async function updateOutsourceOrder(
   id: number,
   data: UpdateOutsourceOrderInput,
   ownerId: string,
+  userId?: string,
 ): Promise<OutsourceOrderDb> {
   // Check if entity exists and belongs to user
-  const existingEntity = await getOutsourceOrderById(id, ownerId);
+  const existingEntity = await getOutsourceOrderById(id, ownerId, false, userId);
   if (!existingEntity) {
     throw new Error('OutsourceOrder not found or access denied');
   }
@@ -189,7 +190,7 @@ export async function updateOutsourceOrder(
     })
     .where(and(
       eq(outsourceOrderSchema.id, id),
-      eq(outsourceOrderSchema.ownerId, ownerId),
+      eq(outsourceOrderSchema.ownerId, existingEntity.ownerId),
     ))
     .returning();
 
@@ -207,12 +208,26 @@ export async function getOutsourceOrderById(
   id: number,
   ownerId: string,
   includeRelations = false,
+  userId?: string,
 ): Promise<OutsourceOrderWithRelations | null> {
+  // Support both org-level and user-level access
+  let ownerCondition: SQL;
+  if (userId && userId !== ownerId) {
+    // If we have both orgId and userId, include both in query
+    ownerCondition = or(
+      eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
+      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+    )!;
+  } else {
+    // Fallback to simple ownerId filter
+    ownerCondition = eq(outsourceOrderSchema.ownerId, ownerId);
+  }
+
   if (includeRelations) {
     const result = await db.query.outsourceOrderSchema.findFirst({
       where: and(
         eq(outsourceOrderSchema.id, id),
-        eq(outsourceOrderSchema.ownerId, ownerId),
+        ownerCondition,
       ),
       with: {
         createdByUser: true as const,
@@ -228,7 +243,7 @@ export async function getOutsourceOrderById(
     .from(outsourceOrderSchema)
     .where(and(
       eq(outsourceOrderSchema.id, id),
-      eq(outsourceOrderSchema.ownerId, ownerId),
+      ownerCondition,
     ))
     .limit(1);
 
@@ -239,10 +254,11 @@ export async function getOutsourceOrderById(
  * Get all outsourceOrders for a user with pagination and filtering
  */
 export async function getOutsourceOrdersByOwner(
-  params: OutsourceOrderListParamsWithOwner,
+  params: OutsourceOrderListParamsWithOwner & { userId?: string },
 ): Promise<OutsourceOrderWithRelations[]> {
   const {
     ownerId,
+    userId,
     page = 1,
     limit = 10,
     search,
@@ -250,7 +266,21 @@ export async function getOutsourceOrdersByOwner(
     sortOrder = 'desc',
   } = params;
 
-  const conditions: SQL[] = [eq(outsourceOrderSchema.ownerId, ownerId)];
+  // Support both org-level and user-level access
+  // Include data created with orgId (new) and userId (legacy)
+  let ownerCondition: SQL;
+  if (userId && userId !== ownerId) {
+    // If we have both orgId and userId, include both in query
+    ownerCondition = or(
+      eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
+      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+    )!;
+  } else {
+    // Fallback to simple ownerId filter
+    ownerCondition = eq(outsourceOrderSchema.ownerId, ownerId);
+  }
+
+  const conditions: SQL[] = [ownerCondition];
 
   // Add search conditions
   if (search) {
@@ -277,12 +307,18 @@ export async function getOutsourceOrdersByOwner(
 /**
  * Delete outsourceOrder by ID
  */
-export async function deleteOutsourceOrder(id: number, ownerId: string): Promise<boolean> {
+export async function deleteOutsourceOrder(id: number, ownerId: string, userId?: string): Promise<boolean> {
+  // Check if entity exists and belongs to user
+  const existingEntity = await getOutsourceOrderById(id, ownerId, false, userId);
+  if (!existingEntity) {
+    throw new Error('OutsourceOrder not found or access denied');
+  }
+
   const result = await db
     .delete(outsourceOrderSchema)
     .where(and(
       eq(outsourceOrderSchema.id, id),
-      eq(outsourceOrderSchema.ownerId, ownerId),
+      eq(outsourceOrderSchema.ownerId, existingEntity.ownerId),
     ));
 
   return !!result;
@@ -291,7 +327,20 @@ export async function deleteOutsourceOrder(id: number, ownerId: string): Promise
 /**
  * Get outsourceOrder statistics
  */
-export async function getOutsourceOrderStats(ownerId: string): Promise<OutsourceOrderStats> {
+export async function getOutsourceOrderStats(ownerId: string, userId?: string): Promise<OutsourceOrderStats> {
+  // Support both org-level and user-level access
+  let ownerCondition: SQL;
+  if (userId && userId !== ownerId) {
+    // If we have both orgId and userId, include both in query
+    ownerCondition = or(
+      eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
+      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+    )!;
+  } else {
+    // Fallback to simple ownerId filter
+    ownerCondition = eq(outsourceOrderSchema.ownerId, ownerId);
+  }
+
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -301,14 +350,14 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
     db
       .select({ count: count() })
       .from(outsourceOrderSchema)
-      .where(eq(outsourceOrderSchema.ownerId, ownerId))
+      .where(ownerCondition)
       .then((res: { count: number }[]) => res[0]?.count || 0),
 
     db
       .select({ count: count() })
       .from(outsourceOrderSchema)
       .where(and(
-        eq(outsourceOrderSchema.ownerId, ownerId),
+        ownerCondition,
         gte(outsourceOrderSchema.createdAt, today),
       ))
       .then((res: { count: number }[]) => res[0]?.count || 0),
@@ -317,7 +366,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
       .select({ count: count() })
       .from(outsourceOrderSchema)
       .where(and(
-        eq(outsourceOrderSchema.ownerId, ownerId),
+        ownerCondition,
         gte(outsourceOrderSchema.createdAt, thisWeek),
       ))
       .then((res: { count: number }[]) => res[0]?.count || 0),
@@ -326,7 +375,7 @@ export async function getOutsourceOrderStats(ownerId: string): Promise<Outsource
       .select({ count: count() })
       .from(outsourceOrderSchema)
       .where(and(
-        eq(outsourceOrderSchema.ownerId, ownerId),
+        ownerCondition,
         gte(outsourceOrderSchema.createdAt, thisMonth),
       ))
       .then((res: { count: number }[]) => res[0]?.count || 0),
