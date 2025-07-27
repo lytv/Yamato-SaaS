@@ -1,3 +1,10 @@
+## [1.2.37](https://github.com/lytv/Yamato-SaaS/compare/v1.2.36...v1.2.37) (2025-07-27)
+
+
+### Bug Fixes
+
+* update ui product step ([701c629](https://github.com/lytv/Yamato-SaaS/commit/701c629729e7139e8e00c70526b42976dfcac05e))
+
 ## [1.2.36](https://github.com/lytv/Yamato-SaaS/compare/v1.2.35...v1.2.36) (2025-07-27)
 
 
