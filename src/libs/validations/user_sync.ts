@@ -184,6 +184,7 @@ export const importUserSyncRowSchema = z.object({
   fullName: userSyncFormSchema.shape.fullName.optional(),
   role: userSyncFormSchema.shape.role.optional(),
   organizationRole: userSyncFormSchema.shape.organizationRole.optional(),
+  shortcut: userSyncFormSchema.shape.shortcut.optional(),
   isActive: userSyncFormSchema.shape.isActive.optional(),
   rowNumber: z.number().int().positive(),
 });

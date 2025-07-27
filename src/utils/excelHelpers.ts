@@ -332,6 +332,7 @@ export function generateUserSyncsExcel(userSyncs: readonly UserSync[]): Buffer {
     'Full Name': userSync.fullName || '',
     'Role': userSync.role || '',
     'Organization Role': userSync.organizationRole || '',
+    'Shortcut': userSync.shortcut || '',
     'Active': userSync.isActive ? 'Yes' : 'No',
     'Created Date': formatDateForExcel(userSync.createdAt),
     'Updated Date': formatDateForExcel(userSync.updatedAt),
@@ -347,6 +348,7 @@ export function generateUserSyncsExcel(userSyncs: readonly UserSync[]): Buffer {
     { wch: 25 }, // Full Name
     { wch: 20 }, // Role
     { wch: 25 }, // Organization Role
+    { wch: 15 }, // Shortcut
     { wch: 10 }, // Active
     { wch: 12 }, // Created Date
     { wch: 12 }, // Updated Date
