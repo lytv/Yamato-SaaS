@@ -1,3 +1,10 @@
+## [1.2.33](https://github.com/lytv/Yamato-SaaS/compare/v1.2.32...v1.2.33) (2025-07-27)
+
+
+### Bug Fixes
+
+* update plan working table ([e506c6d](https://github.com/lytv/Yamato-SaaS/commit/e506c6d9171faf4b97195b7acc142b3eecec23ff))
+
 ## [1.2.32](https://github.com/lytv/Yamato-SaaS/compare/v1.2.31...v1.2.32) (2025-07-27)
 
 
