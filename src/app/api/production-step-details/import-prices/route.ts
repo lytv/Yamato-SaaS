@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!priceType || !['factory_price', 'calculated_price'].includes(priceType)) {
+    if (!priceType || !['factory_price', 'calculated_price', 'retail_price'].includes(priceType)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid price type. Must be factory_price or calculated_price' },
+        { success: false, error: 'Invalid price type. Must be factory_price, calculated_price, or retail_price' },
         { status: 400 }
       );
     }
@@ -201,7 +201,9 @@ export async function POST(request: NextRequest) {
 
           const updateData = priceType === 'factory_price' 
             ? { factoryPrice: update.price.toString() }
-            : { calculatedPrice: update.price.toString() };
+            : priceType === 'calculated_price'
+            ? { calculatedPrice: update.price.toString() }
+            : { retailPrice: update.price.toString() };
 
           if (existing.length > 0) {
             // Update existing record
@@ -227,6 +229,7 @@ export async function POST(request: NextRequest) {
               sequenceNumber: 1, // Default sequence number
               factoryPrice: priceType === 'factory_price' ? update.price.toString() : null,
               calculatedPrice: priceType === 'calculated_price' ? update.price.toString() : null,
+              retailPrice: priceType === 'retail_price' ? update.price.toString() : null,
               isFinalStep: false,
               isVtStep: false,
               isParkingStep: false

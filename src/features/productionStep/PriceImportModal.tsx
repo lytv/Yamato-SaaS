@@ -96,7 +96,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
             <label className="block text-sm font-medium text-gray-700">
               💰 Loại đơn giá cần cập nhật
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                 <input
                   type="radio"
@@ -126,6 +126,22 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                 <div>
                   <div className="font-medium">🧮 Giá tính toán</div>
                   <div className="text-sm text-gray-500">Calculated Price</div>
+                </div>
+              </label>
+
+              <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="priceType"
+                  value="retail_price"
+                  checked={priceType === 'retail_price'}
+                  onChange={(e) => setPriceType(e.target.value as PriceType)}
+                  disabled={isImporting}
+                  className="text-blue-600"
+                />
+                <div>
+                  <div className="font-medium">🛒 Giá bán lẻ</div>
+                  <div className="text-sm text-gray-500">Retail Price</div>
                 </div>
               </label>
             </div>

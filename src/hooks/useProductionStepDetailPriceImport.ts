@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type PriceType = 'factory_price' | 'calculated_price';
+export type PriceType = 'factory_price' | 'calculated_price' | 'retail_price';
 
 export interface ImportSummary {
   processed: number;
