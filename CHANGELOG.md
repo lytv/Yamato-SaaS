@@ -1,3 +1,10 @@
+## [1.2.40](https://github.com/lytv/Yamato-SaaS/compare/v1.2.39...v1.2.40) (2025-07-28)
+
+
+### Bug Fixes
+
+* update import don gia le ([50ecdcc](https://github.com/lytv/Yamato-SaaS/commit/50ecdcc1e98680df82e2be33db571b9a103bcb5a))
+
 ## [1.2.39](https://github.com/lytv/Yamato-SaaS/compare/v1.2.38...v1.2.39) (2025-07-27)
 
 
