@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { fetchEmployeeSalaryEntrys } from '@/libs/api/employeeSalaryEntries';
-import type { EmployeeSalaryEntryListParamsWithOwner, EmployeeSalaryEntrysResponse, EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
+import type { EmployeeSalaryEntryListParamsWithOwner, EmployeeSalaryEntrysResponse, EmployeeSalaryEntryWithRelations, EmployeeSalaryEntryRelationOptions } from '@/types/employeeSalaryEntry';
 
 type EmployeeSalaryEntrysState = {
   employeeSalaryEntrys: EmployeeSalaryEntryWithRelations[];
@@ -107,5 +107,44 @@ export function useEmployeeSalaryEntrys({
   return {
     ...state,
     refresh,
+  };
+}
+
+/**
+ * Hook to fetch relation options for employeeSalaryEntry forms
+ */
+export function useEmployeeSalaryEntryRelationOptions() {
+  const [data, setData] = useState<EmployeeSalaryEntryRelationOptions | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRelationOptions = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/employeeSalaryEntries/relations/options');
+      if (response.ok) {
+        const result = await response.json();
+        setData(result.data);
+      } else {
+        setError('Failed to load relation options');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRelationOptions();
+  }, [fetchRelationOptions]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchRelationOptions,
   };
 }

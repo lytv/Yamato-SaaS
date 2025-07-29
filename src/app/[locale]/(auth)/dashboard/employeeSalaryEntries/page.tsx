@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { EmployeeSalaryEntryForm } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryForm';
+import { EmployeeSalaryEntryFormWithBulk } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryFormWithBulk';
 import { EmployeeSalaryEntryList } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryList';
 import { useEmployeeSalaryEntryMutations } from '@/hooks/useEmployeeSalaryEntryMutations';
 import type { EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
@@ -36,7 +36,6 @@ function EmployeeSalaryEntryModal({
   onSuccess: () => void;
 }) {
   const { createEmployeeSalaryEntry, updateEmployeeSalaryEntry } = useEmployeeSalaryEntryMutations();
-  const t = useTranslations('employeeSalaryEntry');
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
@@ -83,39 +82,12 @@ function EmployeeSalaryEntryModal({
 
       {/* Enhanced Modal content */}
       <div className="fixed inset-0 z-10 flex size-full max-w-none flex-col overflow-auto bg-gradient-to-br from-blue-50 to-purple-50 p-0">
-        {/* Modal Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="rounded-full bg-white/20 p-3">
-                <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold">
-{modal.mode === 'create' ? t('create_title') : t('edit_title')}
-                </h2>
-                <p className="text-xl text-white/90">
-{modal.mode === 'create' ? t('create_desc') : t('edit_desc')}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-colors duration-200"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <EmployeeSalaryEntryForm
+            <EmployeeSalaryEntryFormWithBulk
               employeeSalaryEntry={modal.employeeSalaryEntry}
+              mode={modal.mode}
               onSubmit={handleSubmit}
               onSuccess={(_employeeSalaryEntry) => {
                 onSuccess();
@@ -223,7 +195,7 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
                 <svg className="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-{t('createNew')}
+                {t('createNew')}
               </Button>
             </div>
           </div>

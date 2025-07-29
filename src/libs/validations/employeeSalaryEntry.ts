@@ -244,6 +244,51 @@ export const employeeSalaryEntryBatchSchema = z.object({
   newStatus: z.enum(['draft', 'submitted', 'approved', 'paid', 'cancelled']).optional(),
 });
 
+// 🆕 Bulk creation validation schema
+export const createEmployeeSalaryEntryBulkSchema = z.array(
+  z.object({
+    ownerId: z.string().min(1, 'Owner ID is required'),
+    userId: z.string().min(1, 'Employee is required'),
+    productionStepDetailId: z.number().int().positive('Production Step Detail is required'),
+    planId: z.number().int().positive('Plan is required'),
+    productId: z.number().int().positive('Product is required'),
+    workDate: z.union([z.string(), z.date()]).refine((date) => {
+      const d = new Date(date);
+      const now = new Date();
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+      return d >= threeMonthsAgo && d <= now;
+    }, 'Work date must be within the last 3 months'),
+    entryDate: z.union([z.string(), z.date()]).optional(),
+    actualQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+    plannedQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+    limitQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+    previousEnteredQuantity: z.number().int().min(0, 'Value must be non-negative').optional(),
+    unitPrice: z.number().min(0, 'Value must be non-negative').max(99999999.99, 'Unit Price exceeds maximum allowed value').optional(),
+    totalAmount: z.number().min(0, 'Value must be non-negative').max(9999999999.99, 'Total Amount exceeds maximum allowed value').optional(),
+    salaryNote: z.string().trim().optional(),
+    status: z.string().trim().regex(/^(draft|submitted|approved|paid|cancelled|)$/, 'Invalid status value').optional(),
+    approvedBy: z.string().trim().optional(),
+    approvedAt: z.union([z.string(), z.date()]).optional(),
+    startTime: z.union([z.string(), z.date()]).optional(),
+    endTime: z.union([z.string(), z.date()]).optional(),
+    workDurationMinutes: z.number().int().min(0).max(1440, 'Work duration cannot exceed 24 hours').optional(),
+  }).refine((data) => {
+    // Validate quantity constraint: Thực tế + Trước đó <= Kế hoạch + Giới hạn
+    const actualQuantity = data.actualQuantity || 0;
+    const previousQuantity = data.previousEnteredQuantity || 0;
+    const plannedQuantity = data.plannedQuantity || 0;
+    const limitQuantity = data.limitQuantity || 0;
+
+    const totalUsed = actualQuantity + previousQuantity;
+    const totalAllowed = plannedQuantity + limitQuantity;
+
+    return totalUsed <= totalAllowed;
+  }, {
+    message: 'Số lượng vượt quá giới hạn cho phép (Thực tế + Trước đó > Kế hoạch + Giới hạn)',
+    path: ['actualQuantity'],
+  })
+).min(1, 'At least one salary entry must be provided');
+
 // 🆕 V4: Enhanced validation helper functions
 export function validateEmployeeSalaryEntryId(data: unknown) {
   return employeeSalaryEntryIdSchema.parse(data);
@@ -271,4 +316,8 @@ export function validateEmployeeSalaryEntryBatch(data: unknown) {
 
 export function validateImportEmployeeSalaryEntryRow(data: unknown) {
   return importEmployeeSalaryEntryRowSchema.parse(data);
+}
+
+export function validateCreateEmployeeSalaryEntryBulk(data: unknown) {
+  return createEmployeeSalaryEntryBulkSchema.parse(data);
 }
