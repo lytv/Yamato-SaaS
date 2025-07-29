@@ -167,6 +167,84 @@ export function useUpdateOutsourceOrderDetail() {
 }
 
 /**
+ * Create bulk outsourceOrderDetails mutation
+ */
+export function useCreateOutsourceOrderDetailBulk() {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: Omit<CreateOutsourceOrderDetailInput, 'ownerId'>[]): Promise<OutsourceOrderDetailWithRelations[]> => {
+      if (!userId) throw new Error('User not authenticated');
+
+      const response = await fetch(`${API_BASE}/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `Failed to create outsourceOrderDetails in bulk`);
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Bulk creation failed');
+      }
+
+      return result.data;
+    },
+    onSuccess: (newOutsourceOrderDetails) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
+      
+      // Optimistically update lists
+      queryClient.setQueriesData(
+        { queryKey: outsourceOrderDetailKeys.lists() },
+        (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
+          if (!oldData) return newOutsourceOrderDetails;
+          return [...newOutsourceOrderDetails, ...oldData];
+        }
+      );
+
+      // Update specific order details list
+      if (newOutsourceOrderDetails.length > 0) {
+        const firstItem = newOutsourceOrderDetails[0];
+        if (firstItem?.outsourceOrderId) {
+          const outsourceOrderId = firstItem.outsourceOrderId;
+          queryClient.setQueriesData(
+            { queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId }) },
+            (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
+              if (!oldData) return newOutsourceOrderDetails;
+              return [...newOutsourceOrderDetails, ...oldData];
+            }
+          );
+        }
+      }
+
+      // Invalidate parent order stats
+      queryClient.invalidateQueries({ queryKey: outsourceOrderKeys.stats() });
+      if (newOutsourceOrderDetails.length > 0) {
+        const firstItem = newOutsourceOrderDetails[0];
+        if (firstItem?.outsourceOrderId) {
+          queryClient.invalidateQueries({ 
+            queryKey: outsourceOrderDetailKeys.statsByOrder(firstItem.outsourceOrderId) 
+          });
+        }
+      }
+
+      toast.success(`Created ${newOutsourceOrderDetails.length} outsourceOrderDetails successfully`);
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create outsourceOrderDetails in bulk: ${error.message}`);
+    },
+  });
+}
+
+/**
  * Delete outsourceOrderDetail mutation
  */
 export function useDeleteOutsourceOrderDetail() {

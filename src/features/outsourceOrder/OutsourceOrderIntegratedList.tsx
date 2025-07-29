@@ -49,6 +49,7 @@ import type {
 import { OutsourceOrderForm } from './OutsourceOrderForm';
 import { OutsourceOrderSkeleton } from './OutsourceOrderSkeleton';
 import { OutsourceOrderDetailForm } from '../outsourceOrderDetail/OutsourceOrderDetailForm';
+import { OutsourceOrderDetailBulkForm } from '../outsourceOrderDetail/OutsourceOrderDetailBulkForm';
 import { OutsourceOrderDetailSkeleton } from '../outsourceOrderDetail/OutsourceOrderDetailSkeleton';
 
 function toOrderFormData(item: OutsourceOrderWithRelations | null): OutsourceOrderFormData | undefined {
@@ -113,6 +114,7 @@ export function OutsourceOrderIntegratedList() {
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const [deleteDetailId, setDeleteDetailId] = useState<number | null>(null);
   const [isDetailFormOpen, setIsDetailFormOpen] = useState(false);
+  const [isBulkDetailFormOpen, setIsBulkDetailFormOpen] = useState(false);
   const [editingDetail, setEditingDetail] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [detailSearch, setDetailSearch] = useState('');
 
@@ -176,10 +178,6 @@ export function OutsourceOrderIntegratedList() {
     setDetailSearch(''); // Reset detail search when switching
   };
 
-  const handleEditDetail = (item: OutsourceOrderDetailWithRelations) => {
-    setEditingDetail(item);
-    setIsDetailFormOpen(true);
-  };
 
   const handleDeleteDetail = async (id: number) => {
     try {
@@ -194,6 +192,12 @@ export function OutsourceOrderIntegratedList() {
   const handleAddDetail = (orderId: number) => {
     setExpandedOrderId(orderId);
     setEditingDetail(null);
+    setIsBulkDetailFormOpen(true);
+  };
+
+  const handleEditDetail = (orderId: number, detail: OutsourceOrderDetailWithRelations) => {
+    setExpandedOrderId(orderId);
+    setEditingDetail(detail);
     setIsDetailFormOpen(true);
   };
 
@@ -459,7 +463,7 @@ export function OutsourceOrderIntegratedList() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleEditDetail(item)}
+                                    onClick={() => handleEditDetail(order.id, item)}
                                     className="size-8 p-0"
                                   >
                                     <Edit className="size-4" />
@@ -537,6 +541,24 @@ export function OutsourceOrderIntegratedList() {
               onCancel={() => {
                 setIsDetailFormOpen(false);
                 setEditingDetail(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Detail Form Modal */}
+      {isBulkDetailFormOpen && expandedOrderId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="m-4 max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white">
+            <OutsourceOrderDetailBulkForm
+              outsourceOrderId={expandedOrderId}
+              onSuccess={() => {
+                setIsBulkDetailFormOpen(false);
+                refetchDetails();
+              }}
+              onCancel={() => {
+                setIsBulkDetailFormOpen(false);
               }}
             />
           </div>

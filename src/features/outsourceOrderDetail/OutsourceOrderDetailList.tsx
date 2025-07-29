@@ -39,6 +39,7 @@ import type {
 } from '@/types/outsourceOrderDetail';
 
 import { OutsourceOrderDetailForm } from './OutsourceOrderDetailForm';
+import { OutsourceOrderDetailBulkForm } from './OutsourceOrderDetailBulkForm';
 import { OutsourceOrderDetailSkeleton } from './OutsourceOrderDetailSkeleton';
 
 function toFormData(item: OutsourceOrderDetailWithRelations | null): OutsourceOrderDetailFormData | undefined {
@@ -76,6 +77,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [search, setSearch] = useState('');
   const t = useTranslations('OrderDetailList');
@@ -192,9 +194,17 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                 <ArrowLeft className="mr-2 size-4" />
                 Back to Orders
               </Button>
-              <Button onClick={() => setIsFormOpen(true)}>
+              <Button onClick={() => setIsBulkFormOpen(true)}>
                 <Plus className="mr-2 size-4" />
-                Add Detail
+                {t('add_detail')}
+              </Button>
+              <Button 
+                onClick={() => setIsFormOpen(true)}
+                variant="outline"
+                size="sm"
+              >
+                <Plus className="mr-2 size-4" />
+                {t('add_single')}
               </Button>
             </div>
           </div>
@@ -279,9 +289,18 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               {t('export')}
             </Button>
 
-            <Button onClick={() => setIsFormOpen(true)}>
+            <Button onClick={() => setIsBulkFormOpen(true)} size="sm">
               <Plus className="mr-2 size-4" />
-              Add Detail
+              {t('add_detail')}
+            </Button>
+
+            <Button 
+              onClick={() => setIsFormOpen(true)}
+              variant="outline"
+              size="sm"
+            >
+              <Plus className="mr-2 size-4" />
+              {t('add_single')}
             </Button>
           </div>
         </div>
@@ -412,7 +431,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
         </div>
       </div>
 
-      {/* Form Modal */}
+      {/* Single Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="m-4 max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white">
@@ -429,6 +448,25 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               onCancel={() => {
                 setIsFormOpen(false);
                 setEditingItem(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Form Modal */}
+      {isBulkFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="m-4 max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white">
+            <OutsourceOrderDetailBulkForm
+              outsourceOrderId={outsourceOrderId}
+              onSuccess={() => {
+                setIsBulkFormOpen(false);
+                refetch();
+                refetchStats();
+              }}
+              onCancel={() => {
+                setIsBulkFormOpen(false);
               }}
             />
           </div>
