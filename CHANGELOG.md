@@ -1,3 +1,10 @@
+## [1.2.42](https://github.com/lytv/Yamato-SaaS/compare/v1.2.41...v1.2.42) (2025-07-29)
+
+
+### Bug Fixes
+
+* nhap luong nhieu cong doan ([f7e1529](https://github.com/lytv/Yamato-SaaS/commit/f7e15299bc4cc37ee863a7a887372de1cdd7d4e1))
+
 ## [1.2.41](https://github.com/lytv/Yamato-SaaS/compare/v1.2.40...v1.2.41) (2025-07-29)
 
 
