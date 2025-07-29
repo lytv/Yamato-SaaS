@@ -1,3 +1,11 @@
+## [1.2.41](https://github.com/lytv/Yamato-SaaS/compare/v1.2.40...v1.2.41) (2025-07-29)
+
+
+### Bug Fixes
+
+* an mot so field ([b9785c8](https://github.com/lytv/Yamato-SaaS/commit/b9785c8dfd0468731c6ff443257b14079688974f))
+* them nhieu cong doan một luc ([fe61a74](https://github.com/lytv/Yamato-SaaS/commit/fe61a74ef56d1dc352af162c785cc1319a1f905c))
+
 ## [1.2.40](https://github.com/lytv/Yamato-SaaS/compare/v1.2.39...v1.2.40) (2025-07-28)
 
 
