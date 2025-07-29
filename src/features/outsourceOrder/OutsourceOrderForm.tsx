@@ -210,8 +210,8 @@ export function OutsourceOrderForm({
           )}
         </div>
 
-        {/* Order Code */}
-        <div className="space-y-2">
+        {/* Order Code - Hidden but logic preserved */}
+        <div className="hidden space-y-2">
           <Label htmlFor="orderCode">{t('order_code')}</Label>
           <Input
             id="orderCode"
@@ -262,8 +262,8 @@ export function OutsourceOrderForm({
           )}
         </div>
 
-        {/* Created By */}
-        <div className="space-y-2">
+        {/* Created By - Hidden but logic preserved */}
+        <div className="hidden space-y-2">
           <Label htmlFor="createdByUserId">{t('created_by')}</Label>
 
           {isLoadingOptions
