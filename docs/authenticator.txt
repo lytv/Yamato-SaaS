@@ -1,0 +1,5 @@
+otpauth://totp/ngrok:ly.truong.dn%40gmail.com?secret=HNCOBRWMJFFTZVPTXAERNC74D2QGMPTM&issuer=ngrok
+otpauth://totp/Discord:ly.truong.dn%40gmail.com?secret=RYPWW3OIBXU7GCPH4677II5UZYUDVN7Z&issuer=Discord
+otpauth://totp/ngrok:ngatranymt%40gmail.com?secret=JMBD5FIAE2IYJ46KTV47SYHPIXKX6GFZ&issuer=ngrok
+otpauth://totp/GitHub:lytv?secret=NF3W2FWK73RBBGHT&issuer=GitHub
+otpauth://totp/Google:ly.truong.dn%40gmail.com?secret=enjxjrdsocxef6ert2tztk6wyn2txvdw&issuer=Google
