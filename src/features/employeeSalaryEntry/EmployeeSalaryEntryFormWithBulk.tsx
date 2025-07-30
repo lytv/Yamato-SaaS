@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { EmployeeSalaryEntryForm } from './EmployeeSalaryEntryForm';
@@ -30,6 +31,7 @@ export function EmployeeSalaryEntryFormWithBulk({
   mode = 'create',
 }: EmployeeSalaryEntryFormWithBulkProps) {
   const [formMode, setFormMode] = useState<FormMode>('bulk');
+  const t = useTranslations('employeeSalaryEntry');
 
   // If editing, only show single form
   if (mode === 'edit') {
@@ -37,7 +39,7 @@ export function EmployeeSalaryEntryFormWithBulk({
       <div className="p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold">
-            ✏️ Chỉnh sửa bản ghi lương
+            ✏️ {t('edit_title')}
           </h2>
         </div>
         <EmployeeSalaryEntryForm
@@ -61,7 +63,7 @@ export function EmployeeSalaryEntryFormWithBulk({
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-bold">
-                📝 Tạo bản ghi lương nhân viên mới
+                📝 {t('create_title')}
               </h2>
               <Button
                 type="button"
@@ -69,11 +71,11 @@ export function EmployeeSalaryEntryFormWithBulk({
                 onClick={() => setFormMode('bulk')}
                 className="bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
               >
-                🔢 Chuyển sang tạo nhiều bản ghi
+                🔢 {t('bulk.createSalaryEntry')}
               </Button>
             </div>
             <p className="text-sm text-gray-600">
-              Tạo một bản ghi lương cho nhân viên
+              {t('create_desc')}
             </p>
           </div>
           

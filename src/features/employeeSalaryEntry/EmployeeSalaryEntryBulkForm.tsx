@@ -8,6 +8,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Search, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -92,6 +93,8 @@ export function EmployeeSalaryEntryBulkForm({
   const { fetchQuantityLimit } = useProductionStepDetailQuantityLimit();
   const { fetchPlannedQuantity } = usePlanDetailPlannedQuantity();
   const { fetchPreviousQuantity } = useEmployeeSalaryEntryPreviousQuantity();
+
+  const t = useTranslations('employeeSalaryEntry');
 
 
   // Default work date (today)
@@ -196,9 +199,9 @@ export function EmployeeSalaryEntryBulkForm({
     if (matchedEmployee) {
       setSelectedEmployee(matchedEmployee);
       form.setValue('userId', matchedEmployee.userId);
-      setShortcutMessage(`✅ Found: ${matchedEmployee.fullName}`);
+      setShortcutMessage(`${t('bulk.employeeFound')} ${matchedEmployee.fullName}`);
     } else {
-      setShortcutError(`❌ No employee found with shortcut: "${shortcut}"`);
+      setShortcutError(`${t('bulk.employeeNotFound')} "${shortcut}"`);
     }
   }, [relationOptions?.userSyncs, form]);
 
@@ -230,8 +233,8 @@ export function EmployeeSalaryEntryBulkForm({
 
   const validateStepQuantity = useCallback(async (stepId: number, quantity: number) => {
     if (!selectedPlan || !selectedProduct || !selectedEmployee) {
-      return { valid: false, message: 'Please select plan, product, and employee first' };
-    }
+      return { valid: false, message: t('bulk.validationPleaseSelect') };
+    };
 
     try {
       // Fetch validation data
@@ -251,18 +254,18 @@ export function EmployeeSalaryEntryBulkForm({
       if (totalUsed > totalAllowed) {
         return {
           valid: false,
-          message: `Vượt quá giới hạn! Sử dụng: ${totalUsed}, Cho phép: ${totalAllowed}`,
+          message: t('bulk.validationExceededLimit', { used: totalUsed, allowed: totalAllowed }),
           details: { plannedQuantity, limitQuantity, previousQuantity }
         };
       }
 
       return {
         valid: true,
-        message: `Hợp lệ: ${totalUsed}/${totalAllowed}`,
+        message: t('bulk.validationValid', { used: totalUsed, allowed: totalAllowed }),
         details: { plannedQuantity, limitQuantity, previousQuantity }
       };
     } catch (error) {
-      return { valid: false, message: 'Error validating quantity' };
+      return { valid: false, message: t('bulk.validationError') };
     }
   }, [selectedPlan, selectedProduct, selectedEmployee, fetchQuantityLimit, fetchPlannedQuantity, fetchPreviousQuantity]);
 
@@ -422,8 +425,8 @@ export function EmployeeSalaryEntryBulkForm({
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold">💰 Tạo Bản Ghi Lương Nhân Viên</h1>
-              <p className="text-green-100 text-lg">Thực hiện theo 3 bước đơn giản</p>
+              <h1 className="text-2xl font-bold">💰 {t('bulk.createSalaryEntry')}</h1>
+              <p className="text-green-100 text-lg">{t('bulk.followSteps')}</p>
             </div>
           </div>
         </div>
@@ -433,18 +436,18 @@ export function EmployeeSalaryEntryBulkForm({
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
           <div className="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">1</div>
-          <h3 className="font-semibold text-blue-800">Chọn Nhân Viên</h3>
-          <p className="text-sm text-blue-600">Tìm và chọn nhân viên cần tạo lương</p>
+          <h3 className="font-semibold text-blue-800">{t('bulk.selectEmployee')}</h3>
+          <p className="text-sm text-blue-600">{t('bulk.selectEmployeeDesc')}</p>
         </div>
         <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 text-center">
           <div className="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">2</div>
-          <h3 className="font-semibold text-orange-800">Chọn Kế Hoạch & Sản Phẩm</h3>
-          <p className="text-sm text-orange-600">Chọn dự án và sản phẩm làm việc</p>
+          <h3 className="font-semibold text-orange-800">{t('bulk.selectPlanProduct')}</h3>
+          <p className="text-sm text-orange-600">{t('bulk.selectPlanProductDesc')}</p>
         </div>
         <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
           <div className="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">3</div>
-          <h3 className="font-semibold text-green-800">Chọn Công Đoạn</h3>
-          <p className="text-sm text-green-600">Đánh dấu công việc đã hoàn thành</p>
+          <h3 className="font-semibold text-green-800">{t('bulk.selectSteps')}</h3>
+          <p className="text-sm text-green-600">{t('bulk.selectStepsDesc')}</p>
         </div>
       </div>
 
@@ -457,8 +460,8 @@ export function EmployeeSalaryEntryBulkForm({
                 <div className="bg-white text-blue-500 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">1</div>
               </div>
               <div>
-                <h2 className="text-xl font-bold">👤 BƯỚC 1: CHỌN NHÂN VIÊN</h2>
-                <p className="text-blue-100">Tìm và chọn nhân viên cần tạo bản ghi lương</p>
+                <h2 className="text-xl font-bold">👤 {t('bulk.step1Title')}</h2>
+                <p className="text-blue-100">{t('bulk.step1Desc')}</p>
               </div>
             </div>
             <div className="p-6">
@@ -470,8 +473,8 @@ export function EmployeeSalaryEntryBulkForm({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-blue-800 text-lg">🔍 Tìm Kiếm Nhân Viên</h3>
-                    <p className="text-blue-600 text-sm">Nhập mã nhân viên hoặc chọn từ danh sách</p>
+                    <h3 className="font-bold text-blue-800 text-lg">🔍 {t('bulk.searchEmployee')}</h3>
+                    <p className="text-blue-600 text-sm">{t('bulk.searchEmployeeDesc')}</p>
                   </div>
                 </div>
                 
@@ -479,11 +482,11 @@ export function EmployeeSalaryEntryBulkForm({
                   <div className="bg-white p-4 rounded-lg border border-blue-300 shadow-sm">
                     <label className="mb-2 block text-lg font-bold text-blue-800 flex items-center">
                       <span className="bg-yellow-400 text-yellow-800 px-2 py-1 rounded text-sm mr-2">NHANH</span>
-                      📝 Nhập Mã Nhân Viên
+                      📝 {t('bulk.quickSearch')}
                     </label>
-                    <p className="text-sm text-gray-600 mb-3">Nhập mã nhân viên để tìm nhanh (ví dụ: NV001)</p>
+                    <p className="text-sm text-gray-600 mb-3">{t('bulk.quickSearchDesc')}</p>
                     <Input
-                      placeholder="Ví dụ: NV001, NV002..."
+                      placeholder={t('bulk.quickSearchPlaceholder')}
                       value={shortcutValue}
                       onChange={e => handleShortcutSearch(e.target.value)}
                       className="h-12 border-2 border-blue-300 text-lg font-medium"
@@ -509,14 +512,14 @@ export function EmployeeSalaryEntryBulkForm({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-lg font-bold text-blue-800 flex items-center">
-                            <span className="bg-blue-400 text-white px-2 py-1 rounded text-sm mr-2">CHỌN</span>
-                            👤 Chọn Nhân Viên *
+                            <span className="bg-blue-400 text-white px-2 py-1 rounded text-sm mr-2">{t('bulk.selectLabel')}</span>
+                            👤 {t('bulk.selectFromList')} *
                           </FormLabel>
-                          <p className="text-sm text-gray-600 mb-3">Chọn từ danh sách tất cả nhân viên</p>
+                          <p className="text-sm text-gray-600 mb-3">{t('bulk.selectFromListDesc')}</p>
                           <Select onValueChange={handleEmployeeChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 border-2 border-blue-300 text-lg">
-                                <SelectValue placeholder="👆 Nhấp để chọn nhân viên..." />
+                                <SelectValue placeholder={t('bulk.selectFromListPlaceholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -550,8 +553,8 @@ export function EmployeeSalaryEntryBulkForm({
                 <div className="bg-white text-orange-500 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">2</div>
               </div>
               <div>
-                <h2 className="text-xl font-bold">📋 BƯỚC 2: CHỌN DỰ ÁN & SẢN PHẨM</h2>
-                <p className="text-orange-100">Chọn dự án và sản phẩm mà nhân viên đang làm việc</p>
+                <h2 className="text-xl font-bold">📋 {t('bulk.step2Title')}</h2>
+                <p className="text-orange-100">{t('bulk.step2Desc')}</p>
               </div>
             </div>
             <div className="p-6">
@@ -563,8 +566,8 @@ export function EmployeeSalaryEntryBulkForm({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-orange-800 text-lg">📁 Chọn Dự Án Làm Việc</h3>
-                    <p className="text-orange-600 text-sm">Chọn theo thứ tự: Kế hoạch → Sản phẩm</p>
+                    <h3 className="font-bold text-orange-800 text-lg">📁 {t('bulk.selectProject')}</h3>
+                    <p className="text-orange-600 text-sm">{t('bulk.selectProjectDesc')}</p>
                   </div>
                 </div>
                 
@@ -576,17 +579,17 @@ export function EmployeeSalaryEntryBulkForm({
                       render={() => (
                         <FormItem>
                           <FormLabel className="text-lg font-bold text-orange-800 flex items-center">
-                            <span className="bg-purple-400 text-white px-2 py-1 rounded text-sm mr-2">TRƯỚC</span>
-                            📊 Chọn Kế Hoạch *
+                            <span className="bg-purple-400 text-white px-2 py-1 rounded text-sm mr-2">{t('bulk.firstLabel')}</span>
+                            📊 {t('bulk.selectPlan')} *
                           </FormLabel>
-                          <p className="text-sm text-gray-600 mb-3">Chọn kế hoạch/dự án đang thực hiện</p>
+                          <p className="text-sm text-gray-600 mb-3">{t('bulk.selectPlanDesc')}</p>
                           <Select
                             onValueChange={handlePlanChange}
                             value={selectedPlan?.id.toString() || ''}
                           >
                             <FormControl>
                               <SelectTrigger className="h-12 border-2 border-orange-300 text-lg">
-                                <SelectValue placeholder="👆 Nhấp để chọn kế hoạch..." />
+                                <SelectValue placeholder={t('bulk.selectPlanPlaceholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -612,11 +615,11 @@ export function EmployeeSalaryEntryBulkForm({
                       render={() => (
                         <FormItem>
                           <FormLabel className="text-lg font-bold text-orange-800 flex items-center">
-                            <span className="bg-green-400 text-white px-2 py-1 rounded text-sm mr-2">SAU</span>
-                            📦 Chọn Sản Phẩm *
+                            <span className="bg-green-400 text-white px-2 py-1 rounded text-sm mr-2">{t('bulk.secondLabel')}</span>
+                            📦 {t('bulk.selectProduct')} *
                           </FormLabel>
                           <p className="text-sm text-gray-600 mb-3">
-                            {!selectedPlan ? "⚠️ Hãy chọn kế hoạch trước" : "Chọn sản phẩm trong kế hoạch"}
+                            {!selectedPlan ? t('bulk.selectPlanFirst') : t('bulk.selectProductDesc')}
                           </p>
                           <Select
                             onValueChange={handleProductChange}
@@ -626,9 +629,9 @@ export function EmployeeSalaryEntryBulkForm({
                             <FormControl>
                               <SelectTrigger className={`h-12 border-2 text-lg ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-orange-300'}`}>
                                 <SelectValue placeholder={
-                                  !selectedPlan ? "⏳ Chọn kế hoạch trước..." : 
-                                  filteredProducts.length === 0 ? "❌ Không có sản phẩm" : 
-                                  "👆 Nhấp để chọn sản phẩm..."
+                                  !selectedPlan ? t('bulk.waitingPlan') : 
+                                  filteredProducts.length === 0 ? t('bulk.noProducts') : 
+                                  t('bulk.selectProductPlaceholder')
                                 } />
                               </SelectTrigger>
                             </FormControl>
@@ -656,7 +659,7 @@ export function EmployeeSalaryEntryBulkForm({
                 name="workDate"
                 render={({ field }) => (
                   <FormItem className="hidden">
-                    <FormLabel>Ngày làm việc *</FormLabel>
+                    <FormLabel>{t('bulk.workDate')} *</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -674,8 +677,8 @@ export function EmployeeSalaryEntryBulkForm({
                 <div className="bg-white text-green-500 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">3</div>
               </div>
               <div>
-                <h2 className="text-xl font-bold">✅ BƯỚC 3: CHỌN CÔNG ĐOẠN HOÀN THÀNH</h2>
-                <p className="text-green-100">Đánh dấu những công việc mà nhân viên đã hoàn thành</p>
+                <h2 className="text-xl font-bold">✅ {t('bulk.step3Title')}</h2>
+                <p className="text-green-100">{t('bulk.step3Desc')}</p>
               </div>
             </div>
             
@@ -689,14 +692,14 @@ export function EmployeeSalaryEntryBulkForm({
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-green-800 text-lg">📋 Danh Sách Công Đoạn</h3>
-                      <p className="text-green-600 text-sm">Tích chọn công đoạn đã hoàn thành và nhập số lượng</p>
+                      <h3 className="font-bold text-green-800 text-lg">📋 {t('bulk.stepsList')}</h3>
+                      <p className="text-green-600 text-sm">{t('bulk.stepsListDesc')}</p>
                     </div>
                   </div>
                   <div className="bg-white px-4 py-2 rounded-lg border border-green-300 shadow-sm">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">{selectedStepsCount}</div>
-                      <div className="text-xs text-green-600">Công đoạn đã chọn</div>
+                      <div className="text-xs text-green-600">{t('bulk.stepsSelected')}</div>
                     </div>
                   </div>
                 </div>
@@ -705,7 +708,7 @@ export function EmployeeSalaryEntryBulkForm({
                   <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg flex items-center">
                     <span className="text-red-600 mr-2">⚠️</span>
                     <p className="text-sm font-medium text-red-700">
-                      Có {invalidStepsCount} công đoạn không hợp lệ - vui lòng kiểm tra lại số lượng
+                      {t('bulk.invalidStepsWarning', { count: invalidStepsCount })}
                     </p>
                   </div>
                 )}
@@ -715,18 +718,18 @@ export function EmployeeSalaryEntryBulkForm({
               <div className="bg-white p-4 rounded-lg border border-green-300 shadow-sm mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-green-800 flex items-center">
-                    <span className="bg-blue-400 text-white px-2 py-1 rounded text-sm mr-2">TÌM</span>
-                    🔍 Tìm Kiếm Công Đoạn
+                    <span className="bg-blue-400 text-white px-2 py-1 rounded text-sm mr-2">{t('bulk.searchLabel')}</span>
+                    🔍 {t('bulk.searchSteps')}
                   </h4>
                   <div className="text-sm font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                    {filteredProductionSteps.length} / {productionSteps.length} công đoạn
+                    {t('bulk.stepsCount', { filtered: filteredProductionSteps.length, total: productionSteps.length })}
                   </div>
                 </div>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-green-400" />
                   <Input
                     type="text"
-                    placeholder="💡 Nhập tên công đoạn để tìm nhanh..."
+                    placeholder={t('bulk.searchStepsPlaceholder')}
                     value={stepFilter}
                     onChange={(e) => setStepFilter(e.target.value)}
                     className="pl-12 pr-12 h-12 border-2 border-green-300 text-lg"
@@ -760,10 +763,10 @@ export function EmployeeSalaryEntryBulkForm({
                         }}
                         className="border-2 border-white data-[state=checked]:bg-white data-[state=checked]:text-green-500"
                       />
-                      <span className="font-bold text-lg">📋 DANH SÁCH CÔNG ĐOẠN</span>
+                      <span className="font-bold text-lg">📋 {t('bulk.stepListHeader')}</span>
                     </div>
                     <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
-                      Tích để chọn công đoạn đã hoàn thành
+                      {t('bulk.stepListSubHeader')}
                     </span>
                   </div>
                 </div>
@@ -771,20 +774,20 @@ export function EmployeeSalaryEntryBulkForm({
                 <div className="bg-gray-50 p-3 border-b-2 border-green-200">
                   <div className="grid grid-cols-4 gap-4 text-sm font-bold text-gray-700">
                     <div className="flex items-center">
-                      <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-2">CHỌN</span>
-                      Tên Công Đoạn
+                      <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-2">{t('bulk.selectLabel')}</span>
+                      {t('bulk.stepName')}
                     </div>
                     <div className="flex items-center justify-center">
-                      <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs mr-2">SỐ LƯỢNG</span>
-                      Hoàn Thành
+                      <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs mr-2">{t('bulk.quantityLabel')}</span>
+                      {t('bulk.stepQuantity')}
                     </div>
                     <div className="flex items-center justify-center">
-                      <span className="bg-purple-500 text-white px-2 py-1 rounded text-xs mr-2">GHI CHÚ</span>
-                      Mô Tả
+                      <span className="bg-purple-500 text-white px-2 py-1 rounded text-xs mr-2">{t('bulk.notesLabel')}</span>
+                      {t('bulk.stepNotes')}
                     </div>
                     <div className="flex items-center justify-center">
-                      <span className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-2">TRẠNG THÁI</span>
-                      Kiểm Tra
+                      <span className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-2">{t('bulk.statusLabel')}</span>
+                      {t('bulk.stepStatus')}
                     </div>
                   </div>
                 </div>
@@ -823,7 +826,7 @@ export function EmployeeSalaryEntryBulkForm({
                             placeholder="1"
                           />
                         ) : (
-                          <div className="text-gray-400 text-sm">Chưa chọn</div>
+                          <div className="text-gray-400 text-sm">{t('bulk.notSelected')}</div>
                         )}
                       </div>
 
@@ -834,11 +837,11 @@ export function EmployeeSalaryEntryBulkForm({
                             value={step.salaryNote || ''}
                             onChange={(e) => handleNotesChange(step.id, e.target.value)}
                             className="min-h-10 resize-none border-2 border-purple-300 focus:border-purple-500"
-                            placeholder="💬 Thêm ghi chú..."
+                            placeholder={t('bulk.addNotes')}
                             rows={2}
                           />
                         ) : (
-                          <div className="text-gray-400 text-sm">Chưa chọn</div>
+                          <div className="text-gray-400 text-sm">{t('bulk.notSelected')}</div>
                         )}
                       </div>
 
@@ -860,7 +863,7 @@ export function EmployeeSalaryEntryBulkForm({
                             </div>
                           )
                         ) : (
-                          <div className="text-gray-400 text-sm">Chờ kiểm tra</div>
+                          <div className="text-gray-400 text-sm">{t('bulk.waitingCheck')}</div>
                         )}
                       </div>
                     </div>
@@ -871,15 +874,15 @@ export function EmployeeSalaryEntryBulkForm({
                 {filteredProductionSteps.length === 0 && productionSteps.length > 0 && (
                   <div className="py-12 text-center bg-gray-50">
                     <div className="text-6xl mb-4">🔍</div>
-                    <p className="text-lg font-medium text-gray-600 mb-2">Không tìm thấy công đoạn nào</p>
-                    <p className="text-sm text-gray-500 mb-4">Thử thay đổi từ khóa tìm kiếm</p>
+                    <p className="text-lg font-medium text-gray-600 mb-2">{t('bulk.noStepsFound')}</p>
+                    <p className="text-sm text-gray-500 mb-4">{t('bulk.changeSearchTerm')}</p>
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setStepFilter('')}
                       className="border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
                     >
-                    Xóa bộ lọc
+                    {t('bulk.clearFilter')}
                   </Button>
                 </div>
               )}
@@ -887,8 +890,8 @@ export function EmployeeSalaryEntryBulkForm({
               {productionSteps.length === 0 && selectedProduct && (
                 <div className="py-12 text-center bg-gray-50">
                   <div className="text-6xl mb-4">📋</div>
-                  <p className="text-lg font-medium text-gray-600 mb-2">Chưa có công đoạn nào</p>
-                  <p className="text-sm text-gray-500">Sản phẩm này chưa có công đoạn để chọn</p>
+                  <p className="text-lg font-medium text-gray-600 mb-2">{t('bulk.noStepsAvailable')}</p>
+                  <p className="text-sm text-gray-500">{t('bulk.noStepsForProduct')}</p>
                 </div>
               )}
               </div>
@@ -897,8 +900,8 @@ export function EmployeeSalaryEntryBulkForm({
                 <div className="mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg flex items-center">
                   <span className="text-red-600 mr-3 text-2xl">⚠️</span>
                   <div>
-                    <p className="font-bold text-red-800">Cần chọn ít nhất một công đoạn</p>
-                    <p className="text-sm text-red-600">Vui lòng tích chọn công đoạn mà nhân viên đã hoàn thành</p>
+                    <p className="font-bold text-red-800">{t('bulk.selectAtLeastOneStep')}</p>
+                    <p className="text-sm text-red-600">{t('bulk.selectStepInstructions')}</p>
                   </div>
                 </div>
               )}
@@ -913,7 +916,7 @@ export function EmployeeSalaryEntryBulkForm({
                   <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg flex items-center">
                     <span className="text-red-600 mr-3 text-xl">❌</span>
                     <div>
-                      <p className="font-bold text-red-800">Có lỗi xảy ra</p>
+                      <p className="font-bold text-red-800">{t('bulk.errorOccurred')}</p>
                       <p className="text-sm text-red-600">{createBulkMutation.error.message}</p>
                     </div>
                   </div>
@@ -930,7 +933,7 @@ export function EmployeeSalaryEntryBulkForm({
                   className="h-14 px-8 border-2 border-gray-300 hover:bg-gray-50 text-lg font-medium"
                 >
                   <span className="mr-2">❌</span>
-                  Hủy Bỏ
+                  {t('bulk.cancel')}
                 </Button>
                 <Button 
                   type="submit" 
@@ -940,12 +943,12 @@ export function EmployeeSalaryEntryBulkForm({
                   {isLoading ? (
                     <>
                       <span className="mr-2">⏳</span>
-                      Đang tạo {selectedStepsCount} bản ghi...
+                      {t('bulk.creating', { count: selectedStepsCount })}
                     </>
                   ) : (
                     <>
                       <span className="mr-2">💾</span>
-                      Tạo {selectedStepsCount} Bản Ghi Lương
+                      {t('bulk.createRecords', { count: selectedStepsCount })}
                     </>
                   )}
                 </Button>
