@@ -9,7 +9,8 @@ import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 
 import { getEmployeeSalaryEntries } from '@/libs/queries/employeeSalaryEntry';
-import { validateEmployeeSalaryEntryListParams } from '@/libs/validations/employeeSalaryEntry';
+import { employeeSalaryEntryListParamsSchema } from '@/libs/validations/employeeSalaryEntry';
+import { z } from 'zod';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,27 +21,118 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
 
-    // Parse parameters
-    const params = validateEmployeeSalaryEntryListParams({
-      page: 1, // Export all data
-      limit: 10000, // Large limit for export
-      search: searchParams.get('search') || undefined,
-      sortBy: searchParams.get('sortBy') || 'createdAt',
-      sortOrder: searchParams.get('sortOrder') || 'desc',
-      includeRelations: true, // Always include relations for export
-      status: searchParams.get('status') || undefined,
-      dateFrom: searchParams.get('dateFrom') || undefined,
-      dateTo: searchParams.get('dateTo') || undefined,
-      userId: searchParams.get('userId') || undefined,
-      productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
-      planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
-      productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
+    // Create export-specific schema with higher limit
+    const exportParamsSchema = employeeSalaryEntryListParamsSchema.extend({
+      limit: z.number().int().min(1).max(10000).default(10000), // Higher limit for export
     });
 
-    const employeeSalaryEntries = await getEmployeeSalaryEntries({
-      ...params,
-      owner_id: orgId || userId,
-    });
+    // Parse parameters with validation
+    let params;
+    try {
+      params = exportParamsSchema.parse({
+        page: 1, // Export all data
+        limit: 10000, // Large limit for export
+        search: searchParams.get('search') || undefined,
+        sortBy: searchParams.get('sortBy') || 'createdAt',
+        sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
+        includeRelations: true, // Always include relations for export
+        status: searchParams.get('status') || undefined,
+        dateFrom: searchParams.get('dateFrom') || undefined,
+        dateTo: searchParams.get('dateTo') || undefined,
+        workDateFrom: searchParams.get('workDateFrom') || undefined,
+        workDateTo: searchParams.get('workDateTo') || undefined,
+        userId: searchParams.get('userId') || undefined,
+        employeeCode: searchParams.get('employeeCode') || undefined,
+        employeeName: searchParams.get('employeeName') || undefined,
+        productCode: searchParams.get('productCode') || undefined,
+        productName: searchParams.get('productName') || undefined,
+        stepName: searchParams.get('stepName') || undefined,
+        productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
+        planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
+        productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
+      });
+    } catch (validationError) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid parameters', 
+          details: validationError instanceof Error ? validationError.message : 'Unknown validation error'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Query database with error handling
+    let employeeSalaryEntries;
+    try {
+      employeeSalaryEntries = await getEmployeeSalaryEntries({
+        ...params,
+        ownerId: orgId || userId,
+      });
+    } catch (queryError) {
+      return NextResponse.json(
+        { 
+          error: 'Database query failed', 
+          details: queryError instanceof Error ? queryError.message : 'Unknown database error'
+        },
+        { status: 500 }
+      );
+    }
+
+    // Handle empty data case
+    if (!Array.isArray(employeeSalaryEntries) || employeeSalaryEntries.length === 0) {
+      // Still create Excel file with headers only
+      const emptyData = [{
+        'Employee Name': '',
+        'Product Name': '',
+        'Product Code': '',
+        'Step Name': '',
+        'Step Code': '',
+        'Work Date': '',
+        'Entry Date': '',
+        'Actual Quantity': '',
+        'Planned Quantity': '',
+        'Limit Quantity': '',
+        'Unit Price': '',
+        'Total Amount': '',
+        'Status': '',
+        'Created At': '',
+        'Updated At': '',
+      }];
+      
+      // Create workbook with empty data
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(emptyData);
+      
+      // Set column widths
+      const columnWidths = [
+        { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 15 },
+        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+        { wch: 12 }, { wch: 15 }, { wch: 10 }, { wch: 18 }, { wch: 18 },
+      ];
+      worksheet['!cols'] = columnWidths;
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Employee Salary Entries');
+      
+      // Generate Excel buffer
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      
+      // Create filename with timestamp
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `employee-salary-entries-empty-${timestamp}.xlsx`;
+      
+      // Return Excel file
+      return new NextResponse(excelBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Length': excelBuffer.length.toString(),
+          'Cache-Control': 'no-cache',
+          'Access-Control-Expose-Headers': 'Content-Disposition',
+        },
+      });
+    }
 
     // Transform data for Excel export
     const exportData = employeeSalaryEntries.map((entry: any) => ({
@@ -102,12 +194,16 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': excelBuffer.length.toString(),
+        'Cache-Control': 'no-cache',
+        'Access-Control-Expose-Headers': 'Content-Disposition',
       },
     });
   } catch (error) {
-    console.error('Error exporting employee salary entries:', error);
     return NextResponse.json(
-      { error: 'Failed to export employee salary entries' },
+      { 
+        error: 'Failed to export employee salary entries',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

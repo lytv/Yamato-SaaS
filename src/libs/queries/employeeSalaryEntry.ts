@@ -158,13 +158,24 @@ export async function getEmployeeSalaryEntries(params: {
   sortOrder?: 'asc' | 'desc';
   includeRelations?: boolean;
   status?: string;
+  // Enhanced date filtering
   dateFrom?: string | Date;
   dateTo?: string | Date;
+  workDateFrom?: string | Date;
+  workDateTo?: string | Date;
+  // Enhanced employee filtering
   user_id?: string;
+  employeeCode?: string;
+  employeeName?: string;
+  // Enhanced product filtering
+  product_id?: number;
+  productCode?: string;
+  productName?: string;
+  // Production step filtering
   production_step_detail_id?: number;
+  stepName?: string;
   plan_id?: number;
-  product_id?: number; // 🆕 Add product_id parameter
-  owner_id?: string;
+  ownerId?: string;
 }): Promise<EmployeeSalaryEntryWithRelations[]> {
   const {
     page = 1,
@@ -174,13 +185,24 @@ export async function getEmployeeSalaryEntries(params: {
     sortOrder = 'desc',
     includeRelations = false,
     status,
+    // Enhanced date filtering
     dateFrom,
     dateTo,
+    workDateFrom,
+    workDateTo,
+    // Enhanced employee filtering
     user_id,
+    employeeCode,
+    employeeName,
+    // Enhanced product filtering
+    product_id,
+    productCode,
+    productName,
+    // Production step filtering
     production_step_detail_id,
+    stepName,
     plan_id,
-    product_id, // 🆕 Add product_id
-    owner_id,
+    ownerId,
   } = params;
 
   const offset = (page - 1) * limit;
@@ -280,11 +302,12 @@ export async function getEmployeeSalaryEntries(params: {
 
   // Build enhanced where conditions
   const conditions = [];
-  if (owner_id !== undefined) {
-    conditions.push(eq(employeeSalaryEntrySchema.owner_id, owner_id));
+  if (ownerId !== undefined) {
+    conditions.push(eq(employeeSalaryEntrySchema.owner_id, ownerId));
   }
+  
+  // General search conditions
   if (typeof search === 'string' && search.trim() !== '') {
-    // Create search conditions with proper type handling
     const searchConditions = [
       // Search in text fields
       ilike(employeeSalaryEntrySchema.salary_note, `%${search}%`),
@@ -302,17 +325,53 @@ export async function getEmployeeSalaryEntries(params: {
         sql`CAST(${productionStepDetailSchema.id} AS TEXT) ILIKE ${`%${search}%`}`,
       ] : [])
     ];
-    
-    // Use OR condition for search (any field can match)
     conditions.push(or(...searchConditions));
   }
+
+  // Status filter
   if (status) {
     conditions.push(eq(employeeSalaryEntrySchema.status, status));
   }
 
+  // Enhanced employee filtering
+  if (user_id !== undefined) {
+    conditions.push(eq(employeeSalaryEntrySchema.user_id, user_id));
+  }
+  if (employeeCode) {
+    conditions.push(ilike(userSyncSchema.shortcut, `%${employeeCode}%`));
+  }
+  if (employeeName) {
+    conditions.push(ilike(userSyncSchema.fullName, `%${employeeName}%`));
+  }
+
+  // Enhanced product filtering
+  if (product_id !== undefined) {
+    conditions.push(eq(employeeSalaryEntrySchema.product_id, product_id));
+  }
+  if (productCode) {
+    conditions.push(ilike(productSchema.productCode, `%${productCode}%`));
+  }
+  if (productName) {
+    conditions.push(ilike(productSchema.productName, `%${productName}%`));
+  }
+
+  // Production step filtering
+  if (production_step_detail_id !== undefined) {
+    conditions.push(eq(employeeSalaryEntrySchema.production_step_detail_id, production_step_detail_id));
+  }
+  if (stepName) {
+    conditions.push(ilike(productionStepSchema.stepName, `%${stepName}%`));
+  }
+
+  // Plan filtering
+  if (plan_id !== undefined) {
+    conditions.push(eq(employeeSalaryEntrySchema.plan_id, plan_id));
+  }
+
   let whereConditions = conditions.length > 0 ? (conditions.length === 1 ? conditions[0] : and(...conditions)) : undefined;
 
-  // Date range filter
+  // Enhanced date range filtering
+  // Legacy date filtering (for backward compatibility)
   if (dateFrom && dateTo) {
     whereConditions = and(
       whereConditions,
@@ -324,20 +383,16 @@ export async function getEmployeeSalaryEntries(params: {
     whereConditions = and(whereConditions, lte(employeeSalaryEntrySchema.work_date, typeof dateTo === 'string' ? dateTo : new Date(dateTo).toISOString().slice(0, 10)));
   }
 
-  // Relation filters
-
-  if (user_id !== undefined) {
-    whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.user_id, user_id));
-  }
-  if (production_step_detail_id !== undefined) {
-    whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.production_step_detail_id, production_step_detail_id));
-  }
-  if (plan_id !== undefined) {
-    whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.plan_id, plan_id));
-  }
-  // 🆕 Add product_id filter
-  if (product_id !== undefined) {
-    whereConditions = and(whereConditions, eq(employeeSalaryEntrySchema.product_id, product_id));
+  // Enhanced work date filtering
+  if (workDateFrom && workDateTo) {
+    whereConditions = and(
+      whereConditions,
+      between(employeeSalaryEntrySchema.work_date, typeof workDateFrom === 'string' ? workDateFrom : new Date(workDateFrom).toISOString().slice(0, 10), typeof workDateTo === 'string' ? workDateTo : new Date(workDateTo).toISOString().slice(0, 10)),
+    );
+  } else if (workDateFrom) {
+    whereConditions = and(whereConditions, gte(employeeSalaryEntrySchema.work_date, typeof workDateFrom === 'string' ? workDateFrom : new Date(workDateFrom).toISOString().slice(0, 10)));
+  } else if (workDateTo) {
+    whereConditions = and(whereConditions, lte(employeeSalaryEntrySchema.work_date, typeof workDateTo === 'string' ? workDateTo : new Date(workDateTo).toISOString().slice(0, 10)));
   }
 
   // 🆕 V4: Enhanced sorting with relation support

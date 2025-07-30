@@ -46,6 +46,38 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       if (params?.sortOrder) {
         searchParams.append('sortOrder', params.sortOrder);
       }
+      if (params?.workDateFrom) {
+        const workDateFrom = params.workDateFrom;
+        const dateString = typeof workDateFrom === 'string' 
+          ? workDateFrom 
+          : workDateFrom.toISOString().split('T')[0];
+        searchParams.append('workDateFrom', dateString!);
+      }
+      if (params?.workDateTo) {
+        const workDateTo = params.workDateTo;
+        const dateString = typeof workDateTo === 'string' 
+          ? workDateTo 
+          : workDateTo.toISOString().split('T')[0];
+        searchParams.append('workDateTo', dateString!);
+      }
+      if (params?.employeeCode) {
+        searchParams.append('employeeCode', params.employeeCode);
+      }
+      if (params?.employeeName) {
+        searchParams.append('employeeName', params.employeeName);
+      }
+      if (params?.productCode) {
+        searchParams.append('productCode', params.productCode);
+      }
+      if (params?.productName) {
+        searchParams.append('productName', params.productName);
+      }
+      if (params?.stepName) {
+        searchParams.append('stepName', params.stepName);
+      }
+      if (params?.status) {
+        searchParams.append('status', params.status);
+      }
 
       // Fetch export data
       const response = await fetch(`/api/employeeSalaryEntries/export?${searchParams.toString()}`, {
@@ -58,13 +90,18 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       if (!response.ok) {
         // Try to get error details from JSON response
         let errorMessage = 'Failed to export employeeSalaryEntrys';
+        let errorDetails = '';
+        
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
+          errorDetails = errorData.details || '';
         } catch {
           errorMessage = `Export failed with status ${response.status}`;
         }
-        throw new Error(errorMessage);
+        
+        const fullError = errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage;
+        throw new Error(fullError);
       }
 
       // Get filename from Content-Disposition header

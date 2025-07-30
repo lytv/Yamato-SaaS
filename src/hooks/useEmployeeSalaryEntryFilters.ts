@@ -1,6 +1,7 @@
 /**
  * useEmployeeSalaryEntryFilters Hook
- * Manages employeeSalaryEntry filtering and search state
+ * Enhanced version with advanced filtering capabilities
+ * Supports date range, employee search, product search, and production step filtering
  * Following TDD implementation and Yamato-SaaS patterns
  */
 
@@ -12,7 +13,20 @@ type EmployeeSalaryEntryFiltersReturn = EmployeeSalaryEntryFilters & {
   handleSearchChange: (search: string) => void;
   handleSortChange: (sortBy: EmployeeSalaryEntryFilters['sortBy']) => void;
   handleSortOrderChange: (sortOrder: EmployeeSalaryEntryFilters['sortOrder']) => void;
+  
+  // Enhanced filter handlers
+  handleDateRangeChange: (from?: Date | string, to?: Date | string) => void;
+  handleWorkDateRangeChange: (from?: Date | string, to?: Date | string) => void;
+  handleEmployeeFilterChange: (userId?: string, employeeCode?: string, employeeName?: string) => void;
+  handleProductFilterChange: (productId?: number, productCode?: string, productName?: string) => void;
+  handleProductionStepFilterChange: (productionStepDetailId?: number, stepName?: string) => void;
+  handleStatusChange: (status?: EmployeeSalaryEntryFilters['status']) => void;
+  handlePlanChange: (planId?: number) => void;
+  
   resetFilters: () => void;
+  resetAdvancedFilters: () => void;
+  hasActiveFilters: boolean;
+  hasAdvancedFilters: boolean;
 };
 
 const DEFAULT_FILTERS: EmployeeSalaryEntryFilters = {
@@ -27,6 +41,7 @@ export function useEmployeeSalaryEntryFilters(initialFilters?: Partial<EmployeeS
     ...initialFilters,
   });
 
+  // Basic handlers
   const handleSearchChange = useCallback((search: string) => {
     setFilters(prev => ({ ...prev, search }));
   }, []);
@@ -39,15 +54,122 @@ export function useEmployeeSalaryEntryFilters(initialFilters?: Partial<EmployeeS
     setFilters(prev => ({ ...prev, sortOrder }));
   }, []);
 
+  const handleStatusChange = useCallback((status?: EmployeeSalaryEntryFilters['status']) => {
+    setFilters(prev => ({ ...prev, status }));
+  }, []);
+
+  // Enhanced filter handlers
+  const handleDateRangeChange = useCallback((from?: Date | string, to?: Date | string) => {
+    setFilters(prev => ({
+      ...prev,
+      dateRange: from || to ? { from: from || '', to: to || '' } : undefined,
+    }));
+  }, []);
+
+  const handleWorkDateRangeChange = useCallback((from?: Date | string, to?: Date | string) => {
+    setFilters(prev => ({
+      ...prev,
+      workDateRange: from || to ? { from: from || '', to: to || '' } : undefined,
+    }));
+  }, []);
+
+  const handleEmployeeFilterChange = useCallback((userId?: string, employeeCode?: string, employeeName?: string) => {
+    setFilters(prev => ({
+      ...prev,
+      employee: userId || employeeCode || employeeName ? {
+        userId,
+        employeeCode,
+        employeeName,
+      } : undefined,
+    }));
+  }, []);
+
+  const handleProductFilterChange = useCallback((productId?: number, productCode?: string, productName?: string) => {
+    setFilters(prev => ({
+      ...prev,
+      product: productId || productCode || productName ? {
+        productId,
+        productCode,
+        productName,
+      } : undefined,
+    }));
+  }, []);
+
+  const handleProductionStepFilterChange = useCallback((productionStepDetailId?: number, stepName?: string) => {
+    setFilters(prev => ({
+      ...prev,
+      productionStep: productionStepDetailId || stepName ? {
+        productionStepDetailId,
+        stepName,
+      } : undefined,
+    }));
+  }, []);
+
+  const handlePlanChange = useCallback((planId?: number) => {
+    setFilters(prev => ({
+      ...prev,
+      relations: planId ? { planId } : undefined,
+    }));
+  }, []);
+
+  // Reset handlers
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
   }, []);
+
+  const resetAdvancedFilters = useCallback(() => {
+    setFilters(prev => ({
+      search: prev.search,
+      sortBy: prev.sortBy,
+      sortOrder: prev.sortOrder,
+      // Clear all advanced filters
+      status: undefined,
+      dateRange: undefined,
+      workDateRange: undefined,
+      employee: undefined,
+      product: undefined,
+      productionStep: undefined,
+      relations: undefined,
+    }));
+  }, []);
+
+  // Helper computed properties
+  const hasActiveFilters = !!(
+    filters.search ||
+    filters.status ||
+    filters.dateRange ||
+    filters.workDateRange ||
+    filters.employee ||
+    filters.product ||
+    filters.productionStep ||
+    filters.relations
+  );
+
+  const hasAdvancedFilters = !!(
+    filters.status ||
+    filters.dateRange ||
+    filters.workDateRange ||
+    filters.employee ||
+    filters.product ||
+    filters.productionStep ||
+    filters.relations
+  );
 
   return {
     ...filters,
     handleSearchChange,
     handleSortChange,
     handleSortOrderChange,
+    handleDateRangeChange,
+    handleWorkDateRangeChange,
+    handleEmployeeFilterChange,
+    handleProductFilterChange,
+    handleProductionStepFilterChange,
+    handleStatusChange,
+    handlePlanChange,
     resetFilters,
+    resetAdvancedFilters,
+    hasActiveFilters,
+    hasAdvancedFilters,
   };
 }

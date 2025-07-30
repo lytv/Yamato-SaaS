@@ -163,12 +163,23 @@ export type EmployeeSalaryEntryListParams = {
   readonly showAll?: boolean;
   readonly includeRelations?: boolean;
   readonly status?: 'draft' | 'submitted' | 'approved' | 'paid' | 'cancelled';
+  // Enhanced date filtering
   readonly dateFrom?: Date | string;
   readonly dateTo?: Date | string;
+  readonly workDateFrom?: Date | string;
+  readonly workDateTo?: Date | string;
+  // Enhanced employee filtering
   readonly userId?: string;
+  readonly employeeCode?: string; // Mã nhân viên (shortcut)
+  readonly employeeName?: string; // Tên nhân viên (fullName)
+  // Enhanced product filtering
+  readonly productId?: number;
+  readonly productCode?: string; // Mã sản phẩm
+  readonly productName?: string; // Tên sản phẩm
+  // Production step filtering
   readonly productionStepDetailId?: number;
+  readonly stepName?: string; // Tên công đoạn
   readonly planId?: number;
-  readonly productId?: number; // 🆕 Add product filter
 };
 
 export type EmployeeSalaryEntryListParamsWithOwner = EmployeeSalaryEntryListParams & {
@@ -237,20 +248,42 @@ export type EmployeeSalaryEntryStatsResponse = {
 // 🆕 V4: Enhanced filter state with complex options
 export type EmployeeSalaryEntryFilters = {
   search: string;
-  sortBy: 'createdAt' | 'updatedAt' | 'workDate' | 'id' | 'workDate' | 'status';
+  sortBy: 'createdAt' | 'updatedAt' | 'workDate' | 'id' | 'status';
   sortOrder: 'asc' | 'desc';
   status?: 'draft' | 'submitted' | 'approved' | 'paid' | 'cancelled';
-
+  
+  // Enhanced date filtering
   dateRange?: {
     from: Date | string;
     to: Date | string;
   };
+  workDateRange?: {
+    from: Date | string;
+    to: Date | string;
+  };
+
+  // Enhanced employee filtering
+  employee?: {
+    userId?: string;
+    employeeCode?: string; // Mã nhân viên
+    employeeName?: string; // Tên nhân viên
+  };
+
+  // Enhanced product filtering
+  product?: {
+    productId?: number;
+    productCode?: string; // Mã sản phẩm
+    productName?: string; // Tên sản phẩm
+  };
+
+  // Production step filtering
+  productionStep?: {
+    productionStepDetailId?: number;
+    stepName?: string; // Tên công đoạn
+  };
 
   relations?: {
-    userId?: string;
-    productionStepDetailId?: number;
     planId?: number;
-    productId?: number; // 🆕 Add product filter
   };
 };
 

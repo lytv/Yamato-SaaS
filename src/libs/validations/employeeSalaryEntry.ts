@@ -168,16 +168,30 @@ export const employeeSalaryEntryListParamsSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   showAll: z.boolean().default(false),
   includeRelations: z.boolean().default(false),
-  // 🆕 V4: Enhanced filtering options
+  // Enhanced filtering options
   status: z.enum(['draft', 'submitted', 'approved', 'paid', 'cancelled']).optional(),
 
+  // Enhanced date filtering
   dateFrom: z.union([z.string(), z.date()]).optional(),
   dateTo: z.union([z.string(), z.date()]).optional(),
+  workDateFrom: z.union([z.string(), z.date()]).optional(),
+  workDateTo: z.union([z.string(), z.date()]).optional(),
 
+  // Enhanced employee filtering
   userId: z.string().optional(),
+  employeeCode: z.string().trim().optional(),
+  employeeName: z.string().trim().optional(),
+
+  // Enhanced product filtering
+  productId: z.number().int().positive().optional(),
+  productCode: z.string().trim().optional(),
+  productName: z.string().trim().optional(),
+
+  // Production step filtering
   productionStepDetailId: z.number().int().positive().optional(),
+  stepName: z.string().trim().optional(),
+
   planId: z.number().int().positive().optional(),
-  productId: z.number().int().positive().optional(), // 🆕 Add productId validation
 });
 
 // 🆕 V4: Enhanced import row validation for Excel import with relations

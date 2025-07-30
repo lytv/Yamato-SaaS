@@ -29,27 +29,43 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
 
-    // 🆕 V4: Enhanced parameter parsing with complex filters
+    // 🆕 V4: Enhanced parameter parsing with advanced filters
     const params = validateEmployeeSalaryEntryListParams({
       page: Number(searchParams.get('page')) || 1,
       limit: Number(searchParams.get('limit')) || 10,
       search: searchParams.get('search') || undefined,
       sortBy: searchParams.get('sortBy') || 'createdAt',
       sortOrder: searchParams.get('sortOrder') || 'desc',
+      showAll: searchParams.get('showAll') === 'true',
       includeRelations: searchParams.get('includeRelations') === 'true',
       status: searchParams.get('status') || undefined,
 
+      // Enhanced date filtering
       dateFrom: searchParams.get('dateFrom') || undefined,
       dateTo: searchParams.get('dateTo') || undefined,
+      workDateFrom: searchParams.get('workDateFrom') || undefined,
+      workDateTo: searchParams.get('workDateTo') || undefined,
+
+      // Enhanced employee filtering
       userId: searchParams.get('userId') || undefined,
+      employeeCode: searchParams.get('employeeCode') || undefined,
+      employeeName: searchParams.get('employeeName') || undefined,
+
+      // Enhanced product filtering
+      productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
+      productCode: searchParams.get('productCode') || undefined,
+      productName: searchParams.get('productName') || undefined,
+
+      // Production step filtering
       productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
+      stepName: searchParams.get('stepName') || undefined,
+      
       planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
-      productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined, // 🆕 Add productId parameter
     });
 
     const employeeSalaryEntries = await getEmployeeSalaryEntries({
       ...params,
-      owner_id: orgId || userId,
+      ownerId: orgId || userId, // Fix parameter name to match validation schema
     });
 
 
@@ -57,7 +73,7 @@ export async function GET(request: NextRequest) {
     const totalCountParams = { ...params, page: 1, limit: 999999 };
     const totalResults = await getEmployeeSalaryEntries({
       ...totalCountParams,
-      owner_id: orgId || userId,
+      ownerId: orgId || userId, // Fix parameter name to match validation schema
     });
 
     const total = Array.isArray(totalResults) ? totalResults.length : 0;
@@ -72,14 +88,22 @@ export async function GET(request: NextRequest) {
         total,
         hasMore,
       },
-      // 🆕 V4: Include filter metadata
+      // 🆕 V4: Include enhanced filter metadata
       filters: {
         applied: {
           status: params.status,
           dateFrom: params.dateFrom,
           dateTo: params.dateTo,
+          workDateFrom: params.workDateFrom,
+          workDateTo: params.workDateTo,
           userId: params.userId,
+          employeeCode: params.employeeCode,
+          employeeName: params.employeeName,
+          productId: params.productId,
+          productCode: params.productCode,
+          productName: params.productName,
           productionStepDetailId: params.productionStepDetailId,
+          stepName: params.stepName,
           planId: params.planId,
         },
       },

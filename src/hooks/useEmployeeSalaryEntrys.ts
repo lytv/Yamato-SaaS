@@ -31,16 +31,32 @@ const DEFAULT_PARAMS = {
   ownerId: '', // TODO: lấy ownerId thực tế từ context/auth
 };
 
-export function useEmployeeSalaryEntrys({
-  search = DEFAULT_PARAMS.search,
-  sortBy = DEFAULT_PARAMS.sortBy,
-  sortOrder = DEFAULT_PARAMS.sortOrder,
-  page = DEFAULT_PARAMS.page,
-  limit = DEFAULT_PARAMS.limit,
-  ownerId,
-  showAll = DEFAULT_PARAMS.showAll,
-  includeRelations = true, // 🆕 Add includeRelations parameter with default true
-}: EmployeeSalaryEntryListParamsWithOwner & { includeRelations?: boolean }): EmployeeSalaryEntrysReturn {
+export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWithOwner & { includeRelations?: boolean }): EmployeeSalaryEntrysReturn {
+  const {
+    search = DEFAULT_PARAMS.search,
+    sortBy = DEFAULT_PARAMS.sortBy,
+    sortOrder = DEFAULT_PARAMS.sortOrder,
+    page = DEFAULT_PARAMS.page,
+    limit = DEFAULT_PARAMS.limit,
+    ownerId,
+    showAll = DEFAULT_PARAMS.showAll,
+    includeRelations = true,
+    // Enhanced filter parameters
+    status,
+    dateFrom,
+    dateTo,
+    workDateFrom,
+    workDateTo,
+    userId,
+    employeeCode,
+    employeeName,
+    productId,
+    productCode,
+    productName,
+    productionStepDetailId,
+    stepName,
+    planId,
+  } = params;
   const [state, setState] = useState<EmployeeSalaryEntrysState>({
     employeeSalaryEntrys: [],
     pagination: null,
@@ -65,8 +81,23 @@ export function useEmployeeSalaryEntrys({
         page,
         limit,
         showAll,
-        includeRelations, // 🆕 Add includeRelations parameter
-        ownerId: ownerId || '', // luôn truyền ownerId
+        includeRelations,
+        ownerId: ownerId || '',
+        // Enhanced filter parameters
+        status,
+        dateFrom,
+        dateTo,
+        workDateFrom,
+        workDateTo,
+        userId,
+        employeeCode,
+        employeeName,
+        productId,
+        productCode,
+        productName,
+        productionStepDetailId,
+        stepName,
+        planId,
       });
 
       if (result.success) {
@@ -94,7 +125,31 @@ export function useEmployeeSalaryEntrys({
         pagination: null,
       }));
     }
-  }, [search, sortBy, sortOrder, page, limit, showAll, includeRelations, ownerId]); // 🆕 Add includeRelations to dependency array
+  }, [
+    search, 
+    sortBy, 
+    sortOrder, 
+    page, 
+    limit, 
+    showAll, 
+    includeRelations, 
+    ownerId,
+    // Enhanced filter dependencies
+    status,
+    dateFrom,
+    dateTo,
+    workDateFrom,
+    workDateTo,
+    userId,
+    employeeCode,
+    employeeName,
+    productId,
+    productCode,
+    productName,
+    productionStepDetailId,
+    stepName,
+    planId,
+  ]); // Enhanced dependency array for all filter parameters
 
   const refresh = useCallback(() => {
     fetchData();
