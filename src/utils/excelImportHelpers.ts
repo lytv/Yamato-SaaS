@@ -1034,6 +1034,15 @@ export type ImportProductSubData = {
   rowNumber: number;
 };
 
+export type ImportPlanDetailData = {
+  planCode: string;
+  productName: string;
+  productSubDetail: string;
+  locationCode: string;
+  plannedQuantity: number;
+  rowNumber: number;
+};
+
 /**
  * Parse YMT Plan Excel file and extract product_sub data
  * @param buffer - Excel file buffer
@@ -1211,5 +1220,251 @@ export function validateProductSubImportData(data: ImportProductSubData[]): { is
     isValid: errors.length === 0,
     errors,
     validProductSubs,
+  };
+}
+
+/**
+ * Parse YMT Plan Excel file and extract plan_detail data
+ * @param buffer - Excel file buffer
+ * @returns Promise resolving to array of import plan_detail data
+ */
+export async function parseYmtPlanForPlanDetail(buffer: Buffer): Promise<ImportPlanDetailData[]> {
+  try {
+    // Read workbook from buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+
+    // Convert to JSON array
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (!Array.isArray(rawData) || rawData.length < 4) {
+      throw new Error('Excel file must have at least 4 rows of data');
+    }
+
+    // Extract plan_code from title - search in first 3 rows
+    let planCode = '';
+    
+    // Debug: Log first few rows to understand structure
+    
+    for (let i = 0; i < Math.min(3, rawData.length); i++) {
+      const row = rawData[i] as any[];
+      for (let j = 0; j < Math.min(5, row.length); j++) {
+        const cellValue = row[j]?.toString() || '';
+        
+        // Look for pattern like "CẮT THÁNG 08.2025"
+        // Take last 7 characters, then remove the dot: "08.2025" -> "082025"
+        if (cellValue.length >= 7) {
+          const last7Chars = cellValue.slice(-7); // Get last 7 characters
+          
+          // Check if it matches MM.YYYY pattern
+          const monthYearMatch = last7Chars.match(/^(\d{2})\.(\d{4})$/);
+          if (monthYearMatch) {
+            const month = monthYearMatch[1];
+            const year = monthYearMatch[2];
+            planCode = month + year; // "08" + "2025" = "082025"
+            break;
+          }
+        }
+        
+        // Fallback: Also try the old method for compatibility
+        const monthYearMatch = cellValue.match(/(\d{2})\.(\d{4})/);
+        if (monthYearMatch && !planCode) {
+          const month = monthYearMatch[1];
+          const year = monthYearMatch[2];
+          planCode = month + year; // "08" + "2025" = "082025"
+          break;
+        }
+      }
+      if (planCode) break;
+    }
+    
+    if (!planCode) {
+      throw new Error('Unable to extract plan code from title. Expected format: last 7 characters should be "MM.YYYY" (e.g., "08.2025")');
+    }
+
+    const planDetails: ImportPlanDetailData[] = [];
+    let currentProductName = ''; // Track current product name for merged cells
+    let currentProductSubDetail = ''; // Track current product sub detail for merged cells
+
+    // Start from row 4 (index 3) for data
+    for (let i = 3; i < rawData.length; i++) {
+      const row = rawData[i] as (string | number | undefined)[];
+      const rowNumber = i + 1; // Excel row number (1-based)
+
+      // Skip empty rows
+      if (!row || row.every(cell => !cell || cell.toString().trim() === '')) {
+        continue;
+      }
+
+      // Debug: Log entire row data first to understand structure
+      for (let idx = 0; idx < Math.min(10, row.length); idx++) {
+      }
+
+      // Column A (index 0): Product Name (NHA 01)
+      const columnA = row[0]?.toString().trim() || '';
+      // Column B (index 1): Product Sub Detail (CÔNG BẠC)
+      const columnB = row[1]?.toString().trim() || '';
+      
+      // Update current values if columns have data (for merged cells)
+      if (columnA) {
+        currentProductName = columnA;
+      }
+      if (columnB) {
+        currentProductSubDetail = columnB;
+      }
+      
+      // Search through columns to find all location codes and quantities
+      const locationQuantityPairs: Array<{locationCode: string, plannedQuantity: number}> = [];
+      
+      for (let idx = 2; idx < Math.min(15, row.length); idx++) {
+        const cellValue = row[idx];
+        if (cellValue !== undefined && cellValue !== null && cellValue !== '') {
+          const cellStr = cellValue.toString().trim();
+          const cellNum = parseInt(cellStr);
+          
+          
+          // If it's a small number (1-20), could be location code
+          if (!isNaN(cellNum) && cellNum >= 1 && cellNum <= 20) {
+            // Look for the quantity in the next few columns
+            for (let qIdx = idx + 1; qIdx < Math.min(idx + 4, row.length); qIdx++) {
+              const qValue = row[qIdx];
+              if (qValue !== undefined && qValue !== null && qValue !== '') {
+                const qStr = qValue.toString().trim();
+                const qNum = parseInt(qStr);
+                
+                if (!isNaN(qNum) && qNum > 0) {
+                  locationQuantityPairs.push({
+                    locationCode: cellStr,
+                    plannedQuantity: qNum
+                  });
+                  break; // Found quantity for this location, move to next location
+                }
+              }
+            }
+          }
+        }
+      }
+
+
+      // Create plan details for each location-quantity pair
+      // Use current values (handles merged cells) if row values are empty
+      const effectiveProductName = currentProductName;
+      const effectiveProductSubDetail = currentProductSubDetail;
+      
+      if (effectiveProductName && effectiveProductSubDetail && locationQuantityPairs.length > 0) {
+        locationQuantityPairs.forEach((pair) => {
+          const planDetail: ImportPlanDetailData = {
+            planCode,
+            productName: effectiveProductName,
+            productSubDetail: effectiveProductSubDetail,
+            locationCode: pair.locationCode,
+            plannedQuantity: pair.plannedQuantity,
+            rowNumber: rowNumber, // Keep original row number for each pair
+          };
+          
+          planDetails.push(planDetail);
+        });
+      }
+    }
+
+    return planDetails;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse YMT Plan Excel file for plan_detail: ${error.message}`);
+    }
+    throw new Error('Failed to parse YMT Plan Excel file for plan_detail: Unknown error');
+  }
+}
+
+/**
+ * Validate imported plan_detail data
+ * @param data - Array of import plan_detail data
+ * @returns Validation result with valid plan_details and errors
+ */
+export function validatePlanDetailImportData(data: ImportPlanDetailData[]): { 
+  isValid: boolean; 
+  errors: ImportError[]; 
+  validPlanDetails: ImportPlanDetailData[] 
+} {
+  const validPlanDetails: ImportPlanDetailData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No plan_detail data found in Excel file', value: null }],
+      validPlanDetails: [],
+    };
+  }
+
+  // Check for maximum row limit
+  if (data.length > 5000) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'Maximum 5000 rows allowed', value: data.length }],
+      validPlanDetails: [],
+    };
+  }
+
+  const seenCombinations = new Set<string>();
+
+  for (const planDetail of data) {
+    // Validate required fields
+    if (!planDetail.planCode || !planDetail.productName || !planDetail.productSubDetail || 
+        !planDetail.locationCode || planDetail.plannedQuantity === undefined) {
+      const missingField = !planDetail.planCode ? 'planCode' : 
+                         !planDetail.productName ? 'productName' : 
+                         !planDetail.productSubDetail ? 'productSubDetail' :
+                         !planDetail.locationCode ? 'locationCode' : 'plannedQuantity';
+      errors.push({
+        rowNumber: planDetail.rowNumber,
+        field: missingField,
+        message: 'Required field missing',
+        value: null,
+      });
+      continue;
+    }
+
+    // Validate planned quantity
+    if (planDetail.plannedQuantity < 0) {
+      errors.push({
+        rowNumber: planDetail.rowNumber,
+        field: 'plannedQuantity',
+        message: 'Planned quantity must be non-negative',
+        value: planDetail.plannedQuantity,
+      });
+      continue;
+    }
+
+    // Check for duplicates within import file
+    const combination = `${planDetail.planCode}_${planDetail.locationCode}_${planDetail.productSubDetail}`;
+    if (seenCombinations.has(combination)) {
+      errors.push({
+        rowNumber: planDetail.rowNumber,
+        field: 'combination',
+        message: 'Duplicate plan detail combination within import file',
+        value: combination,
+      });
+      continue;
+    }
+
+    seenCombinations.add(combination);
+    validPlanDetails.push(planDetail);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validPlanDetails,
   };
 }

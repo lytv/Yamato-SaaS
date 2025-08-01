@@ -1,0 +1,62 @@
+-- Table: public.product_sub
+
+-- DROP TABLE IF EXISTS public.product_sub;
+
+CREATE TABLE IF NOT EXISTS public.product_sub
+(
+    id integer NOT NULL DEFAULT nextval('product_sub_id_seq'::regclass),
+    owner_id text COLLATE pg_catalog."default" NOT NULL,
+    product_id integer NOT NULL,
+    product_code text COLLATE pg_catalog."default" NOT NULL,
+    product_sub_code text COLLATE pg_catalog."default" NOT NULL,
+    product_sub_detail text COLLATE pg_catalog."default" NOT NULL,
+    sub_category text COLLATE pg_catalog."default" NOT NULL,
+    color_code text COLLATE pg_catalog."default",
+    barcode text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    note text COLLATE pg_catalog."default",
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT product_sub_pkey PRIMARY KEY (id),
+    CONSTRAINT product_sub_product_id_product_id_fk FOREIGN KEY (product_id)
+        REFERENCES public.product (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.product_sub
+    OWNER to mac;
+-- Index: product_sub_category_idx
+
+-- DROP INDEX IF EXISTS public.product_sub_category_idx;
+
+CREATE INDEX IF NOT EXISTS product_sub_category_idx
+    ON public.product_sub USING btree
+    (sub_category COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: product_sub_code_owner_idx
+
+-- DROP INDEX IF EXISTS public.product_sub_code_owner_idx;
+
+CREATE UNIQUE INDEX IF NOT EXISTS product_sub_code_owner_idx
+    ON public.product_sub USING btree
+    (product_sub_code COLLATE pg_catalog."default" ASC NULLS LAST, owner_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: product_sub_color_idx
+
+-- DROP INDEX IF EXISTS public.product_sub_color_idx;
+
+CREATE INDEX IF NOT EXISTS product_sub_color_idx
+    ON public.product_sub USING btree
+    (color_code COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: product_sub_product_idx
+
+-- DROP INDEX IF EXISTS public.product_sub_product_idx;
+
+CREATE INDEX IF NOT EXISTS product_sub_product_idx
+    ON public.product_sub USING btree
+    (product_id ASC NULLS LAST)
+    TABLESPACE pg_default;

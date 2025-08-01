@@ -47,7 +47,22 @@ export async function GET() {
         uniqueLocationMap.set(item.locationCode, item);
       }
     });
-    const filteredLocationOptions = Array.from(uniqueLocationMap.values());
+    let filteredLocationOptions = Array.from(uniqueLocationMap.values());
+    
+    // If no location codes found, create some default options based on common location patterns
+    if (filteredLocationOptions.length === 0) {
+      filteredLocationOptions = [
+        { locationCode: '1', tableName: 'Bàn 1' },
+        { locationCode: '2', tableName: 'Bàn 2' },
+        { locationCode: '3', tableName: 'Bàn 3' },
+        { locationCode: '4', tableName: 'Bàn 4' },
+        { locationCode: '5', tableName: 'Bàn 5' },
+        { locationCode: 'B01', tableName: 'Bàn B01' },
+        { locationCode: 'B02', tableName: 'Bàn B02' },
+        { locationCode: 'B03', tableName: 'Bàn B03' },
+      ];
+    }
+    
 
     // Get product sub codes
     const productSubOptions = await db.select({

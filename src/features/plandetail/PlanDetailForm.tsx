@@ -118,12 +118,13 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     const loadRelationOptions = async () => {
       try {
         const response = await fetch('/api/plandetails/relations/options');
+        
         if (response.ok) {
           const data = await response.json();
           setRelationOptions(data.data);
         }
       } catch (error) {
-        console.error('Failed to load relation options:', error);
+        // Handle errors silently
       }
     };
 
@@ -235,12 +236,14 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {relationOptions.locationCodes?.map(option => (
-                            <SelectItem key={option.locationCode} value={option.locationCode}>
-                              {option.locationCode}
-                              {option.tableName && ` - ${option.tableName}`}
-                            </SelectItem>
-                          ))}
+                          {(() => {
+                            return relationOptions.locationCodes?.map(option => (
+                              <SelectItem key={option.locationCode} value={option.locationCode}>
+                                {option.locationCode}
+                                {option.tableName && ` - ${option.tableName}`}
+                              </SelectItem>
+                            ));
+                          })()}
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -14,8 +14,10 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { PlanDetailForm } from '@/features/plandetail/PlanDetailForm';
+import { PlanDetailImportModal } from '@/features/plandetail/PlanDetailImportModal';
 import { PlanDetailList } from '@/features/plandetail/PlanDetailList';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
+import type { ImportPlanDetailResult } from '@/types/plandetail';
 import type { PlanDetail } from '@/types/plandetail';
 
 type ModalState = {
@@ -154,6 +156,11 @@ export default function PlanDetailsPage(): JSX.Element {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handleImportSuccess = (_result: ImportPlanDetailResult) => {
+    // Trigger a refresh after successful import
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <main className="container mx-auto max-w-7xl space-y-8 p-6">
       {/* Hero Header */}
@@ -185,15 +192,25 @@ export default function PlanDetailsPage(): JSX.Element {
             </div>
           </div>
 
-          {/* Primary CTA */}
-          <Button
-            onClick={handleCreatePlanDetail}
-            disabled={isCreating}
-            className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
-          >
-            <CalendarDays className="w-5 h-5 mr-2" />
-            {t('plandetail.createNew', { default: 'Create Plan Detail' })}
-          </Button>
+          {/* Primary Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <PlanDetailImportModal
+              onSuccess={(result) => {
+                handleImportSuccess(result);
+              }}
+              onError={(error) => {
+                console.error('Import error:', error);
+              }}
+            />
+            <Button
+              onClick={handleCreatePlanDetail}
+              disabled={isCreating}
+              className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
+            >
+              <CalendarDays className="w-5 h-5 mr-2" />
+              {t('plandetail.createNew', { default: 'Tạo mới Chi tiết kế hoạch' })}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -219,12 +236,13 @@ export default function PlanDetailsPage(): JSX.Element {
         />
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <PlanDetailModal
         modal={modal}
         onClose={handleCloseModal}
         onSuccess={handleSuccess}
       />
+
     </main>
   );
 }

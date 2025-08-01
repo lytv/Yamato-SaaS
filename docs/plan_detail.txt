@@ -1,0 +1,67 @@
+-- Table: public.plan_detail
+
+-- DROP TABLE IF EXISTS public.plan_detail;
+
+CREATE TABLE IF NOT EXISTS public.plan_detail
+(
+    id integer NOT NULL DEFAULT nextval('plan_detail_id_seq'::regclass),
+    owner_id text COLLATE pg_catalog."default" NOT NULL,
+    plan_id integer NOT NULL,
+    location_code text COLLATE pg_catalog."default" NOT NULL,
+    location_type text COLLATE pg_catalog."default",
+    product_code text COLLATE pg_catalog."default" NOT NULL,
+    product_sub_code text COLLATE pg_catalog."default" NOT NULL,
+    planned_quantity integer NOT NULL,
+    actual_quantity integer DEFAULT 0,
+    planned_start_date date,
+    planned_end_date date,
+    actual_start_date date,
+    actual_end_date date,
+    status text COLLATE pg_catalog."default" DEFAULT 'planned'::text,
+    priority integer DEFAULT 5,
+    note text COLLATE pg_catalog."default",
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    CONSTRAINT plan_detail_pkey PRIMARY KEY (id),
+    CONSTRAINT plan_detail_plan_id_plan_id_fk FOREIGN KEY (plan_id)
+        REFERENCES public.plan (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.plan_detail
+    OWNER to mac;
+-- Index: plan_detail_location_idx
+
+-- DROP INDEX IF EXISTS public.plan_detail_location_idx;
+
+CREATE INDEX IF NOT EXISTS plan_detail_location_idx
+    ON public.plan_detail USING btree
+    (location_code COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: plan_detail_product_idx
+
+-- DROP INDEX IF EXISTS public.plan_detail_product_idx;
+
+CREATE INDEX IF NOT EXISTS plan_detail_product_idx
+    ON public.plan_detail USING btree
+    (product_code COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: plan_detail_status_idx
+
+-- DROP INDEX IF EXISTS public.plan_detail_status_idx;
+
+CREATE INDEX IF NOT EXISTS plan_detail_status_idx
+    ON public.plan_detail USING btree
+    (status COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: plan_detail_unique_idx
+
+-- DROP INDEX IF EXISTS public.plan_detail_unique_idx;
+
+CREATE UNIQUE INDEX IF NOT EXISTS plan_detail_unique_idx
+    ON public.plan_detail USING btree
+    (plan_id ASC NULLS LAST, location_code COLLATE pg_catalog."default" ASC NULLS LAST, product_sub_code COLLATE pg_catalog."default" ASC NULLS LAST, owner_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;

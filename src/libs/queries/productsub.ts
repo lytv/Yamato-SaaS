@@ -199,6 +199,27 @@ export async function getProductSubByCode(productSubCode: string, ownerId: strin
 }
 
 /**
+ * Get a productsubsub by productSubDetail with ownership check
+ * @param productSubDetail - ProductSub detail to check
+ * @param ownerId - Owner ID for authorization
+ * @returns Promise resolving to productsubsub or null if not found
+ */
+export async function getProductSubByDetail(productSubDetail: string, ownerId: string): Promise<ProductSubDb | null> {
+  const [productsubsub] = await db
+    .select()
+    .from(productSubSchema)
+    .where(
+      and(
+        eq(productSubSchema.productSubDetail, productSubDetail),
+        eq(productSubSchema.ownerId, ownerId),
+      ),
+    )
+    .limit(1);
+
+  return productsubsub ?? null;
+}
+
+/**
  * Update a productsubsub with ownership check
  * @param id - ProductSub ID
  * @param ownerId - Owner ID for authorization
