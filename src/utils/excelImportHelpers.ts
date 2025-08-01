@@ -1163,18 +1163,9 @@ export function validateProductSubImportData(data: ImportProductSubData[]): { is
   const seenProductSubCodes = new Set<string>();
 
   for (const productSubData of data) {
-    // Debug log
-    console.log(`Validating Row ${productSubData.rowNumber}:`, {
-      productName: productSubData.productName,
-      productSubDetail: productSubData.productSubDetail,
-      totalQuantity: productSubData.totalQuantity,
-      assignments: productSubData.assignments
-    });
-
     // Validate required fields
     if (!productSubData.productName || !productSubData.productSubDetail) {
       const missingField = !productSubData.productName ? 'productName' : 'productSubDetail';
-      console.log(`Row ${productSubData.rowNumber}: Missing ${missingField}`);
       errors.push({
         rowNumber: productSubData.rowNumber,
         field: missingField,

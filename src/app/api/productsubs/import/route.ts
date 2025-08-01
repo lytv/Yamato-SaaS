@@ -67,18 +67,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // Parse Excel using YMT Plan format
     const buffer = Buffer.from(await file.arrayBuffer());
-    console.log('Parsing Excel file...');
     const importData = await parseYmtPlanForProductSub(buffer);
-    console.log('Parsed data count:', importData.length);
 
     // Validate data
-    console.log('Validating data...');
     const validation = validateProductSubImportData(importData);
-    console.log('Validation result:', {
-      validCount: validation.validProductSubs.length,
-      errorCount: validation.errors.length,
-      errors: validation.errors
-    });
 
     // Create product_subs
     const ownerId = orgId || userId;
@@ -138,15 +130,9 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
 
   for (const productSubData of productSubs) {
     try {
-      console.log(`Processing ProductSub for row ${productSubData.rowNumber}:`, {
-        productName: productSubData.productName,
-        productSubDetail: productSubData.productSubDetail
-      });
-
       // Get product by name
       const product = await getProductByName(productSubData.productName, ownerId);
       if (!product) {
-        console.log(`Product not found: "${productSubData.productName}" for ownerId: ${ownerId}`);
         failed.push({
           rowNumber: productSubData.rowNumber,
           field: 'productName',
@@ -155,7 +141,6 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
         });
         continue;
       }
-      console.log(`Found product:`, { id: product.id, name: product.productName, code: product.productCode });
 
       // Generate product_sub_code: First letter of product name + sequence number
       const firstLetter = productSubData.productName.charAt(0).toUpperCase();
@@ -199,7 +184,6 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
         category: subCategory,
         notes: `Imported from YMT Plan`,
       };
-      console.log(`Creating ProductSub with data:`, createData);
       
       const dbProductSub = await createProductSub(createData);
 
