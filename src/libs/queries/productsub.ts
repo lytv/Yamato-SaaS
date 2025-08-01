@@ -6,7 +6,7 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { productSubSchema } from '@/models/Schema';
+import { productSubSchema, productSchema } from '@/models/Schema';
 import type {
   CreateProductSubInput,
   ProductSubDb,
@@ -23,17 +23,30 @@ import { db } from '../DB';
  * @returns Promise resolving to created productsubsub
  */
 export async function createProductSub(data: CreateProductSubInput): Promise<ProductSubDb> {
+  // Get productCode from product table
+  const [product] = await db
+    .select({ productCode: productSchema.productCode })
+    .from(productSchema)
+    .where(eq(productSchema.id, data.productId))
+    .limit(1);
+    
+  if (!product) {
+    throw new Error(`Product with ID ${data.productId} not found`);
+  }
+  
+  const insertData = {
+    ownerId: data.ownerId,
+    productId: data.productId,
+    productCode: product.productCode,
+    productSubCode: data.productsubCode,
+    productSubDetail: data.productsubName,
+    subCategory: data.category || 'DEFAULT',
+    note: data.notes || null,
+  };
+  
   const [productSub] = await db
     .insert(productSubSchema)
-    .values({
-      ownerId: data.ownerId,
-      productId: data.productId,
-      productCode: (data as any).productCode ?? '',
-      productSubCode: data.productsubCode,
-      productSubDetail: data.productsubName,
-      subCategory: data.category ?? '',
-      note: data.notes ?? '',
-    })
+    .values(insertData)
     .returning();
 
   if (!productSub) {

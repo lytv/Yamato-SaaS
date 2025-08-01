@@ -74,9 +74,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // Create productsubsubs using existing createProductSub function (loop approach)
     const ownerId = orgId || userId;
+    // Map ImportProductData to ProductSub format (reusing existing validation)
     const mappedProductSubs = validation.validProducts.map(item => ({
-      productsubCode: item.productCode,
-      productsubName: item.productName,
+      productsubCode: item.productCode, // productCode → productsubCode
+      productsubName: item.productName, // productName → productsubName  
       category: item.category,
       notes: item.notes,
       rowNumber: item.rowNumber,
