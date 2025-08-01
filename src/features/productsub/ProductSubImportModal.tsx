@@ -76,13 +76,13 @@ export function ProductSubImportModal({ isOpen, onClose, onSuccess }: ProductSub
         </button>
         <div className="p-6">
           <h2 id="import-modal-title" className="mb-4 text-xl font-semibold">
-            Import ProductSubs from Excel
+            Import Product Subs from YMT Plan
           </h2>
 
           {/* File Upload Section */}
           <div className="mb-6">
             <label htmlFor="file-upload" className="mb-2 block text-sm font-medium text-gray-700">
-              Select Excel File (.xlsx)
+              Select YMT Plan Excel File (.xlsx)
             </label>
             <input
               id="file-upload"
@@ -106,6 +106,15 @@ export function ProductSubImportModal({ isOpen, onClose, onSuccess }: ProductSub
             )}
           </div>
 
+          {/* Import Info */}
+          <div className="mb-4 rounded-md bg-blue-50 p-3">
+            <p className="text-sm text-blue-700">
+              <strong>Import Format:</strong> The system will read product sub data from YMT Plan format.
+              Product names will be matched with existing products in the database.
+              Product sub codes will be auto-generated.
+            </p>
+          </div>
+
           {/* Error Display */}
           {importError && (
             <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3">
@@ -124,11 +133,18 @@ export function ProductSubImportModal({ isOpen, onClose, onSuccess }: ProductSub
                 </p>
                 <p className="text-green-600">
                   Successfully created:
+                  {' '}
                   {importResult.successCount}
+                </p>
+                <p className="text-blue-600">
+                  Skipped (already exists):
+                  {' '}
+                  {importResult.skippedCount || 0}
                 </p>
                 {importResult.errorCount > 0 && (
                   <p className="text-red-600">
                     Failed:
+                    {' '}
                     {importResult.errorCount}
                   </p>
                 )}
@@ -182,7 +198,7 @@ export function ProductSubImportModal({ isOpen, onClose, onSuccess }: ProductSub
                 disabled={!selectedFile || isImporting}
                 className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {isImporting ? 'Importing...' : 'Import ProductSubs'}
+                {isImporting ? 'Importing...' : 'Import Product Subs'}
               </button>
             )}
           </div>

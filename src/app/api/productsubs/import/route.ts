@@ -1,7 +1,6 @@
 /**
  * ProductSub Import API Route
- * POST /api/productsubsubs/import - Import productsubsubs from Excel file
- * Following existing productsubsub API patterns and auth
+ * POST /api/productsubs/import - Import product_subs from YMT Plan Excel file
  */
 
 import { Buffer } from 'node:buffer';
@@ -10,16 +9,17 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
-import { createProductSub as createProductSubDb, getProductSubByCode } from '@/libs/queries/productsub';
+import { createProductSub, getProductSubByCode } from '@/libs/queries/productsub';
+import { getProductByName } from '@/libs/queries/product';
 import type { ImportError } from '@/types/import';
 import type { ProductSub } from '@/types/productsub';
-import { parseExcelFile, validateImportData } from '@/utils/excelImportHelpers';
+import { parseYmtPlanForProductSub, validateProductSubImportData, type ImportProductSubData } from '@/utils/excelImportHelpers';
 
 // Force dynamic rendering due to auth() usage and file upload
 export const dynamic = 'force-dynamic';
 
 /**
- * POST /api/productsubsubs/import - Import productsubsubs from Excel file
+ * POST /api/productsubs/import - Import product_subs from Excel file
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Native Next.js FormData handling (no multer needed)
+    // Native Next.js FormData handling
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -65,25 +65,24 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Parse Excel using existing utilities
+    // Parse Excel using YMT Plan format
     const buffer = Buffer.from(await file.arrayBuffer());
-    const importData = await parseExcelFile(buffer);
+    console.log('Parsing Excel file...');
+    const importData = await parseYmtPlanForProductSub(buffer);
+    console.log('Parsed data count:', importData.length);
 
-    // Validate data using existing schemas
-    const validation = validateImportData(importData);
+    // Validate data
+    console.log('Validating data...');
+    const validation = validateProductSubImportData(importData);
+    console.log('Validation result:', {
+      validCount: validation.validProductSubs.length,
+      errorCount: validation.errors.length,
+      errors: validation.errors
+    });
 
-    // Create productsubsubs using existing createProductSub function (loop approach)
+    // Create product_subs
     const ownerId = orgId || userId;
-    // Map ImportProductData to ProductSub format (reusing existing validation)
-    const mappedProductSubs = validation.validProducts.map(item => ({
-      productsubCode: item.productCode, // productCode → productsubCode
-      productsubName: item.productName, // productName → productsubName  
-      category: item.category,
-      notes: item.notes,
-      rowNumber: item.rowNumber,
-      productId: 1,
-    }));
-    const results = await processImportData(mappedProductSubs, ownerId);
+    const results = await processImportData(validation.validProductSubs, ownerId);
 
     return Response.json({
       success: true,
@@ -91,12 +90,13 @@ export async function POST(request: NextRequest): Promise<Response> {
         totalRows: importData.length,
         successCount: results.successful.length,
         errorCount: results.failed.length,
+        skippedCount: results.skipped,
         createdProductSubs: results.successful,
         errors: [...validation.errors, ...results.failed],
       },
     });
   } catch (error) {
-    console.error('Error importing productsubsubs:', error);
+    console.error('Error importing product_subs:', error);
 
     if (error instanceof ZodError) {
       return Response.json(
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     if (error instanceof Error) {
-      if (error.message.includes('Failed to parse Excel file')) {
+      if (error.message.includes('Failed to parse YMT Plan Excel file')) {
         return Response.json(
           { success: false, error: error.message, code: 'EXCEL_PARSE_ERROR' },
           { status: 400 },
@@ -126,44 +126,89 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 }
 
-// Helper function using existing createProductSub in loop
-async function processImportData(productsubs: Array<{ productsubCode: string; productsubName: string; category?: string; notes?: string; rowNumber: number; productId: number }>, ownerId: string): Promise<{
+// Helper function to process import data
+async function processImportData(productSubs: ImportProductSubData[], ownerId: string): Promise<{
   successful: ProductSub[];
   failed: ImportError[];
+  skipped: number;
 }> {
   const successful: ProductSub[] = [];
   const failed: ImportError[] = [];
+  let skipped = 0;
 
-  for (const productsubData of productsubs) {
+  for (const productSubData of productSubs) {
     try {
-      // Check for existing productsub code using existing function
-      const existing = await getProductSubByCode(productsubData.productsubCode, ownerId);
-      if (existing) {
+      console.log(`Processing ProductSub for row ${productSubData.rowNumber}:`, {
+        productName: productSubData.productName,
+        productSubDetail: productSubData.productSubDetail
+      });
+
+      // Get product by name
+      const product = await getProductByName(productSubData.productName, ownerId);
+      if (!product) {
+        console.log(`Product not found: "${productSubData.productName}" for ownerId: ${ownerId}`);
         failed.push({
-          rowNumber: productsubData.rowNumber,
-          field: 'productsubCode',
-          message: 'ProductSub code already exists',
-          value: productsubData.productsubCode,
+          rowNumber: productSubData.rowNumber,
+          field: 'productName',
+          message: `Product not found: ${productSubData.productName}`,
+          value: productSubData.productName,
+        });
+        continue;
+      }
+      console.log(`Found product:`, { id: product.id, name: product.productName, code: product.productCode });
+
+      // Generate product_sub_code: First letter of product name + sequence number
+      const firstLetter = productSubData.productName.charAt(0).toUpperCase();
+      const sequenceNumber = Math.floor(Math.random() * 1000) + 1; // You might want to implement proper sequence logic
+      const productSubCode = `${firstLetter}_${sequenceNumber.toString().padStart(3, '0')}`;
+
+      // Check for existing product_sub code (with retry logic for uniqueness)
+      let finalProductSubCode = productSubCode;
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (attempts < maxAttempts) {
+        const existing = await getProductSubByCode(finalProductSubCode, ownerId);
+        if (!existing) {
+          break;
+        }
+        attempts++;
+        const newSequence = Math.floor(Math.random() * 1000) + attempts * 100;
+        finalProductSubCode = `${firstLetter}_${newSequence.toString().padStart(3, '0')}`;
+      }
+
+      if (attempts >= maxAttempts) {
+        failed.push({
+          rowNumber: productSubData.rowNumber,
+          field: 'productSubCode',
+          message: 'Unable to generate unique product_sub_code after multiple attempts',
+          value: productSubCode,
         });
         continue;
       }
 
-      // Create productsub using existing database function
-      const dbProductSub = await createProductSubDb({
-        ownerId,
-        productId: productsubData.productId ?? 1,
-        productsubCode: productsubData.productsubCode,
-        productsubName: productsubData.productsubName,
-        category: productsubData.category,
-        notes: productsubData.notes,
-      });
+      // Extract sub_category from product_sub_detail (first two letters)
+      const subCategory = productSubData.productSubDetail.substring(0, 2).toUpperCase();
 
-      // Transform database productsub to API productsub type
-      const productsub: ProductSub = {
+      // Create product_sub using existing database function
+      const createData = {
+        ownerId,
+        productId: product.id,
+        productsubCode: finalProductSubCode,
+        productsubName: productSubData.productSubDetail,
+        category: subCategory,
+        notes: `Imported from YMT Plan`,
+      };
+      console.log(`Creating ProductSub with data:`, createData);
+      
+      const dbProductSub = await createProductSub(createData);
+
+      // Transform database product_sub to API product_sub type
+      const productSub: ProductSub = {
         id: dbProductSub.id,
         ownerId: dbProductSub.ownerId,
-        productCode: dbProductSub.productCode,
         productId: dbProductSub.productId,
+        productCode: dbProductSub.productCode,
         productSubCode: dbProductSub.productSubCode,
         productSubDetail: dbProductSub.productSubDetail,
         subCategory: dbProductSub.subCategory,
@@ -171,20 +216,20 @@ async function processImportData(productsubs: Array<{ productsubCode: string; pr
         barcode: dbProductSub.barcode,
         description: dbProductSub.description,
         note: dbProductSub.note,
-        createdAt: dbProductSub.createdAt,
-        updatedAt: dbProductSub.updatedAt,
+        createdAt: dbProductSub.createdAt.toISOString(),
+        updatedAt: dbProductSub.updatedAt.toISOString(),
       };
 
-      successful.push(productsub);
+      successful.push(productSub);
     } catch (error) {
       failed.push({
-        rowNumber: productsubData.rowNumber,
+        rowNumber: productSubData.rowNumber,
         field: 'general',
-        message: error instanceof Error ? error.message : 'Failed to create productsub',
-        value: productsubData.productsubCode,
+        message: error instanceof Error ? error.message : 'Failed to create product_sub',
+        value: productSubData.productSubDetail,
       });
     }
   }
 
-  return { successful, failed };
+  return { successful, failed, skipped };
 }

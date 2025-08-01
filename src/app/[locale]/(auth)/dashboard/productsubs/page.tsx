@@ -8,14 +8,16 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
-import { Layers } from 'lucide-react';
+import { Layers, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ProductSubForm } from '@/features/productsub/ProductSubForm';
+import { ProductSubImportModal } from '@/features/productsub/ProductSubImportModal';
 import { ProductSubList } from '@/features/productsub/ProductSubList';
 import { useProductSubMutations } from '@/hooks/useProductSubMutations';
+import type { ImportResult } from '@/types/import';
 import type { ProductSub } from '@/types/productsub';
 
 type ModalState = {
@@ -106,6 +108,7 @@ export default function ProductSubsPage(): JSX.Element {
     isOpen: false,
     mode: 'create',
   });
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -149,6 +152,11 @@ export default function ProductSubsPage(): JSX.Element {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handleImportSuccess = (_result: ImportResult) => {
+    // Trigger a refresh after successful import
+    setRefreshKey(prev => prev + 1);
+  };
+
   const handleDeleteSuccess = (_productsub: ProductSub) => {
     // Trigger a refresh after successful delete
     setRefreshKey(prev => prev + 1);
@@ -185,15 +193,24 @@ export default function ProductSubsPage(): JSX.Element {
             </div>
           </div>
 
-          {/* Primary CTA */}
-          <Button
-            onClick={handleCreateProductSub}
-            disabled={isCreating}
-            className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
-          >
-            <Layers className="w-5 h-5 mr-2" />
-            {t('productsub.createNew', { default: 'Create Product Sub' })}
-          </Button>
+          {/* Primary Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => setImportModalOpen(true)}
+              className="bg-white/10 text-white border border-white/20 hover:bg-white/20 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              {t('productsub.import', { default: 'Import from YMT Plan' })}
+            </Button>
+            <Button
+              onClick={handleCreateProductSub}
+              disabled={isCreating}
+              className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
+            >
+              <Layers className="w-5 h-5 mr-2" />
+              {t('productsub.createNew', { default: 'Create Product Sub' })}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -219,11 +236,18 @@ export default function ProductSubsPage(): JSX.Element {
         />
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <ProductSubModal
         modal={modal}
         onClose={handleCloseModal}
         onSuccess={handleSuccess}
+      />
+
+      {/* Import Modal */}
+      <ProductSubImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
       />
     </main>
   );

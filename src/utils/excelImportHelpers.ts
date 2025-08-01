@@ -1022,3 +1022,203 @@ export function validatePlanImportData(data: ImportPlanData[]): { isValid: boole
     validPlans,
   };
 }
+
+export type ImportProductSubData = {
+  productName: string;
+  productSubDetail: string;
+  totalQuantity: number;
+  assignments: Array<{
+    tableNumber: number;
+    quantity: number;
+  }>;
+  rowNumber: number;
+};
+
+/**
+ * Parse YMT Plan Excel file and extract product_sub data
+ * @param buffer - Excel file buffer
+ * @returns Promise resolving to array of import product_sub data
+ */
+export async function parseYmtPlanForProductSub(buffer: Buffer): Promise<ImportProductSubData[]> {
+  try {
+    // Read workbook from buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+
+    // Convert to JSON array
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (!Array.isArray(rawData) || rawData.length < 4) {
+      throw new Error('Excel file must have at least 4 rows of data');
+    }
+
+
+    const productSubs: ImportProductSubData[] = [];
+    let currentProductName = ''; // Track current product name for merged cells
+
+    // Start from row 4 (index 3) for data
+    for (let i = 3; i < rawData.length; i++) {
+      const row = rawData[i] as (string | number | undefined)[];
+      const rowNumber = i + 1; // Excel row number (1-based)
+
+      // Skip empty rows
+      if (!row || row.every(cell => !cell || cell.toString().trim() === '')) {
+        continue;
+      }
+
+      // Column A (index 0): Product Name (NHA 01)
+      const columnA = row[0]?.toString().trim() || '';
+      // Column B (index 1): Product Sub Detail (CÔNG BẠC)
+      const columnB = row[1]?.toString().trim() || '';
+      // Column C (index 2): Total quantity
+      const columnC = row[2];
+      // Column D (index 3): Table number (BÀN)
+      const columnD = row[3];
+      // Column E (index 4): Quantity for this table
+      const columnE = row[4];
+
+      // Update current product name if column A has value
+      if (columnA) {
+        currentProductName = columnA;
+      }
+
+      // If we have product sub detail and table assignment data
+      if (currentProductName && columnB && columnD !== undefined && columnE !== undefined) {
+        const productName = currentProductName; // Use tracked product name
+        const productSubDetail = columnB;
+        const totalQuantity = columnC ? parseInt(columnC.toString()) || 0 : 0;
+        const tableNumber = parseInt(columnD.toString()) || 0;
+        const quantity = parseInt(columnE.toString()) || 0;
+
+        // Find existing product_sub or create new one
+        let existingProductSub = productSubs.find(p => 
+          p.productName === productName && 
+          p.productSubDetail === productSubDetail
+        );
+
+        if (!existingProductSub) {
+          existingProductSub = {
+            productName,
+            productSubDetail,
+            totalQuantity,
+            assignments: [],
+            rowNumber,
+          };
+          productSubs.push(existingProductSub);
+        }
+
+        // Add table assignment
+        existingProductSub.assignments.push({
+          tableNumber,
+          quantity,
+        });
+      }
+    }
+
+    return productSubs;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse YMT Plan Excel file for product_sub: ${error.message}`);
+    }
+    throw new Error('Failed to parse YMT Plan Excel file for product_sub: Unknown error');
+  }
+}
+
+/**
+ * Validate imported product_sub data
+ * @param data - Array of import product_sub data
+ * @returns Validation result with valid product_subs and errors
+ */
+export function validateProductSubImportData(data: ImportProductSubData[]): { isValid: boolean; errors: ImportError[]; validProductSubs: ImportProductSubData[] } {
+  const validProductSubs: ImportProductSubData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No product_sub data found in Excel file', value: null }],
+      validProductSubs: [],
+    };
+  }
+
+  // Check for maximum row limit
+  if (data.length > 1000) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'Maximum 1000 rows allowed', value: data.length }],
+      validProductSubs: [],
+    };
+  }
+
+  const seenProductSubCodes = new Set<string>();
+
+  for (const productSubData of data) {
+    // Debug log
+    console.log(`Validating Row ${productSubData.rowNumber}:`, {
+      productName: productSubData.productName,
+      productSubDetail: productSubData.productSubDetail,
+      totalQuantity: productSubData.totalQuantity,
+      assignments: productSubData.assignments
+    });
+
+    // Validate required fields
+    if (!productSubData.productName || !productSubData.productSubDetail) {
+      const missingField = !productSubData.productName ? 'productName' : 'productSubDetail';
+      console.log(`Row ${productSubData.rowNumber}: Missing ${missingField}`);
+      errors.push({
+        rowNumber: productSubData.rowNumber,
+        field: missingField,
+        message: 'Required field missing',
+        value: !productSubData.productName ? productSubData.productName : productSubData.productSubDetail,
+      });
+      continue;
+    }
+
+    // Generate product_sub_code for duplicate check
+    const productSubCode = `${productSubData.productName}_${productSubData.productSubDetail}`.replace(/\s+/g, '_').toUpperCase();
+    
+    // Check for duplicate product_sub codes within the import file
+    if (seenProductSubCodes.has(productSubCode.toLowerCase())) {
+      errors.push({
+        rowNumber: productSubData.rowNumber,
+        field: 'productSubCode',
+        message: 'Duplicate product_sub combination within import file',
+        value: productSubCode,
+      });
+      continue;
+    }
+
+    // Validate assignments
+    if (!productSubData.assignments || productSubData.assignments.length === 0) {
+      errors.push({
+        rowNumber: productSubData.rowNumber,
+        field: 'assignments',
+        message: 'No table assignments found',
+        value: 'empty',
+      });
+      continue;
+    }
+
+    // Skip total quantity validation - not needed for database
+    // Total quantity is just for reference in the notes
+
+    seenProductSubCodes.add(productSubCode.toLowerCase());
+    validProductSubs.push(productSubData);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validProductSubs,
+  };
+}

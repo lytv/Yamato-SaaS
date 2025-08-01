@@ -171,6 +171,27 @@ export async function getProductByCode(productCode: string, ownerId: string): Pr
 }
 
 /**
+ * Get a product by productName with ownership check (for import functionality)
+ * @param productName - Product name to check
+ * @param ownerId - Owner ID for authorization
+ * @returns Promise resolving to product or null if not found
+ */
+export async function getProductByName(productName: string, ownerId: string): Promise<ProductDb | null> {
+  const [product] = await db
+    .select()
+    .from(productSchema)
+    .where(
+      and(
+        eq(productSchema.productName, productName),
+        eq(productSchema.ownerId, ownerId),
+      ),
+    )
+    .limit(1);
+
+  return product ?? null;
+}
+
+/**
  * Update a product with ownership check
  * @param id - Product ID
  * @param ownerId - Owner ID for authorization

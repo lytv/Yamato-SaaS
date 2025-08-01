@@ -1,37 +1,86 @@
-import { useState } from 'react';
+/**
+ * useProductSubImport Hook
+ * Manages product_sub import functionality
+ */
 
-import { importProductSubs } from '@/libs/api/productsubs';
+import { useCallback, useState } from 'react';
+
 import type { ImportResult } from '@/types/import';
 
-export function useProductSubImport() {
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+type ImportState = {
+  isImporting: boolean;
+  importError: string | null;
+  importResult: ImportResult | null;
+};
 
-  const importProductSubsHandler = async (file: File) => {
-    setIsImporting(true);
-    setImportError(null);
-    setImportResult(null);
+type ImportReturn = ImportState & {
+  importProductSubs: (file: File) => Promise<ImportResult>;
+  clearError: () => void;
+  clearResult: () => void;
+};
+
+export function useProductSubImport(): ImportReturn {
+  const [state, setState] = useState<ImportState>({
+    isImporting: false,
+    importError: null,
+    importResult: null,
+  });
+
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, importError: null }));
+  }, []);
+
+  const clearResult = useCallback(() => {
+    setState(prev => ({ ...prev, importResult: null }));
+  }, []);
+
+  const importProductSubs = useCallback(async (file: File): Promise<ImportResult> => {
+    setState(prev => ({ ...prev, isImporting: true, importError: null }));
+
     try {
-      const result = await importProductSubs(file);
-      setImportResult(result);
-      return result;
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Import failed');
-      return undefined;
-    } finally {
-      setIsImporting(false);
-    }
-  };
+      const formData = new FormData();
+      formData.append('file', file);
 
-  const clearError = () => setImportError(null);
-  const clearResult = () => setImportResult(null);
+      const response = await fetch('/api/productsubs/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to import product_subs';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = `Import failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      const importResult = result.data;
+
+      setState(prev => ({
+        ...prev,
+        isImporting: false,
+        importResult,
+      }));
+
+      return importResult;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to import product_subs';
+      setState(prev => ({
+        ...prev,
+        isImporting: false,
+        importError: errorMessage,
+      }));
+      throw error;
+    }
+  }, []);
 
   return {
-    importProductSubs: importProductSubsHandler,
-    isImporting,
-    importError,
-    importResult,
+    ...state,
+    importProductSubs,
     clearError,
     clearResult,
   };
