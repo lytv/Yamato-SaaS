@@ -236,14 +236,12 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {(() => {
-                            return relationOptions.locationCodes?.map(option => (
-                              <SelectItem key={option.locationCode} value={option.locationCode}>
-                                {option.locationCode}
-                                {option.tableName && ` - ${option.tableName}`}
-                              </SelectItem>
-                            ));
-                          })()}
+                          {relationOptions.locationCodes?.map(option => (
+                            <SelectItem key={option.locationCode} value={option.locationCode}>
+                              {option.locationCode}
+                              {option.tableName && ` - ${option.tableName}`}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

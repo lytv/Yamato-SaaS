@@ -39,29 +39,61 @@ export async function GET() {
       .where(isNotNull(workTableSchema.locationCode))
       .orderBy(asc(workTableSchema.locationCode));
 
-    // Remove duplicates manually
+    // Fallback: Use table_code as location if location_code is empty
+    const alternativeLocationOptions = await db.select({
+      locationCode: workTableSchema.tableCode, // Use table_code as locationCode
+      tableName: workTableSchema.tableName,
+    }).from(workTableSchema)
+      .where(isNotNull(workTableSchema.tableCode))
+      .orderBy(asc(workTableSchema.tableCode));
+
+    // Create a comprehensive location map starting with defaults 1-12
+    const defaultLocations = [
+      { locationCode: '1', tableName: 'Bàn 1' },
+      { locationCode: '2', tableName: 'Bàn 2' },
+      { locationCode: '3', tableName: 'Bàn 3' },
+      { locationCode: '4', tableName: 'Bàn 4' },
+      { locationCode: '5', tableName: 'Bàn 5' },
+      { locationCode: '6', tableName: 'Bàn 6' },
+      { locationCode: '7', tableName: 'Bàn 7' },
+      { locationCode: '8', tableName: 'Bàn 8' },
+      { locationCode: '9', tableName: 'Bàn 9' },
+      { locationCode: '10', tableName: 'Bàn 10' },
+      { locationCode: '11', tableName: 'Bàn 11' },
+      { locationCode: '12', tableName: 'Bàn 12' },
+    ];
+
+    // Start with default locations
+    const locationMap = new Map<string, { locationCode: string; tableName: string }>();
+    defaultLocations.forEach(item => {
+      locationMap.set(item.locationCode, item);
+    });
+
+    // Override with database data if available
     type LocationItem = { locationCode: string | null; tableName: string | null };
-    const uniqueLocationMap = new Map<string, LocationItem>();
-    (locationOptions as LocationItem[]).forEach(item => {
-      if (item.locationCode && !uniqueLocationMap.has(item.locationCode)) {
-        uniqueLocationMap.set(item.locationCode, item);
+    
+    // Use primary locationOptions first, fallback to alternative if empty
+    const primaryDataUsed = locationOptions.length > 0;
+    const dataToUse = primaryDataUsed ? locationOptions : alternativeLocationOptions;
+    
+    (dataToUse as LocationItem[]).forEach(item => {
+      if (item.locationCode && item.tableName) {
+        locationMap.set(item.locationCode, {
+          locationCode: item.locationCode,
+          tableName: item.tableName
+        });
       }
     });
-    let filteredLocationOptions = Array.from(uniqueLocationMap.values());
-    
-    // If no location codes found, create some default options based on common location patterns
-    if (filteredLocationOptions.length === 0) {
-      filteredLocationOptions = [
-        { locationCode: '1', tableName: 'Bàn 1' },
-        { locationCode: '2', tableName: 'Bàn 2' },
-        { locationCode: '3', tableName: 'Bàn 3' },
-        { locationCode: '4', tableName: 'Bàn 4' },
-        { locationCode: '5', tableName: 'Bàn 5' },
-        { locationCode: 'B01', tableName: 'Bàn B01' },
-        { locationCode: 'B02', tableName: 'Bàn B02' },
-        { locationCode: 'B03', tableName: 'Bàn B03' },
-      ];
-    }
+
+    const filteredLocationOptions = Array.from(locationMap.values()).sort((a, b) => {
+      // Sort numerically for number codes, then alphabetically
+      const aNum = parseInt(a.locationCode);
+      const bNum = parseInt(b.locationCode);
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return aNum - bNum;
+      }
+      return a.locationCode.localeCompare(b.locationCode);
+    });
     
 
     // Get product sub codes

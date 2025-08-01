@@ -1,0 +1,28 @@
+
+> saas-boilerplate@1.2.44 dev
+> run-p dev:*
+
+
+> saas-boilerplate@1.2.44 dev:next
+> next dev
+
+
+> saas-boilerplate@1.2.44 dev:spotlight
+> spotlight-sidecar
+
+🔎 [Spotlight] Checking if we are already running on port 8969
+🔎 [Spotlight] Sidecar is already running on port 8969
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.30
+  - Local:        http://localhost:3001
+  - Environments: .env
+  - Experiments (use with caution):
+    · instrumentationHook
+
+ ✓ Starting...
+ ○ Compiling /instrumentation ...
+ ✓ Compiled /instrumentation in 1178ms (1099 modules)
+ ✓ Ready in 3.4s
+ ✓ Compiled /src/middleware in 263ms (644 modules)
+API auth error: [Error: NEXT_NOT_FOUND] { digest: 'NEXT_NOT_FOUND' }
+[?25h

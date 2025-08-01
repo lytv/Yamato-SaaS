@@ -5,7 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { Download, Search, Filter, Calendar, Edit, Trash2, Package, MapPin, Clock, Grid3X3, List, Target, CheckCircle } from 'lucide-react';
+import { Download, Search, Filter, Calendar, Edit, Trash2, Package, MapPin, Clock, Grid3X3, List, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
@@ -31,7 +31,11 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-  const [relationOptions, setRelationOptions] = useState<{ products: { productCode: string; productName: string }[] }>({ products: [] });
+  const [relationOptions, setRelationOptions] = useState<{ 
+    products: { productCode: string; productName: string }[]; 
+    locationCodes: { locationCode: string; tableName?: string }[];
+    productSubCodes: { productSubCode: string; productSubDetail: string; productCode: string }[];
+  }>({ products: [], locationCodes: [], productSubCodes: [] });
 
   const {
     filters,
@@ -63,7 +67,11 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
         const res = await fetch('/api/plandetails/relations/options');
         if (res.ok) {
           const data = await res.json();
-          setRelationOptions({ products: data.data.products || [] });
+          setRelationOptions({ 
+            products: data.data.products || [], 
+            locationCodes: data.data.locationCodes || [],
+            productSubCodes: data.data.productSubCodes || []
+          });
         }
       } catch (err) {
         // silent
@@ -147,6 +155,42 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Get display information for plan detail
+  const getDisplayInfo = (plandetail: PlanDetailWithRelations) => {
+    // Get product name
+    let productName = plandetail.productCode || '-';
+    if (plandetail.productCode && Array.isArray(relationOptions?.products)) {
+      const found = relationOptions.products.find(p => p.productCode === plandetail.productCode);
+      if (found) {
+        productName = found.productName;
+      }
+    }
+
+    // Get product sub detail (this is what we want to show as "Product")
+    let productSubDetail = plandetail.productSubCode || '-';
+    if (plandetail.productSubCode && Array.isArray(relationOptions?.productSubCodes)) {
+      const found = relationOptions.productSubCodes.find(ps => ps.productSubCode === plandetail.productSubCode);
+      if (found) {
+        productSubDetail = found.productSubDetail;
+      }
+    }
+
+    // Get location name
+    let locationName = plandetail.locationCode || '-';
+    if (plandetail.locationCode && Array.isArray(relationOptions?.locationCodes)) {
+      const found = relationOptions.locationCodes.find(loc => loc.locationCode === plandetail.locationCode);
+      if (found && found.tableName) {
+        locationName = found.tableName;
+      }
+    }
+
+    return {
+      productName,
+      productSubDetail,
+      locationName
+    };
   };
 
   // Loading state
@@ -320,14 +364,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {plandetails.map((plandetailRaw) => {
             const plandetail = plandetailRaw as PlanDetailWithRelations;
-            // Get productName from relationOptions if available
-            let productName = '-';
-            if (plandetail.productCode && Array.isArray(relationOptions?.products)) {
-              const found = relationOptions.products.find(p => p.productCode === plandetail.productCode);
-              if (found) {
-                productName = found.productName;
-              }
-            }
+            const { productName, productSubDetail, locationName } = getDisplayInfo(plandetail);
             
             return (
               <div key={plandetail.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
@@ -353,7 +390,6 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                   {/* Status Badge */}
                   {plandetail.status && (
                     <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                      <CheckCircle className="w-3 h-3 mr-1" />
                       {plandetail.status}
                     </div>
                   )}
@@ -363,47 +399,37 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                 <div className="space-y-3 mb-4">
                   {/* Location & Product Info */}
                   <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-1 gap-3 text-sm">
                       {plandetail.locationCode && (
                         <div className="flex items-center text-gray-600">
                           <MapPin className="w-4 h-4 mr-2 text-blue-500" />
                           <span className="font-medium">Location:</span>
-                          <span className="ml-1 truncate">{plandetail.locationCode}</span>
+                          <span className="ml-1 truncate font-semibold text-gray-800">{locationName}</span>
                         </div>
                       )}
-                      {plandetail.productCode && (
+                      {plandetail.productSubCode && (
                         <div className="flex items-center text-gray-600">
                           <Package className="w-4 h-4 mr-2 text-blue-500" />
                           <span className="font-medium">Product:</span>
-                          <span className="ml-1 truncate">{plandetail.productCode}</span>
+                          <span className="ml-1 truncate font-semibold text-gray-800">{productSubDetail}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Quantities */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Target className="w-4 h-4 mr-1 text-blue-500" />
-                        <span>Planned: {plandetail.plannedQuantity || 0}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
-                        <span>Actual: {plandetail.actualQuantity || 0}</span>
+                  {/* Planned Quantity */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                    <div className="flex items-center justify-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-4">
+                          <Target className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-blue-600 font-medium uppercase tracking-wider">Planned Quantity</span>
+                          <div className="text-3xl font-bold text-blue-700">{plandetail.plannedQuantity || 0}</div>
+                        </div>
                       </div>
                     </div>
-                    {/* Progress Bar */}
-                    {plandetail.plannedQuantity && plandetail.plannedQuantity > 0 && (
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 rounded-full transition-all duration-300"
-                          style={{ 
-                            width: `${Math.min(100, ((plandetail.actualQuantity || 0) / plandetail.plannedQuantity) * 100)}%` 
-                          }}
-                        ></div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Dates */}
@@ -456,11 +482,10 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
           {/* List Header */}
           <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
             <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <div className="col-span-3">Plan & Product</div>
+              <div className="col-span-4">Plan & Product</div>
               <div className="col-span-2">Location</div>
-              <div className="col-span-2">Quantities</div>
-              <div className="col-span-2">Progress</div>
-              <div className="col-span-2">Dates</div>
+              <div className="col-span-2">Planned Qty</div>
+              <div className="col-span-3">Dates</div>
               <div className="col-span-1">Actions</div>
             </div>
           </div>
@@ -469,20 +494,13 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
           <div className="divide-y divide-gray-100">
             {plandetails.map((plandetailRaw) => {
               const plandetail = plandetailRaw as PlanDetailWithRelations;
-              // Get productName from relationOptions if available
-              let productName = '-';
-              if (plandetail.productCode && Array.isArray(relationOptions?.products)) {
-                const found = relationOptions.products.find(p => p.productCode === plandetail.productCode);
-                if (found) {
-                  productName = found.productName;
-                }
-              }
+              const { productName, productSubDetail, locationName } = getDisplayInfo(plandetail);
               
               return (
                 <div key={plandetail.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
                   <div className="grid grid-cols-12 gap-4 items-center">
                     {/* Plan & Product Info */}
-                    <div className="col-span-3">
+                    <div className="col-span-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <Calendar className="w-4 h-4 text-white" />
@@ -492,6 +510,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                             {plandetail.plan?.planCode || 'No Plan'}
                           </p>
                           <p className="text-xs text-gray-500 truncate">{productName}</p>
+                          <p className="text-xs font-medium text-indigo-600 truncate">{productSubDetail}</p>
                         </div>
                       </div>
                     </div>
@@ -501,50 +520,26 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
                       {plandetail.locationCode ? (
                         <div className="flex items-center text-sm text-gray-600">
                           <MapPin className="w-3 h-3 mr-1 text-blue-500" />
-                          {plandetail.locationCode}
+                          <span className="font-medium">{locationName}</span>
                         </div>
                       ) : (
                         <span className="text-sm text-gray-400">-</span>
                       )}
                     </div>
 
-                    {/* Quantities */}
+                    {/* Planned Quantity */}
                     <div className="col-span-2">
-                      <div className="text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Target className="w-3 h-3 mr-1 text-blue-500" />
-                          <span>P: {plandetail.plannedQuantity || 0}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
-                          <span>A: {plandetail.actualQuantity || 0}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div className="col-span-2">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1">
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                              className="bg-gradient-to-r from-blue-400 to-indigo-500 h-1.5 rounded-full"
-                              style={{ 
-                                width: `${plandetail.plannedQuantity && plandetail.plannedQuantity > 0 ? Math.min(100, ((plandetail.actualQuantity || 0) / plandetail.plannedQuantity) * 100) : 0}%` 
-                              }}
-                            ></div>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {plandetail.plannedQuantity && plandetail.plannedQuantity > 0 
-                              ? Math.round(((plandetail.actualQuantity || 0) / plandetail.plannedQuantity) * 100)
-                              : 0}%
-                          </div>
+                      <div className="flex items-center">
+                        <Target className="w-4 h-4 mr-2 text-blue-500" />
+                        <div>
+                          <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Planned</span>
+                          <div className="text-lg font-bold text-blue-700">{plandetail.plannedQuantity || 0}</div>
                         </div>
                       </div>
                     </div>
 
                     {/* Dates */}
-                    <div className="col-span-2">
+                    <div className="col-span-3">
                       {plandetail.plannedStartDate ? (
                         <div className="flex items-center text-xs text-gray-500">
                           <Clock className="w-3 h-3 mr-1" />
