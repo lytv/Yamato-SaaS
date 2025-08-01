@@ -1,3 +1,11 @@
+## [1.2.46](https://github.com/lytv/Yamato-SaaS/compare/v1.2.45...v1.2.46) (2025-08-01)
+
+
+### Bug Fixes
+
+* import plan detail for work tabl e ([e914069](https://github.com/lytv/Yamato-SaaS/commit/e91406972dfa2add7498289e5ca33e3aecd4901d))
+* import plan detail for work table ([25ce6aa](https://github.com/lytv/Yamato-SaaS/commit/25ce6aa28d5e2b306a48fb09de2a994b2d1435ac))
+
 ## [1.2.45](https://github.com/lytv/Yamato-SaaS/compare/v1.2.44...v1.2.45) (2025-08-01)
 
 
