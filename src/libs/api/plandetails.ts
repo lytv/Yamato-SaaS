@@ -30,6 +30,15 @@ export async function fetchPlanDetails(params: PlanDetailListParamsWithOwner): P
   if (params.search) {
     searchParams.append('search', params.search);
   }
+  if (params.planCode) {
+    searchParams.append('planCode', params.planCode);
+  }
+  if (params.productCode) {
+    searchParams.append('productCode', params.productCode);
+  }
+  if (params.productName) {
+    searchParams.append('productName', params.productName);
+  }
   if (params.sortBy) {
     searchParams.append('sortBy', params.sortBy);
   }
@@ -169,6 +178,15 @@ export async function exportPlanDetails(params: PlanDetailListParamsWithOwner): 
   }
   if (params.search) {
     searchParams.append('search', params.search);
+  }
+  if (params.planCode) {
+    searchParams.append('planCode', params.planCode);
+  }
+  if (params.productCode) {
+    searchParams.append('productCode', params.productCode);
+  }
+  if (params.productName) {
+    searchParams.append('productName', params.productName);
   }
   if (params.sortBy) {
     searchParams.append('sortBy', params.sortBy);

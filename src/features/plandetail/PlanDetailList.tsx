@@ -5,7 +5,7 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { Download, Search, Filter, Calendar, Edit, Trash2, Package, MapPin, Clock, Grid3X3, List, Target } from 'lucide-react';
+import { Download, Filter, Calendar, Edit, Trash2, Package, MapPin, Clock, Grid3X3, List, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
@@ -14,9 +14,8 @@ import { usePlanDetailExport } from '@/hooks/usePlanDetailExport';
 import { usePlanDetailFilters } from '@/hooks/usePlanDetailFilters';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
 import { usePlanDetails } from '@/hooks/usePlanDetails';
-import type { ImportPlanDetailResult, PlanDetail, PlanDetailWithRelations } from '@/types/plandetail';
+import type { PlanDetail, PlanDetailWithRelations } from '@/types/plandetail';
 
-import { PlanDetailImportModal } from './PlanDetailImportModal';
 
 type PlanDetailListProps = {
   onEdit: (plandetail: PlanDetail) => void;
@@ -39,16 +38,21 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
 
   const {
     filters,
-    updateFilters,
+    pendingFilters,
+    updatePendingFilters,
+    applyFilters,
     resetFilters,
   } = usePlanDetailFilters();
-  const { search, sortBy, sortOrder } = filters;
+  const { search, planCode, productCode, productName, sortBy, sortOrder } = filters;
 
   // Get ownerId for multi-tenancy
   const ownerId = orgId || userId || '';
 
   const { plandetails, pagination, isLoading, error, refresh } = usePlanDetails({
     search,
+    planCode,
+    productCode,
+    productName,
     sortBy,
     sortOrder,
     page: showAll ? 1 : page,
@@ -80,10 +84,6 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
     fetchRelationOptions();
   }, []);
 
-  // Handle import success
-  const handleImportSuccess = (_result: ImportPlanDetailResult) => {
-    refresh();
-  };
 
   // Handle delete confirmation
   const handleDeleteClick = (plandetail: PlanDetail): void => {
@@ -113,19 +113,18 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
     setDeleteError(null);
   };
 
-  // Handle search input change
-  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    updateFilters({ search: event.target.value });
-  };
 
   // Handle sort field change
   const handleSortFieldChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    updateFilters({ sortBy: event.target.value as any });
+    updatePendingFilters({ sortBy: event.target.value as any });
   };
 
-  // Handle sort order toggle
+  // Handle sort order toggle  
   const handleSortOrderToggle = (): void => {
-    updateFilters({ sortOrder: sortOrder === 'asc' ? 'desc' : 'asc' });
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    updatePendingFilters({ sortOrder: newSortOrder });
+    // Apply immediately for sort changes
+    applyFilters();
   };
 
   // Handle export plandetails
@@ -222,7 +221,7 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
   }
 
   // Empty state
-  if (plandetails.length === 0 && !search) {
+  if (plandetails.length === 0 && !planCode && !productCode && !productName) {
     return (
       <div className="py-12 text-center">
         <h3 className="mt-2 text-sm font-medium text-gray-900">No plandetails found</h3>
@@ -238,35 +237,120 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
       {/* Control Panel */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          {/* Search Section */}
-          <div className="flex flex-1 items-center space-x-4">
-            <div className="relative max-w-lg flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+          {/* Filter Section */}
+          <div className="flex-1 space-y-6">
+            {/* Main Filters */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                <Filter className="mr-2 h-4 w-4 text-blue-600" />
+                Bộ lọc tìm kiếm
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Plan Code Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    🎯 Plan Code
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: PLN001, PLN-2024..."
+                    value={pendingFilters.planCode}
+                    onChange={(e) => updatePendingFilters({ planCode: e.target.value })}
+                    className="block w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-300"
+                  />
+                </div>
+
+                {/* Product Code Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    📦 Mã Hàng
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: SP001, PROD-001..."
+                    value={pendingFilters.productCode}
+                    onChange={(e) => updatePendingFilters({ productCode: e.target.value })}
+                    className="block w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-300"
+                  />
+                </div>
+
+                {/* Product Name Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    🏷️ Tên Sản Phẩm
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: Áo thun, Quần jeans..."
+                    value={pendingFilters.productName}
+                    onChange={(e) => updatePendingFilters({ productName: e.target.value })}
+                    className="block w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-gray-300"
+                  />
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder={t('search_placeholder') || 'Search plan details...'}
-                value={search}
-                onChange={handleSearchInputChange}
-                aria-label={t('search_placeholder') || 'Search plan details'}
-                className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              />
             </div>
-            
-            {/* Show All Toggle */}
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={showAll}
-                onChange={e => setShowAll(e.target.checked)}
-                className="sr-only peer" 
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              <span className="ml-3 text-sm font-medium text-gray-700">
-                {t('show_all') || 'Show All'}
-              </span>
-            </label>
+
+            {/* Filter Actions & Settings */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-gray-100">
+              {/* Filter Actions */}
+              <div className="flex items-center space-x-3">
+                <button
+                  type="button"
+                  onClick={applyFilters}
+                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-sm"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  Áp dụng lọc
+                </button>
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="inline-flex items-center px-4 py-2.5 border border-gray-200 text-gray-600 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500/20 transition-all duration-200"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+
+              {/* Sort & Display Options */}
+              <div className="flex items-center space-x-4">
+                {/* Sort Controls */}
+                <div className="flex items-center space-x-2 text-sm">
+                  <span className="text-gray-500">Sắp xếp:</span>
+                  <select
+                    value={pendingFilters.sortBy}
+                    onChange={handleSortFieldChange}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="createdAt">Ngày tạo</option>
+                    <option value="updatedAt">Ngày cập nhật</option>
+                    <option value="productSubCode">Mã sản phẩm con</option>
+                    <option value="locationCode">Mã vị trí</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleSortOrderToggle}
+                    className="p-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500/20 transition-all duration-200"
+                    title={sortOrder === 'asc' ? 'Đang sắp xếp tăng dần' : 'Đang sắp xếp giảm dần'}
+                  >
+                    {sortOrder === 'asc' ? '↑' : '↓'}
+                  </button>
+                </div>
+
+                {/* Show All Toggle */}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={showAll}
+                    onChange={e => setShowAll(e.target.checked)}
+                    className="sr-only peer" 
+                  />
+                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    {t('show_all') || 'Hiện tất cả'}
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -334,27 +418,21 @@ export function PlanDetailList({ onEdit, onDelete }: PlanDetailListProps): JSX.E
               {isExporting ? (t('exporting') || 'Exporting...') : (t('export') || 'Export')}
             </button>
 
-            {/* Import Modal/Button */}
-            <PlanDetailImportModal onSuccess={handleImportSuccess} />
 
-            {/* Clear Search */}
-            {search && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-xs text-gray-500 underline hover:text-gray-700"
-              >
-                {t('clear_search') || 'Clear'}
-              </button>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Search Results Info */}
-      {search && (
-        <div className="text-sm text-gray-600">
-          {t('search_results_for', { search }) || `Search results for "${search}"`}
+      {/* Filter Results Info */}
+      {(planCode || productCode || productName) && (
+        <div className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4 text-blue-600" />
+            <span>Đang lọc theo:</span>
+            {planCode && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Plan: {planCode}</span>}
+            {productCode && <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Mã: {productCode}</span>}
+            {productName && <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Tên: {productName}</span>}
+          </div>
         </div>
       )}
 

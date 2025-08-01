@@ -75,6 +75,9 @@ export async function getPlanDetailsByOwner(
     page = 1,
     limit = 10,
     search,
+    planCode,
+    productCode,
+    productName,
     sortBy = 'createdAt',
     sortOrder = 'desc',
     includeRelations = false,
@@ -107,9 +110,13 @@ export async function getPlanDetailsByOwner(
         id: planSchema.id,
         planCode: planSchema.planCode,
       },
-    }).from(planDetailSchema).leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
+    }).from(planDetailSchema)
+      .leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .leftJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode));
   } else {
-    baseQuery = db.select().from(planDetailSchema).innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
+    baseQuery = db.select().from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .leftJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode));
   }
 
   // Build where conditions safely
@@ -131,6 +138,19 @@ export async function getPlanDetailsByOwner(
     if (validSearchConditions.length > 0) {
       whereConditions.push(or(...validSearchConditions));
     }
+  }
+
+  // Individual filter conditions
+  if (planCode) {
+    whereConditions.push(ilike(planSchema.planCode, `%${planCode}%`));
+  }
+
+  if (productCode) {
+    whereConditions.push(ilike(planDetailSchema.productCode, `%${productCode}%`));
+  }
+
+  if (productName) {
+    whereConditions.push(ilike(productSchema.productName, `%${productName}%`));
   }
 
   // Safe sorting with switch statement
@@ -201,9 +221,13 @@ export async function getPlanDetailById(
         id: planSchema.id,
         planCode: planSchema.planCode,
       },
-    }).from(planDetailSchema).leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
+    }).from(planDetailSchema)
+      .leftJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .leftJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode));
   } else {
-    baseQuery = db.select().from(planDetailSchema).innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id));
+    baseQuery = db.select().from(planDetailSchema)
+      .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+      .leftJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode));
   }
 
   const [result] = await baseQuery

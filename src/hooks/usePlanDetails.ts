@@ -26,19 +26,25 @@ type PlanDetailsReturn = PlanDetailsState & {
 };
 
 const DEFAULT_PARAMS: Required<
-  Omit<PlanDetailListParamsWithOwner, 'search' | 'ownerId' | 'showAll'>
-> & Pick<PlanDetailListParamsWithOwner, 'search' | 'showAll'> = {
+  Omit<PlanDetailListParamsWithOwner, 'search' | 'planCode' | 'productCode' | 'productName' | 'ownerId' | 'showAll'>
+> & Pick<PlanDetailListParamsWithOwner, 'search' | 'planCode' | 'productCode' | 'productName' | 'showAll'> = {
   page: 1,
   limit: 10,
   sortBy: 'createdAt',
   sortOrder: 'desc',
   search: undefined,
+  planCode: undefined,
+  productCode: undefined,
+  productName: undefined,
   showAll: false,
   includeRelations: false,
 };
 
 export function usePlanDetails({
   search = DEFAULT_PARAMS.search,
+  planCode = DEFAULT_PARAMS.planCode,
+  productCode = DEFAULT_PARAMS.productCode,  
+  productName = DEFAULT_PARAMS.productName,
   sortBy = DEFAULT_PARAMS.sortBy,
   sortOrder = DEFAULT_PARAMS.sortOrder,
   page = DEFAULT_PARAMS.page,
@@ -65,6 +71,9 @@ export function usePlanDetails({
     try {
       const result = await fetchPlanDetails({
         search,
+        planCode,
+        productCode,
+        productName,
         sortBy,
         sortOrder,
         page,
@@ -89,7 +98,7 @@ export function usePlanDetails({
         pagination: null,
       }));
     }
-  }, [search, sortBy, sortOrder, page, limit, showAll, ownerId]);
+  }, [search, planCode, productCode, productName, sortBy, sortOrder, page, limit, showAll, ownerId]);
 
   const refresh = useCallback(() => {
     fetchData();

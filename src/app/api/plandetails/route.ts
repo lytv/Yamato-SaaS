@@ -32,10 +32,14 @@ export async function GET(request: NextRequest) {
       page: Number(searchParams.get('page')) || 1,
       limit: Number(searchParams.get('limit')) || 10,
       search: searchParams.get('search') || undefined,
+      planCode: searchParams.get('planCode') || undefined,
+      productCode: searchParams.get('productCode') || undefined,
+      productName: searchParams.get('productName') || undefined,
       sortBy: searchParams.get('sortBy') || 'createdAt',
       sortOrder: searchParams.get('sortOrder') || 'desc',
       includeRelations: searchParams.get('includeRelations') === 'true',
     });
+
 
     const plandetails = await getPlanDetailsByOwner({
       ...params,

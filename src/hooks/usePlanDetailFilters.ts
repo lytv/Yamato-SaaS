@@ -9,24 +9,41 @@ import type { PlanDetailFilters } from '@/types/plandetail';
 
 const DEFAULT_FILTERS: PlanDetailFilters = {
   search: '',
+  planCode: '',
+  productCode: '',
+  productName: '',
   sortBy: 'createdAt',
   sortOrder: 'desc',
 };
 
 export function usePlanDetailFilters() {
   const [filters, setFilters] = useState<PlanDetailFilters>(DEFAULT_FILTERS);
+  const [pendingFilters, setPendingFilters] = useState<PlanDetailFilters>(DEFAULT_FILTERS);
 
-  const updateFilters = (newFilters: Partial<PlanDetailFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+  const updatePendingFilters = (newFilters: Partial<PlanDetailFilters>) => {
+    setPendingFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  const applyFilters = () => {
+    setFilters({ ...pendingFilters });
   };
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
+    setPendingFilters(DEFAULT_FILTERS);
+  };
+
+  const updateFilters = (newFilters: Partial<PlanDetailFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setPendingFilters(prev => ({ ...prev, ...newFilters }));
   };
 
   return {
     filters,
+    pendingFilters,
     updateFilters,
+    updatePendingFilters,
+    applyFilters,
     resetFilters,
   };
 }

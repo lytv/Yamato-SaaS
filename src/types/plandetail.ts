@@ -125,6 +125,9 @@ export type PlanDetailListParams = {
   readonly page?: number;
   readonly limit?: number;
   readonly search?: string;
+  readonly planCode?: string;
+  readonly productCode?: string;
+  readonly productName?: string;
   readonly sortBy?: 'createdAt' | 'updatedAt' | 'productSubCode' | 'locationCode';
   readonly sortOrder?: 'asc' | 'desc';
   readonly showAll?: boolean;
@@ -163,6 +166,9 @@ export type PlanDetailStatsResponse = {
 // Filter state
 export type PlanDetailFilters = {
   search: string;
+  planCode: string;
+  productCode: string;
+  productName: string;
   sortBy: 'createdAt' | 'updatedAt' | 'productSubCode' | 'locationCode';
   sortOrder: 'asc' | 'desc';
 };
