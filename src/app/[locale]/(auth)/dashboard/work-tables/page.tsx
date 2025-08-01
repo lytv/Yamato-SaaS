@@ -3,13 +3,15 @@
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Table, Plus, Wrench, BarChart3, Settings, Users } from 'lucide-react';
+import { Table, Plus, Wrench, BarChart3, Settings, Users, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { WorkTableForm } from '@/features/workTable/WorkTableForm';
 import { WorkTableList } from '@/features/workTable/WorkTableList';
+import { WorkTableImportModal } from '@/features/workTable/WorkTableImportModal';
 import { useCreateWorkTable, useUpdateWorkTable } from '@/hooks/useWorkTableMutations';
 import type { WorkTable } from '@/types/workTable';
+import type { ImportResult } from '@/types/import';
 
 export default function WorkTablesPage() {
   const { userId } = useAuth();
@@ -17,6 +19,7 @@ export default function WorkTablesPage() {
   const [formMode, setFormMode] = useState<'hidden' | 'create' | 'edit'>('hidden');
   const [selectedWorkTable, setSelectedWorkTable] = useState<WorkTable | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { createWorkTable, isLoading: isCreatingLoading, error: createError } = useCreateWorkTable();
   const { updateWorkTable, isLoading: isUpdatingLoading, error: updateError } = useUpdateWorkTable();
@@ -48,6 +51,19 @@ export default function WorkTablesPage() {
       setSelectedWorkTable(null);
       setRefreshKey(k => k + 1);
     } catch {}
+  };
+
+  const handleImportClick = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const handleImportClose = () => {
+    setIsImportModalOpen(false);
+  };
+
+  const handleImportSuccess = (_result: ImportResult) => {
+    // Refresh the list after successful import
+    setRefreshKey(k => k + 1);
   };
 
   // Helper: convert WorkTable sang Partial<WorkTableFormData>
@@ -103,14 +119,21 @@ export default function WorkTablesPage() {
               </div>
             </div>
 
-            {/* CTA Button */}
-            <div className="lg:text-right">
+            {/* CTA Buttons */}
+            <div className="lg:text-right space-y-3">
               <Button
                 onClick={handleCreate}
-                className="bg-white text-purple-600 hover:bg-purple-50 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200"
+                className="bg-white text-purple-600 hover:bg-purple-50 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200 w-full lg:w-auto"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 {t('add_new', { default: 'Add Work Table' })}
+              </Button>
+              <Button
+                onClick={handleImportClick}
+                className="bg-purple-500 text-white hover:bg-purple-400 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200 w-full lg:w-auto lg:ml-3"
+              >
+                <Upload className="w-5 h-5 mr-2" />
+                Import từ YMT Plan
               </Button>
             </div>
           </div>
@@ -179,6 +202,13 @@ export default function WorkTablesPage() {
         <WorkTableList
           onEdit={handleEdit}
           key={refreshKey}
+        />
+
+        {/* Import Modal */}
+        <WorkTableImportModal
+          isOpen={isImportModalOpen}
+          onClose={handleImportClose}
+          onSuccess={handleImportSuccess}
         />
       </div>
     </main>

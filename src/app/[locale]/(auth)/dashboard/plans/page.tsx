@@ -8,15 +8,17 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { PlanForm } from '@/features/plan/PlanForm';
 import { PlanList } from '@/features/plan/PlanList';
+import { PlanImportModal } from '@/features/plan/PlanImportModal';
 import { usePlanMutations } from '@/hooks/usePlanMutations';
 import type { Plan } from '@/types/plan';
+import type { ImportResult } from '@/types/import';
 
 type ModalState = {
   isOpen: boolean;
@@ -108,6 +110,7 @@ export default function PlansPage(): JSX.Element {
   });
   const [refreshKey, setRefreshKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { isCreating } = usePlanMutations();
 
@@ -154,6 +157,19 @@ export default function PlansPage(): JSX.Element {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handleImportClick = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const handleImportClose = () => {
+    setIsImportModalOpen(false);
+  };
+
+  const handleImportSuccess = (_result: ImportResult) => {
+    // Refresh the list after successful import
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <main className="container mx-auto max-w-7xl space-y-8 p-6">
       {/* Hero Header */}
@@ -186,14 +202,23 @@ export default function PlansPage(): JSX.Element {
           </div>
 
           {/* Primary CTA */}
-          <Button
-            onClick={handleCreatePlan}
-            disabled={isCreating}
-            className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
-          >
-            <CalendarDays className="w-5 h-5 mr-2" />
-            {t('plan.createNew', { default: 'Create Plan' })}
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={handleCreatePlan}
+              disabled={isCreating}
+              className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 w-full lg:w-auto"
+            >
+              <CalendarDays className="w-5 h-5 mr-2" />
+              {t('plan.createNew', { default: 'Create Plan' })}
+            </Button>
+            <Button
+              onClick={handleImportClick}
+              className="bg-green-500 text-white hover:bg-green-400 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 w-full lg:w-auto lg:ml-3"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              Import từ YMT Plan
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -224,6 +249,13 @@ export default function PlansPage(): JSX.Element {
         modal={modal}
         onClose={handleCloseModal}
         onSuccess={handleSuccess}
+      />
+
+      {/* Import Modal */}
+      <PlanImportModal
+        isOpen={isImportModalOpen}
+        onClose={handleImportClose}
+        onSuccess={handleImportSuccess}
       />
     </main>
   );

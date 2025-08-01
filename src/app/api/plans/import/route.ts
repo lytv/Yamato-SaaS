@@ -13,7 +13,7 @@ import { ZodError } from 'zod';
 import { createPlan as createPlanDb, getPlanByCode } from '@/libs/queries/plan';
 import type { ImportError } from '@/types/import';
 import type { Plan } from '@/types/plan';
-import { parseExcelFile, validateImportData } from '@/utils/excelImportHelpers';
+import { parseYmtPlanForPlan, validatePlanImportData } from '@/utils/excelImportHelpers';
 
 // Force dynamic rendering due to auth() usage and file upload
 export const dynamic = 'force-dynamic';
@@ -65,16 +65,16 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Parse Excel using existing utilities
+    // Parse Excel using YMT Plan format for plan
     const buffer = Buffer.from(await file.arrayBuffer());
-    const importData = await parseExcelFile(buffer);
+    const importData = await parseYmtPlanForPlan(buffer);
 
-    // Validate data using existing schemas
-    const validation = validateImportData(importData);
+    // Validate data
+    const validation = validatePlanImportData(importData);
 
-    // Create plans using existing createPlan function (loop approach)
+    // Create plan
     const ownerId = orgId || userId;
-    const results = await processImportData(validation.validProducts as any, ownerId);
+    const results = await processImportData(validation.validPlans, ownerId);
 
     return Response.json({
       success: true,
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         totalRows: importData.length,
         successCount: results.successful.length,
         errorCount: results.failed.length,
+        skippedCount: results.skipped,
         createdPlans: results.successful,
         errors: [...validation.errors, ...results.failed],
       },
@@ -118,24 +119,22 @@ export async function POST(request: NextRequest): Promise<Response> {
 }
 
 // Helper function using existing createPlan in loop
-async function processImportData(plans: Array<{ planCode: string; planName: string; planYear: number; planMonth: number; totalTargetQuantity?: number; totalActualQuantity?: number; status?: string; planStartDate?: string; planEndDate?: string; approvedBy?: string; approvedAt?: string; note?: string; rowNumber: number }>, ownerId: string): Promise<{
+async function processImportData(plans: Array<{ planCode: string; planName: string; planYear: number; planMonth: number; rowNumber: number }>, ownerId: string): Promise<{
   successful: Plan[];
   failed: ImportError[];
+  skipped: number;
 }> {
   const successful: Plan[] = [];
   const failed: ImportError[] = [];
+  let skipped = 0;
 
   for (const planData of plans) {
     try {
-      // Check for existing plan code using existing function
+      // Check for existing plan code
       const existing = await getPlanByCode(planData.planCode, ownerId);
       if (existing) {
-        failed.push({
-          rowNumber: planData.rowNumber,
-          field: 'planCode',
-          message: 'Plan code already exists',
-          value: planData.planCode,
-        });
+        // Skip if already exists
+        skipped++;
         continue;
       }
 
@@ -146,14 +145,7 @@ async function processImportData(plans: Array<{ planCode: string; planName: stri
         planName: planData.planName,
         planYear: planData.planYear,
         planMonth: planData.planMonth,
-        totalTargetQuantity: planData.totalTargetQuantity,
-        totalActualQuantity: planData.totalActualQuantity,
-        status: planData.status,
-        planStartDate: planData.planStartDate,
-        planEndDate: planData.planEndDate,
-        approvedBy: planData.approvedBy,
-        approvedAt: planData.approvedAt,
-        note: planData.note,
+        status: 'draft',
       });
 
       // Transform database plan to API plan type
@@ -187,5 +179,5 @@ async function processImportData(plans: Array<{ planCode: string; planName: stri
     }
   }
 
-  return { successful, failed };
+  return { successful, failed, skipped };
 }

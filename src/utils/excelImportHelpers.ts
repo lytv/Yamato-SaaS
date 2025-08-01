@@ -744,3 +744,281 @@ export async function parseProcessExcelFile(buffer: Buffer): Promise<ImportProce
     throw new Error('Failed to parse Excel file: Unknown error');
   }
 }
+
+/**
+ * Parse YMT Plan Excel file and extract work table data
+ * @param buffer - Excel file buffer
+ * @returns Promise resolving to array of import work table data
+ */
+export async function parseYmtPlanExcelFile(buffer: Buffer): Promise<ImportWorkTableData[]> {
+  try {
+    // Read workbook from buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+
+    // Convert to JSON array
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+      throw new Error('Excel file contains no data');
+    }
+
+    // Process work table data from column D (index 3) 
+    const workTables: ImportWorkTableData[] = [];
+    
+    // Get table name prefix from D3 (row index 2, column index 3)
+    const tableNamePrefix = (rawData[2] as any[])?.[3]?.toString().trim() || 'BÀN';
+
+    // Start from row 4 (index 3) for table codes
+    for (let i = 3; i < rawData.length; i++) {
+      const row = rawData[i] as (string | number | undefined)[];
+      const rowNumber = i + 1; // Excel row number (1-based)
+
+      // Get table code from column D (index 3)
+      const cellValue = row[3];
+      if (cellValue === null || cellValue === undefined || cellValue === '') {
+        continue;
+      }
+      
+      const tableCode = cellValue.toString().trim();
+      
+      // Skip if no table code after trimming
+      if (!tableCode || tableCode === '') {
+        continue;
+      }
+
+      // Create work table data
+      const workTableData: ImportWorkTableData = {
+        tableCode,
+        tableName: `${tableNamePrefix} ${tableCode}`,
+        tableDetail: `${tableNamePrefix} ${tableCode}`,
+        tableType: 'sewing', // Default type for ymt_plan tables
+        rowNumber,
+      };
+
+      workTables.push(workTableData);
+    }
+
+    return workTables;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse YMT Plan Excel file: ${error.message}`);
+    }
+    throw new Error('Failed to parse YMT Plan Excel file: Unknown error');
+  }
+}
+
+export type ImportWorkTableData = {
+  tableCode: string;
+  tableName: string;
+  tableDetail?: string;
+  tableType: string;
+  rowNumber: number;
+};
+
+/**
+ * Validate imported work table data
+ * @param data - Array of import work table data
+ * @returns Validation result with valid work tables and errors
+ */
+export function validateWorkTableImportData(data: ImportWorkTableData[]): { isValid: boolean; errors: ImportError[]; validWorkTables: ImportWorkTableData[] } {
+  const validWorkTables: ImportWorkTableData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No work table data found in Excel file', value: null }],
+      validWorkTables: [],
+    };
+  }
+
+  // Check for maximum row limit
+  if (data.length > 1000) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'Maximum 1000 rows allowed', value: data.length }],
+      validWorkTables: [],
+    };
+  }
+
+  const seenTableCodes = new Set<string>();
+
+  for (const workTableData of data) {
+    // Validate required fields
+    if (!workTableData.tableCode || !workTableData.tableName) {
+      errors.push({
+        rowNumber: workTableData.rowNumber,
+        field: !workTableData.tableCode ? 'tableCode' : 'tableName',
+        message: 'Required field missing',
+        value: !workTableData.tableCode ? workTableData.tableCode : workTableData.tableName,
+      });
+      continue;
+    }
+
+    // Check for duplicate table codes within the import file
+    if (seenTableCodes.has(workTableData.tableCode.toLowerCase())) {
+      errors.push({
+        rowNumber: workTableData.rowNumber,
+        field: 'tableCode',
+        message: 'Duplicate table code within import file',
+        value: workTableData.tableCode,
+      });
+      continue;
+    }
+
+    seenTableCodes.add(workTableData.tableCode.toLowerCase());
+    validWorkTables.push(workTableData);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validWorkTables,
+  };
+}
+
+/**
+ * Parse YMT Plan Excel file and extract plan data from header
+ * @param buffer - Excel file buffer
+ * @returns Promise resolving to array of import plan data
+ */
+export async function parseYmtPlanForPlan(buffer: Buffer): Promise<ImportPlanData[]> {
+  try {
+    // Read workbook from buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) {
+      throw new Error('Excel file contains no worksheets');
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      throw new Error('Unable to read worksheet data');
+    }
+
+    // Convert to JSON array
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+      throw new Error('Excel file contains no data');
+    }
+
+    // Extract plan data from row 1 column B (index 1)
+    const plans: ImportPlanData[] = [];
+    
+    const headerText = (rawData[0] as any[])?.[1]?.toString().trim(); // Row 1, Column B
+    if (!headerText) {
+      throw new Error('No plan header found in cell B1');
+    }
+
+    // Parse "CẮT THÁNG 08.2025" format
+    const matches = headerText.match(/CẮT\s+THÁNG\s+(\d{2})\.(\d{4})/i);
+    if (!matches) {
+      throw new Error(`Invalid plan header format: "${headerText}". Expected format: "CẮT THÁNG MM.YYYY"`);
+    }
+
+    const month = parseInt(matches[1], 10);
+    const year = parseInt(matches[2], 10);
+    
+    // Create plan data
+    const planCode = `${matches[1]}${matches[2]}`; // 082025
+    const planName = planCode; // Same as code
+    
+    const planData: ImportPlanData = {
+      planCode,
+      planName,
+      planYear: year,
+      planMonth: month,
+      rowNumber: 1,
+    };
+
+    plans.push(planData);
+    return plans;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new TypeError(`Failed to parse YMT Plan Excel file: ${error.message}`);
+    }
+    throw new Error('Failed to parse YMT Plan Excel file: Unknown error');
+  }
+}
+
+export type ImportPlanData = {
+  planCode: string;
+  planName: string;
+  planYear: number;
+  planMonth: number;
+  rowNumber: number;
+};
+
+/**
+ * Validate imported plan data
+ * @param data - Array of import plan data
+ * @returns Validation result with valid plans and errors
+ */
+export function validatePlanImportData(data: ImportPlanData[]): { isValid: boolean; errors: ImportError[]; validPlans: ImportPlanData[] } {
+  const validPlans: ImportPlanData[] = [];
+  const errors: ImportError[] = [];
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      isValid: false,
+      errors: [{ rowNumber: 0, field: 'file', message: 'No plan data found in Excel file', value: null }],
+      validPlans: [],
+    };
+  }
+
+  for (const planData of data) {
+    // Validate required fields
+    if (!planData.planCode || !planData.planName) {
+      errors.push({
+        rowNumber: planData.rowNumber,
+        field: !planData.planCode ? 'planCode' : 'planName',
+        message: 'Required field missing',
+        value: !planData.planCode ? planData.planCode : planData.planName,
+      });
+      continue;
+    }
+
+    // Validate year and month
+    if (planData.planYear < 2000 || planData.planYear > 2100) {
+      errors.push({
+        rowNumber: planData.rowNumber,
+        field: 'planYear',
+        message: 'Invalid year (must be between 2000-2100)',
+        value: planData.planYear,
+      });
+      continue;
+    }
+
+    if (planData.planMonth < 1 || planData.planMonth > 12) {
+      errors.push({
+        rowNumber: planData.rowNumber,
+        field: 'planMonth',
+        message: 'Invalid month (must be between 1-12)',
+        value: planData.planMonth,
+      });
+      continue;
+    }
+
+    validPlans.push(planData);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validPlans,
+  };
+}

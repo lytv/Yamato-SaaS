@@ -14,8 +14,8 @@ type WorkTableListProps = {
 
 const DEFAULT_FILTERS: WorkTableFilters = {
   search: '',
-  sortBy: 'createdAt',
-  sortOrder: 'desc',
+  sortBy: 'tableCode',
+  sortOrder: 'asc',
   tableType: 'all',
   locationCode: '',
   tableCategory: 'all',
@@ -37,7 +37,7 @@ export function WorkTableList({ onEdit, onView }: WorkTableListProps) {
 
   const { workTables, pagination, isLoading, error, refresh } = useWorkTables({
     page: currentPage,
-    limit: 10,
+    limit: 50, // Increased to show more tables
     search: filters.search || undefined,
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder,

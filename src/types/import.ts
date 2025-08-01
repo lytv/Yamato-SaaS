@@ -37,8 +37,9 @@ export type ImportResult = {
   totalRows: number;
   successCount: number;
   errorCount: number;
-  createdProducts: Product[];
+  createdProducts?: Product[];
   errors: ImportError[];
+  skippedCount?: number;
 };
 
 export type ImportProductionStepResult = {
