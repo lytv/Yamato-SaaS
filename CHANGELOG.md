@@ -1,3 +1,10 @@
+## [1.2.47](https://github.com/lytv/Yamato-SaaS/compare/v1.2.46...v1.2.47) (2025-08-01)
+
+
+### Bug Fixes
+
+* import plan detail for work table lam lai phan loc ([8e363f5](https://github.com/lytv/Yamato-SaaS/commit/8e363f5fdf5742710b907a0b170091df31ffc9f0))
+
 ## [1.2.46](https://github.com/lytv/Yamato-SaaS/compare/v1.2.45...v1.2.46) (2025-08-01)
 
 
