@@ -1,3 +1,14 @@
+## [1.2.45](https://github.com/lytv/Yamato-SaaS/compare/v1.2.44...v1.2.45) (2025-08-01)
+
+
+### Bug Fixes
+
+* import ([3374969](https://github.com/lytv/Yamato-SaaS/commit/337496914a0508a4c4fefd542793f9f59d2afe75))
+* import ([c3838b6](https://github.com/lytv/Yamato-SaaS/commit/c3838b6829d8dcce93b87ec2eabdf886cb33a8ae))
+* import plan detail ([e68fb6a](https://github.com/lytv/Yamato-SaaS/commit/e68fb6a19b2b05a98a758c2f9fe487adbe1f9df4))
+* import product sub ([25fa041](https://github.com/lytv/Yamato-SaaS/commit/25fa0415cd1a18caf8b43bb678e9914025e10516))
+* import product sub ([e676da0](https://github.com/lytv/Yamato-SaaS/commit/e676da0d6d789b34a92df7dbe5d1bfb51eb129cf))
+
 ## [1.2.44](https://github.com/lytv/Yamato-SaaS/compare/v1.2.43...v1.2.44) (2025-07-30)
 
 
