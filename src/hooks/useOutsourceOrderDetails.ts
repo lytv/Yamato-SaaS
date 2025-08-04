@@ -192,17 +192,25 @@ export function useOutsourceOrderDetailStats(outsourceOrderId?: number) {
 /**
  * Fetch relation options for dropdowns and selectors
  */
-export function useOutsourceOrderDetailRelationOptions(outsourceOrderId?: number) {
+export function useOutsourceOrderDetailRelationOptions(outsourceOrderId?: number, planId?: number, productSubCode?: string) {
   const { userId } = useAuth();
 
   return useQuery({
-    queryKey: outsourceOrderDetailKeys.relationOptions(),
+    queryKey: planId || productSubCode
+      ? [...outsourceOrderDetailKeys.relationOptions(), { planId, productSubCode }]
+      : outsourceOrderDetailKeys.relationOptions(),
     queryFn: async (): Promise<OutsourceOrderDetailRelationOptions> => {
       if (!userId) throw new Error('User not authenticated');
 
       const searchParams = new URLSearchParams();
       if (outsourceOrderId) {
         searchParams.append('outsourceOrderId', String(outsourceOrderId));
+      }
+      if (planId) {
+        searchParams.append('planId', String(planId));
+      }
+      if (productSubCode) {
+        searchParams.append('productSubCode', productSubCode);
       }
 
       const response = await fetch(`${API_BASE}/relations/options?${searchParams}`);

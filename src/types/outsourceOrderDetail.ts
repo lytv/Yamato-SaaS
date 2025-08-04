@@ -23,6 +23,8 @@ export type OutsourceOrderDetailWithRelations = OutsourceOrderDetail & {
   plan?: { id: number; planCode: string; planName: string };
   product?: { id: number; productCode: string; productName: string };
   productionStep?: { id: number; stepCode: string; stepName: string };
+  workTable?: { locationCode: string; tableName: string };
+  productSub?: { productSubCode: string; productSubDetail: string; productCode: string };
 };
 
 // Form data type for React Hook Form
@@ -37,6 +39,8 @@ export type OutsourceOrderDetailFormData = {
   productName: string;
   stepCode: string;
   stepName: string;
+  locationCode?: string;
+  productSubCode?: string;
   orderedQuantity: number;
   completedQuantity?: number;
   expectedCompletionDate: Date | string;
@@ -61,6 +65,8 @@ export type CreateOutsourceOrderDetailInput = {
   productName: string;
   stepCode: string;
   stepName: string;
+  locationCode?: string;
+  productSubCode?: string;
   orderedQuantity: number;
   expectedCompletionDate: Date;
   completedQuantity?: number;
@@ -83,6 +89,8 @@ export type UpdateOutsourceOrderDetailInput = {
   productName?: string;
   stepCode?: string;
   stepName?: string;
+  locationCode?: string;
+  productSubCode?: string;
   orderedQuantity?: number;
   completedQuantity?: number;
   expectedCompletionDate?: Date | string;
@@ -100,6 +108,8 @@ export type OutsourceOrderDetailRelationOptions = {
   readonly plans: readonly { id: number; planCode: string; planName: string }[];
   readonly products: readonly { id: number; productCode: string; productName: string }[];
   readonly productionSteps: readonly { id: number; stepCode: string; stepName: string }[];
+  readonly workTables: readonly { locationCode: string; tableName: string }[];
+  readonly productSubs: readonly { productSubCode: string; productSubDetail: string; productCode: string }[];
 };
 
 // Enhanced relation options with search and pagination

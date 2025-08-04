@@ -153,6 +153,10 @@ export function OutsourceOrderIntegratedList() {
     || item.productName?.toLowerCase().includes(detailSearch.toLowerCase())
     || item.stepCode?.toLowerCase().includes(detailSearch.toLowerCase())
     || item.stepName?.toLowerCase().includes(detailSearch.toLowerCase())
+    || item.productSub?.productSubCode?.toLowerCase().includes(detailSearch.toLowerCase())
+    || item.productSub?.productSubDetail?.toLowerCase().includes(detailSearch.toLowerCase())
+    || item.workTable?.locationCode?.toLowerCase().includes(detailSearch.toLowerCase())
+    || item.workTable?.tableName?.toLowerCase().includes(detailSearch.toLowerCase())
     || item.itemNotes?.toLowerCase().includes(detailSearch.toLowerCase()),
   );
 
@@ -423,6 +427,8 @@ export function OutsourceOrderIntegratedList() {
                             <TableHead className="text-indigo-800 font-semibold">{t('detail_table.sequence')}</TableHead>
                             <TableHead className="text-indigo-800 font-semibold">{t('detail_table.plan')}</TableHead>
                             <TableHead className="text-indigo-800 font-semibold">{t('detail_table.product')}</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.product_sub')}</TableHead>
+                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.location')}</TableHead>
                             <TableHead className="text-indigo-800 font-semibold">{t('detail_table.production_step')}</TableHead>
                             <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.ordered_qty')}</TableHead>
                             <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.completed')}</TableHead>
@@ -434,16 +440,24 @@ export function OutsourceOrderIntegratedList() {
                             <TableRow key={item.id} className="hover:bg-indigo-25 even:bg-gray-50" style={{ backgroundColor: index % 2 === 1 ? '#f8fafc' : 'white' }}>
                               <TableCell className="font-medium">{index + 1}</TableCell>
                               <TableCell>
-                                <div className="text-sm font-medium">{item.planCode}</div>
-                                <div className="text-xs text-gray-500">{item.planName}</div>
+                                <div className="text-sm font-medium">{item.planName}</div>
+                                <div className="text-xs text-gray-500">{item.planCode}</div>
                               </TableCell>
                               <TableCell>
-                                <div className="text-sm font-medium">{item.productCode}</div>
-                                <div className="text-xs text-gray-500">{item.productName}</div>
+                                <div className="text-sm font-medium">{item.productName}</div>
+                                <div className="text-xs text-gray-500">{item.productCode}</div>
                               </TableCell>
                               <TableCell>
-                                <div className="text-sm font-medium">{item.stepCode}</div>
-                                <div className="text-xs text-gray-500">{item.stepName}</div>
+                                <div className="text-sm font-medium">{item.productSub?.productSubDetail || '-'}</div>
+                                <div className="text-xs text-gray-500">{item.productSub?.productSubCode || '-'}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm font-medium">{item.workTable?.tableName || '-'}</div>
+                                <div className="text-xs text-gray-500">{item.workTable?.locationCode || '-'}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm font-medium">{item.stepName}</div>
+                                <div className="text-xs text-gray-500">{item.stepCode}</div>
                               </TableCell>
                               <TableCell className="text-right text-sm">{item.orderedQuantity}</TableCell>
                               <TableCell className="text-right text-sm font-medium text-green-600">

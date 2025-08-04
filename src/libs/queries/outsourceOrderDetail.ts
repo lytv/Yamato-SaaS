@@ -13,6 +13,8 @@ import {
   planSchema,
   productionStepSchema,
   productSchema,
+  workTableSchema,
+  productSubSchema,
 } from '@/models/Schema';
 import type {
   CreateOutsourceOrderDetailInput,
@@ -162,6 +164,8 @@ export async function createOutsourceOrderDetail(data: CreateOutsourceOrderDetai
       productName: data.productName,
       stepCode: data.stepCode,
       stepName: data.stepName,
+      locationCode: data.locationCode,
+      productSubCode: data.productSubCode,
       orderedQuantity: data.orderedQuantity,
       completedQuantity: data.completedQuantity ?? 0,
       expectedCompletionDate: data.expectedCompletionDate
@@ -398,12 +402,23 @@ export async function getOutsourceOrderDetailById(
           stepCode: productionStepSchema.stepCode,
           stepName: productionStepSchema.stepName,
         },
+        workTable: {
+          locationCode: workTableSchema.tableCode,
+          tableName: workTableSchema.tableName,
+        },
+        productSub: {
+          productSubCode: productSubSchema.productSubCode,
+          productSubDetail: productSubSchema.productSubDetail,
+          productCode: productSubSchema.productCode,
+        },
       })
       .from(outsourceOrderDetailSchema)
       .leftJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
       .leftJoin(planSchema, eq(outsourceOrderDetailSchema.planId, planSchema.id))
       .leftJoin(productSchema, eq(outsourceOrderDetailSchema.productId, productSchema.id))
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
+      .leftJoin(workTableSchema, eq(outsourceOrderDetailSchema.locationCode, workTableSchema.tableCode))
+      .leftJoin(productSubSchema, eq(outsourceOrderDetailSchema.productSubCode, productSubSchema.productSubCode))
       .where(and(
         eq(outsourceOrderDetailSchema.id, id),
         eq(outsourceOrderDetailSchema.ownerId, ownerId),
@@ -430,6 +445,8 @@ export async function getOutsourceOrderDetailById(
       plan: row.plan,
       product: row.product,
       productionStep: row.productionStep,
+      workTable: row.workTable,
+      productSub: row.productSub,
       // Override completedQuantity with actual receipt quantity
       completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
     } as OutsourceOrderDetailWithRelations;
@@ -541,12 +558,23 @@ export async function getOutsourceOrderDetailsByOwner(
           stepCode: productionStepSchema.stepCode,
           stepName: productionStepSchema.stepName,
         },
+        workTable: {
+          locationCode: workTableSchema.tableCode,
+          tableName: workTableSchema.tableName,
+        },
+        productSub: {
+          productSubCode: productSubSchema.productSubCode,
+          productSubDetail: productSubSchema.productSubDetail,
+          productCode: productSubSchema.productCode,
+        },
       })
       .from(outsourceOrderDetailSchema)
       .leftJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
       .leftJoin(planSchema, eq(outsourceOrderDetailSchema.planId, planSchema.id))
       .leftJoin(productSchema, eq(outsourceOrderDetailSchema.productId, productSchema.id))
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
+      .leftJoin(workTableSchema, eq(outsourceOrderDetailSchema.locationCode, workTableSchema.tableCode))
+      .leftJoin(productSubSchema, eq(outsourceOrderDetailSchema.productSubCode, productSubSchema.productSubCode))
       .where(whereClause)
       .orderBy(orderDirection)
       .offset(offset)
@@ -560,6 +588,8 @@ export async function getOutsourceOrderDetailsByOwner(
         plan: { id: number; planCode: string; planName: string };
         product: { id: number; productCode: string; productName: string };
         productionStep: { id: number; stepCode: string; stepName: string };
+        workTable: { locationCode: string; tableName: string };
+        productSub: { productSubCode: string; productSubDetail: string; productCode: string };
       }) => {
         const receiptQuantity = await db
           .select({ sum: sum(outsourceOrderReceiptSchema.receiptQuantity) })
@@ -572,6 +602,8 @@ export async function getOutsourceOrderDetailsByOwner(
           plan: row.plan,
           product: row.product,
           productionStep: row.productionStep,
+          workTable: row.workTable,
+          productSub: row.productSub,
           // Override completedQuantity with actual receipt quantity
           completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
         } as OutsourceOrderDetailWithRelations;

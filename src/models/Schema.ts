@@ -531,6 +531,8 @@ export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
   productName: text('product_name').notNull(),
   stepCode: text('step_code').notNull(),
   stepName: text('step_name').notNull(),
+  locationCode: text('location_code'),
+  productSubCode: text('product_sub_code'),
   orderedQuantity: integer('ordered_quantity').notNull(),
   completedQuantity: integer('completed_quantity').default(0),
   expectedCompletionDate: date('expected_completion_date').notNull(),

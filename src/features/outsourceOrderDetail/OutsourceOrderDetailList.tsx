@@ -103,6 +103,10 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
     || item.productName?.toLowerCase().includes(search.toLowerCase())
     || item.stepCode?.toLowerCase().includes(search.toLowerCase())
     || item.stepName?.toLowerCase().includes(search.toLowerCase())
+    || item.productSub?.productSubCode?.toLowerCase().includes(search.toLowerCase())
+    || item.productSub?.productSubDetail?.toLowerCase().includes(search.toLowerCase())
+    || item.workTable?.locationCode?.toLowerCase().includes(search.toLowerCase())
+    || item.workTable?.tableName?.toLowerCase().includes(search.toLowerCase())
     || item.itemNotes?.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -333,6 +337,8 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                       <TableHead>#</TableHead>
                       <TableHead>{t('plan')}</TableHead>
                       <TableHead>{t('product')}</TableHead>
+                      <TableHead>{t('product_sub')}</TableHead>
+                      <TableHead>{t('location')}</TableHead>
                       <TableHead>{t('production_step')}</TableHead>
                       <TableHead className="text-right">{t('ordered_qty')}</TableHead>
                       <TableHead className="text-right">{t('completed')}</TableHead>
@@ -348,16 +354,24 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{index + 1}</TableCell>
                         <TableCell>
-                          <div className="text-sm font-medium">{item.planCode}</div>
-                          <div className="text-xs text-gray-500">{item.planName}</div>
+                          <div className="text-sm font-medium">{item.planName}</div>
+                          <div className="text-xs text-gray-500">{item.planCode}</div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm font-medium">{item.productCode}</div>
-                          <div className="text-xs text-gray-500">{item.productName}</div>
+                          <div className="text-sm font-medium">{item.productName}</div>
+                          <div className="text-xs text-gray-500">{item.productCode}</div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm font-medium">{item.stepCode}</div>
-                          <div className="text-xs text-gray-500">{item.stepName}</div>
+                          <div className="text-sm font-medium">{item.productSub?.productSubDetail || '-'}</div>
+                          <div className="text-xs text-gray-500">{item.productSub?.productSubCode || '-'}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm font-medium">{item.workTable?.tableName || '-'}</div>
+                          <div className="text-xs text-gray-500">{item.workTable?.locationCode || '-'}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm font-medium">{item.stepName}</div>
+                          <div className="text-xs text-gray-500">{item.stepCode}</div>
                         </TableCell>
                         <TableCell className="text-right text-sm">{item.orderedQuantity}</TableCell>
                         <TableCell className="text-right text-sm font-medium text-green-600">

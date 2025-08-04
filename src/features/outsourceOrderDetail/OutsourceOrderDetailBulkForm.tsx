@@ -47,6 +47,8 @@ const bulkFormSchema = z.object({
   outsourceOrderId: z.number(),
   planId: z.number().min(1, 'Plan is required'),
   productId: z.number().min(1, 'Product is required'),
+  locationCode: z.string().optional(),
+  productSubCode: z.string().optional(),
   expectedCompletionDate: z.string().min(1, 'Expected completion date is required'),
   selectedSteps: z.array(z.object({
     productionStepId: z.number(),
@@ -79,11 +81,31 @@ export function OutsourceOrderDetailBulkForm({
 }: OutsourceOrderDetailBulkFormProps) {
   const [selectedPlan, setSelectedPlan] = useState<{ id: number; planCode: string; planName: string } | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<{ id: number; productCode: string; productName: string } | null>(null);
+  const [selectedWorkTable, setSelectedWorkTable] = useState<{ locationCode: string; tableName: string } | null>(null);
+  const [selectedProductSub, setSelectedProductSub] = useState<{ productSubCode: string; productSubDetail: string; productCode: string } | null>(null);
   const [productionSteps, setProductionSteps] = useState<ProductionStepWithSelection[]>([]);
   const [stepFilter, setStepFilter] = useState('');
 
   const createBulkMutation = useCreateOutsourceOrderDetailBulk();
-  const { data: relationOptions, isLoading: isLoadingOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId);
+  
+  // Get basic options (plans, production steps, product subs) - not dependent on plan/product sub selection
+  const { data: basicOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId);
+  
+  // Get products filtered by selected plan
+  const { data: planFilteredOptions, isLoading: isLoadingOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId, selectedPlan?.id);
+  
+  // Get work tables filtered by selected plan and product sub
+  const { data: locationFilteredOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId, selectedPlan?.id, selectedProductSub?.productSubCode);
+  
+  // Combine options - use appropriate filtered data
+  const relationOptions = {
+    outsourceOrders: basicOptions?.outsourceOrders || [],
+    plans: basicOptions?.plans || [],
+    products: planFilteredOptions?.products || [],
+    productionSteps: basicOptions?.productionSteps || [],
+    workTables: locationFilteredOptions?.workTables || [],
+    productSubs: basicOptions?.productSubs || [],
+  };
 
   const t = useTranslations('OrderDetailForm');
 
@@ -98,6 +120,8 @@ export function OutsourceOrderDetailBulkForm({
       outsourceOrderId,
       planId: 0,
       productId: 0,
+      locationCode: '',
+      productSubCode: '',
       expectedCompletionDate: defaultExpectedDate,
       selectedSteps: [],
     },
@@ -110,22 +134,30 @@ export function OutsourceOrderDetailBulkForm({
 
   // Initialize production steps when options are loaded
   useEffect(() => {
-    if (relationOptions?.productionSteps) {
+    if (basicOptions?.productionSteps) {
       setProductionSteps(
-        relationOptions.productionSteps.map(step => ({
+        basicOptions.productionSteps.map(step => ({
           ...step,
           selected: false,
           orderedQuantity: 1,
         }))
       );
     }
-  }, [relationOptions]);
+  }, [basicOptions]);
 
   const handlePlanChange = (planId: string) => {
-    const plan = relationOptions?.plans.find(p => p.id === Number(planId));
+    const plan = basicOptions?.plans.find(p => p.id === Number(planId));
     if (plan) {
       setSelectedPlan(plan);
       form.setValue('planId', plan.id);
+      
+      // Reset product when plan changes since products will be filtered by new plan
+      setSelectedProduct(null);
+      form.setValue('productId', 0);
+      
+      // Also reset product sub since it depends on product
+      setSelectedProductSub(null);
+      form.setValue('productSubCode', '');
     }
   };
 
@@ -134,6 +166,32 @@ export function OutsourceOrderDetailBulkForm({
     if (product) {
       setSelectedProduct(product);
       form.setValue('productId', product.id);
+      
+      // Reset product sub and location when product changes
+      setSelectedProductSub(null);
+      form.setValue('productSubCode', '');
+      setSelectedWorkTable(null);
+      form.setValue('locationCode', '');
+    }
+  };
+
+  const handleWorkTableChange = (locationCode: string) => {
+    const workTable = relationOptions?.workTables?.find(w => w.locationCode === locationCode);
+    if (workTable) {
+      setSelectedWorkTable(workTable);
+      form.setValue('locationCode', workTable.locationCode);
+    }
+  };
+
+  const handleProductSubChange = (productSubCode: string) => {
+    const productSub = basicOptions?.productSubs?.find(p => p.productSubCode === productSubCode);
+    if (productSub) {
+      setSelectedProductSub(productSub);
+      form.setValue('productSubCode', productSub.productSubCode);
+      
+      // Reset location when product sub changes since locations will be filtered by new product sub
+      setSelectedWorkTable(null);
+      form.setValue('locationCode', '');
     }
   };
 
@@ -214,6 +272,8 @@ export function OutsourceOrderDetailBulkForm({
           productName: selectedProduct?.productName || '',
           stepCode: stepInfo?.stepCode || '',
           stepName: stepInfo?.stepName || '',
+          locationCode: data.locationCode,
+          productSubCode: data.productSubCode,
           orderedQuantity: step.orderedQuantity,
           expectedCompletionDate: new Date(data.expectedCompletionDate),
           itemNotes: step.itemNotes,
@@ -302,16 +362,83 @@ export function OutsourceOrderDetailBulkForm({
                 <Select
                   onValueChange={handleProductChange}
                   value={selectedProduct?.id.toString() || ''}
+                  disabled={!selectedPlan}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('select_product')} />
+                      <SelectValue placeholder={selectedPlan ? t('select_product') : t('select_plan_first')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {relationOptions?.products.map(product => (
                       <SelectItem key={product.id} value={product.id.toString()}>
                         {product.productCode} - {product.productName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Product Sub Selection */}
+          <FormField
+            control={form.control}
+            name="productSubCode"
+            render={() => (
+              <FormItem className="flex flex-row items-center gap-x-2">
+                <FormLabel className="min-w-[120px]">
+                  {t('product_sub')}
+                </FormLabel>
+                <Select
+                  onValueChange={handleProductSubChange}
+                  value={selectedProductSub?.productSubCode || ''}
+                  disabled={!selectedProduct}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('select_product_sub')} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {relationOptions?.productSubs
+                      ?.filter(ps => !selectedProduct || ps.productCode === selectedProduct.productCode)
+                      ?.map(productSub => (
+                        <SelectItem key={productSub.productSubCode} value={productSub.productSubCode}>
+                          {productSub.productSubDetail}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Location Selection */}
+          <FormField
+            control={form.control}
+            name="locationCode"
+            render={() => (
+              <FormItem className="flex flex-row items-center gap-x-2">
+                <FormLabel className="min-w-[120px]">
+                  {t('location')}
+                </FormLabel>
+                <Select
+                  onValueChange={handleWorkTableChange}
+                  value={selectedWorkTable?.locationCode || ''}
+                  disabled={!selectedProductSub}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedProductSub ? t('select_location') : t('select_product_sub_first')} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {relationOptions?.workTables?.map(workTable => (
+                      <SelectItem key={workTable.locationCode} value={workTable.locationCode}>
+                        {workTable.tableName}
                       </SelectItem>
                     ))}
                   </SelectContent>

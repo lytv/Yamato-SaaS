@@ -18,6 +18,8 @@ const baseOutsourceOrderDetailSchema = z.object({
   productName: z.string().trim().min(1, 'Product Name is required').max(200, 'Product Name must be 200 characters or less'),
   stepCode: z.string().trim().min(1, 'Step Code is required').max(50, 'Step Code must be 50 characters or less'),
   stepName: z.string().trim().min(1, 'Step Name is required').max(200, 'Step Name must be 200 characters or less'),
+  locationCode: z.string().trim().optional(),
+  productSubCode: z.string().trim().optional(),
   orderedQuantity: z.number().int().min(1, 'Ordered Quantity must be at least 1'),
   completedQuantity: z.number().int().min(0, 'Completed Quantity cannot be negative').optional(),
   expectedCompletionDate: z.preprocess(
@@ -128,6 +130,8 @@ export const updateOutsourceOrderDetailSchema = z.object({
   productName: z.string().trim().max(200, 'Product Name must be 200 characters or less').optional(),
   stepCode: z.string().trim().max(50, 'Step Code must be 50 characters or less').optional(),
   stepName: z.string().trim().max(200, 'Step Name must be 200 characters or less').optional(),
+  locationCode: z.string().trim().optional(),
+  productSubCode: z.string().trim().optional(),
   orderedQuantity: z.number().int().min(1, 'Ordered Quantity must be at least 1').optional(),
   completedQuantity: z.number().int().min(0, 'Completed Quantity cannot be negative').optional(),
   expectedCompletionDate: z.preprocess(
