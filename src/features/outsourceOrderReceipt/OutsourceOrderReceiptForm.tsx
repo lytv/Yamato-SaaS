@@ -148,8 +148,18 @@ export function OutsourceOrderReceiptForm({
     return total + (receipt.receiptQuantity || 0);
   }, 0);
 
-  const remainingQuantity = selectedDetail
+  // Calculate remaining quantity for display (original ordered - completed)
+  const displayRemainingQuantity = selectedDetail
     ? selectedDetail.orderedQuantity - actualCompletedQuantity
+    : 0;
+
+  // Allow 10% over the ordered quantity for input validation
+  const maxAllowedQuantity = selectedDetail
+    ? Math.floor(selectedDetail.orderedQuantity * 1.1) // 110% of ordered quantity
+    : 0;
+
+  const remainingQuantity = selectedDetail
+    ? maxAllowedQuantity - actualCompletedQuantity
     : 0;
 
   return (
@@ -235,7 +245,7 @@ export function OutsourceOrderReceiptForm({
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Còn lại</span>
-                        <div className="font-bold text-orange-600">{remainingQuantity}</div>
+                        <div className="font-bold text-orange-600">{displayRemainingQuantity}</div>
                       </div>
                     </div>
                     {remainingQuantity > 0 ? (
@@ -329,6 +339,7 @@ export function OutsourceOrderReceiptForm({
                               <span className="text-green-700">
                                 Số lượng tối đa có thể nhập: 
                                 <span className="font-bold ml-1 text-green-800">{remainingQuantity} đơn vị</span>
+                                <span className="text-xs ml-1">(cho phép nhập thêm 10%)</span>
                               </span>
                             </div>
                           </div>

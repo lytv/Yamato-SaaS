@@ -80,10 +80,12 @@ export async function createOutsourceOrderReceipt(data: CreateOutsourceOrderRece
       ));
 
     const existingTotal = existingReceiptsSum?.totalReceived || 0;
-    const remainingQuantity = detailExists[0]!.orderedQuantity - existingTotal;
+    // Allow 10% over the ordered quantity
+    const maxAllowedQuantity = Math.floor(detailExists[0]!.orderedQuantity * 1.1); // 110% of ordered quantity
+    const remainingQuantity = maxAllowedQuantity - existingTotal;
 
     if (data.receiptQuantity > remainingQuantity) {
-      throw new Error(`Receipt quantity ${data.receiptQuantity} exceeds remaining quantity ${remainingQuantity} for this order detail`);
+      throw new Error(`Receipt quantity ${data.receiptQuantity} exceeds remaining quantity ${remainingQuantity} for this order detail (max allowed: ${maxAllowedQuantity})`);
     }
   }
 
