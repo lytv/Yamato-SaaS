@@ -688,7 +688,28 @@
       "step_aria": "Filter by step",
       "all_steps": "All steps",
       "search_results_for": "Search results for",
-      "showing": "Showing {count} of {total} production step details"
+      "showing": "Showing {count} of {total} production step details",
+      "select_all": "Select All",
+      "deselect_all": "Deselect All",
+      "selected_items": "selected items",
+      "items_selected": "items selected",
+      "bulk_action_warning": "Selected items will be permanently deleted. This action cannot be undone.",
+      "cancel_selection": "Cancel Selection",
+      "delete_selected": "Delete Selected",
+      "deleting": "Deleting...",
+      "active_filters": "Active filters",
+      "pricing_info": "Pricing Information",
+      "quantity_limits": "Quantity Limits",
+      "status_flags": "Status Flags",
+      "final_step": "Final Step",
+      "not_final": "Not Final",
+      "not_vt": "Not VT Step",
+      "parking_step": "Parking Step",
+      "not_parking": "Not Parking",
+      "edit_detail_title": "Edit Production Step Detail",
+      "sort_retailPrice": "Retail Price",
+      "retailPrice": "Retail Price",
+      "retailPrice_placeholder": "Enter retail price"
     },
     "form": {
       "title": "Create Production Step Detail",
@@ -717,7 +738,9 @@
       "updating": "Updating...",
       "creating": "Creating...",
       "updateProductionStepDetail": "Update Production Step Detail",
-      "createProductionStepDetail": "Create Production Step Detail"
+      "createProductionStepDetail": "Create Production Step Detail",
+      "retailPrice": "Retail Price",
+      "retailPrice_placeholder": "Enter retail price"
     },
     "page": {
       "title": "Production Step Details",
@@ -1184,6 +1207,23 @@
       "paid": "Paid",
       "cancelled": "Cancelled"
     },
+    "work_date_range": "Work Date Range",
+    "advanced_filters": "Advanced Filters",
+    "filters_applied": "filters applied",
+    "from_date": "From Date",
+    "to_date": "To Date",
+    "employee_filter": "Employee Filter",
+    "product_filter": "Product Filter",
+    "production_step_filter": "Production Step Filter",
+    "status_filter": "Status Filter",
+    "all_status": "All Status",
+    "general_search": "General Search",
+    "apply_filters": "Apply Filters",
+    "clear_filters": "Clear Filters",
+    "from": "From",
+    "to": "To",
+    "code": "Code",
+    "name": "Name",
     "bulk": {
       "createSalaryEntry": "Create Employee Salary Records",
       "followSteps": "Follow 3 simple steps",
@@ -1345,8 +1385,10 @@
         "order_date": "Order Date",
         "expected_completion_date": "Expected Completion Date",
         "actual_completion_date": "Actual Completion Date",
-        "actions": "Actions"
+        "actions": "Actions",
+        "apply_retail_price": "Apply Retail Price"
       },
+      "price_type_normal": "Normal Price",
       "empty": "No outsourceOrders found. Create your first one!",
       "error_loading": "Error loading outsourceOrders:",
       "retry": "Retry",
@@ -1405,7 +1447,10 @@
       "cancel": "Cancel",
       "update": "Update",
       "create": "Create",
-      "form_title": "OutsourceOrder"
+      "form_title": "OutsourceOrder",
+      "apply_retail_price": "Apply Retail Price",
+      "normal_price": "Normal Price",
+      "retail_price": "Retail Price"
     }
   },
   "EmployeeSalaryEntryForm": {

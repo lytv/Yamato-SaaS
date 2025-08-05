@@ -11,7 +11,7 @@ const productCodeValidation = z
   .string()
   .min(1, 'Product code is required')
   .max(50, 'Product code must be less than 50 characters')
-  .regex(/^[A-Z0-9]+$/, 'Product code must contain only uppercase letters and numbers');
+  .regex(/^[A-Za-z0-9._-]+$/, 'Product code can contain letters, numbers, dots, underscores, and hyphens');
 
 const planCodeValidation = z
   .string()

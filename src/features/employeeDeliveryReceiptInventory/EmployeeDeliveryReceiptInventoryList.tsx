@@ -75,24 +75,6 @@ export function EmployeeDeliveryReceiptInventoryList({
     return `${rate.toFixed(2)}%`;
   }, []);
 
-  // Get completion rate color
-  const getCompletionRateColor = useCallback((rate: number): string => {
-    if (rate >= 100) {
-      return 'text-green-600 bg-green-50';
-    }
-    if (rate >= 80) {
-      return 'text-green-600 bg-green-50';
-    }
-    if (rate >= 50) {
-      return 'text-yellow-600 bg-yellow-50';
-    }
-    return 'text-red-600 bg-red-50';
-  }, []);
-
-  // Get completion rate progress width
-  const getProgressWidth = useCallback((rate: number): string => {
-    return `${Math.min(rate, 100)}%`;
-  }, []);
 
   // Loading state
   if (isLoading && data.length === 0) {
@@ -251,9 +233,6 @@ export function EmployeeDeliveryReceiptInventoryList({
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                   {t('inventory')}
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t('completion_rate')}
-                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
@@ -267,12 +246,10 @@ export function EmployeeDeliveryReceiptInventoryList({
                     <div className="text-sm text-gray-900">{item.plan_code}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{item.product_code}</div>
-                    <div className="text-sm text-gray-500">{item.product_name}</div>
+                    <div className="text-sm font-medium text-gray-900">{item.product_name}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{item.step_code}</div>
-                    <div className="text-sm text-gray-500">{item.step_name}</div>
+                    <div className="text-sm font-medium text-gray-900">{item.step_name}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900">
                     {formatNumber(item.total_assigned)}
@@ -284,19 +261,6 @@ export function EmployeeDeliveryReceiptInventoryList({
                     <span className={item.current_inventory < 0 ? 'text-red-600' : ''}>
                       {formatNumber(item.current_inventory)}
                     </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getCompletionRateColor(item.completion_rate)}`}>
-                        {formatPercentage(item.completion_rate)}
-                      </span>
-                      <div className="h-2 w-16 rounded-full bg-gray-200">
-                        <div
-                          className={`h-2 rounded-full ${item.completion_rate >= 100 ? 'bg-green-500' : item.completion_rate >= 80 ? 'bg-green-400' : item.completion_rate >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`}
-                          style={{ width: getProgressWidth(item.completion_rate) }}
-                        />
-                      </div>
-                    </div>
                   </td>
                 </tr>
               ))}

@@ -49,7 +49,7 @@ export function ProductionProgressPivotList({
 
   // Fetch data with current filters
   const {
-    data,
+    data: rawData,
     isLoading,
     isError,
     refetch,
@@ -58,6 +58,12 @@ export function ProductionProgressPivotList({
     page: 1,
     limit: 20,
   });
+
+  // Filter out rows with total_completed = 0
+  const data = useMemo(() => {
+    if (!rawData) return [];
+    return rawData.filter(item => item.total_completed > 0);
+  }, [rawData]);
 
 
   // Helper function to get dynamic step columns from data

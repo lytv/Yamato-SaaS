@@ -259,10 +259,10 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
     // Always get users from user_sync table for proper user_id mapping
     try {
       const usersResult = await db.execute(sql`
-        SELECT DISTINCT user_id, user_name 
+        SELECT DISTINCT user_id, full_name as user_name 
         FROM user_sync 
-        WHERE user_name IS NOT NULL 
-        ORDER BY user_name
+        WHERE full_name IS NOT NULL 
+        ORDER BY full_name
         LIMIT 100
       `);
       
@@ -283,8 +283,8 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
       try {
         // Simple direct queries as fallback
         const [productsResult, plansResult] = await Promise.all([
-          db.execute(sql`SELECT DISTINCT product_code, product_name FROM product WHERE product_code IS NOT NULL LIMIT 100`),
-          db.execute(sql`SELECT DISTINCT plan_code, plan_name FROM plan WHERE plan_code IS NOT NULL LIMIT 100`)
+          db.execute(sql`SELECT DISTINCT "productCode" as product_code, "productName" as product_name FROM product WHERE "productCode" IS NOT NULL LIMIT 100`),
+          db.execute(sql`SELECT DISTINCT "planCode" as plan_code, "planName" as plan_name FROM plan WHERE "planCode" IS NOT NULL LIMIT 100`)
         ]);
 
         // Process fallback results

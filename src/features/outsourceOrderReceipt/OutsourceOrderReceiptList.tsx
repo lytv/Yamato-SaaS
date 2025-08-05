@@ -127,43 +127,12 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
     });
   };
 
-  const formatCurrency = (amount?: string | number) => {
-    if (!amount) {
-      return '₫0';
-    }
-    const num = typeof amount === 'string' ? Number(amount) : amount;
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(num);
-  };
-
   const formatDate = (date?: string | Date) => {
     if (!date) {
       return '';
     }
     const d = typeof date === 'string' ? new Date(date) : date;
     return d.toLocaleDateString('vi-VN');
-  };
-
-  const getQualityBadgeVariant = (status?: string) => {
-    switch (status) {
-      case 'passed': return 'default';
-      case 'failed': return 'destructive';
-      case 'partial': return 'secondary';
-      case 'needs_rework': return 'outline';
-      default: return 'outline';
-    }
-  };
-
-  const getStatusBadgeVariant = (status?: string) => {
-    switch (status) {
-      case 'stored':
-      case 'processed': return 'default';
-      case 'rejected': return 'destructive';
-      case 'inspecting': return 'secondary';
-      default: return 'outline';
-    }
   };
 
   if (isLoading) {
@@ -334,18 +303,14 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
             <TableRow>
               <TableHead>Receipt Info</TableHead>
               <TableHead>Quantities</TableHead>
-              <TableHead>Quality</TableHead>
               <TableHead>People</TableHead>
-              <TableHead>Storage</TableHead>
-              <TableHead>Financial</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredReceipts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="py-8 text-center">
+                <TableCell colSpan={4} className="py-8 text-center">
                   <div className="text-muted-foreground">
                     {search || qualityFilter || statusFilter
                       ? t('noReceiptsMatchFilters')
@@ -429,23 +394,6 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
                     </div>
                   </TableCell>
 
-                  {/* Quality */}
-                  <TableCell>
-                    <div className="space-y-2">
-                      <Badge variant={getQualityBadgeVariant(receipt.qualityStatus ?? undefined)}>
-                        {receipt.qualityStatus || t('pending')}
-                      </Badge>
-                      {receipt.qualityScore && (
-                        <div className="text-sm text-muted-foreground">
-                          {t('score')}
-                          :
-                          {' '}
-                          {receipt.qualityScore}
-                          /10
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
 
                   {/* People */}
                   <TableCell>
@@ -469,54 +417,6 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
                     </div>
                   </TableCell>
 
-                  {/* Storage */}
-                  <TableCell>
-                    <div className="space-y-1 text-sm">
-                      {receipt.storageLocation && (
-                        <div className="font-medium">{receipt.storageLocation}</div>
-                      )}
-                      {receipt.warehouseCode && (
-                        <div className="text-muted-foreground">{receipt.warehouseCode}</div>
-                      )}
-                      {!receipt.storageLocation && !receipt.warehouseCode && (
-                        <div className="text-muted-foreground">{t('notSpecified')}</div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Financial */}
-                  <TableCell>
-                    <div className="space-y-1 text-sm">
-                      {receipt.actualUnitCost && (
-                        <div>
-                          <span className="text-muted-foreground">
-                            {t('unitCost')}
-                            :
-                          </span>
-                          <div className="font-medium">{formatCurrency(receipt.actualUnitCost)}</div>
-                        </div>
-                      )}
-                      {receipt.totalCost && (
-                        <div>
-                          <span className="text-muted-foreground">
-                            {t('totalCost')}
-                            :
-                          </span>
-                          <div className="font-bold">{formatCurrency(receipt.totalCost)}</div>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Status */}
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(receipt.status ?? undefined)}>
-                      {receipt.status || t('received')}
-                    </Badge>
-                    {receipt.isPartialReceipt && (
-                      <div className="mt-1 text-xs text-muted-foreground">{t('partial')}</div>
-                    )}
-                  </TableCell>
 
                   {/* Actions */}
                   <TableCell className="text-right">
@@ -571,47 +471,6 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
         </Table>
       </div>
 
-      {/* Summary Footer */}
-      {filteredReceipts.length > 0 && (
-        <div className="rounded-lg border bg-white p-4">
-          <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-            <div>
-              <span className="text-muted-foreground">
-                {t('totalReceipts')}
-                :
-              </span>
-              <div className="font-bold">{filteredReceipts.length}</div>
-            </div>
-            <div>
-              <span className="text-muted-foreground">
-                {t('totalQuantity')}
-                :
-              </span>
-              <div className="font-bold">
-                {filteredReceipts.reduce((sum, r) => sum + r.receiptQuantity, 0).toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <span className="text-muted-foreground">
-                {t('totalDefects')}
-                :
-              </span>
-              <div className="font-bold text-red-600">
-                {filteredReceipts.reduce((sum, r) => sum + (r.defectQuantity || 0), 0).toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <span className="text-muted-foreground">
-                {t('totalCost')}
-                :
-              </span>
-              <div className="font-bold">
-                {formatCurrency(filteredReceipts.reduce((sum, r) => sum + (Number(r.totalCost) || 0), 0))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
