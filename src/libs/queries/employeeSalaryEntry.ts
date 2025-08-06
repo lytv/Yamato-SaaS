@@ -72,6 +72,7 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
     }
   }
   if (data.productionStepDetailId) {
+    // First check if it's a production_step_detail ID
     const productionStepDetailExists = await db
       .select({ id: productionStepDetailSchema.id })
       .from(productionStepDetailSchema)
@@ -79,7 +80,49 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
       .limit(1);
 
     if (!productionStepDetailExists.length) {
-      throw new Error('ProductionStepDetail not found');
+      // If not found, check if it's a production_step ID and create/find corresponding production_step_detail
+      const productionStepExists = await db
+        .select({ id: productionStepSchema.id })
+        .from(productionStepSchema)
+        .where(eq(productionStepSchema.id, data.productionStepDetailId))
+        .limit(1);
+
+      if (!productionStepExists.length) {
+        throw new Error('Production step not found');
+      }
+
+      // Find or create production_step_detail for this production step and product
+      if (data.productId) {
+        const existingDetail = await db
+          .select({ id: productionStepDetailSchema.id })
+          .from(productionStepDetailSchema)
+          .where(
+            and(
+              eq(productionStepDetailSchema.productionStepId, data.productionStepDetailId),
+              eq(productionStepDetailSchema.productId, data.productId),
+              eq(productionStepDetailSchema.ownerId, data.ownerId)
+            )
+          )
+          .limit(1);
+
+        if (existingDetail.length > 0) {
+          // Update the ID to use the found production_step_detail ID
+          data.productionStepDetailId = existingDetail[0].id;
+        } else {
+          // Create new production_step_detail
+          const [newDetail] = await db
+            .insert(productionStepDetailSchema)
+            .values({
+              productionStepId: data.productionStepDetailId,
+              productId: data.productId,
+              sequenceNumber: 1, // Default sequence number
+              ownerId: data.ownerId,
+            } as any)
+            .returning();
+          
+          data.productionStepDetailId = newDetail.id;
+        }
+      }
     }
   }
   if (data.planId) {
@@ -769,6 +812,29 @@ export async function getProductionStepDetailsByProduct(productId: number, owner
     id: r.id,
     stepName: r.stepName || `Step ${r.id}`, // Fallback if stepName is null
   }));
+}
+
+/**
+ * 🆕 Get all production steps (not filtered by product)
+ */
+export async function getAllProductionSteps(ownerId: string): Promise<{
+  id: number;
+  stepCode: string;
+  stepName: string;
+  filmSequence: string | null;
+}[]> {
+  const results = await db
+    .select({
+      id: productionStepSchema.id,
+      stepCode: productionStepSchema.stepCode,
+      stepName: productionStepSchema.stepName,
+      filmSequence: productionStepSchema.filmSequence,
+    })
+    .from(productionStepSchema)
+    .where(eq(productionStepSchema.ownerId, ownerId))
+    .orderBy(asc(productionStepSchema.stepName));
+
+  return results;
 }
 
 /**
