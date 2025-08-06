@@ -70,6 +70,11 @@ export function EmployeeSalaryEntryForm({
   const [productCodeMessage, setProductCodeMessage] = useState('');
   const [productCodeError, setProductCodeError] = useState('');
 
+  // 🆕 State for category shortcut functionality
+  const [categoryValue, setCategoryValue] = useState('');
+  const [categoryMessage, setCategoryMessage] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+
   // 🆕 State for form error
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -180,6 +185,44 @@ export function EmployeeSalaryEntryForm({
     }
   }, [filteredProducts, form]);
 
+  // 🆕 Watch for planId changes to update planned quantity (moved here to fix TS error)
+  const planId = useWatch({ control: form.control, name: 'planId' });
+
+  // 🆕 Function to handle category search
+  const handleCategorySearch = useCallback(async (category: string) => {
+    setCategoryValue(category);
+    setCategoryError('');
+    setCategoryMessage('');
+
+    if (!category.trim()) {
+      return;
+    }
+
+    try {
+      // Fetch product by category
+      const params = new URLSearchParams();
+      params.append('category', category.trim());
+      if (planId) {
+        params.append('planId', planId.toString());
+      }
+
+      const response = await fetch(`/api/employeeSalaryEntries/relations/product-by-category?${params.toString()}`);
+      const data = await response.json();
+
+      if (response.ok && data.success && data.data) {
+        // Auto-populate product selection
+        form.setValue('productId', data.data.id);
+        setCategoryMessage(`✅ Found: ${data.data.productName}`);
+        setProductCodeValue(data.data.productCode);
+        setProductCodeMessage('');
+      } else {
+        setCategoryError(`❌ No product found with category: "${category}"`);
+      }
+    } catch (error) {
+      setCategoryError('❌ Error searching for product');
+    }
+  }, [planId, form]);
+
   // 🆕 V4: Watch for changes in actualQuantity and unitPrice to auto-calculate totalAmount
   const actualQuantity = useWatch({ control: form.control, name: 'actualQuantity' });
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' });
@@ -189,9 +232,6 @@ export function EmployeeSalaryEntryForm({
   
   // 🆕 Watch for productionStepDetailId changes to update limit quantity
   const productionStepDetailId = useWatch({ control: form.control, name: 'productionStepDetailId' });
-
-  // 🆕 Watch for planId changes to update planned quantity
-  const planId = useWatch({ control: form.control, name: 'planId' });
 
   useEffect(() => {
     if (actualQuantity && unitPrice) {
@@ -501,7 +541,22 @@ export function EmployeeSalaryEntryForm({
               {/* Product Section - Compact */}
               <div className="rounded-lg border-2 border-green-200 bg-green-50 p-3">
                 <h3 className="mb-3 text-lg font-bold text-green-900">📦 SẢN PHẨM</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-green-800">Danh mục</label>
+                    <Input
+                      placeholder="Nhập danh mục..."
+                      value={categoryValue}
+                      onChange={e => handleCategorySearch(e.target.value)}
+                      className="h-12 text-lg font-bold border-2 border-green-300"
+                    />
+                    {categoryMessage && (
+                      <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
+                    )}
+                    {categoryError && (
+                      <p className="mt-1 text-xs font-medium text-red-600">❌ Không tìm thấy</p>
+                    )}
+                  </div>
                   <div>
                     <label className="mb-1 block text-sm font-semibold text-green-800">Mã SP</label>
                     <Input
@@ -529,6 +584,8 @@ export function EmployeeSalaryEntryForm({
                               formField.onChange(Number(value));
                               setProductCodeMessage('');
                               setProductCodeError('');
+                              setCategoryMessage('');
+                              setCategoryError('');
                             }}
                             value={formField.value?.toString()}
                             disabled={!planId}
@@ -874,6 +931,9 @@ export function EmployeeSalaryEntryForm({
               setProductCodeValue('');
               setProductCodeMessage('');
               setProductCodeError('');
+              setCategoryValue('');
+              setCategoryMessage('');
+              setCategoryError('');
               setFilteredProducts([]);
               setFilteredProductionStepDetails([]);
             }}

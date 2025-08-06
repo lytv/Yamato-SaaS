@@ -87,6 +87,9 @@ export function EmployeeSalaryEntryBulkForm({
   const [shortcutValue, setShortcutValue] = useState('');
   const [shortcutMessage, setShortcutMessage] = useState('');
   const [shortcutError, setShortcutError] = useState('');
+  const [categoryValue, setCategoryValue] = useState('');
+  const [categoryMessage, setCategoryMessage] = useState('');
+  const [categoryError, setCategoryError] = useState('');
 
   const createBulkMutation = useCreateEmployeeSalaryEntryBulk();
   const { data: relationOptions } = useEmployeeSalaryEntryRelationOptions();
@@ -203,7 +206,41 @@ export function EmployeeSalaryEntryBulkForm({
     } else {
       setShortcutError(`${t('bulk.employeeNotFound')} "${shortcut}"`);
     }
-  }, [relationOptions?.userSyncs, form]);
+  }, [relationOptions?.userSyncs, form, t]);
+
+  const handleCategorySearch = useCallback(async (category: string) => {
+    setCategoryValue(category);
+    setCategoryError('');
+    setCategoryMessage('');
+
+    if (!category.trim()) {
+      return;
+    }
+
+    try {
+      // Fetch product by category
+      const params = new URLSearchParams();
+      params.append('category', category.trim());
+      if (selectedPlan) {
+        params.append('planId', selectedPlan.id.toString());
+      }
+
+      const response = await fetch(`/api/employeeSalaryEntries/relations/product-by-category?${params.toString()}`);
+      const data = await response.json();
+
+      if (response.ok && data.success && data.data) {
+        // Auto-populate product selection
+        const product = data.data;
+        setSelectedProduct(product);
+        form.setValue('productId', product.id);
+        setCategoryMessage(`✅ ${t('bulk.productFound')} ${product.productName}`);
+      } else {
+        setCategoryError(`❌ ${t('bulk.productNotFound')} "${category}"`);
+      }
+    } catch (error) {
+      setCategoryError(`❌ ${t('bulk.errorSearchingProduct')}`);
+    }
+  }, [selectedPlan, form, t]);
 
   const handleEmployeeChange = (userId: string) => {
     const employee = relationOptions?.userSyncs.find(u => u.userId === userId);
@@ -228,6 +265,8 @@ export function EmployeeSalaryEntryBulkForm({
     if (product) {
       setSelectedProduct(product);
       form.setValue('productId', product.id);
+      setCategoryMessage('');
+      setCategoryError('');
     }
   };
 
@@ -571,7 +610,7 @@ export function EmployeeSalaryEntryBulkForm({
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-4 rounded-lg border border-orange-300 shadow-sm">
                     <FormField
                       control={form.control}
@@ -606,6 +645,33 @@ export function EmployeeSalaryEntryBulkForm({
                         </FormItem>
                       )}
                     />
+                  </div>
+
+                  <div className="bg-white p-4 rounded-lg border border-orange-300 shadow-sm">
+                    <label className="mb-2 block text-lg font-bold text-orange-800 flex items-center">
+                      <span className="bg-yellow-400 text-yellow-800 px-2 py-1 rounded text-sm mr-2">{t('bulk.quickLabel')}</span>
+                      🏷️ {t('bulk.categorySearch')}
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">{t('bulk.categorySearchDesc')}</p>
+                    <Input
+                      placeholder={t('bulk.categorySearchPlaceholder')}
+                      value={categoryValue}
+                      onChange={e => handleCategorySearch(e.target.value)}
+                      className={`h-12 border-2 text-lg font-medium ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-orange-300'}`}
+                      disabled={!selectedPlan}
+                    />
+                    {categoryMessage && (
+                      <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded flex items-center">
+                        <span className="text-green-600 mr-2">✅</span>
+                        <p className="text-sm font-medium text-green-700">{categoryMessage}</p>
+                      </div>
+                    )}
+                    {categoryError && (
+                      <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded flex items-center">
+                        <span className="text-red-600 mr-2">❌</span>
+                        <p className="text-sm font-medium text-red-700">{categoryError}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-white p-4 rounded-lg border border-orange-300 shadow-sm">
