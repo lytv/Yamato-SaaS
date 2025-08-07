@@ -89,6 +89,14 @@ export function EmployeeSalaryEntryForm({
   // 🆕 Hook for fetching previous entered quantity
   const { previousQuantity: previousQuantityData, fetchPreviousQuantity } = useEmployeeSalaryEntryPreviousQuantity();
 
+  // 🆕 Get current month plan name (format: MMYYYY)
+  const getCurrentMonthPlanName = () => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${month}${year}`;
+  };
+
   const form = useForm<EmployeeSalaryEntryFormData>({
     resolver: zodResolver(employeeSalaryEntryFormSchema),
     defaultValues: {
@@ -128,6 +136,45 @@ export function EmployeeSalaryEntryForm({
         if (response.ok) {
           const data = await response.json();
           setRelationOptions(data.data);
+          
+          // 🆕 Auto-select current month plan if not editing
+          if (mode === 'create' && !employeeSalaryEntry?.planId && data.data.plans && data.data.plans.length > 0) {
+            const currentMonthPlanName = getCurrentMonthPlanName();
+            console.log('Current month plan name:', currentMonthPlanName);
+            console.log('Available plans:', data.data.plans.map((p: any) => p.planName));
+            
+            // Try to find exact match first
+            let currentMonthPlan = data.data.plans.find(
+              (plan: any) => plan.planName === currentMonthPlanName
+            );
+            
+            // If not found, try with different formats
+            if (!currentMonthPlan) {
+              // Try format: 08/2025 or 08-2025
+              const month = String(new Date().getMonth() + 1).padStart(2, '0');
+              const year = new Date().getFullYear();
+              const alternativeFormats = [
+                `${month}/${year}`,
+                `${month}-${year}`,
+                `${month}.${year}`,
+                `${month}${year}` // Already tried above but keep for completeness
+              ];
+              
+              for (const format of alternativeFormats) {
+                currentMonthPlan = data.data.plans.find(
+                  (plan: any) => plan.planName === format
+                );
+                if (currentMonthPlan) break;
+              }
+            }
+            
+            if (currentMonthPlan) {
+              console.log('Auto-selecting plan:', currentMonthPlan.planName);
+              form.setValue('planId', currentMonthPlan.id);
+            } else {
+              console.log('No matching plan found for current month');
+            }
+          }
         } else {
           console.error('Failed to load relation options:', response.statusText);
         }
@@ -279,7 +326,28 @@ export function EmployeeSalaryEntryForm({
         const response = await fetch(`/api/employeeSalaryEntries/relations/production-step-details?loadAll=true`);
         if (response.ok) {
           const data = await response.json();
-          setFilteredProductionStepDetails(data.data);
+          // Sort by filmSequence as number, then by stepName if filmSequence is null/empty
+          const sortedSteps = data.data.sort((a: any, b: any) => {
+            // Convert filmSequence to numbers
+            const filmSeqA = a.filmSequence ? parseFloat(a.filmSequence) : null;
+            const filmSeqB = b.filmSequence ? parseFloat(b.filmSequence) : null;
+            
+            // If both have valid filmSequence numbers, sort by number
+            if (filmSeqA !== null && filmSeqB !== null && !isNaN(filmSeqA) && !isNaN(filmSeqB)) {
+              return filmSeqA - filmSeqB;
+            }
+            
+            // If only one has valid filmSequence, prioritize it
+            if (filmSeqA !== null && !isNaN(filmSeqA) && (filmSeqB === null || isNaN(filmSeqB))) return -1;
+            if (filmSeqB !== null && !isNaN(filmSeqB) && (filmSeqA === null || isNaN(filmSeqA))) return 1;
+            
+            // If neither has valid filmSequence, sort by stepName
+            const stepNameA = a.stepName || `Step ${a.id}`;
+            const stepNameB = b.stepName || `Step ${b.id}`;
+            return stepNameA.localeCompare(stepNameB);
+          });
+          
+          setFilteredProductionStepDetails(sortedSteps);
         } else {
           console.error('Failed to load production step details:', response.statusText);
           setFilteredProductionStepDetails([]);

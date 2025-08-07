@@ -101,6 +101,13 @@ export function EmployeeSalaryEntryBulkForm({
 
   const t = useTranslations('employeeSalaryEntry');
 
+  // Get current month plan name (format: MMYYYY)
+  const getCurrentMonthPlanName = () => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${month}${year}`;
+  };
 
   // Default work date (today)
   const defaultWorkDate = new Date().toISOString().split('T')[0];
@@ -120,6 +127,47 @@ export function EmployeeSalaryEntryBulkForm({
     control: form.control,
     name: 'selectedSteps',
   });
+
+  // Auto-select current month plan when relationOptions loads
+  useEffect(() => {
+    if (relationOptions?.plans && relationOptions.plans.length > 0 && !selectedPlan) {
+      const currentMonthPlanName = getCurrentMonthPlanName();
+      console.log('Current month plan name (BulkForm):', currentMonthPlanName);
+      console.log('Available plans (BulkForm):', relationOptions.plans.map(p => p.planName));
+      
+      // Try to find exact match first
+      let currentMonthPlan = relationOptions.plans.find(
+        plan => plan.planName === currentMonthPlanName
+      );
+      
+      // If not found, try with different formats
+      if (!currentMonthPlan) {
+        const month = String(new Date().getMonth() + 1).padStart(2, '0');
+        const year = new Date().getFullYear();
+        const alternativeFormats = [
+          `${month}/${year}`,
+          `${month}-${year}`,
+          `${month}.${year}`,
+          `${month}${year}` // Already tried above but keep for completeness
+        ];
+        
+        for (const format of alternativeFormats) {
+          currentMonthPlan = relationOptions.plans.find(
+            plan => plan.planName === format
+          );
+          if (currentMonthPlan) break;
+        }
+      }
+      
+      if (currentMonthPlan) {
+        console.log('Auto-selecting plan (BulkForm):', currentMonthPlan.planName);
+        setSelectedPlan(currentMonthPlan);
+        form.setValue('planId', currentMonthPlan.id);
+      } else {
+        console.log('No matching plan found for current month (BulkForm)');
+      }
+    }
+  }, [relationOptions, selectedPlan, form]);
 
   // Load filtered products when plan changes
   useEffect(() => {
@@ -158,8 +206,29 @@ export function EmployeeSalaryEntryBulkForm({
         const response = await fetch(`/api/employeeSalaryEntries/relations/production-step-details?loadAll=true`);
         if (response.ok) {
           const data = await response.json();
+          // Sort by filmSequence as number, then by stepName if filmSequence is null/empty
+          const sortedSteps = data.data.sort((a: any, b: any) => {
+            // Convert filmSequence to numbers
+            const filmSeqA = a.filmSequence ? parseFloat(a.filmSequence) : null;
+            const filmSeqB = b.filmSequence ? parseFloat(b.filmSequence) : null;
+            
+            // If both have valid filmSequence numbers, sort by number
+            if (filmSeqA !== null && filmSeqB !== null && !isNaN(filmSeqA) && !isNaN(filmSeqB)) {
+              return filmSeqA - filmSeqB;
+            }
+            
+            // If only one has valid filmSequence, prioritize it
+            if (filmSeqA !== null && !isNaN(filmSeqA) && (filmSeqB === null || isNaN(filmSeqB))) return -1;
+            if (filmSeqB !== null && !isNaN(filmSeqB) && (filmSeqA === null || isNaN(filmSeqA))) return 1;
+            
+            // If neither has valid filmSequence, sort by stepName
+            const stepNameA = a.stepName || `Step ${a.id}`;
+            const stepNameB = b.stepName || `Step ${b.id}`;
+            return stepNameA.localeCompare(stepNameB);
+          });
+          
           setProductionSteps(
-            data.data.map((step: any) => ({
+            sortedSteps.map((step: any) => ({
               id: step.id,
               stepName: step.stepName || `Step ${step.id}`,
               stepCode: step.stepCode || '',
