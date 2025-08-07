@@ -12,6 +12,8 @@ type UserSyncFiltersReturn = UserSyncFilters & {
   handleSearchChange: (search: string) => void;
   handleSortChange: (sortBy: UserSyncFilters['sortBy']) => void;
   handleSortOrderChange: (sortOrder: UserSyncFilters['sortOrder']) => void;
+  handleShortcutChange: (shortcut: string) => void;
+  handleFullNameChange: (fullName: string) => void;
   resetFilters: () => void;
 };
 
@@ -19,6 +21,8 @@ const DEFAULT_FILTERS: UserSyncFilters = {
   search: '',
   sortBy: 'createdAt',
   sortOrder: 'desc',
+  shortcut: '',
+  fullName: '',
 };
 
 export function useUserSyncFilters(initialFilters?: Partial<UserSyncFilters>): UserSyncFiltersReturn {
@@ -39,6 +43,14 @@ export function useUserSyncFilters(initialFilters?: Partial<UserSyncFilters>): U
     setFilters(prev => ({ ...prev, sortOrder }));
   }, []);
 
+  const handleShortcutChange = useCallback((shortcut: string) => {
+    setFilters(prev => ({ ...prev, shortcut }));
+  }, []);
+
+  const handleFullNameChange = useCallback((fullName: string) => {
+    setFilters(prev => ({ ...prev, fullName }));
+  }, []);
+
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
   }, []);
@@ -48,6 +60,8 @@ export function useUserSyncFilters(initialFilters?: Partial<UserSyncFilters>): U
     handleSearchChange,
     handleSortChange,
     handleSortOrderChange,
+    handleShortcutChange,
+    handleFullNameChange,
     resetFilters,
   };
 }

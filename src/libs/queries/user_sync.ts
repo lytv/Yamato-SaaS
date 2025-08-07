@@ -59,28 +59,38 @@ export async function getUserSyncsByOwner(params: UserSyncListParamsWithOwner): 
     sortBy = 'createdAt',
     sortOrder = 'desc',
     showAll = false,
+    shortcut,
+    fullName,
   } = params;
   const offset = (page - 1) * limit;
 
   // Build where conditions
-  let whereConditions = eq(userSyncSchema.ownerId, ownerId);
+  const conditions = [eq(userSyncSchema.ownerId, ownerId)];
 
-  // Add search filter if provided
+  // Add exact filter for shortcut if provided
+  if (shortcut && shortcut.trim() !== '') {
+    conditions.push(eq(userSyncSchema.shortcut, shortcut.trim()));
+  }
+
+  // Add exact filter for fullName if provided
+  if (fullName && fullName.trim() !== '') {
+    conditions.push(eq(userSyncSchema.fullName, fullName.trim()));
+  }
+
+  // Add search filter if provided (for general search)
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
-    const searchCondition = and(
-      eq(userSyncSchema.ownerId, ownerId),
+    conditions.push(
       or(
         ilike(userSyncSchema.email, searchTerm),
         ilike(userSyncSchema.fullName, searchTerm),
         ilike(userSyncSchema.role, searchTerm),
         ilike(userSyncSchema.organizationRole, searchTerm),
-      ),
+      ) as any,
     );
-    if (searchCondition) {
-      whereConditions = searchCondition;
-    }
   }
+
+  const whereConditions = conditions.length > 1 ? and(...conditions) : conditions[0];
 
   // Build sort order
   const validSortFields = ['userId', 'email', 'fullName', 'role', 'organizationRole', 'createdAt', 'updatedAt'];
@@ -108,26 +118,34 @@ export async function getUserSyncsByOwner(params: UserSyncListParamsWithOwner): 
  * @param search - Optional search term
  * @returns Promise resolving to total count
  */
-export async function getUserSyncsCount(ownerId: string, search?: string): Promise<number> {
+export async function getUserSyncsCount(ownerId: string, search?: string, shortcut?: string, fullName?: string): Promise<number> {
   // Build where conditions
-  let whereConditions = eq(userSyncSchema.ownerId, ownerId);
+  const conditions = [eq(userSyncSchema.ownerId, ownerId)];
 
-  // Add search filter if provided
+  // Add exact filter for shortcut if provided
+  if (shortcut && shortcut.trim() !== '') {
+    conditions.push(eq(userSyncSchema.shortcut, shortcut.trim()));
+  }
+
+  // Add exact filter for fullName if provided
+  if (fullName && fullName.trim() !== '') {
+    conditions.push(eq(userSyncSchema.fullName, fullName.trim()));
+  }
+
+  // Add search filter if provided (for general search)
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
-    const searchCondition = and(
-      eq(userSyncSchema.ownerId, ownerId),
+    conditions.push(
       or(
         ilike(userSyncSchema.email, searchTerm),
         ilike(userSyncSchema.fullName, searchTerm),
         ilike(userSyncSchema.role, searchTerm),
         ilike(userSyncSchema.organizationRole, searchTerm),
-      ),
+      ) as any,
     );
-    if (searchCondition) {
-      whereConditions = searchCondition;
-    }
   }
+
+  const whereConditions = conditions.length > 1 ? and(...conditions) : conditions[0];
 
   const [result] = await db
     .select({ count: count() })
@@ -233,9 +251,9 @@ export async function getPaginatedUserSyncs(params: UserSyncListParamsWithOwner)
     hasMore: boolean;
   };
 }> {
-  const { ownerId, page = 1, limit = 10, search } = params;
+  const { ownerId, page = 1, limit = 10, search, shortcut, fullName } = params;
   const user_syncs = await getUserSyncsByOwner(params);
-  const total = await getUserSyncsCount(ownerId, search);
+  const total = await getUserSyncsCount(ownerId, search, shortcut, fullName);
   return {
     user_syncs,
     pagination: {

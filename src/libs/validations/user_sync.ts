@@ -47,6 +47,16 @@ export const user_syncListParamsSchema = z.object({
     ),
 
   showAll: z.boolean().optional().default(false),
+
+  // ✅ Exact filter for shortcut
+  shortcut: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) => val || undefined)
+    .pipe(z.string().trim().max(50).optional()),
+
+  // ✅ Exact filter for fullName
+  fullName: z.union([z.string(), z.undefined(), z.null()])
+    .transform((val: string | undefined | null) => val || undefined)
+    .pipe(z.string().trim().max(255).optional()),
 });
 
 // ✅ Form validation with business rules and input sanitization

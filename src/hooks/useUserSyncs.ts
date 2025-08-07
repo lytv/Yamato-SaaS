@@ -26,15 +26,17 @@ type UserSyncsReturn = UserSyncsState & {
 };
 
 const DEFAULT_PARAMS: Required<
-  Omit<UserSyncListParamsWithOwner, 'search' | 'ownerId' | 'showAll'>
+  Omit<UserSyncListParamsWithOwner, 'search' | 'ownerId' | 'showAll' | 'shortcut' | 'fullName'>
 > &
-Pick<UserSyncListParamsWithOwner, 'search' | 'showAll'> = {
+Pick<UserSyncListParamsWithOwner, 'search' | 'showAll' | 'shortcut' | 'fullName'> = {
   page: 1,
   limit: 10,
   sortBy: 'createdAt',
   sortOrder: 'desc',
   search: undefined,
   showAll: false,
+  shortcut: undefined,
+  fullName: undefined,
 };
 
 export function useUserSyncs({
@@ -45,6 +47,8 @@ export function useUserSyncs({
   limit = DEFAULT_PARAMS.limit,
   ownerId,
   showAll = DEFAULT_PARAMS.showAll,
+  shortcut = DEFAULT_PARAMS.shortcut,
+  fullName = DEFAULT_PARAMS.fullName,
 }: UserSyncListParamsWithOwner): UserSyncsReturn {
   const [state, setState] = useState<UserSyncsState>({
     user_syncs: [],
@@ -70,6 +74,8 @@ export function useUserSyncs({
         page,
         limit,
         showAll,
+        shortcut,
+        fullName,
       });
 
       if (result.success) {
@@ -97,7 +103,7 @@ export function useUserSyncs({
         pagination: null,
       }));
     }
-  }, [search, sortBy, sortOrder, page, limit, showAll, ownerId]);
+  }, [search, sortBy, sortOrder, page, limit, showAll, shortcut, fullName, ownerId]);
 
   const refresh = useCallback(() => {
     fetchData();

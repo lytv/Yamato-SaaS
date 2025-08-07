@@ -36,6 +36,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       sortBy: searchParams.get('sortBy') || undefined,
       sortOrder: searchParams.get('sortOrder') || undefined,
       showAll: searchParams.get('showAll') === 'true',
+      shortcut: searchParams.get('shortcut') || undefined,
+      fullName: searchParams.get('fullName') || undefined,
     };
 
     // ✅ Validation with proper error handling
@@ -50,6 +52,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       sortOrder: validatedParams.sortOrder as UserSyncListParams['sortOrder'],
       ownerId: orgId || userId,
       showAll: validatedParams.showAll,
+      shortcut: validatedParams.shortcut,
+      fullName: validatedParams.fullName,
     };
 
     const result = await getPaginatedUserSyncs(paramsWithOwner);

@@ -5,9 +5,9 @@
  */
 
 import { useAuth } from '@clerk/nextjs';
-import { Download, Upload, Search, Filter, Edit, Trash2, Eye, UserCheck, UserX, Calendar, Mail, Building } from 'lucide-react';
+import { Download, Upload, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { UserSyncSkeleton } from '@/features/user_sync/UserSyncSkeleton';
 import { useUserSyncExport } from '@/hooks/useUserSyncExport';
@@ -32,16 +32,56 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
+  
+  // Temporary filter states for manual search
+  const [tempSearch, setTempSearch] = useState('');
+  const [tempShortcut, setTempShortcut] = useState('');
+  const [tempFullName, setTempFullName] = useState('');
 
   const {
     search,
     sortBy,
     sortOrder,
+    shortcut,
+    fullName,
     handleSearchChange,
     handleSortChange,
     handleSortOrderChange,
+    handleShortcutChange,
+    handleFullNameChange,
     resetFilters,
   } = useUserSyncFilters();
+
+  // Sync temporary states with actual filters on mount
+  useEffect(() => {
+    setTempSearch(search);
+    setTempShortcut(shortcut);
+    setTempFullName(fullName);
+  }, [search, shortcut, fullName]);
+
+  // Handle manual search
+  const handleSearch = (): void => {
+    handleSearchChange(tempSearch);
+    handleShortcutChange(tempShortcut);
+    handleFullNameChange(tempFullName);
+    setPage(1); // Reset to first page on new search
+  };
+
+  // Handle clear filters
+  const handleClearFilters = (): void => {
+    setTempSearch('');
+    setTempShortcut('');
+    setTempFullName('');
+    resetFilters();
+    setPage(1);
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   // Get ownerId for multi-tenancy
   const ownerId = orgId || userId || '';
@@ -54,6 +94,8 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     limit: 10,
     ownerId,
     showAll,
+    shortcut,
+    fullName,
   });
 
   const { deleteUserSync, isDeleting } = useUserSyncMutations();
@@ -68,15 +110,6 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     // so we don't need additional user notification here
   };
 
-  // Format date for display
-  const formatDate = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   // Handle delete confirmation
   const handleDeleteClick = (user_sync: UserSync): void => {
@@ -106,9 +139,9 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     setDeleteError(null);
   };
 
-  // Handle search input change
+  // Handle search input change (now only updates temp state)
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    handleSearchChange(event.target.value);
+    setTempSearch(event.target.value);
   };
 
   // Handle sort field change
@@ -136,83 +169,46 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
     }
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div>
-        <div role="status" aria-label={t('loadingUsers')} className="sr-only">
-          {t('loadingUsers')}
-        </div>
-        <UserSyncSkeleton data-testid="user_sync-list-skeleton" />
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="py-12 text-center">
-        <div className="mb-4 text-red-600">{error}</div>
-        <button
-          type="button"
-          onClick={refresh}
-          className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          {t('retry')}
-        </button>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (user_syncs.length === 0 && !search) {
-    return (
-      <div className="py-12 text-center">
-        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noUsersFound')}</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          {t('createFirstUser')}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
       {/* Search and Filter Controls */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          <div className="flex flex-1 items-center space-x-4">
-            <div className="relative max-w-lg flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder={t('search_placeholder')}
-                value={search}
-                onChange={handleSearchInputChange}
-                aria-label={t('search_aria_label')}
-                className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              />
-            </div>
-            <div className="flex items-center space-x-3">
-              <label className="relative inline-flex items-center cursor-pointer">
+        <div className="flex flex-col space-y-4">
+          {/* First Row: Search and Show All */}
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+            <div className="flex flex-1 items-center space-x-4">
+              <div className="relative max-w-lg flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  type="checkbox"
-                  id="showAll"
-                  checked={showAll}
-                  onChange={e => setShowAll(e.target.checked)}
-                  className="sr-only peer"
+                  type="text"
+                  placeholder={t('search_placeholder')}
+                  value={tempSearch}
+                  onChange={handleSearchInputChange}
+                  onKeyPress={handleKeyPress}
+                  aria-label={t('search_aria_label')}
+                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-sm font-medium text-gray-700">
-                  {t('show_all')}
-                </span>
-              </label>
+              </div>
+              <div className="flex items-center space-x-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="showAll"
+                    checked={showAll}
+                    onChange={e => setShowAll(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <span className="ml-3 text-sm font-medium text-gray-700">
+                    {t('show_all')}
+                  </span>
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
             {/* Sort Controls */}
             <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2">
               <Filter className="h-4 w-4 text-gray-500" />
@@ -261,20 +257,99 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
               {t('import')}
             </button>
 
-            {/* Clear Search */}
-            {search && (
+              {/* Clear Filters */}
+              {(search || shortcut || fullName) && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  aria-label={t('clear_search_aria_label')}
+                  className="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
+                >
+                  {t('clear_filters')}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Second Row: Exact Filters */}
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-x-4 lg:space-y-0">
+            <div className="flex-1">
+              <label htmlFor="shortcut-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('filter_by_shortcut')}
+              </label>
+              <input
+                type="text"
+                id="shortcut-filter"
+                placeholder={t('enter_shortcut_exact')}
+                value={tempShortcut}
+                onChange={e => setTempShortcut(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="block w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="fullname-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('filter_by_fullname')}
+              </label>
+              <input
+                type="text"
+                id="fullname-filter"
+                placeholder={t('enter_fullname_exact')}
+                value={tempFullName}
+                onChange={e => setTempFullName(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="block w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm placeholder:text-gray-500 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              />
+            </div>
+            
+            {/* Search Button */}
+            <div className="flex items-end">
               <button
                 type="button"
-                onClick={resetFilters}
-                aria-label={t('clear_search_aria_label')}
-                className="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
+                onClick={handleSearch}
+                className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-sm"
               >
-                {t('clear_search')}
+                <Search className="w-4 h-4 mr-2" />
+                {t('search_button')}
               </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Loading state */}
+      {isLoading && (
+        <div>
+          <div role="status" aria-label={t('loadingUsers')} className="sr-only">
+            {t('loadingUsers')}
+          </div>
+          <UserSyncSkeleton data-testid="user_sync-list-skeleton" />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className="py-12 text-center bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="mb-4 text-red-600">{error}</div>
+          <button
+            type="button"
+            onClick={refresh}
+            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            {t('retry')}
+          </button>
+        </div>
+      )}
+
+      {/* Empty state without search */}
+      {!isLoading && !error && user_syncs.length === 0 && !search && !shortcut && !fullName && (
+        <div className="py-12 text-center bg-white rounded-xl shadow-sm border border-gray-100">
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('noUsersFound')}</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {t('createFirstUser')}
+          </p>
+        </div>
+      )}
 
       {/* Export Error Display */}
       {exportError && (
@@ -304,6 +379,7 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
       )}
 
       {/* UserSync Count */}
+      {!isLoading && !error && user_syncs.length > 0 && (
       <div className="text-sm text-gray-600">
         {t('showing')}
         {' '}
@@ -322,140 +398,115 @@ export function UserSyncList({ onEdit, onDelete }: UserSyncListProps): JSX.Eleme
           </span>
         )}
       </div>
+      )}
 
-      {/* UserSyncs Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {user_syncs.map(user_sync => (
-          <div key={user_sync.userId} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
-            {/* Card Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  {user_sync.avatarUrl ? (
-                    <img 
-                      src={user_sync.avatarUrl} 
-                      alt="avatar" 
-                      className="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold text-lg">
-                        {user_sync.fullName?.charAt(0) || user_sync.email.charAt(0).toUpperCase()}
-                      </span>
+      {/* UserSyncs Table/List View */}
+      {!isLoading && !error && user_syncs.length > 0 && (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('full_name')}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('shortcut')}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('role')}
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('actions')}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {user_syncs.map(user_sync => (
+                <tr key={user_sync.userId} className="hover:bg-gray-50 transition-colors duration-150">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {user_sync.avatarUrl ? (
+                          <img 
+                            src={user_sync.avatarUrl} 
+                            alt="avatar" 
+                            className="h-10 w-10 rounded-full object-cover border-2 border-gray-200" 
+                          />
+                        ) : (
+                          <div className="h-10 w-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold text-sm">
+                              {user_sync.fullName?.charAt(0) || user_sync.email.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user_sync.fullName || t('noName')}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {user_sync.email}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${user_sync.isActive ? 'bg-green-400' : 'bg-gray-400'}`}></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {user_sync.fullName || t('noName')}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate flex items-center">
-                    <Mail className="w-3 h-3 mr-1" />
-                    {user_sync.email}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Status Badge */}
-              <div className="flex flex-col items-end space-y-1">
-                <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                  user_sync.isActive 
-                    ? 'bg-green-100 text-green-800 border border-green-200' 
-                    : 'bg-red-100 text-red-800 border border-red-200'
-                }`}>
-                  {user_sync.isActive ? (
-                    <>
-                      <UserCheck className="w-3 h-3 mr-1" />
-                      {t('active')}
-                    </>
-                  ) : (
-                    <>
-                      <UserX className="w-3 h-3 mr-1" />
-                      {t('inactive')}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Card Content */}
-            <div className="space-y-3 mb-4">
-              {/* User ID */}
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('user_id')}</span>
-                <code className="text-xs text-gray-700 bg-white px-2 py-1 rounded border">
-                  {user_sync.userId.length > 20 ? `${user_sync.userId.substring(0, 20)}...` : user_sync.userId}
-                </code>
-              </div>
-
-              {/* Roles */}
-              {(user_sync.role || user_sync.organizationRole) && (
-                <div className="flex flex-wrap gap-2">
-                  {user_sync.role && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                      <Building className="w-3 h-3 mr-1" />
-                      {user_sync.role}
-                    </span>
-                  )}
-                  {user_sync.organizationRole && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                      <Building className="w-3 h-3 mr-1" />
-                      {user_sync.organizationRole}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Shortcut */}
-              {user_sync.shortcut && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-medium text-gray-500">{t('shortcut')}:</span>
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                    {user_sync.shortcut}
-                  </span>
-                </div>
-              )}
-
-              {/* Dates */}
-              <div className="flex justify-between text-xs text-gray-500">
-                <div className="flex items-center">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  {t('created')}: {formatDate(user_sync.createdAt)}
-                </div>
-                <div>
-                  {t('updated')}: {formatDate(user_sync.updatedAt)}
-                </div>
-              </div>
-            </div>
-
-            {/* Card Actions */}
-            <div className="flex justify-end space-x-2 pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => onEdit(user_sync)}
-                disabled={isDeleting}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Edit className="w-4 h-4 mr-1" />
-                {t('edit')}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDeleteClick(user_sync)}
-                disabled={isDeleting}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4 mr-1" />
-                {t('delete')}
-              </button>
-            </div>
-          </div>
-        ))}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {user_sync.shortcut ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                        {user_sync.shortcut}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col space-y-1">
+                      {user_sync.role && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                          {user_sync.role}
+                        </span>
+                      )}
+                      {user_sync.organizationRole && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                          {user_sync.organizationRole}
+                        </span>
+                      )}
+                      {!user_sync.role && !user_sync.organizationRole && (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(user_sync)}
+                      disabled={isDeleting}
+                      className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Edit className="w-4 h-4 inline" />
+                      <span className="ml-1">{t('edit')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteClick(user_sync)}
+                      disabled={isDeleting}
+                      className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4 inline" />
+                      <span className="ml-1">{t('delete')}</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+      )}
 
       {/* Pagination */}
-      {!showAll && pagination && pagination.total > 0 && (
+      {!isLoading && !error && !showAll && pagination && pagination.total > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div>
