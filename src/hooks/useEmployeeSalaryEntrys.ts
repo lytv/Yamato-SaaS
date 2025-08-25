@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { fetchEmployeeSalaryEntrys } from '@/libs/api/employeeSalaryEntries';
-import type { EmployeeSalaryEntryListParamsWithOwner, EmployeeSalaryEntrysResponse, EmployeeSalaryEntryWithRelations, EmployeeSalaryEntryRelationOptions } from '@/types/employeeSalaryEntry';
+import type { EmployeeSalaryEntryListParamsWithOwner, EmployeeSalaryEntryRelationOptions, EmployeeSalaryEntrysResponse, EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
 
 type EmployeeSalaryEntrysState = {
   employeeSalaryEntrys: EmployeeSalaryEntryWithRelations[];
@@ -21,6 +21,9 @@ type EmployeeSalaryEntrysReturn = EmployeeSalaryEntrysState & {
   refresh: () => void;
 };
 
+// Get today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split('T')[0];
+
 const DEFAULT_PARAMS = {
   page: 1,
   limit: 10,
@@ -29,6 +32,9 @@ const DEFAULT_PARAMS = {
   search: undefined,
   showAll: false,
   ownerId: '', // TODO: lấy ownerId thực tế từ context/auth
+  // 🆕 Default filter by today's work_date
+  workDateFrom: today,
+  workDateTo: today,
 };
 
 export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWithOwner & { includeRelations?: boolean }): EmployeeSalaryEntrysReturn {
@@ -45,16 +51,18 @@ export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWit
     status,
     dateFrom,
     dateTo,
-    workDateFrom,
-    workDateTo,
+    workDateFrom = DEFAULT_PARAMS.workDateFrom,
+    workDateTo = DEFAULT_PARAMS.workDateTo,
     userId,
     employeeCode,
     employeeName,
     productId,
     productCode,
     productName,
+    productCategory,
     productionStepDetailId,
     stepName,
+    filmSequence,
     planId,
   } = params;
   const [state, setState] = useState<EmployeeSalaryEntrysState>({
@@ -95,8 +103,10 @@ export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWit
         productId,
         productCode,
         productName,
+        productCategory,
         productionStepDetailId,
         stepName,
+        filmSequence,
         planId,
       });
 
@@ -126,13 +136,13 @@ export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWit
       }));
     }
   }, [
-    search, 
-    sortBy, 
-    sortOrder, 
-    page, 
-    limit, 
-    showAll, 
-    includeRelations, 
+    search,
+    sortBy,
+    sortOrder,
+    page,
+    limit,
+    showAll,
+    includeRelations,
     ownerId,
     // Enhanced filter dependencies
     status,
@@ -146,8 +156,10 @@ export function useEmployeeSalaryEntrys(params: EmployeeSalaryEntryListParamsWit
     productId,
     productCode,
     productName,
+    productCategory,
     productionStepDetailId,
     stepName,
+    filmSequence,
     planId,
   ]); // Enhanced dependency array for all filter parameters
 

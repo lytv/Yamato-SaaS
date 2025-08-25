@@ -55,11 +55,13 @@ export async function GET(request: NextRequest) {
       productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
       productCode: searchParams.get('productCode') || undefined,
       productName: searchParams.get('productName') || undefined,
+      productCategory: searchParams.get('productCategory') || undefined,
 
       // Production step filtering
       productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
       stepName: searchParams.get('stepName') || undefined,
-      
+      filmSequence: searchParams.get('filmSequence') || undefined,
+
       planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
     });
 
@@ -67,7 +69,6 @@ export async function GET(request: NextRequest) {
       ...params,
       ownerId: orgId || userId, // Fix parameter name to match validation schema
     });
-
 
     // Get total count for pagination (performance optimized)
     const totalCountParams = { ...params, page: 1, limit: 999999 };
@@ -130,18 +131,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('📨 Received POST body:', JSON.stringify(body, null, 2));
 
     // 🆕 V4: Enhanced validation with detailed error messages
     const dataToValidate = {
       ...body,
       ownerId: orgId || userId, // Add ownerId from auth (orgId prioritized)
     };
-    
-    console.log('🔍 Data to validate:', JSON.stringify(dataToValidate, null, 2));
 
     const validatedData = validateCreateEmployeeSalaryEntry(dataToValidate);
-    console.log('✅ Validated data:', JSON.stringify(validatedData, null, 2));
 
     const employeeSalaryEntry = await createEmployeeSalaryEntry(validatedData);
 

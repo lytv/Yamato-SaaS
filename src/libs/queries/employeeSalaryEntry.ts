@@ -100,8 +100,8 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
             and(
               eq(productionStepDetailSchema.productionStepId, data.productionStepDetailId),
               eq(productionStepDetailSchema.productId, data.productId),
-              eq(productionStepDetailSchema.ownerId, data.ownerId)
-            )
+              eq(productionStepDetailSchema.ownerId, data.ownerId),
+            ),
           )
           .limit(1);
 
@@ -119,7 +119,7 @@ export async function createEmployeeSalaryEntry(data: CreateEmployeeSalaryEntryI
               ownerId: data.ownerId,
             } as any)
             .returning();
-          
+
           data.productionStepDetailId = newDetail.id;
         }
       }
@@ -214,9 +214,11 @@ export async function getEmployeeSalaryEntries(params: {
   product_id?: number;
   productCode?: string;
   productName?: string;
+  productCategory?: string;
   // Production step filtering
   production_step_detail_id?: number;
   stepName?: string;
+  filmSequence?: string;
   plan_id?: number;
   ownerId?: string;
 }): Promise<EmployeeSalaryEntryWithRelations[]> {
@@ -241,9 +243,11 @@ export async function getEmployeeSalaryEntries(params: {
     product_id,
     productCode,
     productName,
+    productCategory,
     // Production step filtering
     production_step_detail_id,
     stepName,
+    filmSequence,
     plan_id,
     ownerId,
   } = params;
@@ -348,7 +352,7 @@ export async function getEmployeeSalaryEntries(params: {
   if (ownerId !== undefined) {
     conditions.push(eq(employeeSalaryEntrySchema.owner_id, ownerId));
   }
-  
+
   // General search conditions
   if (typeof search === 'string' && search.trim() !== '') {
     const searchConditions = [
@@ -359,14 +363,18 @@ export async function getEmployeeSalaryEntries(params: {
       ilike(planSchema.planName, `%${search}%`),
       ilike(productSchema.productCode, `%${search}%`),
       ilike(productSchema.productName, `%${search}%`),
+      ilike(productSchema.category, `%${search}%`),
       ilike(productionStepSchema.stepName, `%${search}%`),
+      ilike(productionStepSchema.filmSequence, `%${search}%`),
       // Search in date field (cast to text)
       sql`CAST(${employeeSalaryEntrySchema.work_date} AS TEXT) ILIKE ${`%${search}%`}`,
       // Search in numeric fields (cast to text) - only if search is numeric or contains digits
-      ...(search.match(/\d/) ? [
-        sql`CAST(${employeeSalaryEntrySchema.actual_quantity} AS TEXT) ILIKE ${`%${search}%`}`,
-        sql`CAST(${productionStepDetailSchema.id} AS TEXT) ILIKE ${`%${search}%`}`,
-      ] : [])
+      ...(search.match(/\d/)
+        ? [
+            sql`CAST(${employeeSalaryEntrySchema.actual_quantity} AS TEXT) ILIKE ${`%${search}%`}`,
+            sql`CAST(${productionStepDetailSchema.id} AS TEXT) ILIKE ${`%${search}%`}`,
+          ]
+        : []),
     ];
     conditions.push(or(...searchConditions));
   }
@@ -397,6 +405,9 @@ export async function getEmployeeSalaryEntries(params: {
   if (productName) {
     conditions.push(ilike(productSchema.productName, `%${productName}%`));
   }
+  if (productCategory) {
+    conditions.push(ilike(productSchema.category, `%${productCategory}%`));
+  }
 
   // Production step filtering
   if (production_step_detail_id !== undefined) {
@@ -404,6 +415,9 @@ export async function getEmployeeSalaryEntries(params: {
   }
   if (stepName) {
     conditions.push(ilike(productionStepSchema.stepName, `%${stepName}%`));
+  }
+  if (filmSequence) {
+    conditions.push(ilike(productionStepSchema.filmSequence, `%${filmSequence}%`));
   }
 
   // Plan filtering
@@ -465,7 +479,6 @@ export async function getEmployeeSalaryEntries(params: {
     .orderBy(orderBy)
     .limit(limit)
     .offset(offset);
-
 
   return results.map((r: any) => ({
     id: r.id,
@@ -804,7 +817,7 @@ export async function getProductionStepDetailsByProduct(productId: number, owner
     )
     .where(and(
       eq(productionStepDetailSchema.productId, productId),
-      eq(productionStepDetailSchema.ownerId, ownerId)
+      eq(productionStepDetailSchema.ownerId, ownerId),
     ))
     .orderBy(asc(productionStepDetailSchema.id));
 
@@ -848,21 +861,21 @@ export async function getEmployeeSalaryEntryRelationOptions(ownerId: string): Pr
       fullName: userSyncSchema.fullName,
       shortcut: userSyncSchema.shortcut,
     }).from(userSyncSchema)
-    .where(eq(userSyncSchema.ownerId, ownerId))
-    .orderBy(asc(userSyncSchema.fullName)),
+      .where(eq(userSyncSchema.ownerId, ownerId))
+      .orderBy(asc(userSyncSchema.fullName)),
 
     db.select({
       id: productionStepDetailSchema.id,
     }).from(productionStepDetailSchema)
-    .where(eq(productionStepDetailSchema.ownerId, ownerId))
-    .orderBy(asc(productionStepDetailSchema.id)),
+      .where(eq(productionStepDetailSchema.ownerId, ownerId))
+      .orderBy(asc(productionStepDetailSchema.id)),
 
     db.select({
       id: planSchema.id,
       planName: planSchema.planName,
     }).from(planSchema)
-    .where(eq(planSchema.ownerId, ownerId))
-    .orderBy(asc(planSchema.planName)),
+      .where(eq(planSchema.ownerId, ownerId))
+      .orderBy(asc(planSchema.planName)),
 
     // 🆕 Add product options query with ownerId filter
     db.select({
@@ -870,14 +883,9 @@ export async function getEmployeeSalaryEntryRelationOptions(ownerId: string): Pr
       productCode: productSchema.productCode,
       productName: productSchema.productName,
     }).from(productSchema)
-    .where(eq(productSchema.ownerId, ownerId))
-    .orderBy(asc(productSchema.productName)),
+      .where(eq(productSchema.ownerId, ownerId))
+      .orderBy(asc(productSchema.productName)),
   ]);
-
-  console.log('userSyncOptions:', userSyncOptions);
-  console.log('productionStepDetailOptions:', productionStepDetailOptions);
-  console.log('planOptions:', planOptions);
-  console.log('productOptions:', productOptions);
 
   return {
     userSyncs: userSyncOptions,

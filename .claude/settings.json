@@ -1,18 +1,3 @@
 {
-  "permissions": {
-    "allow": ["WebFetch(domain:docs.anthropic.com)"]
-  },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run .claude/hooks/task_medium_prep_hook.py"
-          }
-        ]
-      }
-    ]
-  },
-  "enabledMcpjsonServers": ["context7", "puppeteer", "sequential-thinking", "webfetch"]
+  "model": "sonnet"
 }

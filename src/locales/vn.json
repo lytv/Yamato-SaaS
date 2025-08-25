@@ -361,61 +361,6 @@
       "apply": "Áp dụng"
     }
   },
-  "productionProgressPivot": {
-    "list": {
-      "title": "Báo cáo Tiến độ Sản xuất - Pivot",
-      "refresh": "Làm mới",
-      "columns": {
-        "productCode": "Mã sản phẩm",
-        "productName": "Tên sản phẩm",
-        "planCode": "Kế hoạch",
-        "plannedQuantity": "SL Kế hoạch",
-        "totalCompleted": "Tổng hoàn thành",
-        "completionRate": "Tỷ lệ hoàn thành"
-      },
-      "export": {
-        "excel": "Excel",
-        "csv": "CSV"
-      },
-      "error": "Không thể tải báo cáo pivot",
-      "retry": "Thử lại"
-    },
-    "filter": {
-      "title": "Bộ lọc",
-      "clear": "Xóa",
-      "search": {
-        "placeholder": "Tìm kiếm sản phẩm, kế hoạch..."
-      },
-      "product": {
-        "label": "Sản phẩm",
-        "placeholder": "Chọn sản phẩm...",
-        "all": "Tất cả sản phẩm"
-      },
-      "plan": {
-        "label": "Kế hoạch",
-        "placeholder": "Chọn kế hoạch...",
-        "all": "Tất cả kế hoạch"
-      },
-      "sortBy": {
-        "label": "Sắp xếp theo",
-        "placeholder": "Chọn trường...",
-        "productCode": "Mã sản phẩm",
-        "productName": "Tên sản phẩm",
-        "planCode": "Mã kế hoạch",
-        "plannedQuantity": "SL kế hoạch",
-        "totalCompleted": "Tổng hoàn thành",
-        "completionRate": "Tỷ lệ hoàn thành"
-      },
-      "sortOrder": {
-        "label": "Thứ tự",
-        "placeholder": "Chọn thứ tự...",
-        "asc": "Tăng dần",
-        "desc": "Giảm dần"
-      },
-      "reset": "Đặt lại",
-      "apply": "Áp dụng"
-    }
-  },
   "DashboardIndex": {
     "title_bar": "Bảng điều khiển",
     "title_bar_description": "Chào mừng bạn đến với bảng điều khiển",
@@ -1097,6 +1042,8 @@
     "edit": "Sửa",
     "delete": "Xóa",
     "search_placeholder": "🔍 Tìm kiếm nhân viên, sản phẩm, công đoạn... (Nhấn Enter để tìm)",
+    "search": "Tìm kiếm",
+    "category": "Danh mục",
     "show_all": "📊",
     "sort_by": "🔄",
     "export": "📊Excel",
@@ -1117,6 +1064,7 @@
     "product_name": "📦 Sản Phẩm",
     "step_name": "⚙️ Công Đoạn",
     "actual_quantity": "🔢 Số Lượng",
+    "total_quantity": "📊 Tổng Số Lượng",
     "actions": "⚡ Thao Tác",
     "not_specified": "Không xác định",
     "units": "đơn vị",
@@ -1128,11 +1076,9 @@
     "from_date": "Từ ngày",
     "to_date": "Đến ngày",
     "employee_filter": "Lọc theo nhân viên",
-    "employee_name": "Tên nhân viên",
     "product_filter": "Lọc theo sản phẩm",
     "product_code": "Mã sản phẩm",
     "production_step_filter": "Lọc theo công đoạn",
-    "step_name": "Tên công đoạn",
     "status_filter": "Lọc theo trạng thái",
     "all_status": "Tất cả trạng thái",
     "draft": "Nháp",
@@ -1152,7 +1098,6 @@
     "clear_all_filters": "Xóa tất cả bộ lọc",
     "general_search": "Tìm kiếm chung",
     "filters_applied": "bộ lọc đang áp dụng",
-    "product_code": "Mã SP:",
     "no_entries_found": "📄 Chưa có bản ghi nào",
     "create_first_entry": "Hãy tạo bản ghi lương nhân viên đầu tiên của bạn!",
     "get_started": "⭐ Bắt đầu ngay",
@@ -1190,13 +1135,6 @@
       "endTime": "Kết thúc làm",
       "workDurationMinutes": "Thời lượng làm (phút)",
       "ownerId": "Chủ sở hữu"
-    },
-    "status": {
-      "draft": "Nháp",
-      "submitted": "Đã gửi",
-      "approved": "Đã duyệt",
-      "paid": "Đã trả lương",
-      "cancelled": "Đã huỷ"
     },
     "bulk": {
       "createSalaryEntry": "Tạo Bản Ghi Lương Nhân Viên",
@@ -1256,50 +1194,7 @@
       "stepStatus": "Kiểm Tra",
       "notSelected": "Chưa chọn",
       "addNotes": "💬 Thêm ghi chú...",
-      "waitingCheck": "Chờ kiểm tra",
-      "selectProduct": "Chọn Sản Phẩm",
-      "selectProductDesc": "Chọn sản phẩm trong kế hoạch đã chọn",
-      "workDate": "Ngày làm việc",
-      "noStepsFound": "Không tìm thấy công đoạn nào",
-      "changeSearchTerm": "Thử thay đổi từ khóa tìm kiếm",
-      "clearFilter": "Xóa bộ lọc",
-      "noStepsAvailable": "Chưa có công đoạn nào",
-      "noStepsForProduct": "Sản phẩm này chưa có công đoạn để chọn",
-      "selectAtLeastOneStep": "Cần chọn ít nhất một công đoạn",
-      "selectStepInstructions": "Vui lòng tích chọn công đoạn mà nhân viên đã hoàn thành",
-      "errorOccurred": "Có lỗi xảy ra",
-      "cancel": "Hủy Bỏ",
-      "creating": "Đang tạo {count} bản ghi...",
-      "createRecords": "Tạo {count} Bản Ghi Lương",
-      "validationExceededLimit": "Vượt quá giới hạn! Sử dụng: {used}, Cho phép: {allowed}",
-      "validationValid": "Hợp lệ: {used}/{allowed}",
-      "validationError": "Error validating quantity",
-      "validationPleaseSelect": "Please select plan, product, and employee first",
-      "selectLabel": "CHỌN",
-      "firstLabel": "TRƯỚC",
-      "secondLabel": "SAU",
-      "searchLabel": "TÌM",
-      "quantityLabel": "SỐ LƯỢNG",
-      "notesLabel": "GHI CHÚ",
-      "statusLabel": "TRẠNG THÁI",
-      "waitingCheck": "Chờ kiểm tra",
-      "validationPending": "⏳",
-      "validationValid": "✅",
-      "validationInvalid": "❌",
-      "readyToCreate": "Sẵn sàng tạo",
-      "validStatus": "Hợp lệ:",
-      "invalidStatus": "Vượt quá giới hạn! Sử dụng: {used}, Cho phép: {allowed}",
-      "noStepsFound": "Không tìm thấy công đoạn nào",
-      "noStepsFoundDesc": "Thử thay đổi từ khóa tìm kiếm",
-      "clearFilter": "Xóa bộ lọc",
-      "noStepsForProduct": "Chưa có công đoạn nào",
-      "noStepsForProductDesc": "Sản phẩm này chưa có công đoạn để chọn",
-      "selectAtLeastOne": "Cần chọn ít nhất một công đoạn",
-      "selectAtLeastOneDesc": "Vui lòng tích chọn công đoạn mà nhân viên đã hoàn thành",
-      "cancel": "Hủy Bỏ",
-      "creating": "Đang tạo {count} bản ghi...",
-      "createRecords": "Tạo {count} Bản Ghi Lương",
-      "error": "Có lỗi xảy ra"
+      "waitingCheck": "Chờ kiểm tra"
     }
   },
   "outsourceOrderDetail": {

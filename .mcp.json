@@ -2,22 +2,46 @@
   "mcpServers": {
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
       "env": {
         "DEFAULT_MINIMUM_TOKENS": "6000"
       }
     },
     "puppeteer": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
     },
     "mcp-deepwiki": {
       "command": "npx",
-      "args": ["-y", "mcp-deepwiki@latest"]
+      "args": [
+        "-y",
+        "mcp-deepwiki@latest"
+      ]
+    },
+    "zen": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/BeehiveInnovations/zen-mcp-server.git",
+        "zen-mcp-server"
+      ],
+      "env": {
+        "PATH": "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:~/.local/bin",
+        "GEMINI_API_KEY": "AIzaSyCGUExTrSR1iH0XI9teh5gIEUaNnVhdnEM"
+      }
     }
   }
 }

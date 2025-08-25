@@ -7,10 +7,10 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
+import { z } from 'zod';
 
 import { getEmployeeSalaryEntries } from '@/libs/queries/employeeSalaryEntry';
 import { employeeSalaryEntryListParamsSchema } from '@/libs/validations/employeeSalaryEntry';
-import { z } from 'zod';
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,18 +46,20 @@ export async function GET(request: NextRequest) {
         employeeName: searchParams.get('employeeName') || undefined,
         productCode: searchParams.get('productCode') || undefined,
         productName: searchParams.get('productName') || undefined,
+        productCategory: searchParams.get('productCategory') || undefined,
         stepName: searchParams.get('stepName') || undefined,
+        filmSequence: searchParams.get('filmSequence') || undefined,
         productionStepDetailId: searchParams.get('productionStepDetailId') ? Number(searchParams.get('productionStepDetailId')) : undefined,
         planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
         productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
       });
     } catch (validationError) {
       return NextResponse.json(
-        { 
-          error: 'Invalid parameters', 
-          details: validationError instanceof Error ? validationError.message : 'Unknown validation error'
+        {
+          error: 'Invalid parameters',
+          details: validationError instanceof Error ? validationError.message : 'Unknown validation error',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,11 +72,11 @@ export async function GET(request: NextRequest) {
       });
     } catch (queryError) {
       return NextResponse.json(
-        { 
-          error: 'Database query failed', 
-          details: queryError instanceof Error ? queryError.message : 'Unknown database error'
+        {
+          error: 'Database query failed',
+          details: queryError instanceof Error ? queryError.message : 'Unknown database error',
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -98,29 +100,41 @@ export async function GET(request: NextRequest) {
         'Created At': '',
         'Updated At': '',
       }];
-      
+
       // Create workbook with empty data
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(emptyData);
-      
+
       // Set column widths
       const columnWidths = [
-        { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 15 },
-        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
-        { wch: 12 }, { wch: 15 }, { wch: 10 }, { wch: 18 }, { wch: 18 },
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 15 },
+        { wch: 25 },
+        { wch: 15 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 18 },
+        { wch: 18 },
       ];
       worksheet['!cols'] = columnWidths;
-      
+
       // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Employee Salary Entries');
-      
+
       // Generate Excel buffer
       const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-      
+
       // Create filename with timestamp
       const timestamp = new Date().toISOString().slice(0, 10);
       const filename = `employee-salary-entries-empty-${timestamp}.xlsx`;
-      
+
       // Return Excel file
       return new NextResponse(excelBuffer, {
         status: 200,
@@ -200,11 +214,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to export employee salary entries',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

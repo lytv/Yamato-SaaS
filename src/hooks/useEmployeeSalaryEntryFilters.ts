@@ -13,16 +13,16 @@ type EmployeeSalaryEntryFiltersReturn = EmployeeSalaryEntryFilters & {
   handleSearchChange: (search: string) => void;
   handleSortChange: (sortBy: EmployeeSalaryEntryFilters['sortBy']) => void;
   handleSortOrderChange: (sortOrder: EmployeeSalaryEntryFilters['sortOrder']) => void;
-  
+
   // Enhanced filter handlers
   handleDateRangeChange: (from?: Date | string, to?: Date | string) => void;
   handleWorkDateRangeChange: (from?: Date | string, to?: Date | string) => void;
   handleEmployeeFilterChange: (userId?: string, employeeCode?: string, employeeName?: string) => void;
-  handleProductFilterChange: (productId?: number, productCode?: string, productName?: string) => void;
-  handleProductionStepFilterChange: (productionStepDetailId?: number, stepName?: string) => void;
+  handleProductFilterChange: (productId?: number, productCode?: string, productName?: string, productCategory?: string) => void;
+  handleProductionStepFilterChange: (productionStepDetailId?: number, stepName?: string, filmSequence?: string) => void;
   handleStatusChange: (status?: EmployeeSalaryEntryFilters['status']) => void;
   handlePlanChange: (planId?: number) => void;
-  
+
   resetFilters: () => void;
   resetAdvancedFilters: () => void;
   hasActiveFilters: boolean;
@@ -76,32 +76,40 @@ export function useEmployeeSalaryEntryFilters(initialFilters?: Partial<EmployeeS
   const handleEmployeeFilterChange = useCallback((userId?: string, employeeCode?: string, employeeName?: string) => {
     setFilters(prev => ({
       ...prev,
-      employee: userId || employeeCode || employeeName ? {
-        userId,
-        employeeCode,
-        employeeName,
-      } : undefined,
+      employee: userId || employeeCode || employeeName
+        ? {
+            userId,
+            employeeCode,
+            employeeName,
+          }
+        : undefined,
     }));
   }, []);
 
-  const handleProductFilterChange = useCallback((productId?: number, productCode?: string, productName?: string) => {
+  const handleProductFilterChange = useCallback((productId?: number, productCode?: string, productName?: string, productCategory?: string) => {
     setFilters(prev => ({
       ...prev,
-      product: productId || productCode || productName ? {
-        productId,
-        productCode,
-        productName,
-      } : undefined,
+      product: productId || productCode || productName || productCategory
+        ? {
+            productId,
+            productCode,
+            productName,
+            productCategory,
+          }
+        : undefined,
     }));
   }, []);
 
-  const handleProductionStepFilterChange = useCallback((productionStepDetailId?: number, stepName?: string) => {
+  const handleProductionStepFilterChange = useCallback((productionStepDetailId?: number, stepName?: string, filmSequence?: string) => {
     setFilters(prev => ({
       ...prev,
-      productionStep: productionStepDetailId || stepName ? {
-        productionStepDetailId,
-        stepName,
-      } : undefined,
+      productionStep: productionStepDetailId || stepName || filmSequence
+        ? {
+            productionStepDetailId,
+            stepName,
+            filmSequence,
+          }
+        : undefined,
     }));
   }, []);
 
@@ -135,24 +143,24 @@ export function useEmployeeSalaryEntryFilters(initialFilters?: Partial<EmployeeS
 
   // Helper computed properties
   const hasActiveFilters = !!(
-    filters.search ||
-    filters.status ||
-    filters.dateRange ||
-    filters.workDateRange ||
-    filters.employee ||
-    filters.product ||
-    filters.productionStep ||
-    filters.relations
+    filters.search
+    || filters.status
+    || filters.dateRange
+    || filters.workDateRange
+    || filters.employee
+    || filters.product
+    || filters.productionStep
+    || filters.relations
   );
 
   const hasAdvancedFilters = !!(
-    filters.status ||
-    filters.dateRange ||
-    filters.workDateRange ||
-    filters.employee ||
-    filters.product ||
-    filters.productionStep ||
-    filters.relations
+    filters.status
+    || filters.dateRange
+    || filters.workDateRange
+    || filters.employee
+    || filters.product
+    || filters.productionStep
+    || filters.relations
   );
 
   return {

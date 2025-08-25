@@ -48,15 +48,15 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       }
       if (params?.workDateFrom) {
         const workDateFrom = params.workDateFrom;
-        const dateString = typeof workDateFrom === 'string' 
-          ? workDateFrom 
+        const dateString = typeof workDateFrom === 'string'
+          ? workDateFrom
           : workDateFrom.toISOString().split('T')[0];
         searchParams.append('workDateFrom', dateString!);
       }
       if (params?.workDateTo) {
         const workDateTo = params.workDateTo;
-        const dateString = typeof workDateTo === 'string' 
-          ? workDateTo 
+        const dateString = typeof workDateTo === 'string'
+          ? workDateTo
           : workDateTo.toISOString().split('T')[0];
         searchParams.append('workDateTo', dateString!);
       }
@@ -72,8 +72,14 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
       if (params?.productName) {
         searchParams.append('productName', params.productName);
       }
+      if (params?.productCategory) {
+        searchParams.append('productCategory', params.productCategory);
+      }
       if (params?.stepName) {
         searchParams.append('stepName', params.stepName);
+      }
+      if (params?.filmSequence) {
+        searchParams.append('filmSequence', params.filmSequence);
       }
       if (params?.status) {
         searchParams.append('status', params.status);
@@ -91,7 +97,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
         // Try to get error details from JSON response
         let errorMessage = 'Failed to export employeeSalaryEntrys';
         let errorDetails = '';
-        
+
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
@@ -99,7 +105,7 @@ export function useEmployeeSalaryEntryExport(): ExportReturn {
         } catch {
           errorMessage = `Export failed with status ${response.status}`;
         }
-        
+
         const fullError = errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage;
         throw new Error(fullError);
       }

@@ -186,10 +186,12 @@ export const employeeSalaryEntryListParamsSchema = z.object({
   productId: z.number().int().positive().optional(),
   productCode: z.string().trim().optional(),
   productName: z.string().trim().optional(),
+  productCategory: z.string().trim().optional(),
 
   // Production step filtering
   productionStepDetailId: z.number().int().positive().optional(),
   stepName: z.string().trim().optional(),
+  filmSequence: z.string().trim().optional(),
 
   planId: z.number().int().positive().optional(),
 });
@@ -300,7 +302,7 @@ export const createEmployeeSalaryEntryBulkSchema = z.array(
   }, {
     message: 'Số lượng vượt quá giới hạn cho phép (Thực tế + Trước đó > Kế hoạch + Giới hạn)',
     path: ['actualQuantity'],
-  })
+  }),
 ).min(1, 'At least one salary entry must be provided');
 
 // 🆕 V4: Enhanced validation helper functions

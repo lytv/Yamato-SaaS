@@ -176,9 +176,11 @@ export type EmployeeSalaryEntryListParams = {
   readonly productId?: number;
   readonly productCode?: string; // Mã sản phẩm
   readonly productName?: string; // Tên sản phẩm
+  readonly productCategory?: string; // Danh mục sản phẩm
   // Production step filtering
   readonly productionStepDetailId?: number;
   readonly stepName?: string; // Tên công đoạn
+  readonly filmSequence?: string; // Phim Tát
   readonly planId?: number;
 };
 
@@ -251,7 +253,7 @@ export type EmployeeSalaryEntryFilters = {
   sortBy: 'createdAt' | 'updatedAt' | 'workDate' | 'id' | 'status';
   sortOrder: 'asc' | 'desc';
   status?: 'draft' | 'submitted' | 'approved' | 'paid' | 'cancelled';
-  
+
   // Enhanced date filtering
   dateRange?: {
     from: Date | string;
@@ -274,12 +276,14 @@ export type EmployeeSalaryEntryFilters = {
     productId?: number;
     productCode?: string; // Mã sản phẩm
     productName?: string; // Tên sản phẩm
+    productCategory?: string; // Danh mục sản phẩm
   };
 
   // Production step filtering
   productionStep?: {
     productionStepDetailId?: number;
     stepName?: string; // Tên công đoạn
+    filmSequence?: string; // Phim Tát
   };
 
   relations?: {
