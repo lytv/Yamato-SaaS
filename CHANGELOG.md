@@ -1,3 +1,10 @@
+## [1.2.48](https://github.com/lytv/Yamato-SaaS/compare/v1.2.47...v1.2.48) (2025-08-25)
+
+
+### Bug Fixes
+
+* **a:** aa ([9c716ca](https://github.com/lytv/Yamato-SaaS/commit/9c716cabe0fcfec751f7a7288dcdee1b4d79c0ff))
+
 ## [1.2.47](https://github.com/lytv/Yamato-SaaS/compare/v1.2.46...v1.2.47) (2025-08-01)
 
 
