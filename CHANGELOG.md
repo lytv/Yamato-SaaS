@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/lytv/Yamato-SaaS/compare/v1.4.0...v1.4.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **update product:** tihem nut search ([8f1c741](https://github.com/lytv/Yamato-SaaS/commit/8f1c741405572f73dbb9260def9b979379bab5e9))
+
 # [1.4.0](https://github.com/lytv/Yamato-SaaS/compare/v1.3.2...v1.4.0) (2025-09-16)
 
 
