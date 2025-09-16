@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/lytv/Yamato-SaaS/compare/v1.3.2...v1.4.0) (2025-09-16)
+
+
+### Features
+
+* **doi vi tri nut len:** nut add new records ([1678301](https://github.com/lytv/Yamato-SaaS/commit/16783017cf698c5c7254f2fb94f38eb9e729fbf4))
+
 ## [1.3.2](https://github.com/lytv/Yamato-SaaS/compare/v1.3.1...v1.3.2) (2025-09-16)
 
 
