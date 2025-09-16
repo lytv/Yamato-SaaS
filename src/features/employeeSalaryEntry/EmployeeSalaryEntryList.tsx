@@ -9,7 +9,6 @@ import { ChevronDown, ChevronUp, Download, Eye, EyeOff, Filter } from 'lucide-re
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { EmployeeSalaryEntrySkeleton } from '@/features/employeeSalaryEntry/EmployeeSalaryEntrySkeleton';
 import { useEmployeeSalaryEntryExport } from '@/hooks/useEmployeeSalaryEntryExport';
 import { useEmployeeSalaryEntryFilters } from '@/hooks/useEmployeeSalaryEntryFilters';
@@ -854,6 +853,23 @@ export function EmployeeSalaryEntryList({
                         </label>
                       </div>
 
+                      {/* Add New Record Button */}
+                      {onCreateNew && (
+                        <button
+                          type="button"
+                          onClick={onCreateNew}
+                          disabled={isCreating}
+                          className="inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <svg className="mr-2 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          ⭐
+                          {' '}
+                          {t('createNew')}
+                        </button>
+                      )}
+
                       {(employeeCodeInput || productCategoryInput || filmSequenceInput || (workDateFrom && workDateFrom !== today) || (workDateTo && workDateTo !== today)) && (
                         <button
                           type="button"
@@ -1266,19 +1282,6 @@ export function EmployeeSalaryEntryList({
                 </button>
               </div>
 
-              {onCreateNew && (
-                <Button
-                  onClick={onCreateNew}
-                  disabled={isCreating}
-                  size="lg"
-                  className="h-10 border-0 bg-white px-6 text-base font-bold text-blue-600 shadow-lg hover:bg-blue-50"
-                >
-                  <svg className="mr-2 size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  {t('createNew')}
-                </Button>
-              )}
             </div>
           </div>
 

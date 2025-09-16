@@ -1186,7 +1186,14 @@
       "stepStatus": "Kiểm Tra",
       "notSelected": "Chưa chọn",
       "addNotes": "💬 Thêm ghi chú...",
-      "waitingCheck": "Chờ kiểm tra"
+      "waitingCheck": "Chờ kiểm tra",
+      "cancel": "Hủy bỏ",
+      "createrecord": "✅ Tạo bản ghi",
+      "createRecords": "💾 Tạo các bản ghi",
+      "selectLabel": "Chọn",
+      "quantityLabel": "Số lượng",
+      "notesLabel": "Ghi chú",
+      "statusLabel": "Trạng thái"
     }
   },
   "outsourceOrderDetail": {
