@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/lytv/Yamato-SaaS/compare/v1.2.48...v1.3.0) (2025-09-16)
+
+
+### Bug Fixes
+
+* **cap nhat phan nhap luon:** thay doi ui ([47a6a54](https://github.com/lytv/Yamato-SaaS/commit/47a6a547fcf0be9a4248672f4554154edaadae7d))
+* **fix bug hien thi :** ok ([70aba1b](https://github.com/lytv/Yamato-SaaS/commit/70aba1baeae7e3293853a7662c2900a1031b49b0))
+
+
+### Features
+
+* add productCategory display support ([11561c7](https://github.com/lytv/Yamato-SaaS/commit/11561c7cae9070a8c647b3bb291e63f94a2f6113))
+
 ## [1.2.48](https://github.com/lytv/Yamato-SaaS/compare/v1.2.47...v1.2.48) (2025-08-25)
 
 
