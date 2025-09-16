@@ -60,7 +60,7 @@ export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
   userSync?: { userId: string; fullName: string | null; shortcut: string | null };
   productionStepDetail?: { id: number; stepName: string | null };
   plan?: { id: number; planName: string };
-  product?: { id: number; productCode: string; productName: string };
+  product?: { id: number; productCode: string; productName: string; productCategory?: string | null };
 };
 
 /**
@@ -332,6 +332,7 @@ export async function getEmployeeSalaryEntries(params: {
               id: productSchema.id,
               productCode: productSchema.productCode,
               productName: productSchema.productName,
+              productCategory: productSchema.category,
             },
           }
         : {}),
@@ -549,6 +550,7 @@ export async function getEmployeeSalaryEntries(params: {
           id: r.product.id,
           productCode: r.product.productCode,
           productName: r.product.productName,
+          productCategory: r.product.productCategory,
         }
       : undefined,
   }));
@@ -616,6 +618,7 @@ export async function getEmployeeSalaryEntryByIdWithRelations(id: number, owner_
         id: productSchema.id,
         productCode: productSchema.productCode,
         productName: productSchema.productName,
+        productCategory: productSchema.category,
       },
     })
     .from(employeeSalaryEntrySchema)
@@ -904,6 +907,7 @@ export async function getEmployeeSalaryEntryRelationOptions(ownerId: string): Pr
       id: productSchema.id,
       productCode: productSchema.productCode,
       productName: productSchema.productName,
+      productCategory: productSchema.category,
     }).from(productSchema)
       .where(eq(productSchema.ownerId, ownerId))
       .orderBy(asc(productSchema.productName)),

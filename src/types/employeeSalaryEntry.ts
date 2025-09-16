@@ -57,6 +57,7 @@ export type EmployeeSalaryEntryWithRelations = {
     id: number;
     productCode: string;
     productName: string;
+    productCategory?: string | null;
   };
 };
 
@@ -114,7 +115,7 @@ export type EmployeeSalaryEntryRelationOptions = {
   readonly userSyncs: { userId: string; fullName: string | null; shortcut: string | null }[];
   readonly productionStepDetails: { id: number; stepName?: string }[]; // 🆕 Add stepName
   readonly plans: { id: number; planName: string }[];
-  readonly products: { id: number; productCode: string; productName: string }[]; // 🆕 Add products
+  readonly products: { id: number; productCode: string; productName: string; productCategory?: string | null }[]; // 🆕 Add products
 };
 
 // API Response types (camelCase)

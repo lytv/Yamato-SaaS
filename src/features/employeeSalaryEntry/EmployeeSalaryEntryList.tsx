@@ -143,7 +143,7 @@ export function EmployeeSalaryEntryList({
     return employeeSalaryEntry.productionStepDetail?.stepName || t('not_specified');
   };
 
-  // 🆕 Helper function to group data by Employee + Product + Step
+  // 🆕 Helper function to group data by Employee + Product + Step (Smart Grouping)
   const getGroupedData = (data: EmployeeSalaryEntryWithRelations[]) => {
     const grouped: { [key: string]: {
       employeeName: string;
@@ -155,6 +155,14 @@ export function EmployeeSalaryEntryList({
       entries: EmployeeSalaryEntryWithRelations[];
     }; } = {};
 
+    // Check if employee filter is active
+    const hasEmployeeFilter = !!(
+      employee?.employeeCode
+      || employee?.employeeName
+      || employeeCodeInput?.trim()
+      || employeeNameInput?.trim()
+    );
+
     data.forEach((entry) => {
       const employeeName = entry.userSync?.fullName || t('not_specified');
       const employeeCode = entry.userSync?.shortcut || '';
@@ -162,13 +170,17 @@ export function EmployeeSalaryEntryList({
       const productCode = entry.product?.productCode || '';
       const stepName = getStepName(entry);
 
-      // Create unique key for grouping
-      const key = `${employeeName}-${productName}-${stepName}`;
+      // Smart grouping logic:
+      // - If no employee filter: group by Product + Step only
+      // - If employee filter exists: group by Employee + Product + Step
+      const key = hasEmployeeFilter
+        ? `${employeeName}-${productName}-${stepName}`
+        : `${productName}-${stepName}`;
 
       if (!grouped[key]) {
         grouped[key] = {
-          employeeName,
-          employeeCode,
+          employeeName: hasEmployeeFilter ? employeeName : '👥 Tất cả nhân viên',
+          employeeCode: hasEmployeeFilter ? employeeCode : '',
           productName,
           productCode,
           stepName,
@@ -951,11 +963,11 @@ export function EmployeeSalaryEntryList({
                                   <div className="text-lg font-semibold text-gray-900">
                                     {employeeSalaryEntry.product?.productName || t('not_specified')}
                                   </div>
-                                  {employeeSalaryEntry.product?.productCode && (
+                                  {employeeSalaryEntry.product?.productCategory && (
                                     <div className="text-sm text-gray-500">
-                                      {t('product_code')}
+                                      {t('category')}
                                       {' '}
-                                      {employeeSalaryEntry.product.productCode}
+                                      {employeeSalaryEntry.product.productCategory}
                                     </div>
                                   )}
                                 </td>
@@ -1070,11 +1082,11 @@ export function EmployeeSalaryEntryList({
                                   <div className="text-lg font-semibold text-gray-900">
                                     {groupedEntry.productName}
                                   </div>
-                                  {groupedEntry.productCode && (
+                                  {groupedEntry.entries[0]?.product?.productCategory && (
                                     <div className="text-sm text-gray-500">
-                                      {t('product_code')}
+                                      {t('category')}
                                       {' '}
-                                      {groupedEntry.productCode}
+                                      {groupedEntry.entries[0].product.productCategory}
                                     </div>
                                   )}
                                 </td>
