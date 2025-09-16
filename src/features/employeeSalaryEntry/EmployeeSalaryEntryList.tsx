@@ -46,7 +46,6 @@ export function EmployeeSalaryEntryList({
   const { userId, orgId } = useAuth();
   const [deleteConfirmEmployeeSalaryEntry, setDeleteConfirmEmployeeSalaryEntry] = useState<EmployeeSalaryEntryWithRelations | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -99,18 +98,14 @@ export function EmployeeSalaryEntryList({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  // Sync external currentPage with internal page state
-  useEffect(() => {
-    if (externalCurrentPage && externalCurrentPage !== page) {
-      setPage(externalCurrentPage);
-    }
-  }, [externalCurrentPage, page]);
+  // Use currentPageState if provided, otherwise use externalCurrentPage or default to 1
+  const currentPage = currentPageState ?? externalCurrentPage ?? 1;
 
   const { employeeSalaryEntrys, pagination, isLoading, error, refresh } = useEmployeeSalaryEntrys({
     search,
     sortBy,
     sortOrder,
-    page: showAll ? 1 : page,
+    page: showAll ? 1 : currentPage,
     limit: 10,
     ownerId,
     showAll,
@@ -131,12 +126,12 @@ export function EmployeeSalaryEntryList({
   const { deleteEmployeeSalaryEntry, isDeleting } = useEmployeeSalaryEntryMutations();
   const { exportEmployeeSalaryEntrys, isExporting, exportError, clearError } = useEmployeeSalaryEntryExport();
 
-  // Update parent component with pagination changes
+  // Update parent component with pagination changes only when pagination data changes, not currentPage
   useEffect(() => {
-    if (onPaginationUpdate && pagination) {
-      onPaginationUpdate(page, pagination.total, pagination.hasMore || false);
+    if (onPaginationUpdate && pagination && pagination.total !== undefined) {
+      onPaginationUpdate(currentPage, pagination.total, pagination.hasMore || false);
     }
-  }, [page, pagination, onPaginationUpdate]);
+  }, [pagination?.total, pagination?.hasMore, onPaginationUpdate, currentPage]);
 
   // Helper function to get step name
   const getStepName = (employeeSalaryEntry: EmployeeSalaryEntryWithRelations): string => {
@@ -1246,7 +1241,7 @@ export function EmployeeSalaryEntryList({
                   type="button"
                   onClick={onPreviousPage}
                   className="flex items-center justify-center rounded-lg bg-white/20 px-3 py-2 text-sm font-bold text-white transition-all hover:bg-white/30 disabled:opacity-50"
-                  disabled={(currentPageState || page) <= 1}
+                  disabled={currentPage <= 1}
                 >
                   <span className="mr-1">←</span>
                   {' '}
@@ -1256,7 +1251,7 @@ export function EmployeeSalaryEntryList({
                 <div className="rounded-lg bg-white/30 px-3 py-2 text-sm font-bold text-white">
                   {t('page')}
                   {' '}
-                  {currentPageState || page}
+                  {currentPage}
                 </div>
 
                 <button
