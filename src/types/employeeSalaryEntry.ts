@@ -52,6 +52,7 @@ export type EmployeeSalaryEntryWithRelations = {
   productionStepDetail?: {
     id: number;
     stepName?: string | null;
+    filmSequence?: string | null;
   };
   product?: {
     id: number;
@@ -113,7 +114,7 @@ export type UpdateEmployeeSalaryEntryInput = Partial<CreateEmployeeSalaryEntryIn
 // Relation options (camelCase)
 export type EmployeeSalaryEntryRelationOptions = {
   readonly userSyncs: { userId: string; fullName: string | null; shortcut: string | null }[];
-  readonly productionStepDetails: { id: number; stepName?: string }[]; // 🆕 Add stepName
+  readonly productionStepDetails: { id: number; stepName?: string; filmSequence?: string | null }[]; // 🆕 Add stepName & filmSequence
   readonly plans: { id: number; planName: string }[];
   readonly products: { id: number; productCode: string; productName: string; productCategory?: string | null }[]; // 🆕 Add products
 };
