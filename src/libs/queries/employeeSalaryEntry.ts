@@ -19,6 +19,18 @@ import type {
 
 import { db } from '../DB';
 
+/**
+ * Normalize Vietnamese text by removing diacritics (accents)
+ * SƯỞN → SUON, ĐIỀU → DIEU
+ */
+function normalizeVietnameseText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036F]/g, '') // Remove diacritics
+    .replace(/đ/gi, 'd') // Handle đ/Đ specifically
+    .toUpperCase();
+}
+
 export type EmployeeSalaryEntry = {
   id: number;
   createdAt: string | Date;
@@ -364,7 +376,11 @@ export async function getEmployeeSalaryEntries(params: {
       ilike(productSchema.productCode, `%${search}%`),
       ilike(productSchema.productName, `%${search}%`),
       ilike(productSchema.category, `%${search}%`),
-      ilike(productionStepSchema.stepName, `%${search}%`),
+      // Search stepName with normalized comparison for Vietnamese text
+      or(
+        ilike(productionStepSchema.stepName, `%${search}%`),
+        sql`UPPER(TRANSLATE(${productionStepSchema.stepName}, 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiioooooooooooooooouuuuuuuuuuuyyyyydd')) LIKE ${`%${normalizeVietnameseText(search)}%`}`,
+      ),
       ilike(productionStepSchema.filmSequence, `%${search}%`),
       // Search in date field (cast to text)
       sql`CAST(${employeeSalaryEntrySchema.work_date} AS TEXT) ILIKE ${`%${search}%`}`,
@@ -414,10 +430,16 @@ export async function getEmployeeSalaryEntries(params: {
     conditions.push(eq(employeeSalaryEntrySchema.production_step_detail_id, production_step_detail_id));
   }
   if (stepName) {
-    conditions.push(ilike(productionStepSchema.stepName, `%${stepName}%`));
+    // Normalized stepName search for Vietnamese text
+    conditions.push(
+      or(
+        ilike(productionStepSchema.stepName, `%${stepName}%`),
+        sql`UPPER(TRANSLATE(${productionStepSchema.stepName}, 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiioooooooooooooooouuuuuuuuuuuyyyyydd')) LIKE ${`%${normalizeVietnameseText(stepName)}%`}`,
+      ),
+    );
   }
   if (filmSequence) {
-    conditions.push(ilike(productionStepSchema.filmSequence, `%${filmSequence}%`));
+    conditions.push(eq(productionStepSchema.filmSequence, filmSequence));
   }
 
   // Plan filtering

@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateEmployeeSalaryEntryBulk } from '@/hooks/useCreateEmployeeSalaryEntryBulk';
 import { useEmployeeSalaryEntryPreviousQuantity } from '@/hooks/useEmployeeSalaryEntryPreviousQuantity';
@@ -526,18 +527,37 @@ export function EmployeeSalaryEntryBulkForm({
     }
   };
 
-  // Filter production steps based on film_sequence only (exact match)
+  /**
+   * Normalize Vietnamese text by removing diacritics (accents)
+   * SƯỞN → SUON, ĐIỀU → DIEU
+   */
+  const normalizeVietnameseText = (text: string): string => {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036F]/g, '') // Remove diacritics
+      .replace(/đ/gi, 'd') // Handle đ/Đ specifically
+      .toUpperCase();
+  };
+
+  // Filter production steps based on stepName (with Vietnamese normalization) and filmSequence
   const filteredProductionSteps = productionSteps.filter((step) => {
     if (!stepFilter) {
       return true;
     }
     const searchTerm = stepFilter.toLowerCase();
+    const normalizedSearchTerm = normalizeVietnameseText(stepFilter);
+
+    // Search in step name (partial match with Vietnamese normalization)
+    const stepNameMatch = step.stepName && (
+      step.stepName.toLowerCase().includes(searchTerm)
+      || normalizeVietnameseText(step.stepName).includes(normalizedSearchTerm)
+    );
 
     // Search in film sequence (exact match)
     const filmSequenceMatch = step.filmSequence
       && step.filmSequence.toLowerCase() === searchTerm;
 
-    return filmSequenceMatch;
+    return stepNameMatch || filmSequenceMatch;
   });
 
   const selectedStepsCount = productionSteps.filter(step => step.selected).length;
@@ -547,607 +567,464 @@ export function EmployeeSalaryEntryBulkForm({
 
   return (
     <div className="max-h-[90vh] overflow-auto bg-gray-50 p-6">
-      {/* Progress Header */}
-      <div className="mb-8">
-        <div className="rounded-xl bg-gradient-to-r from-green-500 to-blue-500 p-3 text-white shadow-lg">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full bg-white/20 p-3">
-              <svg className="size-8" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">
-                💰
-                {t('bulk.createSalaryEntry')}
-              </h1>
-              <p className="text-lg text-green-100">{t('bulk.followSteps')}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Step by Step Guide */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-1 text-center">
-          <div className="mx-auto mb-2 flex size-8 items-center justify-center rounded-full bg-blue-500 text-lg font-bold text-white">1</div>
-          <h3 className="font-semibold text-blue-800">{t('bulk.selectEmployee')}</h3>
-          <p className="text-sm text-blue-600">{t('bulk.selectEmployeeDesc')}</p>
-        </div>
-        <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-1 text-center">
-          <div className="mx-auto mb-2 flex size-8 items-center justify-center rounded-full bg-orange-500 text-lg font-bold text-white">2</div>
-          <h3 className="font-semibold text-orange-800">{t('bulk.selectPlanProduct')}</h3>
-          <p className="text-sm text-orange-600">{t('bulk.selectPlanProductDesc')}</p>
-        </div>
-        <div className="rounded-lg border-2 border-green-200 bg-green-50 p-1 text-center">
-          <div className="mx-auto mb-2 flex size-8 items-center justify-center rounded-full bg-green-500 text-lg font-bold text-white">3</div>
-          <h3 className="font-semibold text-green-800">{t('bulk.selectSteps')}</h3>
-          <p className="text-sm text-green-600">{t('bulk.selectStepsDesc')}</p>
-        </div>
-      </div>
-
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* STEP 1: Employee Selection */}
-          <div className="overflow-hidden rounded-xl border-2 border-blue-200 bg-white shadow-lg">
-            <div className="flex items-center space-x-3 bg-blue-500 p-2 text-white">
-              <div className="rounded-full bg-white/20 p-2">
-                <div className="flex size-6 items-center justify-center rounded-full bg-white text-sm font-bold text-blue-500">1</div>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">
-                  👤
-                  {t('bulk.step1Title')}
-                </h2>
-                <p className="text-blue-100">{t('bulk.step1Desc')}</p>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-                <div className="mb-3 flex items-center">
-                  <div className="mr-3 rounded-full bg-blue-500 p-2 text-white">
-                    <svg className="size-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-blue-800">
-                      🔍
-                      {t('bulk.searchEmployee')}
-                    </h3>
-                    <p className="text-sm text-blue-600">{t('bulk.searchEmployeeDesc')}</p>
-                  </div>
-                </div>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Tabs Container */}
+          <Tabs defaultValue="selection" className="w-full">
+            <TabsList className="mb-6 grid w-full grid-cols-2">
+              <TabsTrigger value="selection" className="flex items-center gap-2 text-base font-medium">
+                🎯 Chọn Nhân Viên
+              </TabsTrigger>
+              <TabsTrigger value="steps" className="flex items-center gap-2 text-base font-medium">
+                ✅ Công Đoạn
+              </TabsTrigger>
+            </TabsList>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="rounded-lg border border-blue-300 bg-white p-4 shadow-sm">
-                    <label className="mb-2 flex items-center text-lg font-bold text-blue-800">
-                      <span className="mr-2 rounded bg-yellow-400 px-2 py-1 text-sm text-yellow-800">NHANH</span>
-                      📝
-                      {' '}
-                      {t('bulk.quickSearch')}
-                    </label>
-                    <p className="mb-3 text-sm text-gray-600">{t('bulk.quickSearchDesc')}</p>
-                    <Input
-                      placeholder={t('bulk.quickSearchPlaceholder')}
-                      value={shortcutValue}
-                      onChange={e => handleShortcutSearch(e.target.value)}
-                      className="h-12 border-2 border-blue-300 text-lg font-medium"
-                    />
-                    {shortcutMessage && (
-                      <div className="mt-2 flex items-center rounded border border-green-300 bg-green-100 p-2">
-                        <span className="mr-2 text-green-600">✅</span>
-                        <p className="text-sm font-medium text-green-700">{shortcutMessage}</p>
-                      </div>
+            {/* Tab 1: Employee & Project Selection */}
+            <TabsContent value="selection" className="space-y-6">
+              <div className="overflow-hidden rounded-xl border-2 border-purple-200 bg-white shadow-lg">
+                <div className="p-6">
+                  {/* Combined Selection: Employee → Plan → Product */}
+                  <div className="space-y-4 rounded-lg border-2 border-purple-200 bg-purple-50 p-4">
+
+                    {/* 1. Employee Selection */}
+                    <div className="rounded-lg border border-blue-300 bg-white p-4 shadow-sm">
+                      <FormField
+                        control={form.control}
+                        name="userId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center text-lg font-bold text-blue-800">
+                              👤 Chọn Nhân Viên *
+                            </FormLabel>
+                            <div className="flex gap-3">
+                              <Input
+                                placeholder="Nhập mã..."
+                                value={shortcutValue}
+                                onChange={e => handleShortcutSearch(e.target.value)}
+                                className="h-12 w-32 border-2 border-blue-300 text-lg font-medium"
+                              />
+                              <Select onValueChange={handleEmployeeChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 flex-1 border-2 border-blue-300 text-lg">
+                                    <SelectValue placeholder={t('bulk.selectFromListPlaceholder')} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {relationOptions?.userSyncs?.map(option => (
+                                    <SelectItem key={option.userId} value={option.userId} className="p-3 text-lg">
+                                      <div className="flex items-center">
+                                        <span className="font-medium">{option.fullName}</span>
+                                        {option.shortcut && (
+                                          <span className="ml-2 rounded bg-gray-200 px-2 py-1 text-sm">
+                                            (
+                                            {option.shortcut}
+                                            )
+                                          </span>
+                                        )}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {shortcutMessage && (
+                              <div className="mt-2 flex items-center rounded border border-green-300 bg-green-100 p-2">
+                                <span className="mr-2 text-green-600">✅</span>
+                                <p className="text-sm font-medium text-green-700">{shortcutMessage}</p>
+                              </div>
+                            )}
+                            {shortcutError && (
+                              <div className="mt-2 flex items-center rounded border border-red-300 bg-red-100 p-2">
+                                <span className="mr-2 text-red-600">❌</span>
+                                <p className="text-sm font-medium text-red-700">{shortcutError}</p>
+                              </div>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* 2. Plan Selection */}
+                    <div className="rounded-lg border border-orange-300 bg-white p-4 shadow-sm">
+                      <FormField
+                        control={form.control}
+                        name="planId"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel className="flex items-center text-lg font-bold text-orange-800">
+                              📊 Chọn Kế Hoạch *
+                            </FormLabel>
+                            <Select
+                              onValueChange={handlePlanChange}
+                              value={selectedPlan?.id.toString() || ''}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-12 border-2 border-orange-300 text-lg">
+                                  <SelectValue placeholder={t('bulk.selectPlanPlaceholder')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {relationOptions?.plans?.map(plan => (
+                                  <SelectItem key={plan.id} value={plan.id.toString()} className="p-3 text-lg">
+                                    <div className="flex items-center">
+                                      <span className="font-medium">{plan.planName}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* 3. Product Selection */}
+                    <div className="rounded-lg border border-green-300 bg-white p-4 shadow-sm">
+                      <FormField
+                        control={form.control}
+                        name="productId"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel className="flex items-center text-lg font-bold text-green-800">
+                              📦 Chọn Sản Phẩm *
+                            </FormLabel>
+                            <div className="flex gap-3">
+                              <Input
+                                placeholder="Nhập danh mục..."
+                                value={categoryValue}
+                                onChange={e => handleCategorySearch(e.target.value)}
+                                className={`h-12 w-32 border-2 text-lg font-medium ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-green-300'}`}
+                                disabled={!selectedPlan}
+                              />
+                              <Select
+                                onValueChange={handleProductChange}
+                                value={selectedProduct?.id.toString() || ''}
+                                disabled={!selectedPlan}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className={`h-12 flex-1 border-2 text-lg ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-green-300'}`}>
+                                    <SelectValue placeholder={
+                                      !selectedPlan
+                                        ? t('bulk.waitingPlan')
+                                        : filteredProducts.length === 0
+                                          ? t('bulk.noProducts')
+                                          : t('bulk.selectProductPlaceholder')
+                                    }
+                                    />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {filteredProducts.map(product => (
+                                    <SelectItem key={product.id} value={product.id.toString()} className="p-3 text-lg">
+                                      <div className="flex items-center">
+                                        <span className="font-medium">{product.productName}</span>
+                                        <span className="ml-2 rounded bg-gray-200 px-2 py-1 text-sm">
+                                          (
+                                          {product.productCode}
+                                          )
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            {categoryMessage && (
+                              <div className="mt-2 flex items-center rounded border border-green-300 bg-green-100 p-2">
+                                <span className="mr-2 text-green-600">✅</span>
+                                <p className="text-sm font-medium text-green-700">{categoryMessage}</p>
+                              </div>
+                            )}
+                            {categoryError && (
+                              <div className="mt-2 flex items-center rounded border border-red-300 bg-red-100 p-2">
+                                <span className="mr-2 text-red-600">❌</span>
+                                <p className="text-sm font-medium text-red-700">{categoryError}</p>
+                              </div>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="workDate"
+                    render={({ field }) => (
+                      <FormItem className="hidden">
+                        <FormLabel>
+                          {t('bulk.workDate')}
+                          {' '}
+                          *
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                    {shortcutError && (
-                      <div className="mt-2 flex items-center rounded border border-red-300 bg-red-100 p-2">
-                        <span className="mr-2 text-red-600">❌</span>
-                        <p className="text-sm font-medium text-red-700">{shortcutError}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-lg border border-blue-300 bg-white p-4 shadow-sm">
-                    <FormField
-                      control={form.control}
-                      name="userId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center text-lg font-bold text-blue-800">
-                            <span className="mr-2 rounded bg-blue-400 px-2 py-1 text-sm text-white">{t('bulk.selectLabel')}</span>
-                            👤
-                            {' '}
-                            {t('bulk.selectFromList')}
-                            {' '}
-                            *
-                          </FormLabel>
-                          <p className="mb-3 text-sm text-gray-600">{t('bulk.selectFromListDesc')}</p>
-                          <Select onValueChange={handleEmployeeChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="h-12 border-2 border-blue-300 text-lg">
-                                <SelectValue placeholder={t('bulk.selectFromListPlaceholder')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {relationOptions?.userSyncs?.map(option => (
-                                <SelectItem key={option.userId} value={option.userId} className="p-3 text-lg">
-                                  <div className="flex items-center">
-                                    <span className="font-medium">{option.fullName}</span>
-                                    {option.shortcut && (
-                                      <span className="ml-2 rounded bg-gray-200 px-2 py-1 text-sm">
-                                        (
-                                        {option.shortcut}
-                                        )
-                                      </span>
-                                    )}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  />
                 </div>
               </div>
+            </TabsContent>
 
-            </div>
-          </div>
+            {/* Tab 2: Production Steps Selection */}
+            <TabsContent value="steps" className="space-y-6">
+              <div className="overflow-hidden rounded-xl border-2 border-green-200 bg-white shadow-lg">
+                <div className="p-6">
+                  {/* Combined Search & Actions Bar */}
+                  <div className="mb-4 rounded-xl border-2 border-gray-200 bg-white p-4 shadow-lg">
 
-          {/* STEP 2: Plan & Product Selection */}
-          <div className="overflow-hidden rounded-xl border-2 border-orange-200 bg-white shadow-lg">
-            <div className="flex items-center space-x-3 bg-orange-500 p-2 text-white">
-              <div className="rounded-full bg-white/20 p-2">
-                <div className="flex size-6 items-center justify-center rounded-full bg-white text-sm font-bold text-orange-500">2</div>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">
-                  📋
-                  {t('bulk.step2Title')}
-                </h2>
-                <p className="text-orange-100">{t('bulk.step2Desc')}</p>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
-                <div className="mb-3 flex items-center">
-                  <div className="mr-3 rounded-full bg-orange-500 p-2 text-white">
-                    <svg className="size-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-orange-800">
-                      📁
-                      {t('bulk.selectProject')}
-                    </h3>
-                    <p className="text-sm text-orange-600">{t('bulk.selectProjectDesc')}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <div className="rounded-lg border border-orange-300 bg-white p-4 shadow-sm">
-                    <FormField
-                      control={form.control}
-                      name="planId"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel className="flex items-center text-lg font-bold text-orange-800">
-                            <span className="mr-2 rounded bg-purple-400 px-2 py-1 text-sm text-white">{t('bulk.firstLabel')}</span>
-                            📊
-                            {' '}
-                            {t('bulk.selectPlan')}
-                            {' '}
-                            *
-                          </FormLabel>
-                          <p className="mb-3 text-sm text-gray-600">{t('bulk.selectPlanDesc')}</p>
-                          <Select
-                            onValueChange={handlePlanChange}
-                            value={selectedPlan?.id.toString() || ''}
+                    {/* Search and Action Buttons Row */}
+                    <div className="flex items-center gap-4">
+                      {/* Search Input */}
+                      <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-green-400" />
+                        <Input
+                          type="text"
+                          placeholder={t('bulk.searchStepsPlaceholder')}
+                          value={stepFilter}
+                          onChange={e => setStepFilter(e.target.value)}
+                          className="h-12 border-2 border-green-300 px-12 text-lg"
+                        />
+                        {stepFilter && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 top-1/2 size-8 -translate-y-1/2 p-0 hover:bg-red-100"
+                            onClick={() => setStepFilter('')}
                           >
-                            <FormControl>
-                              <SelectTrigger className="h-12 border-2 border-orange-300 text-lg">
-                                <SelectValue placeholder={t('bulk.selectPlanPlaceholder')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {relationOptions?.plans?.map(plan => (
-                                <SelectItem key={plan.id} value={plan.id.toString()} className="p-3 text-lg">
-                                  <div className="flex items-center">
-                                    <span className="font-medium">{plan.planName}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="rounded-lg border border-orange-300 bg-white p-4 shadow-sm">
-                    <label className="mb-2 flex items-center text-lg font-bold text-orange-800">
-                      <span className="mr-2 rounded bg-yellow-400 px-2 py-1 text-sm text-yellow-800">{t('bulk.quickLabel')}</span>
-                      🏷️
-                      {' '}
-                      {t('bulk.categorySearch')}
-                    </label>
-                    <p className="mb-3 text-sm text-gray-600">{t('bulk.categorySearchDesc')}</p>
-                    <Input
-                      placeholder={t('bulk.categorySearchPlaceholder')}
-                      value={categoryValue}
-                      onChange={e => handleCategorySearch(e.target.value)}
-                      className={`h-12 border-2 text-lg font-medium ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-orange-300'}`}
-                      disabled={!selectedPlan}
-                    />
-                    {categoryMessage && (
-                      <div className="mt-2 flex items-center rounded border border-green-300 bg-green-100 p-2">
-                        <span className="mr-2 text-green-600">✅</span>
-                        <p className="text-sm font-medium text-green-700">{categoryMessage}</p>
+                            <X className="size-5 text-red-500" />
+                          </Button>
+                        )}
                       </div>
-                    )}
-                    {categoryError && (
-                      <div className="mt-2 flex items-center rounded border border-red-300 bg-red-100 p-2">
-                        <span className="mr-2 text-red-600">❌</span>
-                        <p className="text-sm font-medium text-red-700">{categoryError}</p>
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="rounded-lg border border-orange-300 bg-white p-4 shadow-sm">
-                    <FormField
-                      control={form.control}
-                      name="productId"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel className="flex items-center text-lg font-bold text-orange-800">
-                            <span className="mr-2 rounded bg-green-400 px-2 py-1 text-sm text-white">{t('bulk.secondLabel')}</span>
-                            📦
-                            {' '}
-                            {t('bulk.selectProduct')}
-                            {' '}
-                            *
-                          </FormLabel>
-                          <p className="mb-3 text-sm text-gray-600">
-                            {!selectedPlan ? t('bulk.selectPlanFirst') : t('bulk.selectProductDesc')}
-                          </p>
-                          <Select
-                            onValueChange={handleProductChange}
-                            value={selectedProduct?.id.toString() || ''}
-                            disabled={!selectedPlan}
-                          >
-                            <FormControl>
-                              <SelectTrigger className={`h-12 border-2 text-lg ${!selectedPlan ? 'border-gray-300 bg-gray-100' : 'border-orange-300'}`}>
-                                <SelectValue placeholder={
-                                  !selectedPlan
-                                    ? t('bulk.waitingPlan')
-                                    : filteredProducts.length === 0
-                                      ? t('bulk.noProducts')
-                                      : t('bulk.selectProductPlaceholder')
-                                }
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {filteredProducts.map(product => (
-                                <SelectItem key={product.id} value={product.id.toString()} className="p-3 text-lg">
-                                  <div className="flex items-center">
-                                    <span className="font-medium">{product.productName}</span>
-                                    <span className="ml-2 rounded bg-gray-200 px-2 py-1 text-sm">
-                                      (
-                                      {product.productCode}
-                                      )
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="workDate"
-                render={({ field }) => (
-                  <FormItem className="hidden">
-                    <FormLabel>
-                      {t('bulk.workDate')}
-                      {' '}
-                      *
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* STEP 3: Production Steps Selection */}
-          <div className="overflow-hidden rounded-xl border-2 border-green-200 bg-white shadow-lg">
-            <div className="flex items-center space-x-3 bg-green-500 p-2 text-white">
-              <div className="rounded-full bg-white/20 p-2">
-                <div className="flex size-6 items-center justify-center rounded-full bg-white text-sm font-bold text-green-500">3</div>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">
-                  ✅
-                  {t('bulk.step3Title')}
-                </h2>
-                <p className="text-green-100">{t('bulk.step3Desc')}</p>
-              </div>
-            </div>
-
-            <div className="p-6">
-              {/* Combined Search & Actions Bar */}
-              <div className="mb-4 rounded-xl border-2 border-gray-200 bg-white p-4 shadow-lg">
-
-                {/* Search and Action Buttons Row */}
-                <div className="flex items-center gap-4">
-                  {/* Search Input */}
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-green-400" />
-                    <Input
-                      type="text"
-                      placeholder={t('bulk.searchStepsPlaceholder')}
-                      value={stepFilter}
-                      onChange={e => setStepFilter(e.target.value)}
-                      className="h-12 border-2 border-green-300 px-12 text-lg"
-                    />
-                    {stepFilter && (
+                      {/* Cancel Button */}
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-2 top-1/2 size-8 -translate-y-1/2 p-0 hover:bg-red-100"
-                        onClick={() => setStepFilter('')}
+                        variant="outline"
+                        onClick={onCancel}
+                        disabled={isLoading}
+                        className="h-12 border-2 border-gray-300 px-6 text-base font-medium hover:bg-gray-50"
                       >
-                        <X className="size-5 text-red-500" />
+                        <span className="mr-2">❌</span>
+                        {t('bulk.cancel')}
                       </Button>
+
+                      {/* Create Button */}
+                      <Button
+                        type="submit"
+                        disabled={isLoading || selectedStepsCount === 0 || invalidStepsCount > 0 || !form.formState.isValid}
+                        className="h-12 bg-gradient-to-r from-green-500 to-blue-500 px-6 text-base font-bold text-white shadow-lg hover:from-green-600 hover:to-blue-600"
+                      >
+                        {isLoading
+                          ? (
+                              <>
+                                <span className="mr-2">⏳</span>
+                                {t('bulk.creating', { count: selectedStepsCount })}
+                              </>
+                            )
+                          : (
+                              <>
+                                <span className="mr-2">💾</span>
+                                {t('bulk.createRecords', { count: selectedStepsCount })}
+                              </>
+                            )}
+                      </Button>
+                    </div>
+
+                    {/* Error Message */}
+                    {createBulkMutation.error && (
+                      <div className="flex items-center rounded-lg border-2 border-red-200 bg-red-50 p-3">
+                        <span className="mr-3 text-lg text-red-600">❌</span>
+                        <div>
+                          <p className="font-bold text-red-800">{t('bulk.errorOccurred')}</p>
+                          <p className="text-sm text-red-600">{createBulkMutation.error.message}</p>
+                        </div>
+                      </div>
                     )}
                   </div>
 
-                  {/* Cancel Button */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onCancel}
-                    disabled={isLoading}
-                    className="h-12 border-2 border-gray-300 px-6 text-base font-medium hover:bg-gray-50"
-                  >
-                    <span className="mr-2">❌</span>
-                    {t('bulk.cancel')}
-                  </Button>
+                  <div className="overflow-hidden rounded-lg border-2 border-green-300 bg-white shadow-lg">
+                    <div className="bg-gradient-to-r from-green-500 to-blue-500 p-3 text-white">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={filteredProductionSteps.length > 0 && filteredProductionSteps.every(step => step.selected)}
+                            onCheckedChange={(checked) => {
+                              filteredProductionSteps.forEach((step) => {
+                                if (checked !== step.selected) {
+                                  handleStepToggle(step.id);
+                                }
+                              });
+                            }}
+                            className="border-2 border-white data-[state=checked]:bg-white data-[state=checked]:text-green-500"
+                          />
+                          <span className="text-lg font-bold">
+                            📋
+                            {t('bulk.stepListHeader')}
+                          </span>
+                        </div>
+                        <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium">
+                          {t('bulk.stepListSubHeader')}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Create Button */}
-                  <Button
-                    type="submit"
-                    disabled={isLoading || selectedStepsCount === 0 || invalidStepsCount > 0 || !form.formState.isValid}
-                    className="h-12 bg-gradient-to-r from-green-500 to-blue-500 px-6 text-base font-bold text-white shadow-lg hover:from-green-600 hover:to-blue-600"
-                  >
-                    {isLoading
-                      ? (
-                          <>
-                            <span className="mr-2">⏳</span>
-                            {t('bulk.creating', { count: selectedStepsCount })}
-                          </>
-                        )
-                      : (
-                          <>
-                            <span className="mr-2">💾</span>
-                            {t('bulk.createRecords', { count: selectedStepsCount })}
-                          </>
-                        )}
-                  </Button>
-                </div>
-
-                {/* Error Message */}
-                {createBulkMutation.error && (
-                  <div className="flex items-center rounded-lg border-2 border-red-200 bg-red-50 p-3">
-                    <span className="mr-3 text-lg text-red-600">❌</span>
-                    <div>
-                      <p className="font-bold text-red-800">{t('bulk.errorOccurred')}</p>
-                      <p className="text-sm text-red-600">{createBulkMutation.error.message}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="overflow-hidden rounded-lg border-2 border-green-300 bg-white shadow-lg">
-                <div className="bg-gradient-to-r from-green-500 to-blue-500 p-3 text-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        checked={filteredProductionSteps.length > 0 && filteredProductionSteps.every(step => step.selected)}
-                        onCheckedChange={(checked) => {
-                          filteredProductionSteps.forEach((step) => {
-                            if (checked !== step.selected) {
-                              handleStepToggle(step.id);
-                            }
-                          });
-                        }}
-                        className="border-2 border-white data-[state=checked]:bg-white data-[state=checked]:text-green-500"
-                      />
-                      <span className="text-lg font-bold">
-                        📋
-                        {t('bulk.stepListHeader')}
-                      </span>
-                    </div>
-                    <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium">
-                      {t('bulk.stepListSubHeader')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="border-b-2 border-green-200 bg-gray-50 p-3">
-                  <div className="grid grid-cols-4 gap-4 text-sm font-bold text-gray-700">
-                    <div className="flex items-center">
-                      <span className="mr-2 rounded bg-blue-500 px-2 py-1 text-xs text-white">{t('bulk.selectLabel')}</span>
-                      {t('bulk.stepName')}
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <span className="mr-2 rounded bg-orange-500 px-2 py-1 text-xs text-white">{t('bulk.quantityLabel')}</span>
-                      {t('bulk.stepQuantity')}
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <span className="mr-2 rounded bg-purple-500 px-2 py-1 text-xs text-white">{t('bulk.notesLabel')}</span>
-                      {t('bulk.stepNotes')}
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <span className="mr-2 rounded bg-green-500 px-2 py-1 text-xs text-white">{t('bulk.statusLabel')}</span>
-                      {t('bulk.stepStatus')}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="max-h-96 overflow-y-auto">
-                  {filteredProductionSteps.map((step, index) => (
-                    <div
-                      key={step.id}
-                      className={`grid grid-cols-4 gap-4 border-b border-gray-200 p-4 transition-colors hover:bg-gray-50 ${
-                        step.selected ? 'border-green-200 bg-green-50' : ''
-                      }`}
-                    >
-                      {/* Checkbox and Step Name */}
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={step.selected}
-                          onCheckedChange={() => handleStepToggle(step.id)}
-                          className="data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500"
-                        />
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {step.stepName}
-                            {step.filmSequence && ` : ${step.filmSequence}`}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            #
-                            {index + 1}
-                          </div>
+                    <div className="border-b-2 border-green-200 bg-gray-50 p-3">
+                      <div className="grid grid-cols-4 gap-4 text-sm font-bold text-gray-700">
+                        <div className="flex items-center">
+                          <span className="mr-2 rounded bg-blue-500 px-2 py-1 text-xs text-white">{t('bulk.selectLabel')}</span>
+                          {t('bulk.stepName')}
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <span className="mr-2 rounded bg-orange-500 px-2 py-1 text-xs text-white">{t('bulk.quantityLabel')}</span>
+                          {t('bulk.stepQuantity')}
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <span className="mr-2 rounded bg-purple-500 px-2 py-1 text-xs text-white">{t('bulk.notesLabel')}</span>
+                          {t('bulk.stepNotes')}
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <span className="mr-2 rounded bg-green-500 px-2 py-1 text-xs text-white">{t('bulk.statusLabel')}</span>
+                          {t('bulk.stepStatus')}
                         </div>
                       </div>
-
-                      {/* Quantity Input */}
-                      <div className="flex items-center justify-center">
-                        {step.selected
-                          ? (
-                              <Input
-                                type="text"
-                                value={step.actualQuantity.toString()}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '');
-                                  const numValue = value === '' ? 0 : Number.parseInt(value);
-                                  handleQuantityChange(step.id, numValue);
-                                }}
-                                onBlur={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '');
-                                  const numValue = value === '' ? 0 : Number.parseInt(value);
-                                  handleQuantityBlur(step.id, numValue);
-                                }}
-                                className="h-12 w-28 border-2 border-orange-300 text-center text-xl font-bold focus:border-orange-500"
-                                placeholder="0"
-                              />
-                            )
-                          : (
-                              <div className="text-sm text-gray-400">{t('bulk.notSelected')}</div>
-                            )}
-                      </div>
-
-                      {/* Notes */}
-                      <div className="flex items-center">
-                        {step.selected
-                          ? (
-                              <Textarea
-                                value={step.salaryNote || ''}
-                                onChange={e => handleNotesChange(step.id, e.target.value)}
-                                className="min-h-10 resize-none border-2 border-purple-300 focus:border-purple-500"
-                                placeholder={t('bulk.addNotes')}
-                                rows={2}
-                              />
-                            )
-                          : (
-                              <div className="text-sm text-gray-400">{t('bulk.notSelected')}</div>
-                            )}
-                      </div>
-
-                      {/* Status */}
-                      <div className="flex items-center justify-center">
-                        {step.selected
-                          ? (
-                              step.validationStatus && (
-                                <div className={`flex items-center space-x-1 rounded-full px-3 py-2 text-sm font-bold ${
-                                  step.validationStatus === 'valid'
-                                    ? 'border border-green-300 bg-green-100 text-green-800'
-                                    : step.validationStatus === 'invalid'
-                                      ? 'border border-red-300 bg-red-100 text-red-800'
-                                      : 'border border-yellow-300 bg-yellow-100 text-yellow-800'
-                                }`}
-                                >
-                                  {step.validationStatus === 'valid' && <span className="mr-1">✅</span>}
-                                  {step.validationStatus === 'invalid' && <span className="mr-1">❌</span>}
-                                  {step.validationStatus === 'pending' && <span className="mr-1">⏳</span>}
-                                  <span>{step.validationMessage}</span>
-                                </div>
-                              )
-                            )
-                          : (
-                              <div className="text-sm text-gray-400">{t('bulk.waitingCheck')}</div>
-                            )}
-                      </div>
                     </div>
-                  ))}
+
+                    <div className="max-h-96 overflow-y-auto">
+                      {filteredProductionSteps.map((step, index) => (
+                        <div
+                          key={step.id}
+                          className={`grid grid-cols-4 gap-4 border-b border-gray-200 p-4 transition-colors hover:bg-gray-50 ${
+                            step.selected ? 'border-green-200 bg-green-50' : ''
+                          }`}
+                        >
+                          {/* Checkbox and Step Name */}
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={step.selected}
+                              onCheckedChange={() => handleStepToggle(step.id)}
+                              className="data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500"
+                            />
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {step.stepName}
+                                {step.filmSequence && ` : ${step.filmSequence}`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                #
+                                {index + 1}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quantity Input */}
+                          <div className="flex items-center justify-center">
+                            {step.selected
+                              ? (
+                                  <Input
+                                    type="text"
+                                    value={step.actualQuantity.toString()}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/\D/g, '');
+                                      const numValue = value === '' ? 0 : Number.parseInt(value);
+                                      handleQuantityChange(step.id, numValue);
+                                    }}
+                                    onBlur={(e) => {
+                                      const value = e.target.value.replace(/\D/g, '');
+                                      const numValue = value === '' ? 0 : Number.parseInt(value);
+                                      handleQuantityBlur(step.id, numValue);
+                                    }}
+                                    className="h-12 w-28 border-2 border-orange-300 text-center text-xl font-bold focus:border-orange-500"
+                                    placeholder="0"
+                                  />
+                                )
+                              : (
+                                  <div className="text-sm text-gray-400">{t('bulk.notSelected')}</div>
+                                )}
+                          </div>
+
+                          {/* Notes */}
+                          <div className="flex items-center">
+                            {step.selected
+                              ? (
+                                  <Textarea
+                                    value={step.salaryNote || ''}
+                                    onChange={e => handleNotesChange(step.id, e.target.value)}
+                                    className="min-h-10 resize-none border-2 border-purple-300 focus:border-purple-500"
+                                    placeholder={t('bulk.addNotes')}
+                                    rows={2}
+                                  />
+                                )
+                              : (
+                                  <div className="text-sm text-gray-400">{t('bulk.notSelected')}</div>
+                                )}
+                          </div>
+
+                          {/* Status */}
+                          <div className="flex items-center justify-center">
+                            {step.selected
+                              ? (
+                                  step.validationStatus && (
+                                    <div className={`flex items-center space-x-1 rounded-full px-3 py-2 text-sm font-bold ${
+                                      step.validationStatus === 'valid'
+                                        ? 'border border-green-300 bg-green-100 text-green-800'
+                                        : step.validationStatus === 'invalid'
+                                          ? 'border border-red-300 bg-red-100 text-red-800'
+                                          : 'border border-yellow-300 bg-yellow-100 text-yellow-800'
+                                    }`}
+                                    >
+                                      {step.validationStatus === 'valid' && <span className="mr-1">✅</span>}
+                                      {step.validationStatus === 'invalid' && <span className="mr-1">❌</span>}
+                                      {step.validationStatus === 'pending' && <span className="mr-1">⏳</span>}
+                                      <span>{step.validationMessage}</span>
+                                    </div>
+                                  )
+                                )
+                              : (
+                                  <div className="text-sm text-gray-400">{t('bulk.waitingCheck')}</div>
+                                )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Empty state */}
+                    {filteredProductionSteps.length === 0 && productionSteps.length > 0 && (
+                      <div className="bg-gray-50 py-12 text-center">
+                        <div className="mb-4 text-6xl">🔍</div>
+                        <p className="mb-2 text-lg font-medium text-gray-600">{t('bulk.noStepsFound')}</p>
+                        <p className="mb-4 text-sm text-gray-500">{t('bulk.changeSearchTerm')}</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setStepFilter('')}
+                          className="border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
+                        >
+                          {t('bulk.clearFilter')}
+                        </Button>
+                      </div>
+                    )}
+
+                    {productionSteps.length === 0 && selectedProduct && (
+                      <div className="bg-gray-50 py-12 text-center">
+                        <div className="mb-4 text-6xl">📋</div>
+                        <p className="mb-2 text-lg font-medium text-gray-600">{t('bulk.noStepsAvailable')}</p>
+                        <p className="text-sm text-gray-500">{t('bulk.noStepsForProduct')}</p>
+                      </div>
+                    )}
+                  </div>
+
                 </div>
-
-                {/* Empty state */}
-                {filteredProductionSteps.length === 0 && productionSteps.length > 0 && (
-                  <div className="bg-gray-50 py-12 text-center">
-                    <div className="mb-4 text-6xl">🔍</div>
-                    <p className="mb-2 text-lg font-medium text-gray-600">{t('bulk.noStepsFound')}</p>
-                    <p className="mb-4 text-sm text-gray-500">{t('bulk.changeSearchTerm')}</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStepFilter('')}
-                      className="border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
-                    >
-                      {t('bulk.clearFilter')}
-                    </Button>
-                  </div>
-                )}
-
-                {productionSteps.length === 0 && selectedProduct && (
-                  <div className="bg-gray-50 py-12 text-center">
-                    <div className="mb-4 text-6xl">📋</div>
-                    <p className="mb-2 text-lg font-medium text-gray-600">{t('bulk.noStepsAvailable')}</p>
-                    <p className="text-sm text-gray-500">{t('bulk.noStepsForProduct')}</p>
-                  </div>
-                )}
               </div>
-
-              {selectedStepsCount === 0 && (
-                <div className="mt-4 flex items-center rounded-lg border-2 border-red-200 bg-red-50 p-4">
-                  <span className="mr-3 text-2xl text-red-600">⚠️</span>
-                  <div>
-                    <p className="font-bold text-red-800">{t('bulk.selectAtLeastOneStep')}</p>
-                    <p className="text-sm text-red-600">{t('bulk.selectStepInstructions')}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
+            </TabsContent>
+          </Tabs>
         </form>
       </Form>
     </div>

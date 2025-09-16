@@ -1137,14 +1137,6 @@
       "ownerId": "Chủ sở hữu"
     },
     "bulk": {
-      "createSalaryEntry": "Tạo Bản Ghi Lương Nhân Viên",
-      "followSteps": "Thực hiện theo 3 bước đơn giản",
-      "selectEmployee": "Chọn Nhân Viên",
-      "selectEmployeeDesc": "Tìm và chọn nhân viên cần tạo lương",
-      "selectPlanProduct": "Chọn Kế Hoạch & Sản Phẩm",
-      "selectPlanProductDesc": "Chọn dự án và sản phẩm làm việc",
-      "selectSteps": "Chọn Công Đoạn",
-      "selectStepsDesc": "Đánh dấu công việc đã hoàn thành",
       "step1Title": "BƯỚC 1: CHỌN NHÂN VIÊN",
       "step1Desc": "Tìm và chọn nhân viên cần tạo bản ghi lương",
       "step2Title": "BƯỚC 2: CHỌN DỰ ÁN & SẢN PHẨM",

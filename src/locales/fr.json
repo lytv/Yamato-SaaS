@@ -754,14 +754,6 @@
       "cancelled": "Annulé"
     },
     "bulk": {
-      "createSalaryEntry": "Créer des Fiches de Paie Employés",
-      "followSteps": "Suivez 3 étapes simples",
-      "selectEmployee": "Sélectionner Employé",
-      "selectEmployeeDesc": "Trouver et sélectionner employé pour fiches de paie",
-      "selectPlanProduct": "Sélectionner Plan & Produit",
-      "selectPlanProductDesc": "Choisir projet et produit à travailler",
-      "selectSteps": "Sélectionner Étapes",
-      "selectStepsDesc": "Marquer les tâches terminées",
       "step1Title": "ÉTAPE 1: SÉLECTIONNER EMPLOYÉ",
       "step1Desc": "Trouver et sélectionner employé pour création fiche de paie",
       "step2Title": "ÉTAPE 2: SÉLECTIONNER PROJET & PRODUIT",

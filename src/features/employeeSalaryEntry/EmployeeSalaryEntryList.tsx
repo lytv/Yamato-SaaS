@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, Download, Eye, EyeOff, Filter } from 'lucide-re
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { EmployeeSalaryEntrySkeleton } from '@/features/employeeSalaryEntry/EmployeeSalaryEntrySkeleton';
 import { useEmployeeSalaryEntryExport } from '@/hooks/useEmployeeSalaryEntryExport';
 import { useEmployeeSalaryEntryFilters } from '@/hooks/useEmployeeSalaryEntryFilters';
@@ -20,9 +21,28 @@ import type { EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEnt
 type EmployeeSalaryEntryListProps = {
   onEdit: (employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => void;
   onDelete: (employeeSalaryEntry: EmployeeSalaryEntryWithRelations) => void;
+  currentPage?: number;
+  onPaginationUpdate?: (page: number, total: number, hasMore: boolean) => void;
+  onCreateNew?: () => void;
+  isCreating?: boolean;
+  currentPageState?: number;
+  hasMoreState?: boolean;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
 };
 
-export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntryListProps): JSX.Element {
+export function EmployeeSalaryEntryList({
+  onEdit,
+  onDelete,
+  currentPage: externalCurrentPage,
+  onPaginationUpdate,
+  onCreateNew,
+  isCreating,
+  currentPageState,
+  hasMoreState,
+  onPreviousPage,
+  onNextPage,
+}: EmployeeSalaryEntryListProps): JSX.Element {
   const { userId, orgId } = useAuth();
   const [deleteConfirmEmployeeSalaryEntry, setDeleteConfirmEmployeeSalaryEntry] = useState<EmployeeSalaryEntryWithRelations | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -79,6 +99,13 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
+  // Sync external currentPage with internal page state
+  useEffect(() => {
+    if (externalCurrentPage && externalCurrentPage !== page) {
+      setPage(externalCurrentPage);
+    }
+  }, [externalCurrentPage, page]);
+
   const { employeeSalaryEntrys, pagination, isLoading, error, refresh } = useEmployeeSalaryEntrys({
     search,
     sortBy,
@@ -103,6 +130,13 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
 
   const { deleteEmployeeSalaryEntry, isDeleting } = useEmployeeSalaryEntryMutations();
   const { exportEmployeeSalaryEntrys, isExporting, exportError, clearError } = useEmployeeSalaryEntryExport();
+
+  // Update parent component with pagination changes
+  useEffect(() => {
+    if (onPaginationUpdate && pagination) {
+      onPaginationUpdate(page, pagination.total, pagination.hasMore || false);
+    }
+  }, [page, pagination, onPaginationUpdate]);
 
   // Helper function to get step name
   const getStepName = (employeeSalaryEntry: EmployeeSalaryEntryWithRelations): string => {
@@ -295,7 +329,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
   // Enhanced Error state
   if (error) {
     return (
-      <div className="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100 py-20 text-center">
+      <div className="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100 py-12 text-center">
         <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-red-100">
           <svg className="size-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -322,11 +356,11 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
   // Remove early return for empty state - we'll handle it in the main JSX
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4">
       {/* Advanced Filter Controls */}
       {showFilters && (
-        <div className="rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 p-6 shadow-sm">
-          <div className="space-y-6">
+        <div className="rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 p-4 shadow-sm">
+          <div className="space-y-4">
             {/* Basic Filters - Always visible */}
             <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -439,8 +473,8 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
 
             {/* Advanced Filter Fields - Collapsible */}
             {showAdvancedFilters && (
-              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 
                   {/* Employee Filter */}
                   <div className="space-y-3">
@@ -542,7 +576,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
                 </div>
 
                 {/* Filter Action Buttons */}
-                <div className="flex items-center justify-between border-t border-gray-200 pt-6">
+                <div className="flex items-center justify-between border-t border-gray-200 pt-4">
                   <div className="flex space-x-3">
                     <button
                       type="button"
@@ -689,7 +723,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
       {/* Show empty state only when no data AND no filters */}
       {employeeSalaryEntrys.length === 0 && !hasActiveFilters
         ? (
-            <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 py-20 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 py-12 text-center">
               <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-blue-100">
                 <svg className="size-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -881,7 +915,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
                       {employeeSalaryEntrys.length === 0 && hasActiveFilters
                         ? (
                             <tr>
-                              <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                              <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                                 <div className="flex items-center justify-center">
                                   <svg className="mr-3 size-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1000,7 +1034,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
                       {employeeSalaryEntrys.length === 0 && hasActiveFilters
                         ? (
                             <tr>
-                              <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                              <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                                 <div className="flex items-center justify-center">
                                   <svg className="mr-3 size-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1072,7 +1106,7 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
 
               {/* No Results Found with Filters */}
               {employeeSalaryEntrys.length === 0 && hasActiveFilters && (
-                <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                   <div className="text-center">
                     <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-yellow-100">
                       <svg className="size-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1095,58 +1129,12 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
                 </div>
               )}
 
-              {/* Enhanced Pagination */}
-              {!showAll && pagination && pagination.total > 0 && (
-                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="rounded-lg bg-gray-50 px-4 py-2">
-                      <p className="text-lg font-semibold text-gray-700">
-                        {t('showing')}
-                        {' '}
-                        {employeeSalaryEntrys.length}
-                        {' '}
-                        {t('of')}
-                        {' '}
-                        {pagination.total}
-                        {' '}
-                        {t('employee_salary_entries')}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        type="button"
-                        onClick={() => setPage(page - 1)}
-                        disabled={page <= 1}
-                        className="inline-flex items-center rounded-xl bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-3 text-lg font-bold text-white transition-all duration-200 hover:from-gray-600 hover:to-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {t('previous')}
-                      </button>
-
-                      <div className="rounded-lg bg-blue-500 px-4 py-2 text-lg font-bold text-white">
-                        {t('page')}
-                        {' '}
-                        {page}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setPage(page + 1)}
-                        disabled={!pagination?.hasMore}
-                        className="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-lg font-bold text-white transition-all duration-200 hover:from-blue-600 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {t('next')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Enhanced Delete Confirmation Dialog */}
               {deleteConfirmEmployeeSalaryEntry && (
                 <div className="fixed inset-0 z-50 size-full overflow-y-auto bg-black/60 backdrop-blur-sm">
                   <div className="flex min-h-screen items-center justify-center p-4">
                     <div className="relative mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-2xl">
-                      <div className="p-8 text-center">
+                      <div className="p-6 text-center">
                         <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-red-100">
                           <svg className="size-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -1199,6 +1187,85 @@ export function EmployeeSalaryEntryList({ onEdit, onDelete }: EmployeeSalaryEntr
               )}
             </>
           )}
+
+      {/* Employee Salary Management Header - Moved to Bottom */}
+      <div className="mt-4">
+        <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 p-4 text-white shadow-2xl">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="rounded-full bg-white/20 p-2">
+                  <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    💰
+                    {' '}
+                    {t('pageTitle')}
+                  </h1>
+                  <p className="text-lg text-white/90">
+                    {t('pageDescription')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {/* Mini Pagination Controls */}
+              <div className="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={onPreviousPage}
+                  className="flex items-center justify-center rounded-lg bg-white/20 px-3 py-2 text-sm font-bold text-white transition-all hover:bg-white/30 disabled:opacity-50"
+                  disabled={(currentPageState || page) <= 1}
+                >
+                  <span className="mr-1">←</span>
+                  {' '}
+                  {t('previous')}
+                </button>
+
+                <div className="rounded-lg bg-white/30 px-3 py-2 text-sm font-bold text-white">
+                  {t('page')}
+                  {' '}
+                  {currentPageState || page}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onNextPage}
+                  className="flex items-center justify-center rounded-lg bg-white/20 px-3 py-2 text-sm font-bold text-white transition-all hover:bg-white/30 disabled:opacity-50"
+                  disabled={!(hasMoreState ?? pagination?.hasMore)}
+                >
+                  {t('next')}
+                  {' '}
+                  <span className="ml-1">→</span>
+                </button>
+              </div>
+
+              {onCreateNew && (
+                <Button
+                  onClick={onCreateNew}
+                  disabled={isCreating}
+                  size="lg"
+                  className="h-10 border-0 bg-white px-6 text-base font-bold text-blue-600 shadow-lg hover:bg-blue-50"
+                >
+                  <svg className="mr-2 size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  {t('createNew')}
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Decorative elements */}
+          <div className="absolute -right-10 -top-10 size-20 rounded-full bg-white/10"></div>
+          <div className="absolute -bottom-8 -left-8 size-16 rounded-full bg-white/5"></div>
+        </header>
+      </div>
     </div>
   );
 }

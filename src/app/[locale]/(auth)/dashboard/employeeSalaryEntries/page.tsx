@@ -8,10 +8,8 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { EmployeeSalaryEntryFormWithBulk } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryFormWithBulk';
 import { EmployeeSalaryEntryList } from '@/features/employeeSalaryEntry/EmployeeSalaryEntryList';
 import { useEmployeeSalaryEntryMutations } from '@/hooks/useEmployeeSalaryEntryMutations';
@@ -106,7 +104,6 @@ function EmployeeSalaryEntryModal({
  * Main EmployeeSalaryEntrys dashboard page component
  */
 export default function EmployeeSalaryEntrysPage(): JSX.Element {
-  const t = useTranslations('employeeSalaryEntry');
   const { userId: _userId, orgId: _orgId } = useAuth();
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
@@ -114,6 +111,8 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
   });
   const [refreshKey, setRefreshKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   const { isCreating } = useEmployeeSalaryEntryMutations();
 
@@ -160,57 +159,31 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handlePaginationUpdate = (page: number, _total: number, hasMoreData: boolean) => {
+    setCurrentPage(page);
+    setHasMore(hasMoreData);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <main className="container mx-auto max-w-7xl space-y-6 p-6">
-        {/* Enhanced Page Header with Gradient Background */}
-        <header data-testid="employeeSalaryEntrys-header" className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 p-4 text-white shadow-2xl">
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="rounded-full bg-white/20 p-2">
-                  <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    💰
-                    {' '}
-                    {t('pageTitle')}
-                  </h1>
-                  <p className="text-lg text-white/90">
-                    {t('pageDescription')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={handleCreateEmployeeSalaryEntry}
-                disabled={isCreating}
-                size="lg"
-                className="h-10 border-0 bg-white px-6 text-base font-bold text-blue-600 shadow-lg hover:bg-blue-50"
-              >
-                <svg className="mr-2 size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {t('createNew')}
-              </Button>
-            </div>
-          </div>
-
-          {/* Decorative elements */}
-          <div className="absolute -right-10 -top-10 size-20 rounded-full bg-white/10"></div>
-          <div className="absolute -bottom-8 -left-8 size-16 rounded-full bg-white/5"></div>
-        </header>
+      <main className="container mx-auto max-w-7xl space-y-4 p-4">
 
         {/* Enhanced Main Content */}
         <div
           data-testid="employeeSalaryEntrys-content"
-          className="space-y-6"
+          className="space-y-2"
         >
           {/* Responsive Layout Indicators */}
           {isMobile
@@ -231,6 +204,14 @@ export default function EmployeeSalaryEntrysPage(): JSX.Element {
               key={refreshKey}
               onEdit={handleEditEmployeeSalaryEntry}
               onDelete={handleDeleteSuccess}
+              currentPage={currentPage}
+              onPaginationUpdate={handlePaginationUpdate}
+              onCreateNew={handleCreateEmployeeSalaryEntry}
+              isCreating={isCreating}
+              currentPageState={currentPage}
+              hasMoreState={hasMore}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
             />
           </div>
         </div>
