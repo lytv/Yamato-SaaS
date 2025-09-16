@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/lytv/Yamato-SaaS/compare/v1.3.1...v1.3.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* **load vo cu:** nhan next ([5233af5](https://github.com/lytv/Yamato-SaaS/commit/5233af5a66533a1a62456ea6f459313c076314ec))
+
 ## [1.3.1](https://github.com/lytv/Yamato-SaaS/compare/v1.3.0...v1.3.1) (2025-09-16)
 
 
