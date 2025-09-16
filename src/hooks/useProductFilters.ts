@@ -17,7 +17,7 @@ type ProductFiltersReturn = ProductFilters & {
 
 const DEFAULT_FILTERS: ProductFilters = {
   search: '',
-  sortBy: 'createdAt',
+  sortBy: 'category',
   sortOrder: 'desc',
 };
 

@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { productSchema } from '@/models/Schema';
 import type {
   CreateProductInput,
@@ -15,6 +14,8 @@ import type {
   ProductStats,
   UpdateProductInput,
 } from '@/types/product';
+
+import { db } from '../DB';
 
 /**
  * Create a new product
@@ -68,7 +69,7 @@ export async function getProductsByOwner(params: ProductListParamsWithOwner): Pr
       or(
         ilike(productSchema.productName, searchTerm),
         ilike(productSchema.productCode, searchTerm),
-        ilike(productSchema.category, searchTerm),
+        eq(productSchema.category, search.trim()),
       ),
     );
     if (searchCondition) {
@@ -112,7 +113,7 @@ export async function getProductsCount(ownerId: string, search?: string): Promis
       or(
         ilike(productSchema.productName, searchTerm),
         ilike(productSchema.productCode, searchTerm),
-        ilike(productSchema.category, searchTerm),
+        eq(productSchema.category, search.trim()),
       ),
     );
     if (searchCondition) {

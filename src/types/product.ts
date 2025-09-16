@@ -27,7 +27,7 @@ export type ProductListParams = {
   readonly page?: number;
   readonly limit?: number;
   readonly search?: string;
-  readonly sortBy?: 'createdAt' | 'updatedAt' | 'productName' | 'productCode';
+  readonly sortBy?: 'createdAt' | 'updatedAt' | 'productName' | 'productCode' | 'category';
   readonly sortOrder?: 'asc' | 'desc';
   readonly showAll?: boolean;
 };
@@ -106,7 +106,7 @@ export type ProductStatsResponse = {
 // ✅ Filter state for product list components
 export type ProductFilters = {
   search: string;
-  sortBy: 'createdAt' | 'updatedAt' | 'productName' | 'productCode';
+  sortBy: 'createdAt' | 'updatedAt' | 'productName' | 'productCode' | 'category';
   sortOrder: 'asc' | 'desc';
 };
 

@@ -38,7 +38,7 @@ export const productListParamsSchema = z.object({
   // ✅ Sort validation with strict types and defaults
   sortBy: z.union([z.string(), z.undefined(), z.null()])
     .transform((val: string | undefined | null) =>
-      val && ['createdAt', 'updatedAt', 'productName', 'productCode'].includes(val) ? val : 'createdAt',
+      val && ['createdAt', 'updatedAt', 'productName', 'productCode', 'category'].includes(val) ? val : 'category',
     ),
 
   sortOrder: z.union([z.string(), z.undefined(), z.null()])
