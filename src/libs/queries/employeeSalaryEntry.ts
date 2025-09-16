@@ -58,7 +58,7 @@ export type EmployeeSalaryEntry = {
 
 export type EmployeeSalaryEntryWithRelations = EmployeeSalaryEntry & {
   userSync?: { userId: string; fullName: string | null; shortcut: string | null };
-  productionStepDetail?: { id: number; stepName: string | null };
+  productionStepDetail?: { id: number; stepName: string | null; filmSequence: string | null };
   plan?: { id: number; planName: string };
   product?: { id: number; productCode: string; productName: string; productCategory?: string | null };
 };
@@ -312,6 +312,7 @@ export async function getEmployeeSalaryEntries(params: {
             productionStepDetail: {
               id: productionStepDetailSchema.id,
               stepName: productionStepSchema.stepName,
+              filmSequence: productionStepSchema.filmSequence,
             },
           }
         : {}),
@@ -423,7 +424,7 @@ export async function getEmployeeSalaryEntries(params: {
     conditions.push(ilike(productSchema.productName, `%${productName}%`));
   }
   if (productCategory) {
-    conditions.push(ilike(productSchema.category, `%${productCategory}%`));
+    conditions.push(eq(productSchema.category, productCategory));
   }
 
   // Production step filtering
@@ -543,6 +544,7 @@ export async function getEmployeeSalaryEntries(params: {
       ? {
           id: r.productionStepDetail.id,
           stepName: r.productionStepDetail.stepName,
+          filmSequence: r.productionStepDetail.filmSequence,
         }
       : undefined,
     product: r.product
@@ -609,6 +611,7 @@ export async function getEmployeeSalaryEntryByIdWithRelations(id: number, owner_
       productionStepDetail: {
         id: productionStepDetailSchema.id,
         stepName: productionStepSchema.stepName,
+        filmSequence: productionStepSchema.filmSequence,
       },
       plan: {
         id: planSchema.id,

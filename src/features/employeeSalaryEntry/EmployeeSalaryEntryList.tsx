@@ -972,9 +972,16 @@ export function EmployeeSalaryEntryList({
                                   )}
                                 </td>
                                 <td className="px-6 py-5">
-                                  <div className="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                                  <div className="text-lg font-semibold text-gray-900">
                                     {getStepName(employeeSalaryEntry)}
                                   </div>
+                                  {employeeSalaryEntry.productionStepDetail?.filmSequence && (
+                                    <div className="text-sm text-gray-500">
+                                      Sequence:
+                                      {' '}
+                                      {employeeSalaryEntry.productionStepDetail.filmSequence}
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="px-6 py-5">
                                   <div className="text-2xl font-bold text-green-600">
@@ -1091,9 +1098,16 @@ export function EmployeeSalaryEntryList({
                                   )}
                                 </td>
                                 <td className="px-6 py-5">
-                                  <div className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                                  <div className="text-lg font-semibold text-gray-900">
                                     {groupedEntry.stepName}
                                   </div>
+                                  {groupedEntry.entries[0]?.productionStepDetail?.filmSequence && (
+                                    <div className="text-sm text-gray-500">
+                                      Sequence:
+                                      {' '}
+                                      {groupedEntry.entries[0].productionStepDetail.filmSequence}
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="px-6 py-5">
                                   <div className="text-2xl font-bold text-green-600">
