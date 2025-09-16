@@ -1,3 +1,11 @@
+## [1.3.1](https://github.com/lytv/Yamato-SaaS/compare/v1.3.0...v1.3.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **fix gug:** ok ([35bfc2a](https://github.com/lytv/Yamato-SaaS/commit/35bfc2af355f2e8a03b31e30317f2ae9000c14ab))
+* **sua loi tim chinh xac:** o step ([e1ec9af](https://github.com/lytv/Yamato-SaaS/commit/e1ec9af059bd8b902976064615551e26d52c5c10))
+
 # [1.3.0](https://github.com/lytv/Yamato-SaaS/compare/v1.2.48...v1.3.0) (2025-09-16)
 
 
