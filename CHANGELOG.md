@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/lytv/Yamato-SaaS/compare/v1.4.1...v1.4.2) (2025-09-17)
+
+
+### Bug Fixes
+
+* **bo auto search:** steps ([512bd5e](https://github.com/lytv/Yamato-SaaS/commit/512bd5e88435efc27a77f612976a85eba6b90c32))
+
 ## [1.4.1](https://github.com/lytv/Yamato-SaaS/compare/v1.4.0...v1.4.1) (2025-09-16)
 
 
