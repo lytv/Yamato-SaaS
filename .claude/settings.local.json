@@ -53,5 +53,13 @@
       "Bash(mkdir:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "puppeteer",
+    "sequential-thinking",
+    "mcp-deepwiki",
+    "zen"
+  ],
+  "enableAllProjectMcpServers": true
 }
