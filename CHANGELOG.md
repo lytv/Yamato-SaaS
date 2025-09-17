@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/lytv/Yamato-SaaS/compare/v1.4.2...v1.4.3) (2025-09-17)
+
+
+### Bug Fixes
+
+* **cap nhat ve tinh:** ok ([f761a11](https://github.com/lytv/Yamato-SaaS/commit/f761a1185a42d5e24320ecc0e63c3a603a1f3471))
+
 ## [1.4.2](https://github.com/lytv/Yamato-SaaS/compare/v1.4.1...v1.4.2) (2025-09-17)
 
 
