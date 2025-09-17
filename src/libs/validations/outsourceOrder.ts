@@ -50,12 +50,12 @@ export const outsourceOrderFormSchema = z.object({
     (val) => {
       // Convert string to number if needed
       if (typeof val === 'string') {
-        const num = parseInt(val, 10);
+        const num = Number.parseInt(val, 10);
         return Number.isNaN(num) ? undefined : num;
       }
       return val;
     },
-    z.number().int().min(2).max(3)
+    z.number().int().min(2).max(3),
   ),
 });
 
@@ -108,12 +108,12 @@ export const updateOutsourceOrderSchema = z.object({
     (val) => {
       // Convert string to number if needed
       if (typeof val === 'string') {
-        const num = parseInt(val, 10);
+        const num = Number.parseInt(val, 10);
         return Number.isNaN(num) ? undefined : num;
       }
       return val;
     },
-    z.number().int().min(2).max(3)
+    z.number().int().min(2).max(3),
   ).optional(),
 });
 
@@ -215,6 +215,240 @@ export const outsourceOrderValidationRules = {
         errors.push('Actual quantity significantly exceeds planned quantity');
       }
     }
+
+    return errors;
+  },
+};
+
+// =============================================================================
+// BULK FORM VALIDATION SCHEMAS (New Step-by-Step Flow)
+// =============================================================================
+
+// Individual order detail validation
+export const outsourceOrderDetailFormSchema = z.object({
+  productionStepId: z.number().int().min(1, 'Production step is required'),
+  orderedQuantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  expectedCompletionDate: z.preprocess(
+    val => typeof val === 'string' ? new Date(val) : val,
+    z.date({ required_error: 'Expected completion date is required', invalid_type_error: 'Invalid date' }),
+  ),
+  itemNotes: z.string().trim().max(500, 'Notes must be 500 characters or less').optional(),
+  unitPrice: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '') {
+        return undefined;
+      }
+      if (typeof val === 'string' && val.trim() === '') {
+        return undefined;
+      }
+      const num = Number(val);
+      return Number.isNaN(num) ? undefined : num;
+    },
+    z.number().min(0, 'Unit price cannot be negative').optional(),
+  ),
+  sequenceNumber: z.number().int().min(0).optional(),
+});
+
+// Bulk form validation schema
+export const outsourceOrderBulkFormSchema = z.object({
+  // Step 1: OutsourceOrder Header
+  assignedToUserId: z.string().min(1, 'Assigned To is required'),
+  orderDate: z.preprocess(
+    val => typeof val === 'string' ? new Date(val) : val,
+    z.date({ required_error: 'Order Date is required', invalid_type_error: 'Invalid date' }),
+  ),
+  applyRetailPrice: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        const num = Number.parseInt(val, 10);
+        return Number.isNaN(num) ? undefined : num;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(3, 'Apply retail price must be 2 (Normal) or 3 (Retail)'),
+  ),
+
+  // Optional header fields
+  orderTitle: z.string().trim().max(200, 'Order Title must be 200 characters or less').optional(),
+  priority: z.number().int().min(1).max(10, 'Priority must be between 1 and 10').default(5),
+  expectedCompletionDate: z.preprocess(
+    val => val === undefined || val === '' ? undefined : (typeof val === 'string' ? new Date(val) : val),
+    z.date({ invalid_type_error: 'Invalid date' }).optional(),
+  ),
+  notes: z.string().trim().max(1000, 'Notes must be 1000 characters or less').optional(),
+
+  // Step 2: Order Details
+  planId: z.number().int().min(1, 'Plan is required'),
+  productId: z.number().int().min(1, 'Product is required'),
+  productSubCode: z.string().trim().max(50, 'Product Sub code must be 50 characters or less').optional(),
+  locationCode: z.string().trim().max(50, 'Location code must be 50 characters or less').optional(),
+
+  // Selected production steps with quantities
+  selectedSteps: z.array(outsourceOrderDetailFormSchema).min(1, 'At least one production step must be selected'),
+}).refine(
+  (data) => {
+    // Business rule: Expected completion date should be after order date if provided
+    if (data.expectedCompletionDate && data.orderDate) {
+      return data.expectedCompletionDate >= data.orderDate;
+    }
+    return true;
+  },
+  {
+    message: 'Expected completion date must be on or after order date',
+    path: ['expectedCompletionDate'],
+  },
+).refine(
+  (data) => {
+    // Business rule: All step completion dates should be realistic
+    const orderDate = data.orderDate;
+    const invalidSteps = data.selectedSteps.filter(step =>
+      step.expectedCompletionDate < orderDate,
+    );
+    return invalidSteps.length === 0;
+  },
+  {
+    message: 'All production step completion dates must be on or after order date',
+    path: ['selectedSteps'],
+  },
+);
+
+// Step 1 validation schema (header only)
+export const outsourceOrderStep1Schema = z.object({
+  assignedToUserId: z.string().min(1, 'Assigned To is required'),
+  orderDate: z.preprocess(
+    val => typeof val === 'string' ? new Date(val) : val,
+    z.date({ required_error: 'Order Date is required', invalid_type_error: 'Invalid date' }),
+  ),
+  applyRetailPrice: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        const num = Number.parseInt(val, 10);
+        return Number.isNaN(num) ? undefined : num;
+      }
+      return val;
+    },
+    z.number().int().min(2).max(3),
+  ),
+  orderTitle: z.string().trim().max(200).optional(),
+  priority: z.number().int().min(1).max(10).default(5),
+  expectedCompletionDate: z.preprocess(
+    val => val === undefined || val === '' ? undefined : (typeof val === 'string' ? new Date(val) : val),
+    z.date({ invalid_type_error: 'Invalid date' }).optional(),
+  ),
+  notes: z.string().trim().max(1000).optional(),
+});
+
+// Step 2 validation schema (details only)
+export const outsourceOrderStep2Schema = z.object({
+  planId: z.number().int().min(1, 'Plan is required'),
+  productId: z.number().int().min(1, 'Product is required'),
+  productSubCode: z.string().trim().max(50).optional(),
+  locationCode: z.string().trim().max(50).optional(),
+  selectedSteps: z.array(outsourceOrderDetailFormSchema).min(1, 'At least one production step must be selected'),
+});
+
+// Create outsource order with details validation
+export const createOutsourceOrderWithDetailsSchema = z.object({
+  ownerId: z.string().min(1, 'Owner ID is required'),
+  orderCode: z.string().trim().min(1, 'Order Code is required').max(50).regex(/^[\w-]+$/),
+  createdByUserId: z.string().min(1, 'Created By is required'),
+  assignedToUserId: z.string().min(1, 'Assigned To is required'),
+  orderDate: z.preprocess(
+    val => typeof val === 'string' ? new Date(val) : val,
+    z.date({ required_error: 'Order Date is required' }),
+  ),
+  applyRetailPrice: z.number().int().min(2).max(3),
+  orderTitle: z.string().trim().max(200).optional(),
+  priority: z.number().int().min(1).max(10).optional(),
+  expectedCompletionDate: z.preprocess(
+    val => val === undefined || val === '' ? undefined : (typeof val === 'string' ? new Date(val) : val),
+    z.date({ invalid_type_error: 'Invalid date' }).optional(),
+  ),
+  notes: z.string().trim().max(1000).optional(),
+  status: z.string().trim().default('draft'),
+
+  details: z.array(z.object({
+    planId: z.number().int().min(1),
+    productId: z.number().int().min(1),
+    productionStepId: z.number().int().min(1),
+    orderedQuantity: z.number().int().min(1),
+    expectedCompletionDate: z.preprocess(
+      val => typeof val === 'string' ? new Date(val) : val,
+      z.date({ required_error: 'Expected completion date is required' }),
+    ),
+    itemNotes: z.string().trim().max(500).optional(),
+    unitPrice: z.number().min(0).optional(),
+    locationCode: z.string().trim().max(50).optional(),
+    productSubCode: z.string().trim().max(50).optional(),
+    sequenceNumber: z.number().int().min(0).optional(),
+  })).min(1, 'At least one detail is required'),
+});
+
+// Validation helper functions for bulk form
+export function validateOutsourceOrderBulkForm(data: unknown) {
+  return outsourceOrderBulkFormSchema.safeParse(data);
+}
+
+export function validateOutsourceOrderStep1(data: unknown) {
+  return outsourceOrderStep1Schema.safeParse(data);
+}
+
+export function validateOutsourceOrderStep2(data: unknown) {
+  return outsourceOrderStep2Schema.safeParse(data);
+}
+
+export function validateOutsourceOrderDetailForm(data: unknown) {
+  return outsourceOrderDetailFormSchema.safeParse(data);
+}
+
+export function validateCreateOutsourceOrderWithDetails(data: unknown) {
+  return createOutsourceOrderWithDetailsSchema.safeParse(data);
+}
+
+// Bulk form business rules validation
+export const outsourceOrderBulkValidationRules = {
+  // Check if step 1 is valid for proceeding to step 2
+  canProceedToStep2: (step1Data: any): boolean => {
+    const result = validateOutsourceOrderStep1(step1Data);
+    return result.success;
+  },
+
+  // Validate quantity limits (can be extended for business-specific rules)
+  validateQuantityLimits: (_stepId: number, quantity: number, _context: any): { valid: boolean; message: string } => {
+    // Example business rule - can be extended
+    if (quantity > 10000) {
+      return { valid: false, message: 'Quantity cannot exceed 10,000 per step' };
+    }
+    return { valid: true, message: 'OK' };
+  },
+
+  // Validate date constraints
+  validateDateConstraints: (orderDate: Date, completionDates: Date[]): string[] => {
+    const errors: string[] = [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Order date should not be too far in the past
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    if (orderDate < thirtyDaysAgo) {
+      errors.push('Order date should not be more than 30 days in the past');
+    }
+
+    // All completion dates should be reasonable
+    const maxFutureDate = new Date(today);
+    maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 2);
+
+    completionDates.forEach((date, index) => {
+      if (date > maxFutureDate) {
+        errors.push(`Completion date for step ${index + 1} is too far in the future`);
+      }
+      if (date < orderDate) {
+        errors.push(`Completion date for step ${index + 1} cannot be before order date`);
+      }
+    });
 
     return errors;
   },

@@ -5,19 +5,19 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/libs/DB';
 import {
   outsourceOrderSchema,
-  planSchema,
   planDetailSchema,
+  planSchema,
   productionStepSchema,
   productSchema,
-  workTableSchema,
   productSubSchema,
+  workTableSchema,
 } from '@/models/Schema';
 
 // GET /api/outsourceOrderDetails/relations/options
@@ -77,7 +77,7 @@ export async function GET(_request: NextRequest) {
         .innerJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode))
         .where(and(
           eq(planSchema.ownerId, ownerId),
-          eq(planDetailSchema.planId, planId)
+          eq(planDetailSchema.planId, planId),
         ))
         .groupBy(productSchema.id, planDetailSchema.productCode, productSchema.productName)
         .orderBy(planDetailSchema.productCode);
@@ -105,28 +105,46 @@ export async function GET(_request: NextRequest) {
       .where(eq(productionStepSchema.ownerId, ownerId))
       .orderBy(productionStepSchema.stepCode);
 
-    // Get work tables (locations) - filter by planId and productSubCode if provided
+    // Get work tables (locations) - filter by productSubCode if provided (like OutsourceOrderBulkForm)
     let workTables;
-    if (planId && productSubCode) {
-      // Get locations from plan_detail for selected plan and product sub, join with work_table for names
-      // Note: plan_detail.location_code maps to work_table.table_code 
-      workTables = await db
-        .select({
-          locationCode: planDetailSchema.locationCode,
-          tableName: workTableSchema.tableName,
-        })
-        .from(planDetailSchema)
-        .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
-        .innerJoin(workTableSchema, eq(planDetailSchema.locationCode, workTableSchema.tableCode))
-        .where(and(
-          eq(planSchema.ownerId, ownerId),
-          eq(planDetailSchema.planId, planId),
-          eq(planDetailSchema.productSubCode, productSubCode)
-        ))
-        .groupBy(planDetailSchema.locationCode, workTableSchema.tableName)
-        .orderBy(planDetailSchema.locationCode);
+    if (productSubCode) {
+      // Get locations filtered by product sub code - more flexible dependency chain
+      if (planId) {
+        // If both planId and productSubCode are provided, use the more specific filter
+        workTables = await db
+          .select({
+            locationCode: planDetailSchema.locationCode,
+            tableName: workTableSchema.tableName,
+          })
+          .from(planDetailSchema)
+          .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+          .innerJoin(workTableSchema, eq(planDetailSchema.locationCode, workTableSchema.tableCode))
+          .where(and(
+            eq(planSchema.ownerId, ownerId),
+            eq(planDetailSchema.planId, planId),
+            eq(planDetailSchema.productSubCode, productSubCode),
+          ))
+          .groupBy(planDetailSchema.locationCode, workTableSchema.tableName)
+          .orderBy(planDetailSchema.locationCode);
+      } else {
+        // If only productSubCode is provided, get all locations that support this product sub
+        workTables = await db
+          .select({
+            locationCode: planDetailSchema.locationCode,
+            tableName: workTableSchema.tableName,
+          })
+          .from(planDetailSchema)
+          .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
+          .innerJoin(workTableSchema, eq(planDetailSchema.locationCode, workTableSchema.tableCode))
+          .where(and(
+            eq(planSchema.ownerId, ownerId),
+            eq(planDetailSchema.productSubCode, productSubCode),
+          ))
+          .groupBy(planDetailSchema.locationCode, workTableSchema.tableName)
+          .orderBy(planDetailSchema.locationCode);
+      }
     } else {
-      // Get all work tables if no plan or product sub selected
+      // Get all work tables if no product sub selected
       workTables = await db
         .select({
           locationCode: workTableSchema.tableCode, // Use tableCode as locationCode

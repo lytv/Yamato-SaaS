@@ -126,6 +126,10 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                     href: '/dashboard/outsourceOrders',
                     label: t('outsource_order'),
                   },
+                  {
+                    href: '/dashboard/outsourceOrderDetails',
+                    label: t('outsource_order_details'),
+                  },
                 ],
               },
 

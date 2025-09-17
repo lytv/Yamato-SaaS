@@ -5,6 +5,9 @@
  */
 
 import type { outsourceOrderSchema } from '@/models/Schema';
+import type { Plan } from '@/types/plan';
+import type { Product } from '@/types/product';
+import type { ProductionStep } from '@/types/productionStep';
 import type { UserSync } from '@/types/userSync';
 
 // Infer the OutsourceOrderDb type from Drizzle schema
@@ -208,5 +211,138 @@ export type OutsourceOrderFilterOptions = {
   }[];
   readonly relations: {
     readonly userSyncs: readonly Pick<UserSync, 'id' | 'fullName'>[];
+  };
+};
+
+// =============================================================================
+// BULK FORM TYPES (New Step-by-Step Flow)
+// =============================================================================
+
+// Bulk form data type for the new step-by-step flow
+export type OutsourceOrderBulkFormData = {
+  // Step 1: OutsourceOrder Header
+  assignedToUserId: string;
+  orderDate: Date;
+  applyRetailPrice: number; // 2=normal, 3=retail
+
+  // Optional header fields
+  orderTitle?: string;
+  priority: number; // 1-10, default 5
+  expectedCompletionDate?: Date;
+  notes?: string;
+
+  // Step 2: Order Details
+  planId: number;
+  productId: number;
+  productSubCode?: string;
+  locationCode?: string;
+
+  // Selected production steps with quantities
+  selectedSteps: OutsourceOrderDetailFormData[];
+};
+
+// Individual order detail form data
+export type OutsourceOrderDetailFormData = {
+  productionStepId: number;
+  orderedQuantity: number;
+  expectedCompletionDate: Date;
+  itemNotes?: string;
+  unitPrice?: number;
+  sequenceNumber?: number;
+};
+
+// Relation options for the bulk form dependency chain
+export type OutsourceOrderBulkRelationOptions = {
+  readonly userSyncs: readonly Pick<UserSync, 'id' | 'fullName'>[];
+  readonly plans: readonly Pick<Plan, 'id' | 'planCode' | 'planName'>[];
+  readonly applyRetailPriceOptions: readonly {
+    readonly value: number;
+    readonly label: string;
+  }[];
+};
+
+// Filtered relation options based on selections
+export type OutsourceOrderFilteredProducts = readonly Pick<Product, 'id' | 'productCode' | 'productName'>[];
+
+export type OutsourceOrderProductSub = {
+  readonly code: string;
+  readonly name: string;
+};
+
+export type OutsourceOrderLocation = {
+  readonly code: string;
+  readonly name: string;
+  readonly description?: string;
+};
+
+export type OutsourceOrderProductionStepOption = Pick<ProductionStep, 'id' | 'stepCode' | 'stepName'> & {
+  readonly planCode?: string;
+  readonly planName?: string;
+  readonly productCode?: string;
+  readonly productName?: string;
+};
+
+// State for dependency chain management
+export type OutsourceOrderDependencyState = {
+  selectedPlan: Pick<Plan, 'id' | 'planCode' | 'planName'> | null;
+  selectedProduct: Pick<Product, 'id' | 'productCode' | 'productName'> | null;
+  selectedProductSub: OutsourceOrderProductSub | null;
+  selectedLocation: OutsourceOrderLocation | null;
+
+  filteredProducts: OutsourceOrderFilteredProducts;
+  filteredProductSubs: readonly OutsourceOrderProductSub[];
+  filteredLocations: readonly OutsourceOrderLocation[];
+  productionSteps: readonly OutsourceOrderProductionStepOption[];
+};
+
+// API payload for creating outsource order with details
+export type CreateOutsourceOrderWithDetailsInput = {
+  // Header data
+  ownerId: string;
+  orderCode: string; // Auto-generated
+  createdByUserId: string;
+  assignedToUserId: string;
+  orderDate: Date;
+  applyRetailPrice: number;
+  orderTitle?: string;
+  priority?: number;
+  expectedCompletionDate?: Date;
+  notes?: string;
+  status?: string; // Default 'draft'
+
+  // Details data
+  details: Array<{
+    planId: number;
+    productId: number;
+    productionStepId: number;
+    orderedQuantity: number;
+    expectedCompletionDate: Date;
+    itemNotes?: string;
+    unitPrice?: number;
+    locationCode?: string;
+    productSubCode?: string;
+    sequenceNumber?: number;
+  }>;
+};
+
+// Response for bulk creation
+export type OutsourceOrderBulkCreateResponse = {
+  readonly success: true;
+  readonly data: {
+    readonly outsourceOrder: OutsourceOrderWithRelations;
+    readonly details: readonly any[]; // OutsourceOrderDetail type
+    readonly created: number;
+  };
+  readonly message?: string;
+};
+
+// Step validation state
+export type OutsourceOrderStepValidation = {
+  step1Valid: boolean;
+  step2Valid: boolean;
+  canProceedToStep2: boolean;
+  validationErrors: {
+    step1: readonly string[];
+    step2: readonly string[];
   };
 };

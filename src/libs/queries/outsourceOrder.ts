@@ -22,7 +22,6 @@ import { db } from '../DB';
  * Create a new outsourceOrder with proper date and relation handling
  */
 export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Promise<OutsourceOrderDb> {
-  
   // Validate foreign keys exist
 
   if (data.createdByUserId) {
@@ -49,23 +48,22 @@ export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Pro
   }
 
   const insertValues = {
-      orderCode: data.orderCode,
-      orderTitle: data.orderTitle,
-      orderDate: data.orderDate ? (typeof data.orderDate === 'string' ? data.orderDate : data.orderDate.toISOString().slice(0, 10)) : null,
-      expectedCompletionDate: data.expectedCompletionDate ? (typeof data.expectedCompletionDate === 'string' ? data.expectedCompletionDate : data.expectedCompletionDate.toISOString().slice(0, 10)) : null,
-      actualCompletionDate: data.actualCompletionDate ? (typeof data.actualCompletionDate === 'string' ? data.actualCompletionDate : data.actualCompletionDate.toISOString().slice(0, 10)) : null,
-      status: data.status ?? '',
-      priority: typeof data.priority === 'number' ? data.priority : 0,
-      totalAmount: typeof data.totalAmount === 'number' ? data.totalAmount : (data.totalAmount ? Number(data.totalAmount) : undefined),
-      currency: data.currency,
-      notes: data.notes,
-      attachment: data.attachment,
-      applyRetailPrice: data.applyRetailPrice !== undefined && data.applyRetailPrice !== null ? Number(data.applyRetailPrice) : 2,
-      createdByUserId: data.createdByUserId,
-      assignedToUserId: data.assignedToUserId,
-      ownerId: data.ownerId,
-    } as typeof outsourceOrderSchema.$inferInsert;
-
+    orderCode: data.orderCode,
+    orderTitle: data.orderTitle,
+    orderDate: data.orderDate ? (typeof data.orderDate === 'string' ? data.orderDate : data.orderDate.toISOString().slice(0, 10)) : null,
+    expectedCompletionDate: data.expectedCompletionDate ? (typeof data.expectedCompletionDate === 'string' ? data.expectedCompletionDate : data.expectedCompletionDate.toISOString().slice(0, 10)) : null,
+    actualCompletionDate: data.actualCompletionDate ? (typeof data.actualCompletionDate === 'string' ? data.actualCompletionDate : data.actualCompletionDate.toISOString().slice(0, 10)) : null,
+    status: data.status ?? '',
+    priority: typeof data.priority === 'number' ? data.priority : 0,
+    totalAmount: typeof data.totalAmount === 'number' ? data.totalAmount : (data.totalAmount ? Number(data.totalAmount) : undefined),
+    currency: data.currency,
+    notes: data.notes,
+    attachment: data.attachment,
+    applyRetailPrice: data.applyRetailPrice !== undefined && data.applyRetailPrice !== null ? Number(data.applyRetailPrice) : 2,
+    createdByUserId: data.createdByUserId,
+    assignedToUserId: data.assignedToUserId,
+    ownerId: data.ownerId,
+  } as typeof outsourceOrderSchema.$inferInsert;
 
   const [outsourceOrder] = await db
     .insert(outsourceOrderSchema)
@@ -75,7 +73,6 @@ export async function createOutsourceOrder(data: CreateOutsourceOrderInput): Pro
   if (!outsourceOrder) {
     throw new Error('Failed to create outsourceOrder');
   }
-
 
   return outsourceOrder;
 }
@@ -216,7 +213,7 @@ export async function getOutsourceOrderById(
     // If we have both orgId and userId, include both in query
     ownerCondition = or(
       eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
-      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+      eq(outsourceOrderSchema.ownerId, userId), // Legacy user-level data
     )!;
   } else {
     // Fallback to simple ownerId filter
@@ -232,6 +229,7 @@ export async function getOutsourceOrderById(
       with: {
         createdByUser: true as const,
         assignedToUser: true as const,
+        details: true as const,
       },
     });
 
@@ -273,7 +271,7 @@ export async function getOutsourceOrdersByOwner(
     // If we have both orgId and userId, include both in query
     ownerCondition = or(
       eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
-      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+      eq(outsourceOrderSchema.ownerId, userId), // Legacy user-level data
     )!;
   } else {
     // Fallback to simple ownerId filter
@@ -297,7 +295,11 @@ export async function getOutsourceOrdersByOwner(
     orderBy: [sortOrder === 'asc' ? asc(outsourceOrderSchema[sortBy]) : desc(outsourceOrderSchema[sortBy])],
     limit,
     offset: (page - 1) * limit,
-    with: { createdByUser: true as const, assignedToUser: true as const },
+    with: {
+      createdByUser: true as const,
+      assignedToUser: true as const,
+      details: params.includeRelations ? true as const : false,
+    },
   };
 
   const result = await db.query.outsourceOrderSchema.findMany(queryOptions);
@@ -334,7 +336,7 @@ export async function getOutsourceOrderStats(ownerId: string, userId?: string): 
     // If we have both orgId and userId, include both in query
     ownerCondition = or(
       eq(outsourceOrderSchema.ownerId, ownerId), // New org-level data
-      eq(outsourceOrderSchema.ownerId, userId)   // Legacy user-level data
+      eq(outsourceOrderSchema.ownerId, userId), // Legacy user-level data
     )!;
   } else {
     // Fallback to simple ownerId filter

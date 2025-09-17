@@ -16,8 +16,8 @@ import {
   Search,
   Trash2,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -37,20 +37,21 @@ import { useOutsourceOrderExport } from '@/hooks/useOutsourceOrderExport';
 import { useOutsourceOrderFilters } from '@/hooks/useOutsourceOrderFilters';
 import { useDeleteOutsourceOrder } from '@/hooks/useOutsourceOrderMutations';
 import { useOutsourceOrders, useOutsourceOrderStats } from '@/hooks/useOutsourceOrders';
-import type { 
-  OutsourceOrderFormData, 
-  OutsourceOrderWithRelations 
+import type {
+  OutsourceOrderFormData,
+  OutsourceOrderWithRelations,
 } from '@/types/outsourceOrder';
 import type {
   OutsourceOrderDetailFormData,
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
 
+import { OutsourceOrderDetailBulkForm } from '../outsourceOrderDetail/OutsourceOrderDetailBulkForm';
+import { OutsourceOrderDetailForm } from '../outsourceOrderDetail/OutsourceOrderDetailForm';
+import { OutsourceOrderDetailSkeleton } from '../outsourceOrderDetail/OutsourceOrderDetailSkeleton';
+import { OutsourceOrderBulkForm } from './OutsourceOrderBulkForm';
 import { OutsourceOrderForm } from './OutsourceOrderForm';
 import { OutsourceOrderSkeleton } from './OutsourceOrderSkeleton';
-import { OutsourceOrderDetailForm } from '../outsourceOrderDetail/OutsourceOrderDetailForm';
-import { OutsourceOrderDetailBulkForm } from '../outsourceOrderDetail/OutsourceOrderDetailBulkForm';
-import { OutsourceOrderDetailSkeleton } from '../outsourceOrderDetail/OutsourceOrderDetailSkeleton';
 
 function toOrderFormData(item: OutsourceOrderWithRelations | null): OutsourceOrderFormData | undefined {
   if (!item) {
@@ -104,12 +105,13 @@ function toDetailFormData(item: OutsourceOrderDetailWithRelations | null): Outso
 export function OutsourceOrderIntegratedList() {
   const t = useTranslations('outsourceOrder.list');
   const router = useRouter();
-  
+
   // Order states
   const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null);
   const [isOrderFormOpen, setIsOrderFormOpen] = useState(false);
+  const [isBulkOrderFormOpen, setIsBulkOrderFormOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OutsourceOrderWithRelations | null>(null);
-  
+
   // Detail states
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const [deleteDetailId, setDeleteDetailId] = useState<number | null>(null);
@@ -140,7 +142,7 @@ export function OutsourceOrderIntegratedList() {
   } = useOutsourceOrderDetailsByOrderId(expandedOrderId || 0, expandedOrderId !== null);
 
   // const { data: detailStats } = useOutsourceOrderDetailStats(expandedOrderId || 0);
-  
+
   const deleteDetailMutation = useDeleteOutsourceOrderDetail();
   const { exportData: exportDetails, isExporting: isExportingDetails } = useOutsourceOrderDetailExport();
 
@@ -181,7 +183,6 @@ export function OutsourceOrderIntegratedList() {
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
     setDetailSearch(''); // Reset detail search when switching
   };
-
 
   const handleDeleteDetail = async (id: number) => {
     try {
@@ -259,7 +260,7 @@ export function OutsourceOrderIntegratedList() {
               {t('export')}
             </Button>
 
-            <Button onClick={() => setIsOrderFormOpen(true)}>
+            <Button onClick={() => setIsBulkOrderFormOpen(true)}>
               <Plus className="mr-2 size-4" />
               {t('add')}
             </Button>
@@ -288,228 +289,236 @@ export function OutsourceOrderIntegratedList() {
         </div>
 
         {/* Orders Table */}
-        {ordersLoading ? (
-          <OutsourceOrderSkeleton />
-        ) : (
-          <div className="space-y-3">
-            {outsourceOrders.map(order => (
-              <div key={order.id} className="border-2 rounded-lg shadow-sm">
-                {/* Order Row */}
-                <div className="bg-blue-50 hover:bg-blue-100 border-b border-blue-200">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12"></TableHead>
-                        <TableHead>{t('table.order_code')}</TableHead>
-                        <TableHead>{t('table.created_by')}</TableHead>
-                        <TableHead>{t('table.assigned_to')}</TableHead>
-                        <TableHead>{t('table.order_date')}</TableHead>
-                        <TableHead>{t('table.apply_retail_price')}</TableHead>
-                        <TableHead className="w-32">{t('table.actions')}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleToggleDetails(order.id)}
-                            className="size-8 p-0"
-                          >
-                            {expandedOrderId === order.id ? (
-                              <ChevronDown className="size-4" />
-                            ) : (
-                              <ChevronRight className="size-4" />
-                            )}
-                          </Button>
-                        </TableCell>
-                        <TableCell className="font-bold text-blue-800">
-                          📋 {order.orderCode}
-                        </TableCell>
-                        <TableCell className="font-medium text-blue-700">{order.createdByUser?.fullName || order.createdByUserId}</TableCell>
-                        <TableCell className="font-medium text-blue-700">{order.assignedToUser?.fullName || order.assignedToUserId}</TableCell>
-                        <TableCell className="font-medium text-blue-700">
-                          {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            order.applyRetailPrice === 3 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {/* Debug display */}
-                            [{order.applyRetailPrice}] {order.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleAddDetail(order.id)}
-                              className="size-8 p-0"
-                              title={t('add_detail_tooltip')}
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditOrder(order)}
-                              className="size-8 p-0"
-                            >
-                              <Edit className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDeleteOrderId(order.id)}
-                              className="size-8 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Expanded Details Section */}
-                {expandedOrderId === order.id && (
-                  <div className="border-t bg-amber-25 p-6" style={{ backgroundColor: '#fffbeb' }}>
-
-                    {/* Detail Controls */}
-                    <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                      <h3 className="text-md font-semibold text-indigo-700">📋 {t('order_details_title')}</h3>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => exportDetails({ outsourceOrderId: order.id, format: 'csv' })}
-                          disabled={isExportingDetails}
-                        >
-                          <Download className="mr-2 size-4" />
-                          {t('export_details')}
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleAddDetail(order.id)}
-                        >
-                          <Plus className="mr-2 size-4" />
-                          {t('add_detail')}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Detail Search */}
-                    <div className="mb-4">
-                      <div className="relative max-w-md">
-                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                        <Input
-                          placeholder={t('search_details_placeholder')}
-                          value={detailSearch}
-                          onChange={e => setDetailSearch(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Details Table */}
-                    {detailsLoading ? (
-                      <OutsourceOrderDetailSkeleton />
-                    ) : (
-                      <div className="rounded-lg border-2 border-indigo-200 overflow-hidden">
-                        <Table className="bg-white">
+        {ordersLoading
+          ? (
+              <OutsourceOrderSkeleton />
+            )
+          : (
+              <div className="space-y-3">
+                {outsourceOrders.map(order => (
+                  <div key={order.id} className="rounded-lg border-2 shadow-sm">
+                    {/* Order Row */}
+                    <div className="border-b border-blue-200 bg-blue-50 hover:bg-blue-100">
+                      <Table>
                         <TableHeader>
-                          <TableRow className="bg-indigo-100">
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.sequence')}</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.plan')}</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.product')}</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.product_sub')}</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.location')}</TableHead>
-                            <TableHead className="text-indigo-800 font-semibold">{t('detail_table.production_step')}</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.ordered_qty')}</TableHead>
-                            <TableHead className="text-right text-indigo-800 font-semibold">{t('detail_table.completed')}</TableHead>
-                            <TableHead className="w-24 text-center text-indigo-800 font-semibold">{t('detail_table.actions')}</TableHead>
+                          <TableRow>
+                            <TableHead className="w-12"></TableHead>
+                            <TableHead>{t('table.assigned_to')}</TableHead>
+                            <TableHead>{t('table.order_date')}</TableHead>
+                            <TableHead>{t('table.apply_retail_price')}</TableHead>
+                            <TableHead className="w-32">{t('table.actions')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDetails.map((item, index) => (
-                            <TableRow key={item.id} className="hover:bg-indigo-25 even:bg-gray-50" style={{ backgroundColor: index % 2 === 1 ? '#f8fafc' : 'white' }}>
-                              <TableCell className="font-medium">{index + 1}</TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{item.planName}</div>
-                                <div className="text-xs text-gray-500">{item.planCode}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{item.productName}</div>
-                                <div className="text-xs text-gray-500">{item.productCode}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{item.productSub?.productSubDetail || '-'}</div>
-                                <div className="text-xs text-gray-500">{item.productSub?.productSubCode || '-'}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{item.workTable?.tableName || '-'}</div>
-                                <div className="text-xs text-gray-500">{item.workTable?.locationCode || '-'}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{item.stepName}</div>
-                                <div className="text-xs text-gray-500">{item.stepCode}</div>
-                              </TableCell>
-                              <TableCell className="text-right text-sm">{item.orderedQuantity}</TableCell>
-                              <TableCell className="text-right text-sm font-medium text-green-600">
-                                {item.completedQuantity || 0}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => router.push(`/dashboard/outsourceOrders/${order.id}/details/${item.id}/receipts`)}
-                                    className="size-8 p-0"
-                                    title={t('manage_receipts_tooltip')}
-                                  >
-                                    <Package className="size-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEditDetail(order.id, item)}
-                                    className="size-8 p-0"
-                                  >
-                                    <Edit className="size-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setDeleteDetailId(item.id)}
-                                    className="size-8 p-0 text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="size-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          <TableRow>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleToggleDetails(order.id)}
+                                className="size-8 p-0"
+                              >
+                                {expandedOrderId === order.id
+                                  ? (
+                                      <ChevronDown className="size-4" />
+                                    )
+                                  : (
+                                      <ChevronRight className="size-4" />
+                                    )}
+                              </Button>
+                            </TableCell>
+                            <TableCell className="font-medium text-blue-700">{order.assignedToUser?.fullName || order.assignedToUserId}</TableCell>
+                            <TableCell className="font-medium text-blue-700">
+                              {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : '-'}
+                            </TableCell>
+                            <TableCell>
+                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                order.applyRetailPrice === 3
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                              >
+                                {/* Debug display */}
+                                [
+                                {order.applyRetailPrice}
+                                ]
+                                {' '}
+                                {order.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleAddDetail(order.id)}
+                                  className="size-8 p-0"
+                                  title={t('add_detail_tooltip')}
+                                >
+                                  <Plus className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditOrder(order)}
+                                  className="size-8 p-0"
+                                >
+                                  <Edit className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteOrderId(order.id)}
+                                  className="size-8 p-0 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
                         </TableBody>
-                        </Table>
-                        </div>
-                    )}
+                      </Table>
+                    </div>
 
-                    {filteredDetails.length === 0 && !detailsLoading && (
-                      <div className="py-8 text-center text-muted-foreground bg-indigo-25 rounded-lg border-2 border-indigo-200" style={{ backgroundColor: '#f0f9ff' }}>
-                        {detailSearch ? t('detail_empty_search') : t('detail_empty')}
+                    {/* Expanded Details Section */}
+                    {expandedOrderId === order.id && (
+                      <div className="border-t bg-amber-50 p-6">
+
+                        {/* Detail Controls */}
+                        <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                          <h3 className="text-base font-semibold text-indigo-700">
+                            📋
+                            {t('order_details_title')}
+                          </h3>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => exportDetails({ outsourceOrderId: order.id, format: 'csv' })}
+                              disabled={isExportingDetails}
+                            >
+                              <Download className="mr-2 size-4" />
+                              {t('export_details')}
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddDetail(order.id)}
+                            >
+                              <Plus className="mr-2 size-4" />
+                              {t('add_detail')}
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Detail Search */}
+                        <div className="mb-4">
+                          <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                            <Input
+                              placeholder={t('search_details_placeholder')}
+                              value={detailSearch}
+                              onChange={e => setDetailSearch(e.target.value)}
+                              className="pl-10"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Details Table */}
+                        {detailsLoading
+                          ? (
+                              <OutsourceOrderDetailSkeleton />
+                            )
+                          : (
+                              <div className="overflow-hidden rounded-lg border-2 border-indigo-200">
+                                <Table className="bg-white">
+                                  <TableHeader>
+                                    <TableRow className="bg-indigo-100">
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.sequence')}</TableHead>
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.plan')}</TableHead>
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.product')}</TableHead>
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.product_sub')}</TableHead>
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.location')}</TableHead>
+                                      <TableHead className="font-semibold text-indigo-800">{t('detail_table.production_step')}</TableHead>
+                                      <TableHead className="text-right font-semibold text-indigo-800">{t('detail_table.ordered_qty')}</TableHead>
+                                      <TableHead className="text-right font-semibold text-indigo-800">{t('detail_table.completed')}</TableHead>
+                                      <TableHead className="w-24 text-center font-semibold text-indigo-800">{t('detail_table.actions')}</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {filteredDetails.map((item, index) => (
+                                      <TableRow key={item.id} className="even:bg-gray-50 hover:bg-indigo-50" style={{ backgroundColor: index % 2 === 1 ? '#f8fafc' : 'white' }}>
+                                        <TableCell className="font-medium">{index + 1}</TableCell>
+                                        <TableCell>
+                                          <div className="text-sm font-medium">{item.planName}</div>
+                                          <div className="text-xs text-gray-500">{item.planCode}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="text-sm font-medium">{item.productName}</div>
+                                          <div className="text-xs text-gray-500">{item.productCode}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="text-sm font-medium">{item.productSub?.productSubDetail || '-'}</div>
+                                          <div className="text-xs text-gray-500">{item.productSub?.productSubCode || '-'}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="text-sm font-medium">{item.workTable?.tableName || '-'}</div>
+                                          <div className="text-xs text-gray-500">{item.workTable?.locationCode || '-'}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="text-sm font-medium">{item.stepName}</div>
+                                          <div className="text-xs text-gray-500">{item.stepCode}</div>
+                                        </TableCell>
+                                        <TableCell className="text-right text-sm">{item.orderedQuantity}</TableCell>
+                                        <TableCell className="text-right text-sm font-medium text-green-600">
+                                          {item.completedQuantity || 0}
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="flex justify-center gap-1">
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => router.push(`/dashboard/outsourceOrders/${order.id}/details/${item.id}/receipts`)}
+                                              className="size-8 p-0"
+                                              title={t('manage_receipts_tooltip')}
+                                            >
+                                              <Package className="size-4" />
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => handleEditDetail(order.id, item)}
+                                              className="size-8 p-0"
+                                            >
+                                              <Edit className="size-4" />
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => setDeleteDetailId(item.id)}
+                                              className="size-8 p-0 text-destructive hover:text-destructive"
+                                            >
+                                              <Trash2 className="size-4" />
+                                            </Button>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            )}
+
+                        {filteredDetails.length === 0 && !detailsLoading && (
+                          <div className="rounded-lg border-2 border-indigo-200 bg-indigo-50 py-8 text-center text-muted-foreground">
+                            {detailSearch ? t('detail_empty_search') : t('detail_empty')}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
         {outsourceOrders.length === 0 && !ordersLoading && (
           <div className="py-8 text-center text-muted-foreground">
@@ -533,6 +542,23 @@ export function OutsourceOrderIntegratedList() {
               onCancel={() => {
                 setIsOrderFormOpen(false);
                 setEditingOrder(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Order Form Modal */}
+      {isBulkOrderFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="m-4 max-h-[90vh] w-full max-w-7xl overflow-auto rounded-lg bg-white">
+            <OutsourceOrderBulkForm
+              onSuccess={() => {
+                setIsBulkOrderFormOpen(false);
+                refetchOrders();
+              }}
+              onCancel={() => {
+                setIsBulkOrderFormOpen(false);
               }}
             />
           </div>

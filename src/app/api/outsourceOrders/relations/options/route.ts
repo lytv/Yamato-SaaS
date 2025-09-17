@@ -8,7 +8,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/libs/DB';
-import { userSyncSchema } from '@/models/Schema';
+import { planSchema, userSyncSchema } from '@/models/Schema';
 
 // GET /api/outsourceOrders/relations/options
 export async function GET(request: NextRequest) {
@@ -24,18 +24,37 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(Number(searchParams.get('limit')) || 50, 100);
 
+    // Load user syncs for assignment
     const userSyncs = await db
       .select({
-        userId: userSyncSchema.userId,
+        id: userSyncSchema.userId,
         fullName: userSyncSchema.fullName,
       })
       .from(userSyncSchema)
       .limit(limit);
 
+    // Load plans for selection
+    const plans = await db
+      .select({
+        id: planSchema.id,
+        planCode: planSchema.planCode,
+        planName: planSchema.planName,
+      })
+      .from(planSchema)
+      .limit(limit);
+
+    // Apply retail price options
+    const applyRetailPriceOptions = [
+      { value: 2, label: 'Normal Price' },
+      { value: 3, label: 'Retail Price' },
+    ];
+
     return NextResponse.json({
       success: true,
       data: {
         userSyncs,
+        plans,
+        applyRetailPriceOptions,
       },
     });
   } catch (error) {

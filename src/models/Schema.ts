@@ -477,7 +477,7 @@ export const outsourceOrderSchema = pgTable('outsource_order', {
   // Documentation
   notes: text('notes'), // Ghi chú
   attachment: text('attachment'), // Link file đính kèm
-  
+
   // Pricing Configuration
   applyRetailPrice: integer('apply_retail_price').notNull().default(2), // 2=normal price, 3=retail price
 
@@ -498,17 +498,6 @@ export const outsourceOrderSchema = pgTable('outsource_order', {
     createdByUserIdx: index('outsource_order_created_by_idx').on(table.createdByUserId),
   };
 });
-
-export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ one }) => ({
-  createdByUser: one(userSyncSchema, {
-    fields: [outsourceOrderSchema.createdByUserId],
-    references: [userSyncSchema.userId],
-  }),
-  assignedToUser: one(userSyncSchema, {
-    fields: [outsourceOrderSchema.assignedToUserId],
-    references: [userSyncSchema.userId],
-  }),
-}));
 
 export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
   id: serial('id').primaryKey(),
@@ -556,6 +545,37 @@ export const outsourceOrderDetailSchema = pgTable('outsource_order_detail', {
     orderDetailStatusIdx: index('outsource_order_detail_status_idx').on(table.status),
   };
 });
+
+export const outsourceOrderRelations = relations(outsourceOrderSchema, ({ one, many }) => ({
+  createdByUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.createdByUserId],
+    references: [userSyncSchema.userId],
+  }),
+  assignedToUser: one(userSyncSchema, {
+    fields: [outsourceOrderSchema.assignedToUserId],
+    references: [userSyncSchema.userId],
+  }),
+  details: many(outsourceOrderDetailSchema),
+}));
+
+export const outsourceOrderDetailRelations = relations(outsourceOrderDetailSchema, ({ one }) => ({
+  outsourceOrder: one(outsourceOrderSchema, {
+    fields: [outsourceOrderDetailSchema.outsourceOrderId],
+    references: [outsourceOrderSchema.id],
+  }),
+  plan: one(planSchema, {
+    fields: [outsourceOrderDetailSchema.planId],
+    references: [planSchema.id],
+  }),
+  product: one(productSchema, {
+    fields: [outsourceOrderDetailSchema.productId],
+    references: [productSchema.id],
+  }),
+  productionStep: one(productionStepSchema, {
+    fields: [outsourceOrderDetailSchema.productionStepId],
+    references: [productionStepSchema.id],
+  }),
+}));
 
 // ======================
 // EMPLOYEE_SALARY_ENTRY - Bảng nhập lương theo sản lượng nhân viên
