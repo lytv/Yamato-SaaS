@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/lytv/Yamato-SaaS/compare/v1.5.0...v1.6.0) (2025-09-18)
+
+
+### Features
+
+* **ve tinh ok:** ok mai lam tiep ([89d33f3](https://github.com/lytv/Yamato-SaaS/commit/89d33f3bd1634f9e19ecb4a23418e240bb5edce8))
+
 # [1.5.0](https://github.com/lytv/Yamato-SaaS/compare/v1.4.4...v1.5.0) (2025-09-18)
 
 
