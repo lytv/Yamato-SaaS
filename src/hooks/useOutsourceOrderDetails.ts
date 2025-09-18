@@ -3,16 +3,16 @@
  * Generated based on existing pattern from useOutsourceOrders
  */
 
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import type {
-  OutsourceOrderDetailWithRelations,
   OutsourceOrderDetailListParams,
-  OutsourceOrderDetailStats,
-  OutsourceOrderDetailsResponse,
-  OutsourceOrderDetailStatsResponse,
   OutsourceOrderDetailRelationOptions,
+  OutsourceOrderDetailsResponse,
+  OutsourceOrderDetailStats,
+  OutsourceOrderDetailStatsResponse,
+  OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
 
 const API_BASE = '/api/outsourceOrderDetails';
@@ -21,7 +21,7 @@ const API_BASE = '/api/outsourceOrderDetails';
 export const outsourceOrderDetailKeys = {
   all: ['outsourceOrderDetails'] as const,
   lists: () => [...outsourceOrderDetailKeys.all, 'list'] as const,
-  list: (params: OutsourceOrderDetailListParams) => 
+  list: (params: OutsourceOrderDetailListParams) =>
     [...outsourceOrderDetailKeys.lists(), params] as const,
   details: () => [...outsourceOrderDetailKeys.all, 'detail'] as const,
   detail: (id: number) => [...outsourceOrderDetailKeys.details(), id] as const,
@@ -40,12 +40,20 @@ export function useOutsourceOrderDetails(params: OutsourceOrderDetailListParams 
   return useQuery({
     queryKey: outsourceOrderDetailKeys.list(params),
     queryFn: async (): Promise<OutsourceOrderDetailWithRelations[]> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       Object.entries({ ...params, includeRelations: true }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value));
+        if (value !== undefined && value !== null && value !== '') {
+          if (key === 'orderDateRange' && value && typeof value === 'object') {
+            const dateRange = value as { start: Date; end: Date };
+            searchParams.append('orderStartDate', dateRange.start.toISOString());
+            searchParams.append('orderEndDate', dateRange.end.toISOString());
+          } else {
+            searchParams.append(key, String(value));
+          }
         }
       });
 
@@ -72,12 +80,20 @@ export function useOutsourceOrderDetailsInfinite(params: Omit<OutsourceOrderDeta
   return useInfiniteQuery({
     queryKey: [...outsourceOrderDetailKeys.list(params), 'infinite'],
     queryFn: async ({ pageParam = 1 }): Promise<OutsourceOrderDetailsResponse> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       Object.entries({ ...params, page: pageParam }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value));
+        if (value !== undefined && value !== null && value !== '') {
+          if (key === 'orderDateRange' && value && typeof value === 'object') {
+            const dateRange = value as { start: Date; end: Date };
+            searchParams.append('orderStartDate', dateRange.start.toISOString());
+            searchParams.append('orderEndDate', dateRange.end.toISOString());
+          } else {
+            searchParams.append(key, String(value));
+          }
         }
       });
 
@@ -90,7 +106,7 @@ export function useOutsourceOrderDetailsInfinite(params: Omit<OutsourceOrderDeta
     },
     enabled: !!userId,
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => 
+    getNextPageParam: lastPage =>
       lastPage.pagination.hasMore ? lastPage.pagination.page + 1 : undefined,
     staleTime: 1000 * 60 * 5,
   });
@@ -105,7 +121,9 @@ export function useOutsourceOrderDetail(id: number, includeRelations = false) {
   return useQuery({
     queryKey: outsourceOrderDetailKeys.detail(id),
     queryFn: async (): Promise<OutsourceOrderDetailWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       if (includeRelations) {
@@ -129,20 +147,41 @@ export function useOutsourceOrderDetail(id: number, includeRelations = false) {
 }
 
 /**
- * Fetch outsourceOrderDetails by outsourceOrderId
+ * Fetch outsourceOrderDetails by outsourceOrderId with enhanced filtering
  */
-export function useOutsourceOrderDetailsByOrderId(outsourceOrderId: number, includeRelations = true) {
+export function useOutsourceOrderDetailsByOrderId(
+  outsourceOrderId: number,
+  includeRelations = true,
+  filters?: Partial<OutsourceOrderDetailListParams>,
+) {
   const { userId } = useAuth();
 
   return useQuery({
-    queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId, includeRelations }),
+    queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId, includeRelations, ...filters }),
     queryFn: async (): Promise<OutsourceOrderDetailWithRelations[]> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       searchParams.append('outsourceOrderId', String(outsourceOrderId));
       if (includeRelations) {
         searchParams.append('includeRelations', 'true');
+      }
+
+      // Add filter parameters
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            if (key === 'orderDateRange' && value && typeof value === 'object') {
+              const dateRange = value as { start: Date; end: Date };
+              searchParams.append('orderStartDate', dateRange.start.toISOString());
+              searchParams.append('orderEndDate', dateRange.end.toISOString());
+            } else {
+              searchParams.append(key, String(value));
+            }
+          }
+        });
       }
 
       const response = await fetch(`${API_BASE}?${searchParams}`);
@@ -165,13 +204,15 @@ export function useOutsourceOrderDetailStats(outsourceOrderId?: number) {
   const { userId } = useAuth();
 
   return useQuery({
-    queryKey: outsourceOrderId 
+    queryKey: outsourceOrderId
       ? outsourceOrderDetailKeys.statsByOrder(outsourceOrderId)
       : outsourceOrderDetailKeys.stats(),
     queryFn: async (): Promise<OutsourceOrderDetailStats> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
-      const url = outsourceOrderId 
+      const url = outsourceOrderId
         ? `${API_BASE}/stats?outsourceOrderId=${outsourceOrderId}`
         : `${API_BASE}/stats`;
 
@@ -200,7 +241,9 @@ export function useOutsourceOrderDetailRelationOptions(outsourceOrderId?: number
       ? [...outsourceOrderDetailKeys.relationOptions(), { planId, productSubCode }]
       : outsourceOrderDetailKeys.relationOptions(),
     queryFn: async (): Promise<OutsourceOrderDetailRelationOptions> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       if (outsourceOrderId) {

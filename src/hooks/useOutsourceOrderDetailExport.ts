@@ -3,31 +3,34 @@
  * Generated based on existing pattern from useOutsourceOrderExport.ts
  */
 
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { 
-  OutsourceOrderDetailExportParams, 
-  OutsourceOrderDetailWithRelations 
+
+import type {
+  OutsourceOrderDetailExportParams,
+  OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
 
 const API_BASE = '/api/outsourceOrderDetails/export';
 
-interface ExportResponse {
+type ExportResponse = {
   success: boolean;
   data?: {
     url: string;
     filename: string;
   };
   error?: string;
-}
+};
 
 export function useOutsourceOrderDetailExport() {
   const { userId } = useAuth();
 
   const exportMutation = useMutation({
     mutationFn: async (params: OutsourceOrderDetailExportParams): Promise<ExportResponse> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -45,12 +48,13 @@ export function useOutsourceOrderDetailExport() {
         throw new Error(error.error || 'Export failed');
       }
 
-      // Handle blob download
-      if (response.headers.get('content-type')?.includes('application/')) {
+      // Handle blob download for CSV files
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('text/csv') || contentType?.includes('application/')) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const filename = params.filename || `outsource-order-details-${Date.now()}.${params.format || 'xlsx'}`;
-        
+        const filename = params.filename || `outsource-order-details-${Date.now()}.${params.format || 'csv'}`;
+
         // Trigger download
         const link = document.createElement('a');
         link.href = url;
@@ -82,7 +86,7 @@ export function useOutsourceOrderDetailExport() {
 
   const exportData = (params: Partial<OutsourceOrderDetailExportParams> = {}) => {
     const exportParams: OutsourceOrderDetailExportParams = {
-      format: 'xlsx',
+      format: 'csv', // Default to CSV since Excel is not implemented yet
       includeHeaders: true,
       page: 1,
       limit: 999999, // Export all
@@ -100,40 +104,11 @@ export function useOutsourceOrderDetailExport() {
     return exportData({ ...params, format: 'xlsx' });
   };
 
-  // Client-side export for small datasets
-  const exportClientSide = (
-    data: OutsourceOrderDetailWithRelations[],
-    format: 'csv' | 'xlsx' = 'csv',
-    filename?: string
-  ) => {
-    if (format === 'csv') {
-      return exportToCSVClientSide(data, filename);
-    } else {
-      toast.error('Client-side Excel export not implemented. Use server-side export.');
-    }
-  };
-
-  const exportToCSVClientSide = (
-    data: OutsourceOrderDetailWithRelations[],
-    filename?: string
-  ) => {
-    const csvContent = convertToCSV(data);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename || `outsource-order-details-${Date.now()}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    toast.success('CSV export completed');
-  };
-
+  // Helper function to convert data to CSV format
   const convertToCSV = (data: OutsourceOrderDetailWithRelations[]): string => {
-    if (data.length === 0) return '';
+    if (data.length === 0) {
+      return '';
+    }
 
     // Define headers
     const headers = [
@@ -186,14 +161,46 @@ export function useOutsourceOrderDetailExport() {
 
     // Convert to CSV string
     return allRows
-      .map(row => 
-        row.map(field => 
-          typeof field === 'string' && field.includes(',') 
-            ? `"${field}"` 
-            : field
-        ).join(',')
+      .map(row =>
+        row.map(field =>
+          typeof field === 'string' && field.includes(',')
+            ? `"${field}"`
+            : field,
+        ).join(','),
       )
       .join('\n');
+  };
+
+  const exportToCSVClientSide = (
+    data: OutsourceOrderDetailWithRelations[],
+    filename?: string,
+  ) => {
+    const csvContent = convertToCSV(data);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || `outsource-order-details-${Date.now()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success('CSV export completed');
+  };
+
+  // Client-side export for small datasets
+  const exportClientSide = (
+    data: OutsourceOrderDetailWithRelations[],
+    format: 'csv' | 'xlsx' = 'csv',
+    filename?: string,
+  ) => {
+    if (format === 'csv') {
+      return exportToCSVClientSide(data, filename);
+    } else {
+      toast.error('Client-side Excel export not implemented. Use server-side export.');
+    }
   };
 
   return {

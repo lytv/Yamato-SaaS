@@ -9,15 +9,23 @@ import {
   Download,
   Edit,
   Package,
+  Plus,
   RefreshCw,
   Search,
   Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -27,13 +35,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useOutsourceOrderDetailExport } from '@/hooks/useOutsourceOrderDetailExport';
+import { useOutsourceOrderDetailFilters } from '@/hooks/useOutsourceOrderDetailFilters';
 import { useDeleteOutsourceOrderDetail } from '@/hooks/useOutsourceOrderDetailMutations';
-import { useOutsourceOrderDetails } from '@/hooks/useOutsourceOrderDetails';
+import { useOutsourceOrderDetailRelationOptions, useOutsourceOrderDetails } from '@/hooks/useOutsourceOrderDetails';
 import type {
   OutsourceOrderDetailFormData,
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
 
+import { OutsourceOrderBulkForm } from '../outsourceOrder/OutsourceOrderBulkForm';
 import { OutsourceOrderDetailForm } from './OutsourceOrderDetailForm';
 import { OutsourceOrderDetailSkeleton } from './OutsourceOrderDetailSkeleton';
 
@@ -69,31 +79,79 @@ export function OutsourceOrderDetailOverview() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderDetailWithRelations | null>(null);
-  const [search, setSearch] = useState('');
+  const [isBulkOrderFormOpen, setIsBulkOrderFormOpen] = useState(false);
 
-  // Get all order details (you may need to create this hook)
+  // Use the new filters hook
+  const {
+    filters,
+    tempFilters,
+    // Manual search functions
+    setTempStartDate,
+    setTempEndDate,
+    setTempAssignedToUserId,
+    setTempProductId,
+    setTempProductionStepId,
+    // Quick search functions
+    setTempAssignedUserSearch,
+    setTempProductSearch,
+    setTempProductionStepSearch,
+    handleManualSearch,
+    resetFilters,
+    hasActiveFilters,
+  } = useOutsourceOrderDetailFilters();
+
+  // Get all order details with filters
   const {
     data: orderDetails = [],
     isLoading,
     error,
     refetch,
-  } = useOutsourceOrderDetails({ search, includeRelations: true });
+  } = useOutsourceOrderDetails(filters);
+
+  // Get relation options for filters
+  const { data: relationOptions } = useOutsourceOrderDetailRelationOptions();
 
   const deleteItemMutation = useDeleteOutsourceOrderDetail();
   const { exportData, isExporting } = useOutsourceOrderDetailExport();
 
-  // Filter details based on search
-  const filteredDetails = orderDetails.filter(item =>
-    search === ''
-    || item.planCode?.toLowerCase().includes(search.toLowerCase())
-    || item.planName?.toLowerCase().includes(search.toLowerCase())
-    || item.productCode?.toLowerCase().includes(search.toLowerCase())
-    || item.productName?.toLowerCase().includes(search.toLowerCase())
-    || item.stepCode?.toLowerCase().includes(search.toLowerCase())
-    || item.stepName?.toLowerCase().includes(search.toLowerCase())
-    || item.outsourceOrder?.orderCode?.toLowerCase().includes(search.toLowerCase())
-    || item.itemNotes?.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Note: filtering is now handled by the API through filters hook
+
+  // Auto-select logic for quick search
+  useEffect(() => {
+    if (!relationOptions) {
+      return;
+    }
+
+    // Auto-select assigned user when shortcut matches exactly
+    if (tempFilters.assignedUserSearch) {
+      const matchedUser = relationOptions.assignedUsers?.find(
+        user => user.shortcut === tempFilters.assignedUserSearch,
+      );
+      if (matchedUser && tempFilters.assignedToUserId !== matchedUser.id) {
+        setTempAssignedToUserId(matchedUser.id);
+      }
+    }
+
+    // Auto-select product when category matches exactly
+    if (tempFilters.productSearch) {
+      const matchedProduct = relationOptions.products?.find(
+        product => product.category === tempFilters.productSearch,
+      );
+      if (matchedProduct && tempFilters.productId !== matchedProduct.id) {
+        setTempProductId(matchedProduct.id);
+      }
+    }
+
+    // Auto-select production step when sequence matches exactly
+    if (tempFilters.productionStepSearch) {
+      const matchedStep = relationOptions.productionSteps?.find(
+        step => step.filmSequence === tempFilters.productionStepSearch,
+      );
+      if (matchedStep && tempFilters.productionStepId !== matchedStep.id) {
+        setTempProductionStepId(matchedStep.id);
+      }
+    }
+  }, [tempFilters.assignedUserSearch, tempFilters.productSearch, tempFilters.productionStepSearch, relationOptions, tempFilters.assignedToUserId, tempFilters.productId, tempFilters.productionStepId, setTempAssignedToUserId, setTempProductId, setTempProductionStepId]);
 
   const handleEdit = (item: OutsourceOrderDetailWithRelations) => {
     setEditingItem(item);
@@ -112,110 +170,375 @@ export function OutsourceOrderDetailOverview() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center rounded bg-white p-6 py-8 shadow">
-        <p className="mb-4 text-destructive">
-          Error loading order details:
-          {' '}
-          {error.message}
-        </p>
-        <Button onClick={() => refetch()} variant="outline">
-          <RefreshCw className="mr-2 size-4" />
-          Retry
-        </Button>
+      <div className="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 via-orange-50 to-red-100 p-8 shadow-lg">
+        <div className="text-center">
+          <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-gradient-to-r from-red-100 to-orange-100 shadow-lg">
+            <RefreshCw className="size-12 text-red-600" />
+          </div>
+          <h3 className="mb-2 text-xl font-bold text-red-700">
+            ⚠️ Có lỗi xảy ra
+          </h3>
+          <p className="mb-6 text-red-600">
+            {error.message || 'Không thể tải dữ liệu chi tiết đơn hàng'}
+          </p>
+          <div className="flex justify-center gap-3">
+            <Button
+              onClick={() => refetch()}
+              className="bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-lg transition-all duration-200 hover:from-red-600 hover:to-orange-700 hover:shadow-xl"
+            >
+              <RefreshCw className="mr-2 size-4" />
+              🔄 Thử lại
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-300 text-red-700 hover:bg-red-50"
+              onClick={() => window.location.reload()}
+            >
+              🔄 Tải lại trang
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="rounded bg-white p-6 shadow">
-        <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-bold">Chi tiết đơn hàng gia công</h2>
-          <div className="flex gap-2">
+      {/* Enhanced Header with Gradient */}
+      <div className="rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 p-6 shadow-lg">
+        <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 p-2">
+              <Package className="size-6 text-white" />
+            </div>
+            <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
+              Chi tiết đơn hàng gia công
+            </h2>
+          </div>
+          <div className="flex gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => exportData()}
               disabled={isExporting}
+              className="border-blue-300 bg-white/80 text-blue-700 backdrop-blur-sm hover:bg-blue-50"
             >
               <Download className="mr-2 size-4" />
-              Xuất dữ liệu
+              📊 Xuất CSV
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setIsBulkOrderFormOpen(true)}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:from-blue-600 hover:to-purple-700"
+            >
+              <Plus className="mr-2 size-4" />
+              ⭐ Tạo mới
             </Button>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="mb-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Tìm kiếm chi tiết..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pl-10"
-            />
+        {/* Enhanced Filter Section with Dropdowns */}
+        <div className="rounded-lg border border-white/50 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-700">Bộ lọc chi tiết</h4>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            {/* 1. Giao Cho (Assigned To) */}
+            <div className="min-w-[160px] flex-1 space-y-1">
+              <label htmlFor="assigned-to-select-detail" className="text-xs font-medium text-gray-600">👤 Giao Cho</label>
+              <Input
+                placeholder="Tìm theo Shortcut..."
+                value={tempFilters.assignedUserSearch || ''}
+                onChange={e => setTempAssignedUserSearch(e.target.value || undefined)}
+                className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              <Select
+                value={(tempFilters.assignedToUserId !== undefined ? tempFilters.assignedToUserId : filters.assignedToUserId) || 'all'}
+                onValueChange={value => setTempAssignedToUserId(value === 'all' ? undefined : value)}
+              >
+                <SelectTrigger id="assigned-to-select-detail" className="border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn người thực hiện" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  {relationOptions?.assignedUsers?.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 2. Sản phẩm (Product) */}
+            <div className="min-w-[160px] flex-1 space-y-1">
+              <label htmlFor="product-select-detail" className="text-xs font-medium text-gray-600">📦 Sản phẩm</label>
+              <Input
+                placeholder="Tìm theo Category..."
+                value={tempFilters.productSearch || ''}
+                onChange={e => setTempProductSearch(e.target.value || undefined)}
+                className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              <Select
+                value={(tempFilters.productId !== undefined ? tempFilters.productId?.toString() : filters.productId?.toString()) || 'all'}
+                onValueChange={value => setTempProductId(value === 'all' ? undefined : Number(value))}
+              >
+                <SelectTrigger id="product-select-detail" className="border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn sản phẩm" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  {relationOptions?.products?.map(product => (
+                    <SelectItem key={product.id} value={product.id.toString()}>
+                      {product.productName}
+                      {' '}
+                      (
+                      {product.productCode}
+                      )
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 3. Công đoạn (Production Step) */}
+            <div className="min-w-[160px] flex-1 space-y-1">
+              <label htmlFor="production-step-select-detail" className="text-xs font-medium text-gray-600">⚙️ Công đoạn</label>
+              <Input
+                placeholder="Tìm theo Sequence..."
+                value={tempFilters.productionStepSearch || ''}
+                onChange={e => setTempProductionStepSearch(e.target.value || undefined)}
+                className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              <Select
+                value={(tempFilters.productionStepId !== undefined ? tempFilters.productionStepId?.toString() : filters.productionStepId?.toString()) || 'all'}
+                onValueChange={value => setTempProductionStepId(value === 'all' ? undefined : Number(value))}
+              >
+                <SelectTrigger id="production-step-select-detail" className="border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn công đoạn" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  {relationOptions?.productionSteps?.map(step => (
+                    <SelectItem key={step.id} value={step.id.toString()}>
+                      {step.stepName}
+                      {' '}
+                      (
+                      {step.stepCode}
+                      )
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 4. Từ Ngày (From Date) */}
+            <div className="min-w-[140px] flex-1 space-y-1">
+              <label htmlFor="start-date-input" className="text-xs font-medium text-gray-600">📅 Từ Ngày</label>
+              <Input
+                id="start-date-input"
+                type="date"
+                value={tempFilters.startDate?.toISOString().split('T')[0] || ''}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setTempStartDate(new Date(e.target.value));
+                  } else {
+                    setTempStartDate(undefined);
+                  }
+                }}
+                placeholder="Chọn từ ngày"
+                className="border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* 5. Đến Ngày (To Date) */}
+            <div className="min-w-[140px] flex-1 space-y-1">
+              <label htmlFor="end-date-input" className="text-xs font-medium text-gray-600">📅 Đến Ngày</label>
+              <Input
+                id="end-date-input"
+                type="date"
+                value={tempFilters.endDate?.toISOString().split('T')[0] || ''}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setTempEndDate(new Date(e.target.value));
+                  } else {
+                    setTempEndDate(undefined);
+                  }
+                }}
+                placeholder="Chọn đến ngày"
+                className="border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                min={tempFilters.startDate?.toISOString().split('T')[0] || ''}
+              />
+            </div>
+
+            {/* Search Button */}
+            <div className="flex gap-2">
+              <Button
+                onClick={handleManualSearch}
+                disabled={isLoading}
+                className="whitespace-nowrap bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-2 font-medium text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50"
+              >
+                {isLoading
+                  ? (
+                      <>
+                        <div className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Đang tìm...
+                      </>
+                    )
+                  : (
+                      <>
+                        🔍 Tìm Kiếm
+                      </>
+                    )}
+              </Button>
+
+              {/* Clear filters button */}
+              {hasActiveFilters && (
+                <Button variant="outline" size="sm" onClick={resetFilters} className="whitespace-nowrap">
+                  🗑️ Xóa bộ lọc
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Table */}
+      {/* Table Section Container */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+        {/* Enhanced Table with Gradient Header */}
         {isLoading
           ? (
               <OutsourceOrderDetailSkeleton />
             )
           : (
-              <div className="overflow-hidden rounded-lg border">
+              <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-blue-50">
-                      <TableHead>STT</TableHead>
-                      <TableHead>Phiếu giao</TableHead>
-                      <TableHead>Kế hoạch</TableHead>
-                      <TableHead>Sản phẩm</TableHead>
-                      <TableHead>Công đoạn</TableHead>
-                      <TableHead className="text-right">SL đặt</TableHead>
-                      <TableHead className="text-right">SL hoàn thành</TableHead>
-                      <TableHead className="text-right">Đơn giá</TableHead>
-                      <TableHead>Ngày dự kiến</TableHead>
-                      <TableHead className="w-24 text-center">Thao tác</TableHead>
+                    <TableRow className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        #️⃣ STT
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        👤 Giao Cho
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        📅 Ngày Giao
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        📋 Kế hoạch
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        📦 Sản phẩm
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                        ⚙️ Công đoạn
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                        📊 SL đặt
+                      </TableHead>
+                      <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                        ✅ SL hoàn thành
+                      </TableHead>
+                      <TableHead className="w-32 px-6 py-4 text-center text-lg font-bold text-white">
+                        ⚡ Thao tác
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredDetails.map((item, index) => (
-                      <TableRow key={item.id} className="hover:bg-blue-25">
-                        <TableCell className="font-medium">{index + 1}</TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{item.outsourceOrder?.orderCode}</div>
+                    {orderDetails.map((item, index) => (
+                      <TableRow
+                        key={item.id}
+                        className={`group transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md ${
+                          index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                        }`}
+                      >
+                        <TableCell className="px-6 py-4 font-bold text-blue-600">
+                          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-sm">
+                            {index + 1}
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{item.planName}</div>
-                          <div className="text-xs text-gray-500">{item.planCode}</div>
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-blue-100">
+                              <span className="text-sm">👤</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {item.outsourceOrder?.assignedToUser?.fullName || item.outsourceOrder?.assignedToUserId || '-'}
+                              </div>
+                              {item.outsourceOrder?.assignedToUser?.shortcut && (
+                                <div className="text-xs text-gray-500">
+                                  {item.outsourceOrder.assignedToUser.shortcut}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{item.productName}</div>
-                          <div className="text-xs text-gray-500">{item.productCode}</div>
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">📅</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {item.outsourceOrder?.orderDate ? new Date(item.outsourceOrder.orderDate).toLocaleDateString('vi-VN') : '-'}
+                            </span>
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{item.stepName}</div>
-                          <div className="text-xs text-gray-500">{item.stepCode}</div>
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-green-100">
+                              <span className="text-sm">📋</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{item.planName}</div>
+                              <div className="text-xs text-gray-500">{item.planCode}</div>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right text-sm">{item.orderedQuantity}</TableCell>
-                        <TableCell className="text-right text-sm font-medium text-green-600">
-                          {item.completedQuantity || 0}
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-purple-100">
+                              <span className="text-sm">📦</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{item.productName}</div>
+                              <div className="text-xs text-gray-500">{item.product?.category || 'Category 1'}</div>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right text-sm">
-                          {item.unitPrice ? `${item.unitPrice.toLocaleString()} VND` : '-'}
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-yellow-100">
+                              <span className="text-sm">⚙️</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{item.stepName}</div>
+                              <div className="text-xs text-gray-500">
+                                Sequence:
+                                {item.productionStep?.filmSequence || '25'}
+                              </div>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-sm">
-                          {item.expectedCompletionDate ? new Date(item.expectedCompletionDate).toLocaleDateString() : '-'}
+                        <TableCell className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <span className="text-lg">📊</span>
+                            <span className="text-sm font-bold text-blue-600">{item.orderedQuantity}</span>
+                          </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <span className="text-lg">✅</span>
+                            <span className="text-sm font-bold text-green-600">
+                              {item.completedQuantity || 0}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-6 py-4">
                           <div className="flex justify-center gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => router.push(`/dashboard/outsourceOrders/${item.outsourceOrderId}/details/${item.id}/receipts`)}
-                              className="size-8 p-0"
+                              className="size-10 rounded-full bg-blue-100 p-0 text-blue-600 transition-all duration-200 hover:scale-110 hover:bg-blue-200"
                               title="Quản lý biên lai"
                             >
                               <Package className="size-4" />
@@ -224,7 +547,7 @@ export function OutsourceOrderDetailOverview() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(item)}
-                              className="size-8 p-0"
+                              className="size-10 rounded-full bg-green-100 p-0 text-green-600 transition-all duration-200 hover:scale-110 hover:bg-green-200"
                             >
                               <Edit className="size-4" />
                             </Button>
@@ -232,7 +555,7 @@ export function OutsourceOrderDetailOverview() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setDeleteId(item.id)}
-                              className="size-8 p-0 text-destructive hover:text-destructive"
+                              className="size-10 rounded-full bg-red-100 p-0 text-red-600 transition-all duration-200 hover:scale-110 hover:bg-red-200"
                             >
                               <Trash2 className="size-4" />
                             </Button>
@@ -245,9 +568,35 @@ export function OutsourceOrderDetailOverview() {
               </div>
             )}
 
-        {filteredDetails.length === 0 && !isLoading && (
-          <div className="py-8 text-center text-muted-foreground">
-            {search ? 'Không tìm thấy chi tiết phù hợp.' : 'Chưa có chi tiết nào.'}
+        {orderDetails.length === 0 && !isLoading && (
+          <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 py-16 text-center shadow-inner">
+            <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 shadow-lg">
+              {hasActiveFilters
+                ? (
+                    <Search className="size-12 text-blue-600" />
+                  )
+                : (
+                    <Package className="size-12 text-blue-600" />
+                  )}
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-gray-700">
+              {hasActiveFilters ? '🔍 Không tìm thấy kết quả' : '📭 Chưa có dữ liệu'}
+            </h3>
+            <p className="mb-6 text-gray-500">
+              {hasActiveFilters
+                ? `Không có chi tiết nào phù hợp với các bộ lọc đã chọn. Hãy thử thay đổi bộ lọc.`
+                : 'Chưa có chi tiết đơn hàng gia công nào. Hãy tạo mới để bắt đầu!'}
+            </p>
+            {!hasActiveFilters && (
+              <Button
+                size="lg"
+                onClick={() => setIsBulkOrderFormOpen(true)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transition-all duration-200 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+              >
+                <Plus className="mr-2 size-5" />
+                ⭐ Tạo chi tiết đầu tiên
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -274,16 +623,54 @@ export function OutsourceOrderDetailOverview() {
         </div>
       )}
 
-      {/* Delete Confirmation */}
+      {/* Enhanced Delete Confirmation Modal */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <h3 className="mb-2 text-lg font-bold">Bạn chắc chắn?</h3>
-            <p className="mb-4">Hành động này không thể hoàn tác. Chi tiết sẽ bị xóa vĩnh viễn.</p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteId(null)}>Hủy</Button>
-              <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>Xóa</Button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border-2 border-red-200 bg-gradient-to-br from-white via-red-50 to-red-100 p-8 shadow-2xl">
+            <div className="text-center">
+              <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-gradient-to-r from-red-100 to-orange-100 shadow-lg">
+                <Trash2 className="size-10 text-red-600" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-red-700">
+                🗑️ Xác nhận xóa
+              </h3>
+              <p className="mb-6 text-red-600">
+                Bạn có chắc chắn muốn xóa chi tiết này? Hành động này không thể hoàn tác.
+              </p>
+              <div className="flex justify-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteId(null)}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  ❌ Hủy
+                </Button>
+                <Button
+                  onClick={() => deleteId && handleDelete(deleteId)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg transition-all duration-200 hover:from-red-600 hover:to-red-700 hover:shadow-xl"
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  🗑️ Xóa vĩnh viễn
+                </Button>
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Order Form Modal */}
+      {isBulkOrderFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="m-4 max-h-[90vh] w-full max-w-7xl overflow-auto rounded-lg bg-white">
+            <OutsourceOrderBulkForm
+              onSuccess={() => {
+                setIsBulkOrderFormOpen(false);
+                refetch();
+              }}
+              onCancel={() => {
+                setIsBulkOrderFormOpen(false);
+              }}
+            />
           </div>
         </div>
       )}

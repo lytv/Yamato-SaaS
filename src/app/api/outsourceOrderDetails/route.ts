@@ -45,6 +45,9 @@ export async function GET(request: NextRequest) {
       planId: searchParams.get('planId') ? Number(searchParams.get('planId')) : undefined,
       productId: searchParams.get('productId') ? Number(searchParams.get('productId')) : undefined,
       productionStepId: searchParams.get('productionStepId') ? Number(searchParams.get('productionStepId')) : undefined,
+      assignedToUserId: searchParams.get('assignedToUserId') || undefined,
+      orderStartDate: searchParams.get('orderStartDate') || undefined,
+      orderEndDate: searchParams.get('orderEndDate') || undefined,
     };
 
     const validation = validateOutsourceOrderDetailListParams(rawParams);
@@ -133,7 +136,7 @@ export async function POST(request: NextRequest) {
       status: body.status || 'pending',
       completedQuantity: body.completedQuantity || 0,
     });
-    
+
     if (!validation.success) {
       return NextResponse.json(
         {

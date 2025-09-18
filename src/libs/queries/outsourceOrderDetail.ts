@@ -4,7 +4,7 @@
  * Generated based on existing pattern from outsourceOrder queries
  */
 
-import { and, asc, count, desc, eq, gte, ilike, or, sum, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, lte, or, type SQL, sum } from 'drizzle-orm';
 
 import {
   outsourceOrderDetailSchema,
@@ -13,8 +13,9 @@ import {
   planSchema,
   productionStepSchema,
   productSchema,
-  workTableSchema,
   productSubSchema,
+  userSyncSchema,
+  workTableSchema,
 } from '@/models/Schema';
 import type {
   CreateOutsourceOrderDetailInput,
@@ -386,6 +387,13 @@ export async function getOutsourceOrderDetailById(
           orderCode: outsourceOrderSchema.orderCode,
           orderTitle: outsourceOrderSchema.orderTitle,
           status: outsourceOrderSchema.status,
+          assignedToUserId: outsourceOrderSchema.assignedToUserId,
+          orderDate: outsourceOrderSchema.orderDate,
+          createdByUserId: outsourceOrderSchema.createdByUserId,
+        },
+        assignedToUser: {
+          fullName: userSyncSchema.fullName,
+          shortcut: userSyncSchema.shortcut,
         },
         plan: {
           id: planSchema.id,
@@ -396,11 +404,13 @@ export async function getOutsourceOrderDetailById(
           id: productSchema.id,
           productCode: productSchema.productCode,
           productName: productSchema.productName,
+          category: productSchema.category,
         },
         productionStep: {
           id: productionStepSchema.id,
           stepCode: productionStepSchema.stepCode,
           stepName: productionStepSchema.stepName,
+          filmSequence: productionStepSchema.filmSequence,
         },
         workTable: {
           locationCode: workTableSchema.tableCode,
@@ -414,6 +424,7 @@ export async function getOutsourceOrderDetailById(
       })
       .from(outsourceOrderDetailSchema)
       .leftJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
+      .leftJoin(userSyncSchema, eq(outsourceOrderSchema.assignedToUserId, userSyncSchema.userId))
       .leftJoin(planSchema, eq(outsourceOrderDetailSchema.planId, planSchema.id))
       .leftJoin(productSchema, eq(outsourceOrderDetailSchema.productId, productSchema.id))
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
@@ -441,7 +452,10 @@ export async function getOutsourceOrderDetailById(
 
     return {
       ...row.outsourceOrderDetail,
-      outsourceOrder: row.outsourceOrder,
+      outsourceOrder: {
+        ...row.outsourceOrder,
+        assignedToUser: row.assignedToUser,
+      },
       plan: row.plan,
       product: row.product,
       productionStep: row.productionStep,
@@ -483,6 +497,9 @@ export async function getOutsourceOrderDetailsByOwner(
     planId,
     productId,
     productionStepId,
+    assignedToUserId,
+    orderStartDate,
+    orderEndDate,
     showAll = false,
   } = params;
 
@@ -510,6 +527,20 @@ export async function getOutsourceOrderDetailsByOwner(
 
   if (productionStepId) {
     conditions.push(eq(outsourceOrderDetailSchema.productionStepId, productionStepId));
+  }
+
+  // Date range filtering - filter by order date
+  if (orderStartDate) {
+    conditions.push(gte(outsourceOrderSchema.orderDate, orderStartDate));
+  }
+
+  if (orderEndDate) {
+    conditions.push(lte(outsourceOrderSchema.orderDate, orderEndDate));
+  }
+
+  // Assigned user filtering (requires join with outsourceOrder)
+  if (assignedToUserId) {
+    conditions.push(eq(outsourceOrderSchema.assignedToUserId, assignedToUserId));
   }
 
   if (search) {
@@ -542,6 +573,13 @@ export async function getOutsourceOrderDetailsByOwner(
           orderCode: outsourceOrderSchema.orderCode,
           orderTitle: outsourceOrderSchema.orderTitle,
           status: outsourceOrderSchema.status,
+          assignedToUserId: outsourceOrderSchema.assignedToUserId,
+          orderDate: outsourceOrderSchema.orderDate,
+          createdByUserId: outsourceOrderSchema.createdByUserId,
+        },
+        assignedToUser: {
+          fullName: userSyncSchema.fullName,
+          shortcut: userSyncSchema.shortcut,
         },
         plan: {
           id: planSchema.id,
@@ -552,11 +590,13 @@ export async function getOutsourceOrderDetailsByOwner(
           id: productSchema.id,
           productCode: productSchema.productCode,
           productName: productSchema.productName,
+          category: productSchema.category,
         },
         productionStep: {
           id: productionStepSchema.id,
           stepCode: productionStepSchema.stepCode,
           stepName: productionStepSchema.stepName,
+          filmSequence: productionStepSchema.filmSequence,
         },
         workTable: {
           locationCode: workTableSchema.tableCode,
@@ -569,7 +609,8 @@ export async function getOutsourceOrderDetailsByOwner(
         },
       })
       .from(outsourceOrderDetailSchema)
-      .leftJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
+      .innerJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
+      .leftJoin(userSyncSchema, eq(outsourceOrderSchema.assignedToUserId, userSyncSchema.userId))
       .leftJoin(planSchema, eq(outsourceOrderDetailSchema.planId, planSchema.id))
       .leftJoin(productSchema, eq(outsourceOrderDetailSchema.productId, productSchema.id))
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
@@ -584,7 +625,8 @@ export async function getOutsourceOrderDetailsByOwner(
     const itemsWithReceipts = await Promise.all(
       result.map(async (row: {
         outsourceOrderDetail: typeof outsourceOrderDetailSchema.$inferSelect;
-        outsourceOrder: { id: number; orderCode: string; orderTitle: string; status: string };
+        outsourceOrder: { id: number; orderCode: string; orderTitle: string; status: string; assignedToUserId: string; orderDate: string; createdByUserId: string };
+        assignedToUser: { fullName: string | null };
         plan: { id: number; planCode: string; planName: string };
         product: { id: number; productCode: string; productName: string };
         productionStep: { id: number; stepCode: string; stepName: string };
@@ -595,10 +637,13 @@ export async function getOutsourceOrderDetailsByOwner(
           .select({ sum: sum(outsourceOrderReceiptSchema.receiptQuantity) })
           .from(outsourceOrderReceiptSchema)
           .where(eq(outsourceOrderReceiptSchema.outsourceOrderDetailId, row.outsourceOrderDetail.id));
-        
+
         return {
           ...row.outsourceOrderDetail,
-          outsourceOrder: row.outsourceOrder,
+          outsourceOrder: {
+            ...row.outsourceOrder,
+            assignedToUser: row.assignedToUser,
+          },
           plan: row.plan,
           product: row.product,
           productionStep: row.productionStep,
@@ -607,7 +652,7 @@ export async function getOutsourceOrderDetailsByOwner(
           // Override completedQuantity with actual receipt quantity
           completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
         } as OutsourceOrderDetailWithRelations;
-      })
+      }),
     );
 
     return itemsWithReceipts;
@@ -761,10 +806,10 @@ export async function getOutsourceOrderDetailStats(
     .innerJoin(outsourceOrderDetailSchema, eq(outsourceOrderReceiptSchema.outsourceOrderDetailId, outsourceOrderDetailSchema.id))
     .where(and(...completedConditions));
   const totalCompletedQuantity = Number(completedQuantityStats[0]?.totalCompletedQuantity) || 0;
-  
+
   // Calculate completion rate
-  const completionRate = totalOrderedQuantity > 0 
-    ? totalCompletedQuantity / totalOrderedQuantity 
+  const completionRate = totalOrderedQuantity > 0
+    ? totalCompletedQuantity / totalOrderedQuantity
     : 0;
 
   return {

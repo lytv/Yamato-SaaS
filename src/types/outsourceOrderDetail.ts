@@ -19,10 +19,12 @@ export type OutsourceOrderDetail = Omit<OutsourceOrderDetailDb, 'createdAt' | 'u
 // OutsourceOrderDetail with relations
 export type OutsourceOrderDetailWithRelations = OutsourceOrderDetail & {
   // Relations types
-  outsourceOrder?: Pick<OutsourceOrder, 'id' | 'orderCode' | 'orderTitle' | 'status'>;
+  outsourceOrder?: Pick<OutsourceOrder, 'id' | 'orderCode' | 'orderTitle' | 'status' | 'assignedToUserId' | 'orderDate' | 'createdByUserId'> & {
+    assignedToUser?: { fullName?: string | null; shortcut?: string | null };
+  };
   plan?: { id: number; planCode: string; planName: string };
-  product?: { id: number; productCode: string; productName: string };
-  productionStep?: { id: number; stepCode: string; stepName: string };
+  product?: { id: number; productCode: string; productName: string; category: string | null };
+  productionStep?: { id: number; stepCode: string; stepName: string; filmSequence: string | null };
   workTable?: { locationCode: string; tableName: string };
   productSub?: { productSubCode: string; productSubDetail: string; productCode: string };
 };
@@ -104,10 +106,11 @@ export type UpdateOutsourceOrderDetailInput = {
 
 // Relation options for dropdowns and selectors
 export type OutsourceOrderDetailRelationOptions = {
+  readonly assignedUsers: readonly { id: string; fullName: string; shortcut: string | null }[];
   readonly outsourceOrders: readonly Pick<OutsourceOrder, 'id' | 'orderCode' | 'orderTitle'>[];
   readonly plans: readonly { id: number; planCode: string; planName: string }[];
-  readonly products: readonly { id: number; productCode: string; productName: string }[];
-  readonly productionSteps: readonly { id: number; stepCode: string; stepName: string }[];
+  readonly products: readonly { id: number; productCode: string; productName: string; category: string | null }[];
+  readonly productionSteps: readonly { id: number; stepCode: string; stepName: string; filmSequence: string | null }[];
   readonly workTables: readonly { locationCode: string; tableName: string }[];
   readonly productSubs: readonly { productSubCode: string; productSubDetail: string; productCode: string }[];
 };
@@ -172,6 +175,9 @@ export type OutsourceOrderDetailListParams = {
   readonly planId?: number;
   readonly productId?: number;
   readonly productionStepId?: number;
+  readonly assignedToUserId?: string;
+  readonly orderStartDate?: string;
+  readonly orderEndDate?: string;
 };
 
 export type OutsourceOrderDetailListParamsWithOwner = OutsourceOrderDetailListParams & {
@@ -220,17 +226,27 @@ export type OutsourceOrderDetailStatsResponse = {
   readonly data: OutsourceOrderDetailStats;
 };
 
-// Filter state
+// Filter state for OutsourceOrderDetail
 export type OutsourceOrderDetailFilters = {
   search: string;
   sortBy: 'createdAt' | 'updatedAt' | 'sequenceNumber' | 'expectedCompletionDate';
   sortOrder: 'asc' | 'desc';
   outsourceOrderId?: number;
   status?: string;
+  // Enhanced filters for UI
+  assignedToUserId?: string;
   planId?: number;
   productId?: number;
   productionStepId?: number;
-  dateRange?: {
+  // Quick search fields for dropdown filters
+  assignedUserSearch?: string; // Search by shortcut in assigned users
+  productSearch?: string; // Search by category in products
+  productionStepSearch?: string; // Search by sequence in production steps
+  // Separate date fields for UI
+  startDate?: Date;
+  endDate?: Date;
+  // Keep for backward compatibility and API calls
+  orderDateRange?: {
     start: Date;
     end: Date;
   };
@@ -241,9 +257,10 @@ export type OutsourceOrderDetailFilters = {
 export type OutsourceOrderDetailFilterOptions = {
   readonly statuses: readonly string[];
   readonly outsourceOrders: readonly Pick<OutsourceOrder, 'id' | 'orderCode' | 'orderTitle'>[];
+  readonly assignedUsers: readonly { id: string; fullName: string }[];
   readonly plans: readonly { id: number; planCode: string; planName: string }[];
-  readonly products: readonly { id: number; productCode: string; productName: string }[];
-  readonly productionSteps: readonly { id: number; stepCode: string; stepName: string }[];
+  readonly products: readonly { id: number; productCode: string; productName: string; category: string | null }[];
+  readonly productionSteps: readonly { id: number; stepCode: string; stepName: string; filmSequence: string | null }[];
   readonly datePresets: readonly {
     readonly label: string;
     readonly value: string;

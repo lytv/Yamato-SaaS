@@ -85,8 +85,8 @@ export const outsourceOrderDetailValidationSchema = baseOutsourceOrderDetailSche
 }).refine((data) => {
   // Ensure actualCompletionDate is not before expectedCompletionDate (if both provided)
   if (data.actualCompletionDate && data.expectedCompletionDate) {
-    return data.actualCompletionDate >= data.expectedCompletionDate ||
-           Math.abs(data.actualCompletionDate.getTime() - data.expectedCompletionDate.getTime()) < 24 * 60 * 60 * 1000; // Allow same day
+    return data.actualCompletionDate >= data.expectedCompletionDate
+      || Math.abs(data.actualCompletionDate.getTime() - data.expectedCompletionDate.getTime()) < 24 * 60 * 60 * 1000; // Allow same day
   }
   return true;
 }, {
@@ -109,8 +109,8 @@ export const createOutsourceOrderDetailSchema = baseOutsourceOrderDetailSchema.e
 }).refine((data) => {
   // Ensure actualCompletionDate is not before expectedCompletionDate (if both provided)
   if (data.actualCompletionDate && data.expectedCompletionDate) {
-    return data.actualCompletionDate >= data.expectedCompletionDate ||
-           Math.abs(data.actualCompletionDate.getTime() - data.expectedCompletionDate.getTime()) < 24 * 60 * 60 * 1000; // Allow same day
+    return data.actualCompletionDate >= data.expectedCompletionDate
+      || Math.abs(data.actualCompletionDate.getTime() - data.expectedCompletionDate.getTime()) < 24 * 60 * 60 * 1000; // Allow same day
   }
   return true;
 }, {
@@ -173,8 +173,8 @@ export const updateOutsourceOrderDetailSchema = z.object({
   itemNotes: z.string().trim().optional(),
 }).refine((data) => {
   // Ensure completedQuantity doesn't exceed orderedQuantity (if both provided)
-  if (data.completedQuantity !== undefined && data.orderedQuantity !== undefined && 
-      data.completedQuantity > data.orderedQuantity) {
+  if (data.completedQuantity !== undefined && data.orderedQuantity !== undefined
+    && data.completedQuantity > data.orderedQuantity) {
     return false;
   }
   return true;
@@ -197,9 +197,12 @@ export const outsourceOrderDetailListParamsSchema = z.object({
   planId: z.number().int().min(1).optional(),
   productId: z.number().int().min(1).optional(),
   productionStepId: z.number().int().min(1).optional(),
+  assignedToUserId: z.string().trim().optional(),
+  orderStartDate: z.string().trim().optional(),
+  orderEndDate: z.string().trim().optional(),
 });
 
-// Export parameters validation  
+// Export parameters validation
 export const outsourceOrderDetailExportParamsSchema = outsourceOrderDetailListParamsSchema.extend({
   format: z.enum(['xlsx', 'csv']).default('xlsx'),
   includeHeaders: z.boolean().default(true),

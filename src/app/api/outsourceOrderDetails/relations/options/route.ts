@@ -5,7 +5,7 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ilike } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -17,6 +17,7 @@ import {
   productionStepSchema,
   productSchema,
   productSubSchema,
+  userSyncSchema,
   workTableSchema,
 } from '@/models/Schema';
 
@@ -39,6 +40,29 @@ export async function GET(_request: NextRequest) {
       ? Number(searchParams.get('planId'))
       : undefined;
     const productSubCode = searchParams.get('productSubCode') || undefined;
+
+    // Search parameters for filtering dropdown options
+    const assignedUserSearch = searchParams.get('assignedUserSearch') || undefined;
+    const productSearch = searchParams.get('productSearch') || undefined;
+    const productionStepSearch = searchParams.get('productionStepSearch') || undefined;
+
+    // Get assigned users (from userSyncSchema for assignment)
+    let assignedUsersQuery = db
+      .select({
+        id: userSyncSchema.userId,
+        fullName: userSyncSchema.fullName,
+        shortcut: userSyncSchema.shortcut,
+      })
+      .from(userSyncSchema);
+
+    // Add search filter if provided
+    if (assignedUserSearch) {
+      assignedUsersQuery = assignedUsersQuery.where(
+        ilike(userSyncSchema.shortcut, `%${assignedUserSearch}%`),
+      );
+    }
+
+    const assignedUsers = await assignedUsersQuery.orderBy(userSyncSchema.fullName);
 
     // Get outsource orders
     const outsourceOrders = await db
@@ -66,43 +90,78 @@ export async function GET(_request: NextRequest) {
     let products;
     if (planId) {
       // Get products from plan_detail for selected plan, join with product table for names
-      products = await db
+      const productsQuery = db
         .select({
           id: productSchema.id,
           productCode: planDetailSchema.productCode,
           productName: productSchema.productName,
+          category: productSchema.category,
         })
         .from(planDetailSchema)
         .innerJoin(planSchema, eq(planDetailSchema.planId, planSchema.id))
-        .innerJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode))
-        .where(and(
-          eq(planSchema.ownerId, ownerId),
-          eq(planDetailSchema.planId, planId),
-        ))
-        .groupBy(productSchema.id, planDetailSchema.productCode, productSchema.productName)
+        .innerJoin(productSchema, eq(planDetailSchema.productCode, productSchema.productCode));
+
+      // Build where conditions
+      const whereConditions = [
+        eq(planSchema.ownerId, ownerId),
+        eq(planDetailSchema.planId, planId),
+      ];
+
+      // Add product search filter if provided
+      if (productSearch) {
+        whereConditions.push(ilike(productSchema.category, `%${productSearch}%`));
+      }
+
+      products = await productsQuery
+        .where(and(...whereConditions))
+        .groupBy(productSchema.id, planDetailSchema.productCode, productSchema.productName, productSchema.category)
         .orderBy(planDetailSchema.productCode);
     } else {
       // Get all products if no plan selected
-      products = await db
+      const productsQuery = db
         .select({
           id: productSchema.id,
           productCode: productSchema.productCode,
           productName: productSchema.productName,
+          category: productSchema.category,
         })
-        .from(productSchema)
-        .where(eq(productSchema.ownerId, ownerId))
+        .from(productSchema);
+
+      // Build where conditions
+      const whereConditions = [eq(productSchema.ownerId, ownerId)];
+
+      // Add product search filter if provided
+      if (productSearch) {
+        whereConditions.push(ilike(productSchema.category, `%${productSearch}%`));
+      }
+
+      products = await productsQuery
+        .where(and(...whereConditions))
         .orderBy(productSchema.productCode);
     }
 
     // Get production steps
-    const productionSteps = await db
+    const productionStepsQuery = db
       .select({
         id: productionStepSchema.id,
         stepCode: productionStepSchema.stepCode,
         stepName: productionStepSchema.stepName,
+        filmSequence: productionStepSchema.filmSequence,
       })
-      .from(productionStepSchema)
-      .where(eq(productionStepSchema.ownerId, ownerId))
+      .from(productionStepSchema);
+
+    // Build where conditions
+    const productionStepWhereConditions = [eq(productionStepSchema.ownerId, ownerId)];
+
+    // Add production step search filter if provided (search by filmSequence)
+    if (productionStepSearch) {
+      productionStepWhereConditions.push(
+        ilike(productionStepSchema.filmSequence, `%${productionStepSearch}%`),
+      );
+    }
+
+    const productionSteps = await productionStepsQuery
+      .where(and(...productionStepWhereConditions))
       .orderBy(productionStepSchema.stepCode);
 
     // Get work tables (locations) - filter by productSubCode if provided (like OutsourceOrderBulkForm)
@@ -167,6 +226,7 @@ export async function GET(_request: NextRequest) {
       .orderBy(productSubSchema.productSubCode);
 
     const relationOptions = {
+      assignedUsers,
       outsourceOrders,
       plans,
       products,

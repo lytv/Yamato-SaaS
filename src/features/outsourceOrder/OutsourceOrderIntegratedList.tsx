@@ -23,6 +23,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -31,8 +38,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useOutsourceOrderDetailExport } from '@/hooks/useOutsourceOrderDetailExport';
+import { useOutsourceOrderDetailFilters } from '@/hooks/useOutsourceOrderDetailFilters';
 import { useDeleteOutsourceOrderDetail } from '@/hooks/useOutsourceOrderDetailMutations';
-import { useOutsourceOrderDetailsByOrderId } from '@/hooks/useOutsourceOrderDetails';
+import { useOutsourceOrderDetailRelationOptions, useOutsourceOrderDetailsByOrderId } from '@/hooks/useOutsourceOrderDetails';
 import { useOutsourceOrderExport } from '@/hooks/useOutsourceOrderExport';
 import { useOutsourceOrderFilters } from '@/hooks/useOutsourceOrderFilters';
 import { useDeleteOutsourceOrder } from '@/hooks/useOutsourceOrderMutations';
@@ -118,9 +126,19 @@ export function OutsourceOrderIntegratedList() {
   const [isDetailFormOpen, setIsDetailFormOpen] = useState(false);
   const [isBulkDetailFormOpen, setIsBulkDetailFormOpen] = useState(false);
   const [editingDetail, setEditingDetail] = useState<OutsourceOrderDetailWithRelations | null>(null);
-  const [detailSearch, setDetailSearch] = useState('');
 
   const { filters, setSearch, resetFilters, hasActiveFilters } = useOutsourceOrderFilters();
+
+  // Detail filters
+  const {
+    filters: detailFilters,
+    setAssignedToUserId,
+    setProductId,
+    setProductionStepId,
+    setOrderDateRange,
+    resetFilters: resetDetailFilters,
+    hasActiveFilters: hasActiveDetailFilters,
+  } = useOutsourceOrderDetailFilters(expandedOrderId || undefined);
 
   // Order data
   const {
@@ -134,33 +152,31 @@ export function OutsourceOrderIntegratedList() {
   const deleteOrderMutation = useDeleteOutsourceOrder();
   const { exportData: exportOrders, isExporting: isExportingOrders } = useOutsourceOrderExport();
 
-  // Detail data (only load when expanded)
+  // Detail data (only load when expanded) with filters
   const {
     data: orderDetails = [],
     isLoading: detailsLoading,
     refetch: refetchDetails,
-  } = useOutsourceOrderDetailsByOrderId(expandedOrderId || 0, expandedOrderId !== null);
+  } = useOutsourceOrderDetailsByOrderId(
+    expandedOrderId || 0,
+    expandedOrderId !== null,
+    expandedOrderId ? detailFilters : undefined,
+  );
+
+  // Detail relation options for filters
+  const { data: detailRelationOptions } = useOutsourceOrderDetailRelationOptions(
+    expandedOrderId || undefined,
+    detailFilters.planId,
+    undefined, // productSubCode - we'll implement this later if needed
+  );
 
   // const { data: detailStats } = useOutsourceOrderDetailStats(expandedOrderId || 0);
 
   const deleteDetailMutation = useDeleteOutsourceOrderDetail();
   const { exportData: exportDetails, isExporting: isExportingDetails } = useOutsourceOrderDetailExport();
 
-  // Filter details based on search
-  const filteredDetails = orderDetails.filter(item =>
-    detailSearch === ''
-    || item.planCode?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.planName?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.productCode?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.productName?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.stepCode?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.stepName?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.productSub?.productSubCode?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.productSub?.productSubDetail?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.workTable?.locationCode?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.workTable?.tableName?.toLowerCase().includes(detailSearch.toLowerCase())
-    || item.itemNotes?.toLowerCase().includes(detailSearch.toLowerCase()),
-  );
+  // Note: filtering is now handled by the API through detailFilters
+  // orderDetails already contains filtered results from the server
 
   const handleEditOrder = (item: OutsourceOrderWithRelations) => {
     setEditingOrder(item);
@@ -181,7 +197,9 @@ export function OutsourceOrderIntegratedList() {
 
   const handleToggleDetails = (orderId: number) => {
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
-    setDetailSearch(''); // Reset detail search when switching
+    if (expandedOrderId !== orderId) {
+      resetDetailFilters(); // Reset detail filters when switching to new order
+    }
   };
 
   const handleDeleteDetail = async (id: number) => {
@@ -334,16 +352,11 @@ export function OutsourceOrderIntegratedList() {
                             <TableCell>
                               <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 order.applyRetailPrice === 3
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-slate-100 text-slate-800'
                               }`}
                               >
-                                {/* Debug display */}
-                                [
-                                {order.applyRetailPrice}
-                                ]
-                                {' '}
-                                {order.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
+                                {order.applyRetailPrice === 3 ? `💎 ${t('price_type_retail')}` : `💰 ${t('price_type_normal')}`}
                               </span>
                             </TableCell>
                             <TableCell>
@@ -410,17 +423,111 @@ export function OutsourceOrderIntegratedList() {
                           </div>
                         </div>
 
-                        {/* Detail Search */}
-                        <div className="mb-4">
-                          <div className="relative max-w-md">
-                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                            <Input
-                              placeholder={t('search_details_placeholder')}
-                              value={detailSearch}
-                              onChange={e => setDetailSearch(e.target.value)}
-                              className="pl-10"
-                            />
+                        {/* Detail Filters */}
+                        <div className="mb-4 space-y-3">
+                          <h4 className="text-sm font-medium text-gray-700">Bộ lọc chi tiết</h4>
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                            {/* 1. Giao Cho (Assigned To) */}
+                            <div className="space-y-1">
+                              <label htmlFor="assigned-to-select" className="text-xs font-medium text-gray-600">Giao Cho</label>
+                              <Select
+                                value={detailFilters.assignedToUserId || 'all'}
+                                onValueChange={value => setAssignedToUserId(value === 'all' ? undefined : value)}
+                              >
+                                <SelectTrigger id="assigned-to-select" className="w-full">
+                                  <SelectValue placeholder="Chọn người thực hiện" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="all">Tất cả</SelectItem>
+                                  {detailRelationOptions?.assignedUsers?.map(user => (
+                                    <SelectItem key={user.id} value={user.id}>
+                                      {user.fullName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* 2. Sản phẩm (Product) */}
+                            <div className="space-y-1">
+                              <label htmlFor="product-select" className="text-xs font-medium text-gray-600">Sản phẩm</label>
+                              <Select
+                                value={detailFilters.productId?.toString() || 'all'}
+                                onValueChange={value => setProductId(value === 'all' ? undefined : Number(value))}
+                              >
+                                <SelectTrigger id="product-select" className="w-full">
+                                  <SelectValue placeholder="Chọn sản phẩm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="all">Tất cả</SelectItem>
+                                  {detailRelationOptions?.products?.map(product => (
+                                    <SelectItem key={product.id} value={product.id.toString()}>
+                                      {product.productName}
+                                      {' '}
+                                      (
+                                      {product.productCode}
+                                      )
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* 3. Công đoạn (Production Step) */}
+                            <div className="space-y-1">
+                              <label htmlFor="production-step-select" className="text-xs font-medium text-gray-600">Công đoạn</label>
+                              <Select
+                                value={detailFilters.productionStepId?.toString() || 'all'}
+                                onValueChange={value => setProductionStepId(value === 'all' ? undefined : Number(value))}
+                              >
+                                <SelectTrigger id="production-step-select" className="w-full">
+                                  <SelectValue placeholder="Chọn công đoạn" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="all">Tất cả</SelectItem>
+                                  {detailRelationOptions?.productionSteps?.map(step => (
+                                    <SelectItem key={step.id} value={step.id.toString()}>
+                                      {step.stepName}
+                                      {' '}
+                                      (
+                                      {step.stepCode}
+                                      )
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* 4. Ngày Giao (Order Date) - Filter by order date */}
+                            <div className="space-y-1">
+                              <label htmlFor="order-date-input" className="text-xs font-medium text-gray-600">Ngày Giao</label>
+                              <Input
+                                id="order-date-input"
+                                type="date"
+                                value={detailFilters.orderDateRange?.start?.toISOString().split('T')[0] || ''}
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    const startDate = new Date(e.target.value);
+                                    const endDate = new Date(startDate);
+                                    endDate.setHours(23, 59, 59, 999);
+                                    setOrderDateRange({ start: startDate, end: endDate });
+                                  } else {
+                                    setOrderDateRange(undefined);
+                                  }
+                                }}
+                                placeholder="Chọn ngày giao"
+                              />
+                            </div>
                           </div>
+
+                          {/* Clear filters button */}
+                          {hasActiveDetailFilters && (
+                            <div className="flex justify-end">
+                              <Button variant="outline" size="sm" onClick={resetDetailFilters}>
+                                Xóa bộ lọc
+                              </Button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Details Table */}
@@ -445,7 +552,7 @@ export function OutsourceOrderIntegratedList() {
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {filteredDetails.map((item, index) => (
+                                    {orderDetails.map((item, index) => (
                                       <TableRow key={item.id} className="even:bg-gray-50 hover:bg-indigo-50" style={{ backgroundColor: index % 2 === 1 ? '#f8fafc' : 'white' }}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell>
@@ -508,9 +615,9 @@ export function OutsourceOrderIntegratedList() {
                               </div>
                             )}
 
-                        {filteredDetails.length === 0 && !detailsLoading && (
+                        {orderDetails.length === 0 && !detailsLoading && (
                           <div className="rounded-lg border-2 border-indigo-200 bg-indigo-50 py-8 text-center text-muted-foreground">
-                            {detailSearch ? t('detail_empty_search') : t('detail_empty')}
+                            {hasActiveDetailFilters ? t('detail_empty_search') : t('detail_empty')}
                           </div>
                         )}
                       </div>

@@ -1386,6 +1386,7 @@
         "apply_retail_price": "Apply Retail Price"
       },
       "price_type_normal": "Normal Price",
+      "price_type_retail": "Retail Price",
       "empty": "No outsourceOrders found. Create your first one!",
       "error_loading": "Error loading outsourceOrders:",
       "retry": "Retry",
