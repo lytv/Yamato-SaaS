@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/lytv/Yamato-SaaS/compare/v1.4.3...v1.4.4) (2025-09-18)
+
+
+### Bug Fixes
+
+* resolve ESLint accessibility and function definition errors ([485b644](https://github.com/lytv/Yamato-SaaS/commit/485b6442d74e101ac6348e46983320d093503a24))
+
 ## [1.4.3](https://github.com/lytv/Yamato-SaaS/compare/v1.4.2...v1.4.3) (2025-09-17)
 
 
