@@ -30,6 +30,7 @@ export async function GET(_request: NextRequest) {
         id: productionStepSchema.id,
         stepCode: productionStepSchema.stepCode,
         stepName: productionStepSchema.stepName,
+        filmSequence: productionStepSchema.filmSequence,
       })
       .from(productionStepSchema)
       .where(eq(productionStepSchema.ownerId, ownerId))

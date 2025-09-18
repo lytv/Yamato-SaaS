@@ -275,7 +275,7 @@ export type OutsourceOrderLocation = {
   readonly description?: string;
 };
 
-export type OutsourceOrderProductionStepOption = Pick<ProductionStep, 'id' | 'stepCode' | 'stepName'> & {
+export type OutsourceOrderProductionStepOption = Pick<ProductionStep, 'id' | 'stepCode' | 'stepName' | 'filmSequence'> & {
   readonly planCode?: string;
   readonly planName?: string;
   readonly productCode?: string;
