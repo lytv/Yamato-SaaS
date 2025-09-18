@@ -247,6 +247,16 @@ export const outsourceOrderDetailFormSchema = z.object({
     z.number().min(0, 'Unit price cannot be negative').optional(),
   ),
   sequenceNumber: z.number().int().min(0).optional(),
+  completedQuantity: z.number().int().min(0, 'Completed quantity cannot be negative').optional(),
+}).refine((data) => {
+  // Validate completed quantity doesn't exceed ordered quantity
+  if (data.completedQuantity !== undefined && data.completedQuantity > data.orderedQuantity) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Completed quantity cannot exceed ordered quantity',
+  path: ['completedQuantity'],
 });
 
 // Bulk form validation schema
@@ -381,6 +391,16 @@ export const createOutsourceOrderWithDetailsSchema = z.object({
     locationCode: z.string().trim().max(50).optional(),
     productSubCode: z.string().trim().max(50).optional(),
     sequenceNumber: z.number().int().min(0).optional(),
+    completedQuantity: z.number().int().min(0, 'Completed quantity cannot be negative').optional(),
+  }).refine((data) => {
+    // Validate completed quantity doesn't exceed ordered quantity
+    if (data.completedQuantity !== undefined && data.completedQuantity > data.orderedQuantity) {
+      return false;
+    }
+    return true;
+  }, {
+    message: 'Completed quantity cannot exceed ordered quantity',
+    path: ['completedQuantity'],
   })).min(1, 'At least one detail is required'),
 });
 
@@ -418,6 +438,17 @@ export const outsourceOrderBulkValidationRules = {
     // Example business rule - can be extended
     if (quantity > 10000) {
       return { valid: false, message: 'Quantity cannot exceed 10,000 per step' };
+    }
+    return { valid: true, message: 'OK' };
+  },
+
+  // Validate completed quantity against ordered quantity
+  validateCompletedQuantity: (orderedQuantity: number, completedQuantity: number): { valid: boolean; message: string } => {
+    if (completedQuantity < 0) {
+      return { valid: false, message: 'Completed quantity cannot be negative' };
+    }
+    if (completedQuantity > orderedQuantity) {
+      return { valid: false, message: 'Completed quantity cannot exceed ordered quantity' };
     }
     return { valid: true, message: 'OK' };
   },

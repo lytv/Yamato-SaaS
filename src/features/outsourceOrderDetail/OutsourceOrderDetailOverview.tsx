@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -80,6 +81,9 @@ export function OutsourceOrderDetailOverview() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [isBulkOrderFormOpen, setIsBulkOrderFormOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // Use the new filters hook
   const {
@@ -168,6 +172,84 @@ export function OutsourceOrderDetailOverview() {
     }
   };
 
+  // Bulk selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedItems(orderDetails.map(item => item.id));
+    } else {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleSelectItem = (itemId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedItems(prev => [...prev, itemId]);
+    } else {
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkDeleting(true);
+    try {
+      // Delete each selected item with individual error handling
+      const deleteResults = [];
+      const failedDeletes = [];
+
+      for (const id of selectedItems) {
+        try {
+          await deleteItemMutation.mutateAsync(id);
+          deleteResults.push({ id, success: true });
+        } catch (error) {
+          // Failed to delete item - error handled below
+          deleteResults.push({ id, success: false, error });
+          failedDeletes.push(id);
+        }
+      }
+
+      // Show success/failure summary
+      const successCount = deleteResults.filter(r => r.success).length;
+      const failedCount = failedDeletes.length;
+
+      if (successCount > 0) {
+        // Successfully deleted items - could show toast here if needed
+      }
+
+      if (failedCount > 0) {
+        // Failed to delete some items - handled gracefully
+      }
+
+      // Always clear selection and refresh
+      setSelectedItems([]);
+      setShowBulkDeleteConfirm(false);
+      refetch();
+    } catch {
+      // Bulk delete error occurred - handled gracefully
+      // Still clear selection and refresh on error
+      setSelectedItems([]);
+      setShowBulkDeleteConfirm(false);
+      refetch();
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  // Auto-cleanup selectedItems when orderDetails change
+  useEffect(() => {
+    if (selectedItems.length > 0) {
+      const currentIds = orderDetails.map(item => item.id);
+      const validSelectedItems = selectedItems.filter(id => currentIds.includes(id));
+
+      if (validSelectedItems.length !== selectedItems.length) {
+        setSelectedItems(validSelectedItems);
+      }
+    }
+  }, [orderDetails, selectedItems]);
+
+  // Computed values for bulk selection
+  const isAllSelected = orderDetails.length > 0 && selectedItems.length === orderDetails.length;
+  const isSomeSelected = selectedItems.length > 0 && selectedItems.length < orderDetails.length;
+
   if (error) {
     return (
       <div className="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 via-orange-50 to-red-100 p-8 shadow-lg">
@@ -214,6 +296,23 @@ export function OutsourceOrderDetailOverview() {
             <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
               Chi tiết đơn hàng gia công
             </h2>
+            {selectedItems.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {selectedItems.length}
+                  {' '}
+                  đã chọn
+                </span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowBulkDeleteConfirm(true)}
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Xóa đã chọn
+                </Button>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
             <Button
@@ -415,8 +514,14 @@ export function OutsourceOrderDetailOverview() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        #️⃣ STT
+                      <TableHead className="w-12 px-6 py-4 text-left text-lg font-bold text-white">
+                        <Checkbox
+                          checked={isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          indeterminate={isSomeSelected}
+                          aria-label="Chọn tất cả"
+                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-blue-600"
+                        />
                       </TableHead>
                       <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
                         👤 Giao Cho
@@ -452,10 +557,12 @@ export function OutsourceOrderDetailOverview() {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                         }`}
                       >
-                        <TableCell className="px-6 py-4 font-bold text-blue-600">
-                          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-sm">
-                            {index + 1}
-                          </div>
+                        <TableCell className="px-6 py-4">
+                          <Checkbox
+                            checked={selectedItems.includes(item.id)}
+                            onCheckedChange={checked => handleSelectItem(item.id, checked as boolean)}
+                            aria-label={`Chọn item ${item.id}`}
+                          />
                         </TableCell>
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center space-x-3">
@@ -671,6 +778,47 @@ export function OutsourceOrderDetailOverview() {
                 setIsBulkOrderFormOpen(false);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirmation */}
+      {showBulkDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6">
+            <h3 className="mb-2 text-lg font-bold">Xác nhận xóa hàng loạt</h3>
+            <p className="mb-4">
+              Bạn có chắc chắn muốn xóa
+              {' '}
+              {selectedItems.length}
+              {' '}
+              item đã chọn? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowBulkDeleteConfirm(false)}
+                disabled={isBulkDeleting}
+              >
+                Hủy
+              </Button>
+              <Button
+                className="bg-destructive text-destructive-foreground"
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+              >
+                {isBulkDeleting
+                  ? (
+                      <>
+                        <div className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Đang xóa...
+                      </>
+                    )
+                  : (
+                      `Xóa ${selectedItems.length} items`
+                    )}
+              </Button>
+            </div>
           </div>
         </div>
       )}

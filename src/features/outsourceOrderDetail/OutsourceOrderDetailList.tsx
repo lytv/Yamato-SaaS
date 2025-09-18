@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -38,8 +39,8 @@ import type {
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
 
-import { OutsourceOrderDetailForm } from './OutsourceOrderDetailForm';
 import { OutsourceOrderDetailBulkForm } from './OutsourceOrderDetailBulkForm';
+import { OutsourceOrderDetailForm } from './OutsourceOrderDetailForm';
 import { OutsourceOrderDetailSkeleton } from './OutsourceOrderDetailSkeleton';
 
 function toFormData(item: OutsourceOrderDetailWithRelations | null): OutsourceOrderDetailFormData | undefined {
@@ -80,6 +81,8 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
   const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [search, setSearch] = useState('');
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const t = useTranslations('OrderDetailList');
 
   const {
@@ -129,6 +132,41 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
     router.push('/dashboard/outsourceOrders');
   };
 
+  // Bulk selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedItems(filteredDetails.map(item => item.id));
+    } else {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleSelectItem = (itemId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedItems(prev => [...prev, itemId]);
+    } else {
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      // Delete each selected item
+      for (const id of selectedItems) {
+        await deleteMutation.mutateAsync(id);
+      }
+      setSelectedItems([]);
+      setShowBulkDeleteConfirm(false);
+      refetchStats();
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+    }
+  };
+
+  // Computed values for bulk selection
+  const isAllSelected = filteredDetails.length > 0 && selectedItems.length === filteredDetails.length;
+  const isSomeSelected = selectedItems.length > 0 && selectedItems.length < filteredDetails.length;
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center rounded bg-white p-6 py-8 shadow">
@@ -149,6 +187,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
       {/* Breadcrumb Navigation */}
       <nav className="flex text-sm">
         <button
+          type="button"
           onClick={handleBackToOrders}
           className="text-blue-600 hover:text-blue-800"
         >
@@ -156,6 +195,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
         </button>
         <span className="mx-2 text-gray-400">/</span>
         <button
+          type="button"
           onClick={handleBackToOrders}
           className="text-blue-600 hover:text-blue-800"
         >
@@ -202,7 +242,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                 <Plus className="mr-2 size-4" />
                 {t('add_detail')}
               </Button>
-              <Button 
+              <Button
                 onClick={() => setIsFormOpen(true)}
                 variant="outline"
                 size="sm"
@@ -246,7 +286,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               <div className="font-medium text-green-600">
                 {(() => {
                   const amount = Number(order.totalAmount);
-                  return !isNaN(amount) && isFinite(amount) ? `₫ ${amount.toLocaleString()}` : '-';
+                  return !Number.isNaN(amount) && Number.isFinite(amount) ? `₫ ${amount.toLocaleString()}` : '-';
                 })()}
               </div>
             </div>
@@ -281,7 +321,26 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
       {/* Controls */}
       <div className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-bold">{t('order_details')}</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold">{t('order_details')}</h2>
+            {selectedItems.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {selectedItems.length}
+                  {' '}
+                  selected
+                </span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowBulkDeleteConfirm(true)}
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Delete Selected
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -298,7 +357,7 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
               {t('add_detail')}
             </Button>
 
-            <Button 
+            <Button
               onClick={() => setIsFormOpen(true)}
               variant="outline"
               size="sm"
@@ -334,7 +393,14 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>#</TableHead>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          indeterminate={isSomeSelected}
+                          aria-label="Select all"
+                        />
+                      </TableHead>
                       <TableHead>{t('plan')}</TableHead>
                       <TableHead>{t('product')}</TableHead>
                       <TableHead>{t('product_sub')}</TableHead>
@@ -350,9 +416,15 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredDetails.map((item, index) => (
+                    {filteredDetails.map(item => (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium">{index + 1}</TableCell>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedItems.includes(item.id)}
+                            onCheckedChange={checked => handleSelectItem(item.id, checked as boolean)}
+                            aria-label={`Select item ${item.id}`}
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="text-sm font-medium">{item.planName}</div>
                           <div className="text-xs text-gray-500">{item.planCode}</div>
@@ -496,6 +568,32 @@ export function OutsourceOrderDetailList({ outsourceOrderId }: OutsourceOrderDet
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDeleteId(null)}>{t('cancel')}</Button>
               <Button className="bg-destructive text-destructive-foreground" onClick={() => deleteId && handleDelete(deleteId)}>{t('delete')}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirmation */}
+      {showBulkDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6">
+            <h3 className="mb-2 text-lg font-bold">Confirm Bulk Delete</h3>
+            <p className="mb-4">
+              Are you sure you want to delete
+              {' '}
+              {selectedItems.length}
+              {' '}
+              selected items? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBulkDeleteConfirm(false)}>Cancel</Button>
+              <Button
+                className="bg-destructive text-destructive-foreground"
+                onClick={handleBulkDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? 'Deleting...' : `Delete ${selectedItems.length} Items`}
+              </Button>
             </div>
           </div>
         </div>

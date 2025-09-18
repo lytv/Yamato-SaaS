@@ -60,6 +60,7 @@ type ProductionStepWithSelection = OutsourceOrderProductionStepOption & {
   expectedCompletionDate: Date;
   itemNotes?: string;
   unitPrice?: number;
+  completedQuantity?: number; // Số lượng hoàn thành
   validationStatus?: 'valid' | 'invalid' | 'pending';
   validationMessage?: string;
 };
@@ -130,6 +131,7 @@ export function OutsourceOrderBulkForm({
         expectedCompletionDate: defaultExpectedCompletion,
         itemNotes: '',
         unitPrice: 0,
+        completedQuantity: 0, // Initialize completed quantity
         validationStatus: 'pending' as const,
       }));
       setProductionSteps(steps);
@@ -238,6 +240,7 @@ export function OutsourceOrderBulkForm({
         expectedCompletionDate: step.expectedCompletionDate,
         itemNotes: step.itemNotes,
         unitPrice: step.unitPrice,
+        completedQuantity: step.completedQuantity || 0,
       });
 
       // Validate quantity
@@ -303,6 +306,64 @@ export function OutsourceOrderBulkForm({
     setProductionSteps(updatedSteps);
   };
 
+  // Handle completed quantity change
+  const handleCompletedQuantityChange = (stepId: number, completedQuantity: number) => {
+    const stepIndex = productionSteps.findIndex(s => s.id === stepId);
+    if (stepIndex === -1) {
+      return;
+    }
+
+    const currentStep = productionSteps[stepIndex];
+    if (!currentStep) {
+      return;
+    }
+
+    // Update step completed quantity
+    const updatedSteps = [...productionSteps];
+    updatedSteps[stepIndex] = { ...currentStep, completedQuantity };
+    setProductionSteps(updatedSteps);
+
+    // Update form field
+    const fieldIndex = fields.findIndex(field => field.productionStepId === stepId);
+    if (fieldIndex >= 0) {
+      form.setValue(`selectedSteps.${fieldIndex}.completedQuantity`, completedQuantity);
+    }
+  };
+
+  // Handle completed quantity blur (validation)
+  const handleCompletedQuantityBlur = async (stepId: number, completedQuantity: number) => {
+    const stepIndex = productionSteps.findIndex(s => s.id === stepId);
+    if (stepIndex === -1) {
+      return;
+    }
+
+    const currentStep = productionSteps[stepIndex];
+    if (!currentStep || !currentStep.selected) {
+      return;
+    }
+
+    // Validate completed quantity doesn't exceed ordered quantity
+    if (completedQuantity > currentStep.orderedQuantity) {
+      const updatedSteps = [...productionSteps];
+      updatedSteps[stepIndex] = {
+        ...currentStep,
+        validationStatus: 'invalid',
+        validationMessage: 'Completed quantity cannot exceed ordered quantity',
+      };
+      setProductionSteps(updatedSteps);
+    } else {
+      // Re-validate the step
+      const validation = await validateStepQuantity(stepId, currentStep.orderedQuantity);
+      const updatedSteps = [...productionSteps];
+      updatedSteps[stepIndex] = {
+        ...currentStep,
+        validationStatus: validation.valid ? 'valid' : 'invalid',
+        validationMessage: validation.message,
+      };
+      setProductionSteps(updatedSteps);
+    }
+  };
+
   // Handle notes change
   const handleNotesChange = (stepId: number, notes: string) => {
     const stepIndex = productionSteps.findIndex(s => s.id === stepId);
@@ -354,6 +415,7 @@ export function OutsourceOrderBulkForm({
           unitPrice: step.unitPrice,
           locationCode: data.locationCode,
           productSubCode: data.productSubCode,
+          completedQuantity: step.completedQuantity || 0,
         })),
       };
 
@@ -919,9 +981,10 @@ export function OutsourceOrderBulkForm({
                     {/* Production Steps Table */}
                     <div className="overflow-hidden rounded-lg border-2 border-yellow-300">
                       <div className="bg-yellow-200 p-3">
-                        <div className="grid grid-cols-4 gap-4 text-sm font-bold">
+                        <div className="grid grid-cols-5 gap-4 text-sm font-bold">
                           <div>Công Đoạn Sản Xuất</div>
                           <div className="text-center">Số Lượng</div>
+                          <div className="text-center">SL Hoàn Thành</div>
                           <div className="text-center">Ghi Chú</div>
                           <div className="text-center">Tình Trạng</div>
                         </div>
@@ -932,7 +995,7 @@ export function OutsourceOrderBulkForm({
                           <div
                             key={step.id}
                             className={cn(
-                              'grid grid-cols-4 gap-4 p-4 border-b border-yellow-200 hover:bg-yellow-50',
+                              'grid grid-cols-5 gap-4 p-4 border-b border-yellow-200 hover:bg-yellow-50',
                               step.selected && 'bg-yellow-100',
                             )}
                           >
@@ -966,6 +1029,24 @@ export function OutsourceOrderBulkForm({
                                       onChange={e => handleQuantityChange(step.id, Number(e.target.value) || 0)}
                                       onBlur={e => handleQuantityBlur(step.id, Number(e.target.value) || 0)}
                                       className="h-12 w-28 border-2 border-blue-300 bg-blue-50 text-center text-lg font-bold text-blue-700 focus:border-blue-500 focus:bg-white"
+                                      placeholder="0"
+                                    />
+                                  )
+                                : (
+                                    <span className="text-sm text-gray-400">Chưa chọn</span>
+                                  )}
+                            </div>
+
+                            {/* Completed Quantity */}
+                            <div className="flex items-center justify-center">
+                              {step.selected
+                                ? (
+                                    <Input
+                                      type="text"
+                                      value={step.completedQuantity || 0}
+                                      onChange={e => handleCompletedQuantityChange(step.id, Number(e.target.value) || 0)}
+                                      onBlur={e => handleCompletedQuantityBlur(step.id, Number(e.target.value) || 0)}
+                                      className="h-12 w-28 border-2 border-green-300 bg-green-50 text-center text-lg font-bold text-green-700 focus:border-green-500 focus:bg-white"
                                       placeholder="0"
                                     />
                                   )

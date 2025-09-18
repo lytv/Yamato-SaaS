@@ -249,6 +249,7 @@ export type OutsourceOrderDetailFormData = {
   itemNotes?: string;
   unitPrice?: number;
   sequenceNumber?: number;
+  completedQuantity?: number; // Số lượng hoàn thành
 };
 
 // Relation options for the bulk form dependency chain
@@ -322,6 +323,7 @@ export type CreateOutsourceOrderWithDetailsInput = {
     locationCode?: string;
     productSubCode?: string;
     sequenceNumber?: number;
+    completedQuantity?: number; // Số lượng hoàn thành
   }>;
 };
 
@@ -331,7 +333,9 @@ export type OutsourceOrderBulkCreateResponse = {
   readonly data: {
     readonly outsourceOrder: OutsourceOrderWithRelations;
     readonly details: readonly any[]; // OutsourceOrderDetail type
+    readonly receipts?: readonly any[]; // OutsourceOrderReceipt type
     readonly created: number;
+    readonly receiptsCreated?: number;
   };
   readonly message?: string;
 };

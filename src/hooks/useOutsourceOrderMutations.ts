@@ -237,7 +237,10 @@ export function useCreateOutsourceOrderWithDetails() {
       // Invalidate stats
       queryClient.invalidateQueries({ queryKey: outsourceOrderKeys.stats() });
 
-      toast.success(`OutsourceOrder created successfully with ${result.created} details`);
+      const receiptsMessage = result.receiptsCreated && result.receiptsCreated > 0
+        ? ` and ${result.receiptsCreated} auto-generated receipts`
+        : '';
+      toast.success(`OutsourceOrder created successfully with ${result.created} details${receiptsMessage}`);
     },
     onError: (error: Error) => {
       toast.error(`Failed to create outsource order: ${error.message}`);

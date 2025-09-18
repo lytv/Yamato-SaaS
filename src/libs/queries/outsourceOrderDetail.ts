@@ -358,16 +358,19 @@ export async function updateOutsourceOrderDetail(
  * Delete an outsourceOrderDetail
  */
 export async function deleteOutsourceOrderDetail(id: number, ownerId: string): Promise<void> {
-  const result = await db
+  // First check if the record exists and belongs to the user
+  const existingRecord = await getOutsourceOrderDetailById(id, ownerId);
+  if (!existingRecord) {
+    throw new Error('OutsourceOrderDetail not found or access denied');
+  }
+
+  // Delete the record
+  await db
     .delete(outsourceOrderDetailSchema)
     .where(and(
       eq(outsourceOrderDetailSchema.id, id),
       eq(outsourceOrderDetailSchema.ownerId, ownerId),
     ));
-
-  if (Array.isArray(result) ? result.length === 0 : false) {
-    throw new Error('OutsourceOrderDetail not found or access denied');
-  }
 }
 
 /**
