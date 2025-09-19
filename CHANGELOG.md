@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/lytv/Yamato-SaaS/compare/v1.6.0...v1.6.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* **fix gio han nhap :** ok ([4f53de4](https://github.com/lytv/Yamato-SaaS/commit/4f53de45c8dc606ebd00cf62a2bab962f2aae52d))
+
 # [1.6.0](https://github.com/lytv/Yamato-SaaS/compare/v1.5.0...v1.6.0) (2025-09-18)
 
 
