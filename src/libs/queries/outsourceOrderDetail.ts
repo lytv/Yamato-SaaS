@@ -10,6 +10,7 @@ import {
   outsourceOrderDetailSchema,
   outsourceOrderReceiptSchema,
   outsourceOrderSchema,
+  planDetailSchema,
   planSchema,
   productionStepSchema,
   productSchema,
@@ -424,6 +425,9 @@ export async function getOutsourceOrderDetailById(
           productSubDetail: productSubSchema.productSubDetail,
           productCode: productSubSchema.productCode,
         },
+        planDetail: {
+          plannedQuantity: planDetailSchema.plannedQuantity,
+        },
       })
       .from(outsourceOrderDetailSchema)
       .leftJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
@@ -433,6 +437,10 @@ export async function getOutsourceOrderDetailById(
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
       .leftJoin(workTableSchema, eq(outsourceOrderDetailSchema.locationCode, workTableSchema.tableCode))
       .leftJoin(productSubSchema, eq(outsourceOrderDetailSchema.productSubCode, productSubSchema.productSubCode))
+      .leftJoin(planDetailSchema, and(
+        eq(planDetailSchema.planId, outsourceOrderDetailSchema.planId),
+        eq(planDetailSchema.productCode, outsourceOrderDetailSchema.productCode),
+      ))
       .where(and(
         eq(outsourceOrderDetailSchema.id, id),
         eq(outsourceOrderDetailSchema.ownerId, ownerId),
@@ -466,6 +474,8 @@ export async function getOutsourceOrderDetailById(
       productSub: row.productSub,
       // Override completedQuantity with actual receipt quantity
       completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
+      // Add planned quantity from plan_detail
+      plannedQuantity: row.planDetail?.plannedQuantity || 0,
     } as OutsourceOrderDetailWithRelations;
   }
 
@@ -610,6 +620,9 @@ export async function getOutsourceOrderDetailsByOwner(
           productSubDetail: productSubSchema.productSubDetail,
           productCode: productSubSchema.productCode,
         },
+        planDetail: {
+          plannedQuantity: planDetailSchema.plannedQuantity,
+        },
       })
       .from(outsourceOrderDetailSchema)
       .innerJoin(outsourceOrderSchema, eq(outsourceOrderDetailSchema.outsourceOrderId, outsourceOrderSchema.id))
@@ -619,6 +632,10 @@ export async function getOutsourceOrderDetailsByOwner(
       .leftJoin(productionStepSchema, eq(outsourceOrderDetailSchema.productionStepId, productionStepSchema.id))
       .leftJoin(workTableSchema, eq(outsourceOrderDetailSchema.locationCode, workTableSchema.tableCode))
       .leftJoin(productSubSchema, eq(outsourceOrderDetailSchema.productSubCode, productSubSchema.productSubCode))
+      .leftJoin(planDetailSchema, and(
+        eq(planDetailSchema.planId, outsourceOrderDetailSchema.planId),
+        eq(planDetailSchema.productCode, outsourceOrderDetailSchema.productCode),
+      ))
       .where(whereClause)
       .orderBy(orderDirection)
       .offset(offset)
@@ -635,6 +652,7 @@ export async function getOutsourceOrderDetailsByOwner(
         productionStep: { id: number; stepCode: string; stepName: string };
         workTable: { locationCode: string; tableName: string };
         productSub: { productSubCode: string; productSubDetail: string; productCode: string };
+        planDetail: { plannedQuantity: number } | null;
       }) => {
         const receiptQuantity = await db
           .select({ sum: sum(outsourceOrderReceiptSchema.receiptQuantity) })
@@ -654,6 +672,8 @@ export async function getOutsourceOrderDetailsByOwner(
           productSub: row.productSub,
           // Override completedQuantity with actual receipt quantity
           completedQuantity: Number(receiptQuantity[0]?.sum) || 0,
+          // Add planned quantity from plan_detail
+          plannedQuantity: row.planDetail?.plannedQuantity || 0,
         } as OutsourceOrderDetailWithRelations;
       }),
     );

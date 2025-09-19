@@ -135,7 +135,7 @@ export function OutsourceOrderDetailOverview() {
 
     orderDetails.forEach((item) => {
       const assignedTo = item.outsourceOrder?.assignedToUser?.fullName || item.outsourceOrder?.assignedToUserId || '-';
-      const plan = `${item.planName} (${item.planCode})`;
+      const plan = `${item.planName}`;
       const product = `${item.productName} (${item.product?.category || ''})`;
       const step = `${item.stepName} (${item.productionStep?.filmSequence || '25'})`;
 
@@ -164,6 +164,7 @@ export function OutsourceOrderDetailOverview() {
           step,
           totalOrderedQuantity: 0,
           totalCompletedQuantity: 0,
+          plannedQuantity: item.plannedQuantity || 0,
         });
       }
 
@@ -726,8 +727,13 @@ export function OutsourceOrderDetailOverview() {
                                 <div className="flex size-8 items-center justify-center rounded-full bg-green-100">
                                   <span className="text-sm">📋</span>
                                 </div>
-                                <div className="text-sm font-medium text-gray-900">
-                                  {group.plan}
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {group.plan}
+                                  </div>
+                                  <div className="text-lg font-bold text-blue-600">
+                                    {group.plannedQuantity || 0}
+                                  </div>
                                 </div>
                               </div>
                             </TableCell>
@@ -865,7 +871,9 @@ export function OutsourceOrderDetailOverview() {
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-gray-900">{item.planName}</div>
-                                <div className="text-xs text-gray-500">{item.planCode}</div>
+                                <div className="text-lg font-bold text-blue-600">
+                                  {item.plannedQuantity || 0}
+                                </div>
                               </div>
                             </div>
                           </TableCell>

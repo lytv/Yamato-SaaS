@@ -27,6 +27,8 @@ export type OutsourceOrderDetailWithRelations = OutsourceOrderDetail & {
   productionStep?: { id: number; stepCode: string; stepName: string; filmSequence: string | null };
   workTable?: { locationCode: string; tableName: string };
   productSub?: { productSubCode: string; productSubDetail: string; productCode: string };
+  // Add planned quantity from plan_detail table
+  plannedQuantity?: number;
 };
 
 // Form data type for React Hook Form
