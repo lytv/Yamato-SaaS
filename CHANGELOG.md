@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/lytv/Yamato-SaaS/compare/v1.6.2...v1.6.3) (2025-09-19)
+
+
+### Bug Fixes
+
+* **them so luong ke hoach:** ngon roi ([f29d68d](https://github.com/lytv/Yamato-SaaS/commit/f29d68dd26d42b49f75ca4ccd140948fdd06b2d2))
+
 ## [1.6.2](https://github.com/lytv/Yamato-SaaS/compare/v1.6.1...v1.6.2) (2025-09-19)
 
 
