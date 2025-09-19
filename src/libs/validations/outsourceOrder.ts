@@ -249,13 +249,16 @@ export const outsourceOrderDetailFormSchema = z.object({
   sequenceNumber: z.number().int().min(0).optional(),
   completedQuantity: z.number().int().min(0, 'Completed quantity cannot be negative').optional(),
 }).refine((data) => {
-  // Validate completed quantity doesn't exceed ordered quantity
-  if (data.completedQuantity !== undefined && data.completedQuantity > data.orderedQuantity) {
-    return false;
+  // Allow completed quantity up to 110% of ordered quantity
+  if (data.completedQuantity !== undefined) {
+    const maxAllowedQuantity = Math.floor(data.orderedQuantity * 1.1);
+    if (data.completedQuantity > maxAllowedQuantity) {
+      return false;
+    }
   }
   return true;
 }, {
-  message: 'Completed quantity cannot exceed ordered quantity',
+  message: 'Completed quantity cannot exceed 110% of ordered quantity',
   path: ['completedQuantity'],
 });
 
@@ -393,13 +396,16 @@ export const createOutsourceOrderWithDetailsSchema = z.object({
     sequenceNumber: z.number().int().min(0).optional(),
     completedQuantity: z.number().int().min(0, 'Completed quantity cannot be negative').optional(),
   }).refine((data) => {
-    // Validate completed quantity doesn't exceed ordered quantity
-    if (data.completedQuantity !== undefined && data.completedQuantity > data.orderedQuantity) {
-      return false;
+    // Allow completed quantity up to 110% of ordered quantity
+    if (data.completedQuantity !== undefined) {
+      const maxAllowedQuantity = Math.floor(data.orderedQuantity * 1.1);
+      if (data.completedQuantity > maxAllowedQuantity) {
+        return false;
+      }
     }
     return true;
   }, {
-    message: 'Completed quantity cannot exceed ordered quantity',
+    message: 'Completed quantity cannot exceed 110% of ordered quantity',
     path: ['completedQuantity'],
   })).min(1, 'At least one detail is required'),
 });

@@ -123,12 +123,8 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 label: t('outsource_menu'),
                 submenu: [
                   {
-                    href: '/dashboard/outsourceOrders',
-                    label: t('outsource_order'),
-                  },
-                  {
                     href: '/dashboard/outsourceOrderDetails',
-                    label: t('outsource_order_details'),
+                    label: t('outsource_order'),
                   },
                 ],
               },

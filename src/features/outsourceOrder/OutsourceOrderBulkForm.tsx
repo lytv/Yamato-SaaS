@@ -61,7 +61,8 @@ type ProductionStepWithSelection = OutsourceOrderProductionStepOption & {
   itemNotes?: string;
   unitPrice?: number;
   completedQuantity?: number; // Số lượng hoàn thành
-  validationStatus?: 'valid' | 'invalid' | 'pending';
+  completedQuantityInput?: string; // Input text cho completed quantity
+  validationStatus?: 'valid' | 'invalid' | 'pending' | 'warning';
   validationMessage?: string;
 };
 
@@ -132,6 +133,7 @@ export function OutsourceOrderBulkForm({
         itemNotes: '',
         unitPrice: 0,
         completedQuantity: 0, // Initialize completed quantity
+        completedQuantityInput: '0', // Initialize completed quantity input
         validationStatus: 'pending' as const,
       }));
       setProductionSteps(steps);
@@ -233,6 +235,14 @@ export function OutsourceOrderBulkForm({
     setProductionSteps(updatedSteps);
 
     if (newSelected) {
+      // Initialize completed quantity input if not set
+      if (!step.completedQuantityInput) {
+        updatedSteps[stepIndex] = { ...updatedSteps[stepIndex], completedQuantityInput: '0' };
+      }
+
+      // Update the state with the modified steps
+      setProductionSteps(updatedSteps);
+
       // Add to selected steps
       append({
         productionStepId: stepId,
@@ -306,8 +316,8 @@ export function OutsourceOrderBulkForm({
     setProductionSteps(updatedSteps);
   };
 
-  // Handle completed quantity change
-  const handleCompletedQuantityChange = (stepId: number, completedQuantity: number) => {
+  // Handle completed quantity change (input text)
+  const handleCompletedQuantityChange = (stepId: number, inputValue: string) => {
     const stepIndex = productionSteps.findIndex(s => s.id === stepId);
     if (stepIndex === -1) {
       return;
@@ -318,20 +328,15 @@ export function OutsourceOrderBulkForm({
       return;
     }
 
-    // Update step completed quantity
+    // Update step completed quantity input (text)
     const updatedSteps = [...productionSteps];
-    updatedSteps[stepIndex] = { ...currentStep, completedQuantity };
+    updatedSteps[stepIndex] = { ...currentStep, completedQuantityInput: inputValue };
     setProductionSteps(updatedSteps);
-
-    // Update form field
-    const fieldIndex = fields.findIndex(field => field.productionStepId === stepId);
-    if (fieldIndex >= 0) {
-      form.setValue(`selectedSteps.${fieldIndex}.completedQuantity`, completedQuantity);
-    }
   };
 
   // Handle completed quantity blur (validation)
-  const handleCompletedQuantityBlur = async (stepId: number, completedQuantity: number) => {
+  const handleCompletedQuantityBlur = async (stepId: number, inputValue: string) => {
+    const completedQuantity = Number(inputValue) || 0;
     const stepIndex = productionSteps.findIndex(s => s.id === stepId);
     if (stepIndex === -1) {
       return;
@@ -342,21 +347,41 @@ export function OutsourceOrderBulkForm({
       return;
     }
 
-    // Validate completed quantity doesn't exceed ordered quantity
-    if (completedQuantity > currentStep.orderedQuantity) {
-      const updatedSteps = [...productionSteps];
+    // Update completed quantity (number) and form field
+    const updatedSteps = [...productionSteps];
+    updatedSteps[stepIndex] = { ...currentStep, completedQuantity, completedQuantityInput: inputValue };
+    setProductionSteps(updatedSteps);
+
+    // Update form field
+    const fieldIndex = fields.findIndex(field => field.productionStepId === stepId);
+    if (fieldIndex >= 0) {
+      form.setValue(`selectedSteps.${fieldIndex}.completedQuantity`, completedQuantity);
+    }
+
+    // Allow up to 110% of ordered quantity
+    const maxAllowedQuantity = Math.floor(currentStep.orderedQuantity * 1.1);
+
+    // Validate completed quantity doesn't exceed 110% of ordered quantity
+    if (completedQuantity > maxAllowedQuantity) {
       updatedSteps[stepIndex] = {
-        ...currentStep,
+        ...updatedSteps[stepIndex],
         validationStatus: 'invalid',
-        validationMessage: 'Completed quantity cannot exceed ordered quantity',
+        validationMessage: `Số lượng hoàn thành không được vượt quá ${maxAllowedQuantity} (110% của ${currentStep.orderedQuantity})`,
+      };
+      setProductionSteps(updatedSteps);
+    } else if (completedQuantity > currentStep.orderedQuantity) {
+      // Warning when between 100% and 110%
+      updatedSteps[stepIndex] = {
+        ...updatedSteps[stepIndex],
+        validationStatus: 'warning',
+        validationMessage: `⚠️ Vượt quá kế hoạch ${((completedQuantity / currentStep.orderedQuantity - 1) * 100).toFixed(1)}%`,
       };
       setProductionSteps(updatedSteps);
     } else {
       // Re-validate the step
       const validation = await validateStepQuantity(stepId, currentStep.orderedQuantity);
-      const updatedSteps = [...productionSteps];
       updatedSteps[stepIndex] = {
-        ...currentStep,
+        ...updatedSteps[stepIndex],
         validationStatus: validation.valid ? 'valid' : 'invalid',
         validationMessage: validation.message,
       };
@@ -921,6 +946,15 @@ export function OutsourceOrderBulkForm({
                       type="submit"
                       disabled={isSubmitting || selectedStepsCount === 0 || invalidStepsCount > 0 || !canProceedToStep2}
                       className="h-12 bg-gradient-to-r from-green-500 to-blue-500 text-base font-bold text-white"
+                      title={
+                        !canProceedToStep2
+                          ? 'Vui lòng điền đầy đủ thông tin ở tab \'Thông Tin\': Vệ Tinh, Ngày đặt hàng, Loại giá'
+                          : selectedStepsCount === 0
+                            ? 'Vui lòng chọn ít nhất 1 công đoạn'
+                            : invalidStepsCount > 0
+                              ? 'Có công đoạn với số lượng vượt quá 110%'
+                              : ''
+                      }
                     >
                       {isSubmitting
                         ? (
@@ -1043,9 +1077,9 @@ export function OutsourceOrderBulkForm({
                                 ? (
                                     <Input
                                       type="text"
-                                      value={step.completedQuantity || 0}
-                                      onChange={e => handleCompletedQuantityChange(step.id, Number(e.target.value) || 0)}
-                                      onBlur={e => handleCompletedQuantityBlur(step.id, Number(e.target.value) || 0)}
+                                      value={step.completedQuantityInput || '0'}
+                                      onChange={e => handleCompletedQuantityChange(step.id, e.target.value)}
+                                      onBlur={e => handleCompletedQuantityBlur(step.id, e.target.value)}
                                       className="h-12 w-28 border-2 border-green-300 bg-green-50 text-center text-lg font-bold text-green-700 focus:border-green-500 focus:bg-white"
                                       placeholder="0"
                                     />
@@ -1081,11 +1115,13 @@ export function OutsourceOrderBulkForm({
                                       step.validationStatus === 'valid' && 'bg-green-100 text-green-800',
                                       step.validationStatus === 'invalid' && 'bg-red-100 text-red-800',
                                       step.validationStatus === 'pending' && 'bg-yellow-100 text-yellow-800',
+                                      step.validationStatus === 'warning' && 'bg-orange-100 text-orange-800',
                                     )}
                                     >
                                       {step.validationStatus === 'valid' && '✅ '}
                                       {step.validationStatus === 'invalid' && '❌ '}
                                       {step.validationStatus === 'pending' && '⏳ '}
+                                      {step.validationStatus === 'warning' && '⚠️ '}
                                       {step.validationMessage}
                                     </div>
                                   )

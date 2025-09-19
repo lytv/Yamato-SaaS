@@ -6,8 +6,7 @@
 'use client';
 
 import {
-  Download,
-  Edit,
+  FileText,
   Package,
   Plus,
   RefreshCw,
@@ -35,7 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useOutsourceOrderDetailExport } from '@/hooks/useOutsourceOrderDetailExport';
 import { useOutsourceOrderDetailFilters } from '@/hooks/useOutsourceOrderDetailFilters';
 import { useDeleteOutsourceOrderDetail } from '@/hooks/useOutsourceOrderDetailMutations';
 import { useOutsourceOrderDetailRelationOptions, useOutsourceOrderDetails } from '@/hooks/useOutsourceOrderDetails';
@@ -45,6 +43,7 @@ import type {
 } from '@/types/outsourceOrderDetail';
 
 import { OutsourceOrderBulkForm } from '../outsourceOrder/OutsourceOrderBulkForm';
+import { OutsourceOrderReceiptForm } from '../outsourceOrderReceipt/OutsourceOrderReceiptForm';
 import { OutsourceOrderDetailForm } from './OutsourceOrderDetailForm';
 import { OutsourceOrderDetailSkeleton } from './OutsourceOrderDetailSkeleton';
 
@@ -84,6 +83,8 @@ export function OutsourceOrderDetailOverview() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [showCreateReceiptForm, setShowCreateReceiptForm] = useState(false);
+  const [selectedItemForReceipt, setSelectedItemForReceipt] = useState<OutsourceOrderDetailWithRelations | null>(null);
 
   // Use the new filters hook
   const {
@@ -116,7 +117,6 @@ export function OutsourceOrderDetailOverview() {
   const { data: relationOptions } = useOutsourceOrderDetailRelationOptions();
 
   const deleteItemMutation = useDeleteOutsourceOrderDetail();
-  const { exportData, isExporting } = useOutsourceOrderDetailExport();
 
   // Note: filtering is now handled by the API through filters hook
 
@@ -157,9 +157,20 @@ export function OutsourceOrderDetailOverview() {
     }
   }, [tempFilters.assignedUserSearch, tempFilters.productSearch, tempFilters.productionStepSearch, relationOptions, tempFilters.assignedToUserId, tempFilters.productId, tempFilters.productionStepId, setTempAssignedToUserId, setTempProductId, setTempProductionStepId]);
 
-  const handleEdit = (item: OutsourceOrderDetailWithRelations) => {
-    setEditingItem(item);
-    setIsFormOpen(true);
+  const handleCreateReceipt = (item: OutsourceOrderDetailWithRelations) => {
+    setSelectedItemForReceipt(item);
+    setShowCreateReceiptForm(true);
+  };
+
+  const handleReceiptFormSuccess = () => {
+    setShowCreateReceiptForm(false);
+    setSelectedItemForReceipt(null);
+    refetch();
+  };
+
+  const handleReceiptFormCancel = () => {
+    setShowCreateReceiptForm(false);
+    setSelectedItemForReceipt(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -296,43 +307,6 @@ export function OutsourceOrderDetailOverview() {
             <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
               Chi tiết đơn hàng gia công
             </h2>
-            {selectedItems.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">
-                  {selectedItems.length}
-                  {' '}
-                  đã chọn
-                </span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowBulkDeleteConfirm(true)}
-                >
-                  <Trash2 className="mr-2 size-4" />
-                  Xóa đã chọn
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => exportData()}
-              disabled={isExporting}
-              className="border-blue-300 bg-white/80 text-blue-700 backdrop-blur-sm hover:bg-blue-50"
-            >
-              <Download className="mr-2 size-4" />
-              📊 Xuất CSV
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setIsBulkOrderFormOpen(true)}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:from-blue-600 hover:to-purple-700"
-            >
-              <Plus className="mr-2 size-4" />
-              ⭐ Tạo mới
-            </Button>
           </div>
         </div>
 
@@ -497,6 +471,36 @@ export function OutsourceOrderDetailOverview() {
                   🗑️ Xóa bộ lọc
                 </Button>
               )}
+
+              {/* Create new button */}
+              <Button
+                size="sm"
+                onClick={() => setIsBulkOrderFormOpen(true)}
+                className="whitespace-nowrap bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-2 font-medium text-white shadow-lg transition-all duration-200 hover:from-green-600 hover:to-emerald-700"
+              >
+                <Plus className="mr-2 size-4" />
+                ⭐ Tạo mới
+              </Button>
+
+              {/* Bulk delete button - show when items selected */}
+              {selectedItems.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-600">
+                    {selectedItems.length}
+                    {' '}
+                    đã chọn
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowBulkDeleteConfirm(true)}
+                    className="whitespace-nowrap bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 font-medium text-white shadow-lg transition-all duration-200 hover:from-red-600 hover:to-red-700"
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    🗑️ Xóa đã chọn
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -653,10 +657,11 @@ export function OutsourceOrderDetailOverview() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(item)}
-                              className="size-10 rounded-full bg-green-100 p-0 text-green-600 transition-all duration-200 hover:scale-110 hover:bg-green-200"
+                              onClick={() => handleCreateReceipt(item)}
+                              className="size-10 rounded-full bg-purple-100 p-0 text-purple-600 transition-all duration-200 hover:scale-110 hover:bg-purple-200"
+                              title="Tạo phiếu nhập cho đơn gia công"
                             >
-                              <Edit className="size-4" />
+                              <FileText className="size-4" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -820,6 +825,18 @@ export function OutsourceOrderDetailOverview() {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Create Receipt Form - Fullscreen */}
+      {showCreateReceiptForm && selectedItemForReceipt && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <OutsourceOrderReceiptForm
+            outsourceOrderDetailId={selectedItemForReceipt.id}
+            isEditing={false}
+            onSuccess={handleReceiptFormSuccess}
+            onCancel={handleReceiptFormCancel}
+          />
         </div>
       )}
     </div>
