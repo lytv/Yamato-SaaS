@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/lytv/Yamato-SaaS/compare/v1.6.1...v1.6.2) (2025-09-19)
+
+
+### Bug Fixes
+
+* **update tong:** nong ([b9b992d](https://github.com/lytv/Yamato-SaaS/commit/b9b992d49172a4d0b9810b70f2d02c955b8f2e07))
+
 ## [1.6.1](https://github.com/lytv/Yamato-SaaS/compare/v1.6.0...v1.6.1) (2025-09-19)
 
 
