@@ -85,6 +85,15 @@ export function OutsourceOrderDetailOverview() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showCreateReceiptForm, setShowCreateReceiptForm] = useState(false);
   const [selectedItemForReceipt, setSelectedItemForReceipt] = useState<OutsourceOrderDetailWithRelations | null>(null);
+  const [showSummaryView, setShowSummaryView] = useState(false);
+
+  // Group by options state - default all enabled
+  const [groupByOptions, setGroupByOptions] = useState({
+    assignedTo: true,
+    plan: true,
+    product: true,
+    step: true,
+  });
 
   // Use the new filters hook
   const {
@@ -119,6 +128,54 @@ export function OutsourceOrderDetailOverview() {
   const deleteItemMutation = useDeleteOutsourceOrderDetail();
 
   // Note: filtering is now handled by the API through filters hook
+
+  // Group data for summary view
+  const groupSummaryData = () => {
+    const grouped = new Map();
+
+    orderDetails.forEach((item) => {
+      const assignedTo = item.outsourceOrder?.assignedToUser?.fullName || item.outsourceOrder?.assignedToUserId || '-';
+      const plan = `${item.planName} (${item.planCode})`;
+      const product = `${item.productName} (${item.product?.category || ''})`;
+      const step = `${item.stepName} (${item.productionStep?.filmSequence || '25'})`;
+
+      // Build key based on selected group options
+      const keyParts = [];
+      if (groupByOptions.assignedTo) {
+        keyParts.push(assignedTo);
+      }
+      if (groupByOptions.plan) {
+        keyParts.push(plan);
+      }
+      if (groupByOptions.product) {
+        keyParts.push(product);
+      }
+      if (groupByOptions.step) {
+        keyParts.push(step);
+      }
+
+      const key = keyParts.join('|');
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          assignedTo,
+          plan,
+          product,
+          step,
+          totalOrderedQuantity: 0,
+          totalCompletedQuantity: 0,
+        });
+      }
+
+      const group = grouped.get(key);
+      group.totalOrderedQuantity += item.orderedQuantity || 0;
+      group.totalCompletedQuantity += item.completedQuantity || 0;
+    });
+
+    return Array.from(grouped.values());
+  };
+
+  const summaryData = groupSummaryData();
 
   // Auto-select logic for quick search
   useEffect(() => {
@@ -444,6 +501,102 @@ export function OutsourceOrderDetailOverview() {
               />
             </div>
 
+            {/* Summary View Toggle */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="summary-view-toggle"
+                checked={showSummaryView}
+                onCheckedChange={checked => setShowSummaryView(checked as boolean)}
+                className="border-gray-300 bg-white"
+              />
+              <label htmlFor="summary-view-toggle" className="cursor-pointer text-sm font-medium text-gray-600">
+                📊 Tổng
+              </label>
+            </div>
+
+            {/* Group By Options - Only show when Summary View is enabled */}
+            {showSummaryView && (
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                <span className="text-xs font-medium text-blue-700">Nhóm theo:</span>
+
+                <div className="flex items-center space-x-1">
+                  <Checkbox
+                    id="group-assigned-to"
+                    checked={groupByOptions.assignedTo}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked as boolean;
+                      // Ensure at least one option is always selected
+                      const otherOptionsSelected = groupByOptions.plan || groupByOptions.product || groupByOptions.step;
+                      if (newValue || otherOptionsSelected) {
+                        setGroupByOptions(prev => ({ ...prev, assignedTo: newValue }));
+                      }
+                    }}
+                    className="border-blue-300 bg-white"
+                  />
+                  <label htmlFor="group-assigned-to" className="cursor-pointer text-xs font-medium text-blue-700">
+                    👤 Giao Cho
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-1">
+                  <Checkbox
+                    id="group-plan"
+                    checked={groupByOptions.plan}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked as boolean;
+                      // Ensure at least one option is always selected
+                      const otherOptionsSelected = groupByOptions.assignedTo || groupByOptions.product || groupByOptions.step;
+                      if (newValue || otherOptionsSelected) {
+                        setGroupByOptions(prev => ({ ...prev, plan: newValue }));
+                      }
+                    }}
+                    className="border-blue-300 bg-white"
+                  />
+                  <label htmlFor="group-plan" className="cursor-pointer text-xs font-medium text-blue-700">
+                    📋 Kế hoạch
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-1">
+                  <Checkbox
+                    id="group-product"
+                    checked={groupByOptions.product}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked as boolean;
+                      // Ensure at least one option is always selected
+                      const otherOptionsSelected = groupByOptions.assignedTo || groupByOptions.plan || groupByOptions.step;
+                      if (newValue || otherOptionsSelected) {
+                        setGroupByOptions(prev => ({ ...prev, product: newValue }));
+                      }
+                    }}
+                    className="border-blue-300 bg-white"
+                  />
+                  <label htmlFor="group-product" className="cursor-pointer text-xs font-medium text-blue-700">
+                    📦 Sản phẩm
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-1">
+                  <Checkbox
+                    id="group-step"
+                    checked={groupByOptions.step}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked as boolean;
+                      // Ensure at least one option is always selected
+                      const otherOptionsSelected = groupByOptions.assignedTo || groupByOptions.plan || groupByOptions.product;
+                      if (newValue || otherOptionsSelected) {
+                        setGroupByOptions(prev => ({ ...prev, step: newValue }));
+                      }
+                    }}
+                    className="border-blue-300 bg-white"
+                  />
+                  <label htmlFor="group-step" className="cursor-pointer text-xs font-medium text-blue-700">
+                    ⚙️ Công đoạn
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* Search Button */}
             <div className="flex gap-2">
               <Button
@@ -513,172 +666,283 @@ export function OutsourceOrderDetailOverview() {
           ? (
               <OutsourceOrderDetailSkeleton />
             )
-          : (
-              <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
-                      <TableHead className="w-12 px-6 py-4 text-left text-lg font-bold text-white">
-                        <Checkbox
-                          checked={isAllSelected}
-                          onCheckedChange={handleSelectAll}
-                          indeterminate={isSomeSelected}
-                          aria-label="Chọn tất cả"
-                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-blue-600"
-                        />
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        👤 Giao Cho
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        📅 Ngày Giao
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        📋 Kế hoạch
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        📦 Sản phẩm
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
-                        ⚙️ Công đoạn
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
-                        📊 SL đặt
-                      </TableHead>
-                      <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
-                        ✅ SL hoàn thành
-                      </TableHead>
-                      <TableHead className="w-32 px-6 py-4 text-center text-lg font-bold text-white">
-                        ⚡ Thao tác
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orderDetails.map((item, index) => (
-                      <TableRow
-                        key={item.id}
-                        className={`group transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md ${
-                          index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                        }`}
-                      >
-                        <TableCell className="px-6 py-4">
-                          <Checkbox
-                            checked={selectedItems.includes(item.id)}
-                            onCheckedChange={checked => handleSelectItem(item.id, checked as boolean)}
-                            aria-label={`Chọn item ${item.id}`}
-                          />
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex size-8 items-center justify-center rounded-full bg-blue-100">
-                              <span className="text-sm">👤</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {item.outsourceOrder?.assignedToUser?.fullName || item.outsourceOrder?.assignedToUserId || '-'}
-                              </div>
-                              {item.outsourceOrder?.assignedToUser?.shortcut && (
-                                <div className="text-xs text-gray-500">
-                                  {item.outsourceOrder.assignedToUser.shortcut}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg">📅</span>
-                            <span className="text-sm font-medium text-gray-900">
-                              {item.outsourceOrder?.orderDate ? new Date(item.outsourceOrder.orderDate).toLocaleDateString('vi-VN') : '-'}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex size-8 items-center justify-center rounded-full bg-green-100">
-                              <span className="text-sm">📋</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{item.planName}</div>
-                              <div className="text-xs text-gray-500">{item.planCode}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex size-8 items-center justify-center rounded-full bg-purple-100">
-                              <span className="text-sm">📦</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{item.productName}</div>
-                              <div className="text-xs text-gray-500">{item.product?.category || 'Category 1'}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex size-8 items-center justify-center rounded-full bg-yellow-100">
-                              <span className="text-sm">⚙️</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{item.stepName}</div>
-                              <div className="text-xs text-gray-500">
-                                Sequence:
-                                {item.productionStep?.filmSequence || '25'}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <span className="text-lg">📊</span>
-                            <span className="text-sm font-bold text-blue-600">{item.orderedQuantity}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <span className="text-lg">✅</span>
-                            <span className="text-sm font-bold text-green-600">
-                              {item.completedQuantity || 0}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-4">
-                          <div className="flex justify-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => router.push(`/dashboard/outsourceOrders/${item.outsourceOrderId}/details/${item.id}/receipts`)}
-                              className="size-10 rounded-full bg-blue-100 p-0 text-blue-600 transition-all duration-200 hover:scale-110 hover:bg-blue-200"
-                              title="Quản lý biên lai"
-                            >
-                              <Package className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCreateReceipt(item)}
-                              className="size-10 rounded-full bg-purple-100 p-0 text-purple-600 transition-all duration-200 hover:scale-110 hover:bg-purple-200"
-                              title="Tạo phiếu nhập cho đơn gia công"
-                            >
-                              <FileText className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDeleteId(item.id)}
-                              className="size-10 rounded-full bg-red-100 p-0 text-red-600 transition-all duration-200 hover:scale-110 hover:bg-red-200"
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+          : showSummaryView
+            ? (
+                <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700">
+                        {groupByOptions.assignedTo && (
+                          <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                            👤 Giao Cho
+                          </TableHead>
+                        )}
+                        {groupByOptions.plan && (
+                          <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                            📋 Kế hoạch
+                          </TableHead>
+                        )}
+                        {groupByOptions.product && (
+                          <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                            📦 Sản phẩm
+                          </TableHead>
+                        )}
+                        {groupByOptions.step && (
+                          <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                            ⚙️ Công đoạn
+                          </TableHead>
+                        )}
+                        <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                          📊 SL Đặt
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                          ✅ SL Hoàn Thành
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                    </TableHeader>
+                    <TableBody>
+                      {summaryData.map((group, index) => (
+                        <TableRow
+                          key={`${group.assignedTo}-${group.plan}-${group.product}-${group.step}`}
+                          className={`group transition-all duration-200 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:shadow-md ${
+                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                          }`}
+                        >
+                          {groupByOptions.assignedTo && (
+                            <TableCell className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex size-8 items-center justify-center rounded-full bg-blue-100">
+                                  <span className="text-sm">👤</span>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {group.assignedTo}
+                                </div>
+                              </div>
+                            </TableCell>
+                          )}
+                          {groupByOptions.plan && (
+                            <TableCell className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex size-8 items-center justify-center rounded-full bg-green-100">
+                                  <span className="text-sm">📋</span>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {group.plan}
+                                </div>
+                              </div>
+                            </TableCell>
+                          )}
+                          {groupByOptions.product && (
+                            <TableCell className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex size-8 items-center justify-center rounded-full bg-purple-100">
+                                  <span className="text-sm">📦</span>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {group.product}
+                                </div>
+                              </div>
+                            </TableCell>
+                          )}
+                          {groupByOptions.step && (
+                            <TableCell className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex size-8 items-center justify-center rounded-full bg-yellow-100">
+                                  <span className="text-sm">⚙️</span>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {group.step}
+                                </div>
+                              </div>
+                            </TableCell>
+                          )}
+                          <TableCell className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <span className="text-lg">📊</span>
+                              <span className="text-sm font-bold text-blue-600">
+                                {group.totalOrderedQuantity}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <span className="text-lg">✅</span>
+                              <span className="text-sm font-bold text-green-600">
+                                {group.totalCompletedQuantity}
+                              </span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
+            : (
+                <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
+                        <TableHead className="w-12 px-6 py-4 text-left text-lg font-bold text-white">
+                          <Checkbox
+                            checked={isAllSelected}
+                            onCheckedChange={handleSelectAll}
+                            indeterminate={isSomeSelected}
+                            aria-label="Chọn tất cả"
+                            className="border-white data-[state=checked]:bg-white data-[state=checked]:text-blue-600"
+                          />
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                          👤 Giao Cho
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                          📅 Ngày Giao
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                          📋 Kế hoạch
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                          📦 Sản phẩm
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-left text-lg font-bold text-white">
+                          ⚙️ Công đoạn
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                          📊 SL đặt
+                        </TableHead>
+                        <TableHead className="px-6 py-4 text-right text-lg font-bold text-white">
+                          ✅ SL hoàn thành
+                        </TableHead>
+                        <TableHead className="w-32 px-6 py-4 text-center text-lg font-bold text-white">
+                          ⚡ Thao tác
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orderDetails.map((item, index) => (
+                        <TableRow
+                          key={item.id}
+                          className={`group transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md ${
+                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                          }`}
+                        >
+                          <TableCell className="px-6 py-4">
+                            <Checkbox
+                              checked={selectedItems.includes(item.id)}
+                              onCheckedChange={checked => handleSelectItem(item.id, checked as boolean)}
+                              aria-label={`Chọn item ${item.id}`}
+                            />
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex size-8 items-center justify-center rounded-full bg-blue-100">
+                                <span className="text-sm">👤</span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {item.outsourceOrder?.assignedToUser?.fullName || item.outsourceOrder?.assignedToUserId || '-'}
+                                </div>
+                                {item.outsourceOrder?.assignedToUser?.shortcut && (
+                                  <div className="text-xs text-gray-500">
+                                    {item.outsourceOrder.assignedToUser.shortcut}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg">📅</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {item.outsourceOrder?.orderDate ? new Date(item.outsourceOrder.orderDate).toLocaleDateString('vi-VN') : '-'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex size-8 items-center justify-center rounded-full bg-green-100">
+                                <span className="text-sm">📋</span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{item.planName}</div>
+                                <div className="text-xs text-gray-500">{item.planCode}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex size-8 items-center justify-center rounded-full bg-purple-100">
+                                <span className="text-sm">📦</span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{item.productName}</div>
+                                <div className="text-xs text-gray-500">{item.product?.category || ''}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex size-8 items-center justify-center rounded-full bg-yellow-100">
+                                <span className="text-sm">⚙️</span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{item.stepName}</div>
+                                <div className="text-xs text-gray-500">
+                                  {item.productionStep?.filmSequence || '25'}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <span className="text-lg">📊</span>
+                              <span className="text-sm font-bold text-blue-600">{item.orderedQuantity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <span className="text-lg">✅</span>
+                              <span className="text-sm font-bold text-green-600">
+                                {item.completedQuantity || 0}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex justify-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => router.push(`/dashboard/outsourceOrders/${item.outsourceOrderId}/details/${item.id}/receipts`)}
+                                className="size-10 rounded-full bg-blue-100 p-0 text-blue-600 transition-all duration-200 hover:scale-110 hover:bg-blue-200"
+                                title="Quản lý biên lai"
+                              >
+                                <Package className="size-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCreateReceipt(item)}
+                                className="size-10 rounded-full bg-purple-100 p-0 text-purple-600 transition-all duration-200 hover:scale-110 hover:bg-purple-200"
+                                title="Tạo phiếu nhập cho đơn gia công"
+                              >
+                                <FileText className="size-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteId(item.id)}
+                                className="size-10 rounded-full bg-red-100 p-0 text-red-600 transition-all duration-200 hover:scale-110 hover:bg-red-200"
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
 
         {orderDetails.length === 0 && !isLoading && (
           <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 py-16 text-center shadow-inner">
