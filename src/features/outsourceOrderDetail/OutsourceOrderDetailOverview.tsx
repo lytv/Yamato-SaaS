@@ -41,6 +41,7 @@ import type {
   OutsourceOrderDetailFormData,
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
+import { searchVietnameseText } from '@/utils/Helpers';
 
 import { OutsourceOrderBulkForm } from '../outsourceOrder/OutsourceOrderBulkForm';
 import { OutsourceOrderReceiptForm } from '../outsourceOrderReceipt/OutsourceOrderReceiptForm';
@@ -184,30 +185,30 @@ export function OutsourceOrderDetailOverview() {
       return;
     }
 
-    // Auto-select assigned user when shortcut matches exactly
+    // Auto-select assigned user when shortcut or fullName matches (with Vietnamese support)
     if (tempFilters.assignedUserSearch) {
       const matchedUser = relationOptions.assignedUsers?.find(
-        user => user.shortcut === tempFilters.assignedUserSearch,
+        user => searchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
       );
       if (matchedUser && tempFilters.assignedToUserId !== matchedUser.id) {
         setTempAssignedToUserId(matchedUser.id);
       }
     }
 
-    // Auto-select product when category matches exactly
+    // Auto-select product when name, code, or category matches (with Vietnamese support)
     if (tempFilters.productSearch) {
       const matchedProduct = relationOptions.products?.find(
-        product => product.category === tempFilters.productSearch,
+        product => searchVietnameseText(product, ['productName', 'productCode', 'category'], tempFilters.productSearch || ''),
       );
       if (matchedProduct && tempFilters.productId !== matchedProduct.id) {
         setTempProductId(matchedProduct.id);
       }
     }
 
-    // Auto-select production step when sequence matches exactly
+    // Auto-select production step when name, code, or sequence matches (with Vietnamese support)
     if (tempFilters.productionStepSearch) {
       const matchedStep = relationOptions.productionSteps?.find(
-        step => step.filmSequence === tempFilters.productionStepSearch,
+        step => searchVietnameseText(step, ['stepName', 'stepCode', 'filmSequence'], tempFilters.productionStepSearch || ''),
       );
       if (matchedStep && tempFilters.productionStepId !== matchedStep.id) {
         setTempProductionStepId(matchedStep.id);
@@ -378,7 +379,7 @@ export function OutsourceOrderDetailOverview() {
             <div className="min-w-[160px] flex-1 space-y-1">
               <label htmlFor="assigned-to-select-detail" className="text-xs font-medium text-gray-600">👤 Giao Cho</label>
               <Input
-                placeholder="Tìm theo Shortcut..."
+                placeholder="Tìm theo tên hoặc shortcut..."
                 value={tempFilters.assignedUserSearch || ''}
                 onChange={e => setTempAssignedUserSearch(e.target.value || undefined)}
                 className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -392,11 +393,17 @@ export function OutsourceOrderDetailOverview() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {relationOptions?.assignedUsers?.map(user => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.fullName}
-                    </SelectItem>
-                  ))}
+                  {relationOptions?.assignedUsers
+                    ?.filter(user =>
+                      !tempFilters.assignedUserSearch
+                      || searchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
+                    )
+                    ?.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.fullName}
+                        {user.shortcut && ` (${user.shortcut})`}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -405,7 +412,7 @@ export function OutsourceOrderDetailOverview() {
             <div className="min-w-[160px] flex-1 space-y-1">
               <label htmlFor="product-select-detail" className="text-xs font-medium text-gray-600">📦 Sản phẩm</label>
               <Input
-                placeholder="Tìm theo Category..."
+                placeholder="Tìm theo tên, mã hoặc category..."
                 value={tempFilters.productSearch || ''}
                 onChange={e => setTempProductSearch(e.target.value || undefined)}
                 className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -419,15 +426,17 @@ export function OutsourceOrderDetailOverview() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {relationOptions?.products?.map(product => (
-                    <SelectItem key={product.id} value={product.id.toString()}>
-                      {product.productName}
-                      {' '}
-                      (
-                      {product.productCode}
-                      )
-                    </SelectItem>
-                  ))}
+                  {relationOptions?.products
+                    ?.filter(product =>
+                      !tempFilters.productSearch
+                      || searchVietnameseText(product, ['productName', 'productCode', 'category'], tempFilters.productSearch || ''),
+                    )
+                    ?.map(product => (
+                      <SelectItem key={product.id} value={product.id.toString()}>
+                        {product.productName}
+                        {product.productCode && ` (${product.productCode})`}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -436,7 +445,7 @@ export function OutsourceOrderDetailOverview() {
             <div className="min-w-[160px] flex-1 space-y-1">
               <label htmlFor="production-step-select-detail" className="text-xs font-medium text-gray-600">⚙️ Công đoạn</label>
               <Input
-                placeholder="Tìm theo Sequence..."
+                placeholder="Tìm theo tên, mã hoặc sequence..."
                 value={tempFilters.productionStepSearch || ''}
                 onChange={e => setTempProductionStepSearch(e.target.value || undefined)}
                 className="mb-1 border-gray-300 bg-white text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -450,15 +459,17 @@ export function OutsourceOrderDetailOverview() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {relationOptions?.productionSteps?.map(step => (
-                    <SelectItem key={step.id} value={step.id.toString()}>
-                      {step.stepName}
-                      {' '}
-                      (
-                      {step.stepCode}
-                      )
-                    </SelectItem>
-                  ))}
+                  {relationOptions?.productionSteps
+                    ?.filter(step =>
+                      !tempFilters.productionStepSearch
+                      || searchVietnameseText(step, ['stepName', 'stepCode', 'filmSequence'], tempFilters.productionStepSearch || ''),
+                    )
+                    ?.map(step => (
+                      <SelectItem key={step.id} value={step.id.toString()}>
+                        {step.stepName}
+                        {step.stepCode && ` (${step.stepCode})`}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
