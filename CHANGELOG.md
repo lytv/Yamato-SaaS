@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/lytv/Yamato-SaaS/compare/v1.6.4...v1.6.5) (2025-09-22)
+
+
+### Bug Fixes
+
+* **cap nhat tim nahn:** ok ([169adaa](https://github.com/lytv/Yamato-SaaS/commit/169adaacbeb428164ce479f02956256c695c5692))
+
 ## [1.6.4](https://github.com/lytv/Yamato-SaaS/compare/v1.6.3...v1.6.4) (2025-09-19)
 
 
