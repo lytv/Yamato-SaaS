@@ -80,3 +80,29 @@ export const searchVietnameseText = (
     return normalizedFieldValue.includes(normalizedSearchTerm);
   });
 };
+
+/**
+ * Exact match search function for auto-select behavior
+ * Only returns true if searchTerm exactly matches one of the searchFields
+ */
+export const exactMatchVietnameseText = (
+  item: Record<string, any>,
+  searchFields: string[],
+  searchTerm: string,
+): boolean => {
+  if (!searchTerm.trim()) {
+    return false;
+  }
+
+  const normalizedSearchTerm = normalizeVietnameseText(searchTerm);
+
+  return searchFields.some((field) => {
+    const fieldValue = item[field];
+    if (!fieldValue) {
+      return false;
+    }
+
+    const normalizedFieldValue = normalizeVietnameseText(String(fieldValue));
+    return normalizedFieldValue === normalizedSearchTerm;
+  });
+};

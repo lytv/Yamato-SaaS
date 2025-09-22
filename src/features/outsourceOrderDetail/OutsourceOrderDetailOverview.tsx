@@ -41,7 +41,7 @@ import type {
   OutsourceOrderDetailFormData,
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
-import { searchVietnameseText } from '@/utils/Helpers';
+import { exactMatchVietnameseText, searchVietnameseText } from '@/utils/Helpers';
 
 import { OutsourceOrderBulkForm } from '../outsourceOrder/OutsourceOrderBulkForm';
 import { OutsourceOrderReceiptForm } from '../outsourceOrderReceipt/OutsourceOrderReceiptForm';
@@ -185,30 +185,30 @@ export function OutsourceOrderDetailOverview() {
       return;
     }
 
-    // Auto-select assigned user when shortcut or fullName matches (with Vietnamese support)
+    // Auto-select assigned user only when exact match (with Vietnamese support)
     if (tempFilters.assignedUserSearch) {
       const matchedUser = relationOptions.assignedUsers?.find(
-        user => searchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
+        user => exactMatchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
       );
       if (matchedUser && tempFilters.assignedToUserId !== matchedUser.id) {
         setTempAssignedToUserId(matchedUser.id);
       }
     }
 
-    // Auto-select product when name, code, or category matches (with Vietnamese support)
+    // Auto-select product only when exact match (with Vietnamese support)
     if (tempFilters.productSearch) {
       const matchedProduct = relationOptions.products?.find(
-        product => searchVietnameseText(product, ['productName', 'productCode', 'category'], tempFilters.productSearch || ''),
+        product => exactMatchVietnameseText(product, ['productName', 'productCode', 'category'], tempFilters.productSearch || ''),
       );
       if (matchedProduct && tempFilters.productId !== matchedProduct.id) {
         setTempProductId(matchedProduct.id);
       }
     }
 
-    // Auto-select production step when name, code, or sequence matches (with Vietnamese support)
+    // Auto-select production step only when exact match (with Vietnamese support)
     if (tempFilters.productionStepSearch) {
       const matchedStep = relationOptions.productionSteps?.find(
-        step => searchVietnameseText(step, ['stepName', 'stepCode', 'filmSequence'], tempFilters.productionStepSearch || ''),
+        step => exactMatchVietnameseText(step, ['stepName', 'stepCode', 'filmSequence'], tempFilters.productionStepSearch || ''),
       );
       if (matchedStep && tempFilters.productionStepId !== matchedStep.id) {
         setTempProductionStepId(matchedStep.id);

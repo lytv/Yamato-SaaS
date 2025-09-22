@@ -1,4 +1,4 @@
-import { normalizeVietnameseText, searchVietnameseText } from '../Helpers';
+import { exactMatchVietnameseText, normalizeVietnameseText, searchVietnameseText } from '../Helpers';
 
 describe('Vietnamese Text Search for Comboboxes', () => {
   describe('normalizeVietnameseText', () => {
@@ -92,6 +92,36 @@ describe('Vietnamese Text Search for Comboboxes', () => {
 
       expect(searchVietnameseText(userWithMissingField, ['fullName', 'shortcut'], 'test')).toBe(true);
       expect(searchVietnameseText(userWithMissingField, ['shortcut'], 'test')).toBe(false);
+    });
+  });
+
+  describe('exactMatchVietnameseText', () => {
+    const testUsers = [
+      { id: '1', fullName: 'Nguyễn Văn Anh', shortcut: 'NVA' },
+      { id: '2', fullName: 'Trần Thị Bích', shortcut: 'TTB' },
+    ];
+
+    it('should return true for exact matches with Vietnamese diacritics', () => {
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], 'Nguyễn Văn Anh')).toBe(true);
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], 'nguyen van anh')).toBe(true);
+      expect(exactMatchVietnameseText(testUsers[0], ['shortcut'], 'NVA')).toBe(true);
+      expect(exactMatchVietnameseText(testUsers[0], ['shortcut'], 'nva')).toBe(true);
+    });
+
+    it('should return false for partial matches', () => {
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], 'Nguyễn')).toBe(false);
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], 'nguyen')).toBe(false);
+      expect(exactMatchVietnameseText(testUsers[0], ['shortcut'], 'NV')).toBe(false);
+    });
+
+    it('should return false for empty search term', () => {
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], '')).toBe(false);
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName'], '   ')).toBe(false);
+    });
+
+    it('should work across multiple fields', () => {
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName', 'shortcut'], 'NVA')).toBe(true);
+      expect(exactMatchVietnameseText(testUsers[0], ['fullName', 'shortcut'], 'Nguyễn Văn Anh')).toBe(true);
     });
   });
 
