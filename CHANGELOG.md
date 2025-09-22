@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/lytv/Yamato-SaaS/compare/v1.6.5...v1.6.6) (2025-09-22)
+
+
+### Bug Fixes
+
+* **fix bug tu tim:** ok ([d780c4f](https://github.com/lytv/Yamato-SaaS/commit/d780c4f7e5d49354b69e376932a04beda9482e8d))
+
 ## [1.6.5](https://github.com/lytv/Yamato-SaaS/compare/v1.6.4...v1.6.5) (2025-09-22)
 
 
