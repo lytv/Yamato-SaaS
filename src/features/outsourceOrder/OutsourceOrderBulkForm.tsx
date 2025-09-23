@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useOutsourceOrderDetailRelationOptions } from '@/hooks/useOutsourceOrderDetails';
 import { useCreateOutsourceOrderWithDetails } from '@/hooks/useOutsourceOrderMutations';
 import {
   useOutsourceOrderFilteredLocations,
@@ -52,7 +53,7 @@ import type {
   OutsourceOrderBulkFormData,
   OutsourceOrderProductionStepOption,
 } from '@/types/outsourceOrder';
-import { cn } from '@/utils/Helpers';
+import { cn, searchVietnameseText } from '@/utils/Helpers';
 
 type ProductionStepWithSelection = OutsourceOrderProductionStepOption & {
   selected: boolean;
@@ -85,8 +86,15 @@ export function OutsourceOrderBulkForm({
   const [productionSteps, setProductionSteps] = useState<ProductionStepWithSelection[]>([]);
   const [stepFilter, setStepFilter] = useState('');
 
+  // User search state
+  const [assignedUserSearch, setAssignedUserSearch] = useState('');
+
+  // Product search state
+  const [productSearch, setProductSearch] = useState('');
+
   // Hooks for data fetching
   const { data: relationOptions } = useOutsourceOrderRelationOptions();
+  const { data: detailRelationOptions } = useOutsourceOrderDetailRelationOptions();
   const { data: filteredProducts } = useOutsourceOrderFilteredProducts(selectedPlan?.id || null);
   const { data: filteredProductSubs } = useOutsourceOrderFilteredProductSubs(selectedProduct?.id || null);
   const { data: filteredLocations } = useOutsourceOrderFilteredLocations(selectedProductSub?.code || null);
@@ -148,6 +156,7 @@ export function OutsourceOrderBulkForm({
       setSelectedProduct(null);
       setSelectedProductSub(null);
       setSelectedLocation(null);
+      setProductSearch(''); // Reset product search
       form.setValue('productId', 0);
     }
   }, [selectedPlan, form]);
@@ -506,31 +515,47 @@ export function OutsourceOrderBulkForm({
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Assigned To */}
                     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                      <FormField
-                        control={form.control}
-                        name="assignedToUserId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="h-12 text-base">
-                                  <SelectValue placeholder="👤 Chọn Vệ Tinh" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {relationOptions?.userSyncs
-                                  ?.filter((user: { id: string; fullName: string }) => user.id && user.id.trim() !== '')
-                                  ?.map((user: { id: string; fullName: string }) => (
-                                    <SelectItem key={user.id} value={user.id} className="text-base">
-                                      {user.fullName}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="🔍 Tìm theo tên hoặc shortcut..."
+                          value={assignedUserSearch}
+                          onChange={e => setAssignedUserSearch(e.target.value)}
+                          className="h-10 border-blue-300 bg-white text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                        <FormField
+                          control={form.control}
+                          name="assignedToUserId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 text-base">
+                                    <SelectValue placeholder="👤 Chọn Vệ Tinh" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {detailRelationOptions?.assignedUsers
+                                    ?.filter((user: { id: string; fullName: string; shortcut: string | null }) => {
+                                      return user.id && user.id.trim() !== ''
+                                        && user.shortcut && (user.shortcut.toLowerCase().startsWith('vt'))
+                                        && (
+                                          !assignedUserSearch
+                                          || searchVietnameseText(user, ['shortcut', 'fullName'], assignedUserSearch)
+                                        );
+                                    })
+                                    ?.map((user: { id: string; fullName: string; shortcut: string | null }) => (
+                                      <SelectItem key={user.id} value={user.id} className="text-base">
+                                        {user.fullName}
+                                        {user.shortcut && ` (${user.shortcut})`}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
 
                     {/* Order Date */}
@@ -729,31 +754,47 @@ export function OutsourceOrderBulkForm({
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Chọn Vệ Tinh */}
                     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                      <FormField
-                        control={form.control}
-                        name="assignedToUserId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="h-12 text-base">
-                                  <SelectValue placeholder="👤 Chọn Vệ Tinh" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {relationOptions?.userSyncs
-                                  ?.filter((user: { id: string; fullName: string }) => user.id && user.id.trim() !== '')
-                                  ?.map((user: { id: string; fullName: string }) => (
-                                    <SelectItem key={user.id} value={user.id} className="text-base">
-                                      {user.fullName}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="🔍 Tìm theo tên hoặc shortcut..."
+                          value={assignedUserSearch}
+                          onChange={e => setAssignedUserSearch(e.target.value)}
+                          className="h-10 border-blue-300 bg-white text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                        <FormField
+                          control={form.control}
+                          name="assignedToUserId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 text-base">
+                                    <SelectValue placeholder="👤 Chọn Vệ Tinh" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {detailRelationOptions?.assignedUsers
+                                    ?.filter((user: { id: string; fullName: string; shortcut: string | null }) => {
+                                      return user.id && user.id.trim() !== ''
+                                        && user.shortcut && (user.shortcut.toLowerCase().startsWith('vt'))
+                                        && (
+                                          !assignedUserSearch
+                                          || searchVietnameseText(user, ['shortcut', 'fullName'], assignedUserSearch)
+                                        );
+                                    })
+                                    ?.map((user: { id: string; fullName: string; shortcut: string | null }) => (
+                                      <SelectItem key={user.id} value={user.id} className="text-base">
+                                        {user.fullName}
+                                        {user.shortcut && ` (${user.shortcut})`}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
 
                     {/* Chọn Kế Hoạch */}
@@ -794,48 +835,60 @@ export function OutsourceOrderBulkForm({
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Chọn Sản Phẩm */}
                     <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                      <FormField
-                        control={form.control}
-                        name="productId"
-                        render={() => (
-                          <FormItem>
-                            <Select
-                              onValueChange={handleProductChange}
-                              value={selectedProduct?.id.toString() || ''}
-                              disabled={!selectedPlan}
-                            >
-                              <FormControl>
-                                <SelectTrigger className={cn(
-                                  'h-12 text-base',
-                                  !selectedPlan && 'bg-gray-100',
-                                )}
-                                >
-                                  <SelectValue placeholder={
-                                    !selectedPlan
-                                      ? '⚠️ Chọn kế hoạch trước'
-                                      : '📦 Chọn sản phẩm'
-                                  }
-                                  />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {filteredProducts
-                                  ?.filter((product: { id: number; productCode: string; productName: string }) => product.id && product.productCode && product.productCode.trim() !== '')
-                                  ?.map((product: { id: number; productCode: string; productName: string }) => (
-                                    <SelectItem key={product.id} value={product.id.toString()} className="text-base">
-                                      {product.productName}
-                                      {' '}
-                                      (
-                                      {product.productCode}
-                                      )
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="🔍 Tìm theo tên hoặc category..."
+                          value={productSearch}
+                          onChange={e => setProductSearch(e.target.value)}
+                          disabled={!selectedPlan}
+                          className="h-10 border-green-300 bg-white text-sm shadow-sm focus:border-green-500 focus:ring-green-500"
+                        />
+                        <FormField
+                          control={form.control}
+                          name="productId"
+                          render={() => (
+                            <FormItem>
+                              <Select
+                                onValueChange={handleProductChange}
+                                value={selectedProduct?.id.toString() || ''}
+                                disabled={!selectedPlan}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className={cn(
+                                    'h-12 text-base',
+                                    !selectedPlan && 'bg-gray-100',
+                                  )}
+                                  >
+                                    <SelectValue placeholder={
+                                      !selectedPlan
+                                        ? '⚠️ Chọn kế hoạch trước'
+                                        : '📦 Chọn sản phẩm'
+                                    }
+                                    />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {filteredProducts
+                                    ?.filter((product: { id: number; productCode: string; productName: string; category?: string }) => {
+                                      return product.id && product.productCode && product.productCode.trim() !== ''
+                                        && (
+                                          !productSearch
+                                          || searchVietnameseText(product, ['productName', 'productCode', 'category'], productSearch)
+                                        );
+                                    })
+                                    ?.map((product: { id: number; productCode: string; productName: string; category?: string }) => (
+                                      <SelectItem key={product.id} value={product.id.toString()} className="text-base">
+                                        {product.productName}
+                                        {product.category && ` (${product.category})`}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
 
                     {/* Chọn Product Sub */}
