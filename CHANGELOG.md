@@ -1,3 +1,11 @@
+## [1.6.7](https://github.com/lytv/Yamato-SaaS/compare/v1.6.6...v1.6.7) (2025-09-23)
+
+
+### Bug Fixes
+
+* **bo auto:** ok ([bd937d1](https://github.com/lytv/Yamato-SaaS/commit/bd937d13617b1383025e88402846385b03881f30))
+* disable auto-select functionality for dropdown testing ([0d4bbc6](https://github.com/lytv/Yamato-SaaS/commit/0d4bbc6780b54026de18df267918db69eb7a6657))
+
 ## [1.6.6](https://github.com/lytv/Yamato-SaaS/compare/v1.6.5...v1.6.6) (2025-09-22)
 
 
