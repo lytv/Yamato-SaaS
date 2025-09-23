@@ -3,15 +3,16 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useProductionStepDetailQuantityLimit } from '../useProductionStepDetailQuantityLimit';
 
 // Mock fetch
-global.fetch = jest.fn();
+globalThis.fetch = vi.fn();
 
 describe('useProductionStepDetailQuantityLimit', () => {
   beforeEach(() => {
-    (fetch as jest.Mock).mockClear();
+    (fetch as any).mockClear();
   });
 
   it('should return null initially', () => {
@@ -32,7 +33,7 @@ describe('useProductionStepDetailQuantityLimit', () => {
       },
     };
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -56,12 +57,12 @@ describe('useProductionStepDetailQuantityLimit', () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      '/api/production-step-details/quantity-limit?productionStepDetailId=1'
+      '/api/production-step-details/quantity-limit?productionStepDetailId=1',
     );
   });
 
   it('should handle fetch error', async () => {
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    (fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
     const { result } = renderHook(() => useProductionStepDetailQuantityLimit());
 

@@ -8,8 +8,8 @@ import { NextResponse } from 'next/server';
 
 import { getSatelliteProgressFilterOptions } from '@/libs/queries/satelliteProgress';
 import type {
-  SatelliteProgressFilterOptionsResponse,
   SatelliteProgressErrorResponse,
+  SatelliteProgressFilterOptionsResponse,
 } from '@/types/satelliteProgress';
 
 /**
@@ -40,7 +40,6 @@ export async function GET() {
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('Satellite progress filter options API error:', error);
 

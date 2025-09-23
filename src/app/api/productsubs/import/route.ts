@@ -9,11 +9,11 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
-import { createProductSub, getProductSubByCode } from '@/libs/queries/productsub';
 import { getProductByName } from '@/libs/queries/product';
+import { createProductSub, getProductSubByCode } from '@/libs/queries/productsub';
 import type { ImportError } from '@/types/import';
 import type { ProductSub } from '@/types/productsub';
-import { parseYmtPlanForProductSub, validateProductSubImportData, type ImportProductSubData } from '@/utils/excelImportHelpers';
+import { type ImportProductSubData, parseYmtPlanForProductSub, validateProductSubImportData } from '@/utils/excelImportHelpers';
 
 // Force dynamic rendering due to auth() usage and file upload
 export const dynamic = 'force-dynamic';
@@ -126,7 +126,7 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
 }> {
   const successful: ProductSub[] = [];
   const failed: ImportError[] = [];
-  let skipped = 0;
+  const skipped = 0;
 
   for (const productSubData of productSubs) {
     try {
@@ -151,7 +151,7 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
       let finalProductSubCode = productSubCode;
       let attempts = 0;
       const maxAttempts = 10;
-      
+
       while (attempts < maxAttempts) {
         const existing = await getProductSubByCode(finalProductSubCode, ownerId);
         if (!existing) {
@@ -184,7 +184,7 @@ async function processImportData(productSubs: ImportProductSubData[], ownerId: s
         category: subCategory,
         notes: `Imported from YMT Plan`,
       };
-      
+
       const dbProductSub = await createProductSub(createData);
 
       // Transform database product_sub to API product_sub type

@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { and, eq, sql } from 'drizzle-orm';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { db } from '@/libs/DB';
 import { productSchema } from '@/models/Schema';
-import { and, eq, sql } from 'drizzle-orm';
 
 type Product = {
   id: number;
@@ -18,20 +20,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const ownerId = orgId || userId;
-    
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const planId = searchParams.get('planId');
-    
+
     if (!category) {
       return NextResponse.json(
         { error: 'Category parameter is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     let query;
-    
+
     if (planId) {
       // Get product by category filtered by plan (through plan_detail)
       query = db
@@ -51,8 +53,8 @@ export async function GET(request: NextRequest) {
               WHERE pd.product_code = ${productSchema.productCode}
               AND pd.plan_id = ${planId}
               AND pd.owner_id = ${ownerId}
-            )`
-          )
+            )`,
+          ),
         )
         .limit(1);
     } else {
@@ -68,8 +70,8 @@ export async function GET(request: NextRequest) {
         .where(
           and(
             eq(productSchema.ownerId, ownerId),
-            eq(productSchema.category, category)
-          )
+            eq(productSchema.category, category),
+          ),
         )
         .limit(1);
     }
@@ -79,7 +81,7 @@ export async function GET(request: NextRequest) {
     if (!product) {
       return NextResponse.json(
         { error: 'No product found with this category' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -91,7 +93,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching product by category:', error);
     return NextResponse.json(
       { error: 'Failed to fetch product by category' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

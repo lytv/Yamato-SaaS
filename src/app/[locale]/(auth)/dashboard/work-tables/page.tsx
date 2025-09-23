@@ -1,17 +1,17 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { BarChart3, Plus, Settings, Table, Upload, Users, Wrench } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Table, Plus, Wrench, BarChart3, Settings, Users, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { WorkTableForm } from '@/features/workTable/WorkTableForm';
-import { WorkTableList } from '@/features/workTable/WorkTableList';
 import { WorkTableImportModal } from '@/features/workTable/WorkTableImportModal';
+import { WorkTableList } from '@/features/workTable/WorkTableList';
 import { useCreateWorkTable, useUpdateWorkTable } from '@/hooks/useWorkTableMutations';
-import type { WorkTable } from '@/types/workTable';
 import type { ImportResult } from '@/types/import';
+import type { WorkTable } from '@/types/workTable';
 
 export default function WorkTablesPage() {
   const { userId } = useAuth();
@@ -88,51 +88,51 @@ export default function WorkTablesPage() {
         <div className="container mx-auto max-w-6xl px-6 py-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="mb-8 lg:mb-0">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <Table className="w-8 h-8 text-white" />
+              <div className="mb-4 flex items-center space-x-4">
+                <div className="flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <Table className="size-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">
+                  <h1 className="mb-2 text-4xl font-bold">
                     Quản lý bàn làm việc
                   </h1>
-                  <p className="text-purple-100 text-lg">
+                  <p className="text-lg text-purple-100">
                     Quản lý và theo dõi các bàn làm việc trong xưởng sản xuất
                   </p>
                 </div>
               </div>
-              
+
               {/* Feature indicators */}
               <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Wrench className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <Wrench className="size-4" />
                   <span>Work Station Management</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Users className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <Users className="size-4" />
                   <span>Operator Assignment</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <BarChart3 className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <BarChart3 className="size-4" />
                   <span>Efficiency Tracking</span>
                 </div>
               </div>
             </div>
 
             {/* CTA Buttons */}
-            <div className="lg:text-right space-y-3">
+            <div className="space-y-3 lg:text-right">
               <Button
                 onClick={handleCreate}
-                className="bg-white text-purple-600 hover:bg-purple-50 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200 w-full lg:w-auto"
+                className="h-auto w-full border-0 bg-white px-8 py-4 text-lg font-semibold text-purple-600 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-purple-50 lg:w-auto"
               >
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="mr-2 size-5" />
                 {t('add_new', { default: 'Add Work Table' })}
               </Button>
               <Button
                 onClick={handleImportClick}
-                className="bg-purple-500 text-white hover:bg-purple-400 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200 w-full lg:w-auto lg:ml-3"
+                className="h-auto w-full border-0 bg-purple-500 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-purple-400 lg:ml-3 lg:w-auto"
               >
-                <Upload className="w-5 h-5 mr-2" />
+                <Upload className="mr-2 size-5" />
                 Import từ YMT Plan
               </Button>
             </div>
@@ -141,27 +141,26 @@ export default function WorkTablesPage() {
       </div>
 
       {/* Content Container */}
-      <div className="container mx-auto max-w-6xl px-6 py-8 space-y-8">
+      <div className="container mx-auto max-w-6xl space-y-8 px-6 py-8">
         {/* Create/Edit Form */}
         {formMode !== 'hidden' && (
           <div className="relative">
             {/* Modal Backdrop */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-              <div className="relative z-10 w-full max-w-5xl mx-4 rounded-xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm duration-300 animate-in fade-in">
+              <div className="relative z-10 mx-4 w-full max-w-5xl rounded-xl bg-white shadow-2xl duration-300 animate-in zoom-in-95">
+                <div className="flex items-center justify-between border-b border-gray-200 p-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
-                      <Table className="w-5 h-5 text-white" />
+                    <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-violet-600">
+                      <Table className="size-5 text-white" />
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">
                         {formMode === 'edit' ? 'Edit Work Table' : 'Create Work Table'}
                       </h2>
                       <p className="text-sm text-gray-500">
-                        {formMode === 'edit' 
+                        {formMode === 'edit'
                           ? 'Update work table configuration'
-                          : 'Add a new work table to the production line'
-                        }
+                          : 'Add a new work table to the production line'}
                       </p>
                     </div>
                   </div>
@@ -169,7 +168,7 @@ export default function WorkTablesPage() {
                     variant="ghost"
                     size="sm"
                     onClick={handleFormCancel}
-                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2"
+                    className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                   >
                     <span className="text-lg">×</span>
                   </Button>
@@ -187,7 +186,7 @@ export default function WorkTablesPage() {
                   {(createError || updateError) && (
                     <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
                       <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4 text-red-600" />
+                        <Settings className="size-4 text-red-600" />
                         <p className="text-sm font-medium text-red-800">Error</p>
                       </div>
                       <p className="mt-1 text-sm text-red-700">{createError || updateError}</p>

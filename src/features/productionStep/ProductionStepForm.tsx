@@ -5,7 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Settings, FileText, GitBranch, Tag, StickyNote } from 'lucide-react';
+import { FileText, GitBranch, Settings, StickyNote, Tag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -83,14 +83,14 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 p-6 rounded-xl">
+    <div className="rounded-xl bg-gradient-to-br from-slate-50 to-indigo-50 p-6">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Form Header */}
-        <div className="text-center pb-6 border-b border-gray-200">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Settings className="w-8 h-8 text-white" />
+        <div className="border-b border-gray-200 pb-6 text-center">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600">
+            <Settings className="size-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
             {isEditing ? t('edit_title') : t('title')}
           </h2>
           <p className="text-gray-600">
@@ -100,19 +100,19 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
 
         {/* Error Display */}
         {error && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
             <div className="text-sm text-red-700">{t('error')}</div>
           </div>
         )}
 
         {/* Form Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Step Code Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <FileText className="w-4 h-4 mr-2 text-indigo-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <FileText className="mr-2 size-4 text-indigo-500" />
               {t('stepCode')}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="stepCode"
@@ -120,17 +120,17 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
               {...register('stepCode')}
               aria-required="true"
               aria-describedby={errors.stepCode ? 'stepCode-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                errors.stepCode 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                errors.stepCode
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('stepCode_placeholder')}
             />
             {errors.stepCode && (
-              <p id="stepCode-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="stepCode-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.stepCode.message}
               </p>
@@ -138,11 +138,11 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           </div>
 
           {/* Step Name Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Settings className="w-4 h-4 mr-2 text-indigo-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Settings className="mr-2 size-4 text-indigo-500" />
               {t('stepName')}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="stepName"
@@ -150,17 +150,17 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
               {...register('stepName')}
               aria-required="true"
               aria-describedby={errors.stepName ? 'stepName-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                errors.stepName 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                errors.stepName
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('stepName_placeholder')}
             />
             {errors.stepName && (
-              <p id="stepName-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="stepName-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.stepName.message}
               </p>
@@ -168,9 +168,9 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           </div>
 
           {/* Film Sequence Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <GitBranch className="w-4 h-4 mr-2 text-indigo-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <GitBranch className="mr-2 size-4 text-indigo-500" />
               {t('filmSequence')}
             </label>
             <input
@@ -178,17 +178,17 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
               type="text"
               {...register('filmSequence')}
               aria-describedby={errors.filmSequence ? 'filmSequence-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                errors.filmSequence 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                errors.filmSequence
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('filmSequence_placeholder')}
             />
             {errors.filmSequence && (
-              <p id="filmSequence-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="filmSequence-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.filmSequence.message}
               </p>
@@ -196,9 +196,9 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           </div>
 
           {/* Step Group Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Tag className="w-4 h-4 mr-2 text-indigo-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Tag className="mr-2 size-4 text-indigo-500" />
               {t('stepGroup')}
             </label>
             <input
@@ -206,17 +206,17 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
               type="text"
               {...register('stepGroup')}
               aria-describedby={errors.stepGroup ? 'stepGroup-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                errors.stepGroup 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                errors.stepGroup
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('stepGroup_placeholder')}
             />
             {errors.stepGroup && (
-              <p id="stepGroup-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="stepGroup-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.stepGroup.message}
               </p>
@@ -224,9 +224,9 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           </div>
 
           {/* Notes Field - Full Width */}
-          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <StickyNote className="w-4 h-4 mr-2 text-indigo-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:col-span-2">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <StickyNote className="mr-2 size-4 text-indigo-500" />
               {t('notes')}
             </label>
             <textarea
@@ -234,17 +234,17 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
               rows={4}
               {...register('notes')}
               aria-describedby={errors.notes ? 'notes-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none ${
-                errors.notes 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                errors.notes
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('notes_placeholder')}
             />
             {errors.notes && (
-              <p id="notes-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="notes-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.notes.message}
               </p>
@@ -253,11 +253,11 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 border-t border-gray-200 pt-6">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50"
           >
             {t('cancel')}
           </button>
@@ -265,7 +265,7 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50"
           >
             {t('reset')}
           </button>
@@ -273,10 +273,10 @@ export function ProductionStepForm({ productionStep, onSuccess, onCancel }: Prod
           <button
             type="submit"
             disabled={isSubmitting || !isValid}
-            className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:from-indigo-700 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting && (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              <div className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
             )}
             {isSubmitting
               ? isEditing

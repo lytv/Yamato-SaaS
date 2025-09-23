@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,12 +47,12 @@ export async function GET(request: NextRequest) {
           code: 'VALIDATION_ERROR',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const params = validation.data;
-    
+
     // Get all data for export
     const outsourceOrderDetails = await getOutsourceOrderDetailsByOwner({
       ...params,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
           error: 'No data found to export',
           code: 'NO_DATA',
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     if (params.format === 'csv') {
       const csvContent = generateCSV(outsourceOrderDetails, params.includeHeaders);
-      
+
       return new NextResponse(csvContent, {
         status: 200,
         headers: {
@@ -101,20 +101,22 @@ export async function GET(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 function generateCSV(data: any[], includeHeaders: boolean): string {
-  if (data.length === 0) return '';
+  if (data.length === 0) {
+    return '';
+  }
 
   // Define headers
   const headers = [
     'ID',
     'Order Code',
     'Plan Code',
-    'Plan Name', 
+    'Plan Name',
     'Product Code',
     'Product Name',
     'Step Code',
@@ -160,15 +162,15 @@ function generateCSV(data: any[], includeHeaders: boolean): string {
 
   // Convert to CSV string
   return allRows
-    .map(row => 
-      row.map(field => {
+    .map(row =>
+      row.map((field) => {
         const stringField = String(field);
         // Wrap in quotes if contains comma, quote, or newline
         if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
           return `"${stringField.replace(/"/g, '""')}"`;
         }
         return stringField;
-      }).join(',')
+      }).join(','),
     )
     .join('\n');
 }

@@ -3,8 +3,11 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
+import { Buffer } from 'node:buffer';
+
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 
 import { exportPriceSummary } from '@/libs/queries/priceSummary';
@@ -90,7 +93,6 @@ export async function GET(request: NextRequest) {
         'Content-Length': fileBuffer.length.toString(),
       },
     });
-
   } catch (error) {
     console.error('Price summary export API error:', error);
 
@@ -109,12 +111,14 @@ export async function GET(request: NextRequest) {
  * Prepare data for export with dynamic step columns
  */
 function prepareExportData(data: PriceSummaryItem[], includeHeaders: boolean): any[][] {
-  if (data.length === 0) return [];
+  if (data.length === 0) {
+    return [];
+  }
 
   // Collect all unique step codes across all products
   const allStepCodes = new Set<string>();
-  data.forEach(item => {
-    Object.keys(item.step_data).forEach(stepCode => {
+  data.forEach((item) => {
+    Object.keys(item.step_data).forEach((stepCode) => {
       allStepCodes.add(stepCode);
     });
   });
@@ -123,7 +127,7 @@ function prepareExportData(data: PriceSummaryItem[], includeHeaders: boolean): a
   const sortedStepCodes = Array.from(allStepCodes).sort((a, b) => {
     const getNumericPart = (code: string) => {
       const match = code.match(/\d+/);
-      return match ? parseInt(match[0], 10) : 0;
+      return match ? Number.parseInt(match[0], 10) : 0;
     };
     return getNumericPart(a) - getNumericPart(b);
   });
@@ -135,7 +139,7 @@ function prepareExportData(data: PriceSummaryItem[], includeHeaders: boolean): a
     const headers = [
       'Mã sản phẩm',
       'Tên sản phẩm',
-      ...sortedStepCodes.map(stepCode => {
+      ...sortedStepCodes.map((stepCode) => {
         const firstItemWithStep = data.find(item => item.step_data[stepCode]);
         return firstItemWithStep?.step_data[stepCode]?.step_name || stepCode;
       }),
@@ -146,11 +150,11 @@ function prepareExportData(data: PriceSummaryItem[], includeHeaders: boolean): a
   }
 
   // Add data rows
-  data.forEach(item => {
+  data.forEach((item) => {
     const row = [
       item.product_code,
       item.product_name,
-      ...sortedStepCodes.map(stepCode => {
+      ...sortedStepCodes.map((stepCode) => {
         const stepData = item.step_data[stepCode];
         return stepData ? stepData.price : 0;
       }),
@@ -169,17 +173,21 @@ function prepareExportData(data: PriceSummaryItem[], includeHeaders: boolean): a
 function generateExcel(data: any[][]): Buffer {
   const worksheet = XLSX.utils.aoa_to_sheet(data);
   const workbook = XLSX.utils.book_new();
-  
+
   // Set column widths
   const columnWidths = data[0]?.map((_, index) => {
-    if (index === 0 || index === 1) return { wch: 20 }; // Product code/name
-    if (data[0] && index >= data[0].length - 2) return { wch: 15 }; // Total columns
+    if (index === 0 || index === 1) {
+      return { wch: 20 };
+    } // Product code/name
+    if (data[0] && index >= data[0].length - 2) {
+      return { wch: 15 };
+    } // Total columns
     return { wch: 12 }; // Step columns
   }) || [];
   worksheet['!cols'] = columnWidths;
 
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Tổng Hợp Đơn Giá');
-  
+
   return Buffer.from(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
 }
 
@@ -188,18 +196,18 @@ function generateExcel(data: any[][]): Buffer {
  */
 function generateCSV(data: any[][]): Buffer {
   const csvContent = data
-    .map(row => 
-      row.map(cell => {
+    .map(row =>
+      row.map((cell) => {
         const cellStr = String(cell || '');
         // Escape quotes and wrap in quotes if contains comma, quote, or newline
         if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
           return `"${cellStr.replace(/"/g, '""')}"`;
         }
         return cellStr;
-      }).join(',')
+      }).join(','),
     )
     .join('\n');
-  
+
   // Add BOM for Excel UTF-8 support
-  return Buffer.from('\uFEFF' + csvContent, 'utf8');
+  return Buffer.from(`\uFEFF${csvContent}`, 'utf8');
 }

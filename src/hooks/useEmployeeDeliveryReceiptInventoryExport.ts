@@ -85,7 +85,7 @@ export function useEmployeeDeliveryReceiptInventoryExport(): UseEmployeeDelivery
  */
 export function generateExportFilename(
   format: ExportFormat = 'xlsx',
-  filters?: Partial<EmployeeDeliveryReceiptInventoryExportParams>
+  filters?: Partial<EmployeeDeliveryReceiptInventoryExportParams>,
 ): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
   let filename = `employee-delivery-receipt-inventory-${timestamp}`;

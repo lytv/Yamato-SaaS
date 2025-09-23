@@ -9,13 +9,13 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
-import { createPlanDetail } from '@/libs/queries/plandetail';
 import { getPlanByCode } from '@/libs/queries/plan';
+import { createPlanDetail } from '@/libs/queries/plandetail';
 import { getProductByName } from '@/libs/queries/product';
 import { getProductSubByDetail } from '@/libs/queries/productsub';
 import type { ImportError } from '@/types/import';
 import type { PlanDetail } from '@/types/plandetail';
-import { parseYmtPlanForPlanDetail, validatePlanDetailImportData, type ImportPlanDetailData } from '@/utils/excelImportHelpers';
+import { type ImportPlanDetailData, parseYmtPlanForPlanDetail, validatePlanDetailImportData } from '@/utils/excelImportHelpers';
 
 // Force dynamic rendering due to auth() usage and file upload
 export const dynamic = 'force-dynamic';
@@ -82,8 +82,8 @@ export async function POST(request: NextRequest): Promise<Response> {
       success: true,
       imported: results.successful.length,
       failed: results.failed.length,
-      errors: [...validation.errors, ...results.failed].map(err => 
-        typeof err === 'string' ? err : `Row ${err.rowNumber}: ${err.message}`
+      errors: [...validation.errors, ...results.failed].map(err =>
+        typeof err === 'string' ? err : `Row ${err.rowNumber}: ${err.message}`,
       ),
       plandetails: results.successful,
     });
@@ -126,7 +126,7 @@ async function processImportData(planDetails: ImportPlanDetailData[], ownerId: s
 }> {
   const successful: PlanDetail[] = [];
   const failed: ImportError[] = [];
-  let skipped = 0;
+  const skipped = 0;
 
   for (const planDetailData of planDetails) {
     try {
@@ -180,8 +180,7 @@ async function processImportData(planDetails: ImportPlanDetailData[], ownerId: s
         priority: 5, // Default priority
         note: `Imported from YMT Plan ${planDetailData.planCode}`,
       };
-      
-      
+
       const dbPlanDetail = await createPlanDetail(createData);
 
       // Transform database plan_detail to API plan_detail type
@@ -216,7 +215,6 @@ async function processImportData(planDetails: ImportPlanDetailData[], ownerId: s
       });
     }
   }
-
 
   return { successful, failed, skipped };
 }

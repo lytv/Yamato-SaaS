@@ -130,7 +130,7 @@ export function EmployeeSalaryEntryList({
     if (onPaginationUpdate && pagination && pagination.total !== undefined) {
       onPaginationUpdate(currentPage, pagination.total, pagination.hasMore || false);
     }
-  }, [pagination?.total, pagination?.hasMore, onPaginationUpdate, currentPage]);
+  }, [pagination, onPaginationUpdate, currentPage]);
 
   // Helper function to get step name
   const getStepName = (employeeSalaryEntry: EmployeeSalaryEntryWithRelations): string => {

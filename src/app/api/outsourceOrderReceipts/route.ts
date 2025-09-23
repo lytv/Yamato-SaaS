@@ -86,29 +86,28 @@ export async function GET(request: NextRequest) {
         hasMore,
       },
     });
-
   } catch (error) {
     console.error('GET /api/outsourceOrderReceipts error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message.includes('not found') || error.message.includes('access denied')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'NOT_FOUND' },
-          { status: 404 }
+          { status: 404 },
         );
       }
-      
+
       if (error.message.includes('validation') || error.message.includes('invalid')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'VALIDATION_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -120,7 +119,7 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -142,7 +141,7 @@ export async function POST(request: NextRequest) {
           code: 'VALIDATION_ERROR',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -153,7 +152,6 @@ export async function POST(request: NextRequest) {
       data: outsourceOrderReceipt,
       message: 'OutsourceOrderReceipt created successfully',
     }, { status: 201 });
-
   } catch (error) {
     console.error('POST /api/outsourceOrderReceipts error:', error);
 
@@ -161,35 +159,35 @@ export async function POST(request: NextRequest) {
       if (error.message.includes('unique constraint')) {
         return NextResponse.json(
           { success: false, error: 'Receipt number already exists', code: 'DUPLICATE_ERROR' },
-          { status: 409 }
+          { status: 409 },
         );
       }
-      
+
       if (error.message.includes('foreign key constraint') || error.message.includes('not found')) {
         return NextResponse.json(
           { success: false, error: 'Referenced entity not found', code: 'REFERENCE_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (error.message.includes('exceeds remaining quantity')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'BUSINESS_RULE_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
-      
+
       if (error.message.includes('validation') || error.message.includes('invalid')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'VALIDATION_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

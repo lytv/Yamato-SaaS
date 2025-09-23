@@ -3,8 +3,8 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
-import { useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useCallback, useState } from 'react';
 
 import type {
   SatelliteProgressExportParams,
@@ -53,7 +53,7 @@ export function useSatelliteProgressExport(): UseSatelliteProgressExportResult {
       }
 
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Failed to export satellite progress data');
       }
@@ -73,7 +73,6 @@ export function useSatelliteProgressExport(): UseSatelliteProgressExportResult {
       setTimeout(() => {
         setExportProgress(0);
       }, 1000);
-
     } catch (error) {
       setExportError(error as Error);
       setExportProgress(0);

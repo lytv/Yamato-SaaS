@@ -25,10 +25,10 @@ export function ProductionProgressReportSkeleton({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-5" />
+              <Skeleton className="size-5" />
               <Skeleton className="h-5 w-16" />
             </div>
-            <Skeleton className="h-8 w-8" />
+            <Skeleton className="size-8" />
           </div>
         </CardHeader>
         <CardContent>
@@ -37,14 +37,14 @@ export function ProductionProgressReportSkeleton({
       </Card>
 
       {/* Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-24" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="mb-2 h-8 w-16" />
               <Skeleton className="h-3 w-32" />
             </CardContent>
           </Card>
@@ -64,47 +64,47 @@ export function ProductionProgressReportSkeleton({
         </CardHeader>
         <CardContent>
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 pb-4 border-b">
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-2" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
-            <Skeleton className="h-4 w-full col-span-1" />
+          <div className="grid grid-cols-12 gap-4 border-b pb-4">
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-2 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
+            <Skeleton className="col-span-1 h-4 w-full" />
           </div>
 
           {/* Table Rows */}
           <div className="space-y-4 pt-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="grid grid-cols-12 gap-4 py-2">
-                <Skeleton className="h-6 w-16 col-span-1" />
-                <Skeleton className="h-4 w-full col-span-2" />
-                <Skeleton className="h-4 w-full col-span-1" />
-                <Skeleton className="h-4 w-full col-span-1" />
-                <Skeleton className="h-4 w-full col-span-1" />
-                <Skeleton className="h-4 w-12 col-span-1 ml-auto" />
-                <Skeleton className="h-4 w-12 col-span-1 ml-auto" />
-                <Skeleton className="h-4 w-12 col-span-1 ml-auto" />
-                <Skeleton className="h-4 w-12 col-span-1 ml-auto" />
-                <Skeleton className="h-4 w-12 col-span-1 ml-auto" />
-                <Skeleton className="h-6 w-16 col-span-1 ml-auto" />
+                <Skeleton className="col-span-1 h-6 w-16" />
+                <Skeleton className="col-span-2 h-4 w-full" />
+                <Skeleton className="col-span-1 h-4 w-full" />
+                <Skeleton className="col-span-1 h-4 w-full" />
+                <Skeleton className="col-span-1 h-4 w-full" />
+                <Skeleton className="col-span-1 ml-auto h-4 w-12" />
+                <Skeleton className="col-span-1 ml-auto h-4 w-12" />
+                <Skeleton className="col-span-1 ml-auto h-4 w-12" />
+                <Skeleton className="col-span-1 ml-auto h-4 w-12" />
+                <Skeleton className="col-span-1 ml-auto h-4 w-12" />
+                <Skeleton className="col-span-1 ml-auto h-6 w-16" />
               </div>
             ))}
           </div>
 
           {/* Pagination Skeleton */}
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between border-t pt-4">
             <Skeleton className="h-4 w-32" />
             <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-8" />
+              <Skeleton className="size-8" />
+              <Skeleton className="size-8" />
+              <Skeleton className="size-8" />
+              <Skeleton className="size-8" />
             </div>
           </div>
         </CardContent>

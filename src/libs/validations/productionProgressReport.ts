@@ -57,14 +57,18 @@ export const ProductionProgressReportListParamsSchema = z.object({
   production_step_code: z.string().optional(),
   report_type: z.enum(['ALL', 'EMPLOYEE_SUMMARY', 'OUTSOURCE_DETAIL']).optional().default('ALL'),
   page: z.string().optional().transform((val) => {
-    if (val === undefined || val === '') return 1;
-    const parsed = parseInt(val, 10);
-    return isNaN(parsed) || parsed < 1 ? 1 : parsed;
+    if (val === undefined || val === '') {
+      return 1;
+    }
+    const parsed = Number.parseInt(val, 10);
+    return Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
   }),
   limit: z.string().optional().transform((val) => {
-    if (val === undefined || val === '') return 20;
-    const parsed = parseInt(val, 10);
-    return isNaN(parsed) || parsed < 1 ? 20 : Math.min(parsed, 100);
+    if (val === undefined || val === '') {
+      return 20;
+    }
+    const parsed = Number.parseInt(val, 10);
+    return Number.isNaN(parsed) || parsed < 1 ? 20 : Math.min(parsed, 100);
   }),
   sortBy: z.string().optional().default('plan_code'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
@@ -145,7 +149,7 @@ export function validateSortField(field: unknown): keyof ProductionProgressRepor
     'completion_rate',
     'remaining_quantity',
   ];
-  
+
   if (typeof field === 'string' && validFields.includes(field as keyof ProductionProgressReportItem)) {
     return field as keyof ProductionProgressReportItem;
   }
@@ -153,7 +157,9 @@ export function validateSortField(field: unknown): keyof ProductionProgressRepor
 }
 
 export function validateSortOrder(order: unknown): 'asc' | 'desc' {
-  if (order === 'desc') return 'desc';
+  if (order === 'desc') {
+    return 'desc';
+  }
   return 'asc';
 }
 
@@ -184,7 +190,7 @@ export function validateCompletionRate(rate: number): {
   category: 'excellent' | 'good' | 'average' | 'poor';
 } {
   const validatedRate = Math.max(0, rate);
-  
+
   let category: 'excellent' | 'good' | 'average' | 'poor';
   if (validatedRate >= 100) {
     category = 'excellent';

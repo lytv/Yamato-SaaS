@@ -4,13 +4,14 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { getPriceSummary } from '@/libs/queries/priceSummary';
 import { validatePriceSummaryFiltersWithOwner } from '@/libs/validations/priceSummary';
 import type {
-  PriceSummaryResponse,
   PriceSummaryErrorResponse,
+  PriceSummaryResponse,
 } from '@/types/priceSummary';
 
 /**
@@ -37,14 +38,12 @@ export async function GET(request: NextRequest) {
       product_code: searchParams.get('product_code') || undefined,
       price_type: searchParams.get('price_type') || 'factory_price',
       show_only_with_pricing: searchParams.get('show_only_with_pricing') === 'true' || false,
-      page: parseInt(searchParams.get('page') || '1', 10),
-      limit: parseInt(searchParams.get('limit') || '20', 10),
+      page: Number.parseInt(searchParams.get('page') || '1', 10),
+      limit: Number.parseInt(searchParams.get('limit') || '20', 10),
       sortBy: searchParams.get('sortBy') || 'product_code',
       sortOrder: searchParams.get('sortOrder') || 'asc',
       ownerId: userId,
     };
-
-    console.log('API received filters:', filters);
 
     // Validate filters
     const validatedFilters = validatePriceSummaryFiltersWithOwner(filters);
@@ -62,7 +61,6 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('Price summary API error:', error);
 

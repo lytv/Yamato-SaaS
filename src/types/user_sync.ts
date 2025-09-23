@@ -30,8 +30,8 @@ export type UserSyncListParams = {
   readonly sortBy?: 'createdAt' | 'updatedAt' | 'email' | 'userId' | 'fullName' | 'role' | 'isActive';
   readonly sortOrder?: 'asc' | 'desc';
   readonly showAll?: boolean;
-  readonly shortcut?: string;  // Exact filter for shortcut
-  readonly fullName?: string;  // Exact filter for fullName
+  readonly shortcut?: string; // Exact filter for shortcut
+  readonly fullName?: string; // Exact filter for fullName
 };
 
 // ✅ Internal type for queries (WITH ownerId for database operations)
@@ -121,8 +121,8 @@ export type UserSyncFilters = {
   search: string;
   sortBy: 'createdAt' | 'updatedAt' | 'email' | 'userId' | 'fullName' | 'role' | 'isActive';
   sortOrder: 'asc' | 'desc';
-  shortcut: string;  // Exact filter for shortcut
-  fullName: string;  // Exact filter for fullName
+  shortcut: string; // Exact filter for shortcut
+  fullName: string; // Exact filter for fullName
 };
 
 // ✅ Multi-tenancy owner types (reusing from todo pattern)

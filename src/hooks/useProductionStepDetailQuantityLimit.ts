@@ -28,22 +28,22 @@ export const useProductionStepDetailQuantityLimit = () => {
 
     try {
       const response = await fetch(
-        `/api/production-step-details/quantity-limit?productionStepDetailId=${productionStepDetailId}`
+        `/api/production-step-details/quantity-limit?productionStepDetailId=${productionStepDetailId}`,
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch quantity limit: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         const limit: ProductionStepDetailQuantityLimit = {
           quantityLimit1: data.data.quantityLimit1,
           quantityLimit2: data.data.quantityLimit2,
           effectiveLimit: data.data.quantityLimit1 || data.data.quantityLimit2 || null,
         };
-        
+
         setQuantityLimit(limit);
         return limit;
       } else {

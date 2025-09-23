@@ -8,9 +8,9 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
+import { BarChart3, Cog, FileText, Plus, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { Settings, Cog, Plus, FileText, BarChart3 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ProcessForm } from '@/features/process/ProcessForm';
@@ -54,11 +54,7 @@ function ProcessModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-      onKeyDown={handleKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm duration-300 animate-in fade-in"
     >
       {/* Backdrop */}
       <div
@@ -66,24 +62,32 @@ function ProcessModal({
         onClick={handleBackdropClick}
         data-testid="modal-backdrop"
         aria-hidden="true"
+        role="presentation"
       />
 
       {/* Modal content */}
-      <div className="relative z-10 w-full max-w-5xl mx-4 rounded-xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
+      <div
+        className="relative z-10 mx-4 w-full max-w-5xl rounded-xl bg-white shadow-2xl duration-300 animate-in zoom-in-95"
+        onKeyDown={handleKeyDown}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        tabIndex={-1}
+      >
+        <div className="flex items-center justify-between border-b border-gray-200 p-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-gray-600 rounded-full flex items-center justify-center">
-              <Settings className="w-5 h-5 text-white" />
+            <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-slate-500 to-gray-600">
+              <Settings className="size-5 text-white" />
             </div>
             <div>
               <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
                 {modal.mode === 'create' ? 'Create Process' : 'Edit Process'}
               </h2>
               <p className="text-sm text-gray-500">
-                {modal.mode === 'create' 
+                {modal.mode === 'create'
                   ? 'Define a new production process'
-                  : 'Update process configuration'
-                }
+                  : 'Update process configuration'}
               </p>
             </div>
           </div>
@@ -91,7 +95,7 @@ function ProcessModal({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2"
+            className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             aria-label="Close"
           >
             <span className="text-lg">×</span>
@@ -178,32 +182,32 @@ export default function ProcesssPage(): JSX.Element {
         <div className="container mx-auto max-w-6xl px-6 py-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="mb-8 lg:mb-0">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <Settings className="w-8 h-8 text-white" />
+              <div className="mb-4 flex items-center space-x-4">
+                <div className="flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <Settings className="size-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">
+                  <h1 className="mb-2 text-4xl font-bold">
                     Quản lý quy trình sản xuất
                   </h1>
-                  <p className="text-slate-100 text-lg">
+                  <p className="text-lg text-slate-100">
                     Định nghĩa và quản lý các quy trình sản xuất trong nhà máy
                   </p>
                 </div>
               </div>
-              
+
               {/* Feature indicators */}
               <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Cog className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <Cog className="size-4" />
                   <span>Process Definition</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <FileText className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <FileText className="size-4" />
                   <span>Documentation</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <BarChart3 className="w-4 h-4" />
+                <div className="flex items-center space-x-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                  <BarChart3 className="size-4" />
                   <span>Performance Tracking</span>
                 </div>
               </div>
@@ -214,9 +218,9 @@ export default function ProcesssPage(): JSX.Element {
               <Button
                 onClick={handleCreateProcess}
                 disabled={isCreating}
-                className="bg-white text-slate-700 hover:bg-slate-50 border-0 shadow-lg text-lg px-8 py-4 h-auto font-semibold transform hover:scale-105 transition-all duration-200"
+                className="h-auto border-0 bg-white px-8 py-4 text-lg font-semibold text-slate-700 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-slate-50"
               >
-                <Plus className="w-5 h-5 mr-2" />
+                <Plus className="mr-2 size-5" />
                 {t('process.createNew', { default: 'Create Process' })}
               </Button>
             </div>
@@ -225,7 +229,7 @@ export default function ProcesssPage(): JSX.Element {
       </div>
 
       {/* Content Container */}
-      <div className="container mx-auto max-w-6xl px-6 py-8 space-y-8">
+      <div className="container mx-auto max-w-6xl space-y-8 px-6 py-8">
 
         {/* Main Content */}
         <div

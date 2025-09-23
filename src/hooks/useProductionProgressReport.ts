@@ -23,20 +23,38 @@ export function useProductionProgressReport(
     queryKey: ['production-progress-report', filters],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
-      
+
       // Add filter parameters to search params
-      if (filters.search) searchParams.set('search', filters.search);
-      if (filters.plan_code) searchParams.set('plan_code', filters.plan_code);
-      if (filters.product_code) searchParams.set('product_code', filters.product_code);
-      if (filters.production_step_code) searchParams.set('production_step_code', filters.production_step_code);
-      if (filters.report_type && filters.report_type !== 'ALL') searchParams.set('report_type', filters.report_type);
-      if (filters.page) searchParams.set('page', filters.page.toString());
-      if (filters.limit) searchParams.set('limit', filters.limit.toString());
-      if (filters.sortBy) searchParams.set('sortBy', filters.sortBy);
-      if (filters.sortOrder) searchParams.set('sortOrder', filters.sortOrder);
+      if (filters.search) {
+        searchParams.set('search', filters.search);
+      }
+      if (filters.plan_code) {
+        searchParams.set('plan_code', filters.plan_code);
+      }
+      if (filters.product_code) {
+        searchParams.set('product_code', filters.product_code);
+      }
+      if (filters.production_step_code) {
+        searchParams.set('production_step_code', filters.production_step_code);
+      }
+      if (filters.report_type && filters.report_type !== 'ALL') {
+        searchParams.set('report_type', filters.report_type);
+      }
+      if (filters.page) {
+        searchParams.set('page', filters.page.toString());
+      }
+      if (filters.limit) {
+        searchParams.set('limit', filters.limit.toString());
+      }
+      if (filters.sortBy) {
+        searchParams.set('sortBy', filters.sortBy);
+      }
+      if (filters.sortOrder) {
+        searchParams.set('sortOrder', filters.sortOrder);
+      }
 
       const response = await fetch(`/api/production-progress-report?${searchParams.toString()}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch production progress report');

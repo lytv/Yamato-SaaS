@@ -55,7 +55,6 @@ export async function getProductionProgressPivot(
       )
     `);
 
-
     // Validate and transform raw results
     let validatedData: ProductionProgressPivotItem[] = [];
 
@@ -63,17 +62,17 @@ export async function getProductionProgressPivot(
       validatedData = rawResults.rows.map((row: any) => {
         // Parse JSON step data and convert to fixed format for backward compatibility
         const stepData = row.step_data || {};
-        
+
         // Sort step codes by numeric value after 'cd' prefix for proper ordering (cd01, cd02, cd10, cd20)
         const stepKeys = Object.keys(stepData).sort((a, b) => {
           // Extract numeric part from step codes like 'cd01', 'cd02', etc.
           const getNumericPart = (code: string) => {
             const match = code.match(/\d+/);
-            return match ? parseInt(match[0], 10) : 0;
+            return match ? Number.parseInt(match[0], 10) : 0;
           };
           return getNumericPart(a) - getNumericPart(b);
         });
-        
+
         // Create the item with base data
         const item: any = {
           product_code: row.product_code,
@@ -112,12 +111,12 @@ export async function getProductionProgressPivot(
     // Apply search filter if provided
     if (search && search.trim() !== '') {
       const searchTerm = search.toLowerCase().trim();
-      validatedData = validatedData.filter(item => {
+      validatedData = validatedData.filter((item) => {
         // Search in basic fields
-        if (item.product_code.toLowerCase().includes(searchTerm) ||
-            item.product_name.toLowerCase().includes(searchTerm) ||
-            item.plan_code.toLowerCase().includes(searchTerm) ||
-            item.plan_name.toLowerCase().includes(searchTerm)) {
+        if (item.product_code.toLowerCase().includes(searchTerm)
+          || item.product_name.toLowerCase().includes(searchTerm)
+          || item.plan_code.toLowerCase().includes(searchTerm)
+          || item.plan_name.toLowerCase().includes(searchTerm)) {
           return true;
         }
 
@@ -239,11 +238,11 @@ export async function getProductionProgressPivotFilterOptions(): Promise<Product
         if (row.plan_code) {
           plans.set(row.plan_code, row.plan_name || row.plan_code);
         }
-        
+
         // Parse JSON step data to collect all step codes and names
         if (row.step_data) {
           const stepData = row.step_data || {};
-          Object.keys(stepData).forEach(stepCode => {
+          Object.keys(stepData).forEach((stepCode) => {
             const stepInfo = stepData[stepCode];
             if (stepInfo && typeof stepInfo === 'object' && stepInfo.step_name) {
               steps.set(stepCode, stepInfo.step_name);

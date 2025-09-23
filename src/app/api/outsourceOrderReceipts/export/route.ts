@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           code: 'VALIDATION_ERROR',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     if (!outsourceOrderReceipts.length) {
       return NextResponse.json(
         { success: false, error: 'No data found for export', code: 'NO_DATA' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -121,15 +121,15 @@ export async function GET(request: NextRequest) {
     // Generate CSV content
     const csvContent = [
       params.includeHeaders ? csvHeaders.join(',') : null,
-      ...csvRows.map(row => 
-        row.map(cell => {
+      ...csvRows.map(row =>
+        row.map((cell) => {
           // Escape cells that contain commas, quotes, or newlines
           const cellStr = String(cell);
           if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
             return `"${cellStr.replace(/"/g, '""')}"`;
           }
           return cellStr;
-        }).join(',')
+        }).join(','),
       ),
     ].filter(Boolean).join('\n');
 
@@ -146,7 +146,6 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'no-cache',
       },
     });
-
   } catch (error) {
     console.error('GET /api/outsourceOrderReceipts/export error:', error);
 
@@ -154,21 +153,21 @@ export async function GET(request: NextRequest) {
       if (error.message.includes('not found') || error.message.includes('access denied')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'NOT_FOUND' },
-          { status: 404 }
+          { status: 404 },
         );
       }
-      
+
       if (error.message.includes('validation') || error.message.includes('invalid')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'VALIDATION_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

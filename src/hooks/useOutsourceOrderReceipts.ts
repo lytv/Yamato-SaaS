@@ -3,16 +3,16 @@
  * Generated based on existing pattern from useOutsourceOrderDetails
  */
 
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import type {
-  OutsourceOrderReceiptWithRelations,
   OutsourceOrderReceiptListParams,
-  OutsourceOrderReceiptStats,
-  OutsourceOrderReceiptsResponse,
-  OutsourceOrderReceiptStatsResponse,
   OutsourceOrderReceiptRelationOptions,
+  OutsourceOrderReceiptsResponse,
+  OutsourceOrderReceiptStats,
+  OutsourceOrderReceiptStatsResponse,
+  OutsourceOrderReceiptWithRelations,
 } from '@/types/outsourceOrderReceipt';
 
 const API_BASE = '/api/outsourceOrderReceipts';
@@ -21,7 +21,7 @@ const API_BASE = '/api/outsourceOrderReceipts';
 export const outsourceOrderReceiptKeys = {
   all: ['outsourceOrderReceipts'] as const,
   lists: () => [...outsourceOrderReceiptKeys.all, 'list'] as const,
-  list: (params: OutsourceOrderReceiptListParams) => 
+  list: (params: OutsourceOrderReceiptListParams) =>
     [...outsourceOrderReceiptKeys.lists(), params] as const,
   details: () => [...outsourceOrderReceiptKeys.all, 'detail'] as const,
   detail: (id: number) => [...outsourceOrderReceiptKeys.details(), id] as const,
@@ -40,7 +40,9 @@ export function useOutsourceOrderReceipts(params: OutsourceOrderReceiptListParam
   return useQuery({
     queryKey: outsourceOrderReceiptKeys.list(params),
     queryFn: async (): Promise<OutsourceOrderReceiptWithRelations[]> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       Object.entries({ ...params, includeRelations: true }).forEach(([key, value]) => {
@@ -72,7 +74,9 @@ export function useOutsourceOrderReceiptsInfinite(params: Omit<OutsourceOrderRec
   return useInfiniteQuery({
     queryKey: [...outsourceOrderReceiptKeys.list(params), 'infinite'],
     queryFn: async ({ pageParam = 1 }): Promise<OutsourceOrderReceiptsResponse> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       Object.entries({ ...params, page: pageParam }).forEach(([key, value]) => {
@@ -90,7 +94,7 @@ export function useOutsourceOrderReceiptsInfinite(params: Omit<OutsourceOrderRec
     },
     enabled: !!userId,
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => 
+    getNextPageParam: lastPage =>
       lastPage.pagination.hasMore ? lastPage.pagination.page + 1 : undefined,
     staleTime: 1000 * 60 * 5,
   });
@@ -105,7 +109,9 @@ export function useOutsourceOrderReceipt(id: number, includeRelations = false) {
   return useQuery({
     queryKey: outsourceOrderReceiptKeys.detail(id),
     queryFn: async (): Promise<OutsourceOrderReceiptWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       if (includeRelations) {
@@ -137,7 +143,9 @@ export function useOutsourceOrderReceiptsByDetailId(outsourceOrderDetailId: numb
   return useQuery({
     queryKey: outsourceOrderReceiptKeys.list({ outsourceOrderDetailId, includeRelations }),
     queryFn: async (): Promise<OutsourceOrderReceiptWithRelations[]> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       searchParams.append('outsourceOrderDetailId', String(outsourceOrderDetailId));
@@ -165,13 +173,15 @@ export function useOutsourceOrderReceiptStats(outsourceOrderDetailId?: number) {
   const { userId } = useAuth();
 
   return useQuery({
-    queryKey: outsourceOrderDetailId 
+    queryKey: outsourceOrderDetailId
       ? outsourceOrderReceiptKeys.statsByDetail(outsourceOrderDetailId)
       : outsourceOrderReceiptKeys.stats(),
     queryFn: async (): Promise<OutsourceOrderReceiptStats> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
-      const url = outsourceOrderDetailId 
+      const url = outsourceOrderDetailId
         ? `${API_BASE}/stats?outsourceOrderDetailId=${outsourceOrderDetailId}`
         : `${API_BASE}/stats`;
 
@@ -198,7 +208,9 @@ export function useOutsourceOrderReceiptRelationOptions(outsourceOrderDetailId?:
   return useQuery({
     queryKey: outsourceOrderReceiptKeys.relationOptions(),
     queryFn: async (): Promise<OutsourceOrderReceiptRelationOptions> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const searchParams = new URLSearchParams();
       if (outsourceOrderDetailId) {

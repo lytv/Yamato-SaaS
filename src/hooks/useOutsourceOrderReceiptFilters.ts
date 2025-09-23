@@ -3,7 +3,7 @@
  * Generated based on existing pattern from useOutsourceOrderDetailFilters
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { OutsourceOrderReceiptFilters, OutsourceOrderReceiptListParams } from '@/types/outsourceOrderReceipt';
 
@@ -29,7 +29,7 @@ export function useOutsourceOrderReceiptFilters(initialFilters?: Partial<Outsour
   // Update individual filter
   const updateFilter = useCallback(<K extends keyof OutsourceOrderReceiptFilters>(
     key: K,
-    value: OutsourceOrderReceiptFilters[K]
+    value: OutsourceOrderReceiptFilters[K],
   ) => {
     setFilters(prev => ({
       ...prev,
@@ -73,7 +73,7 @@ export function useOutsourceOrderReceiptFilters(initialFilters?: Partial<Outsour
     };
 
     // Remove undefined values
-    Object.keys(params).forEach(key => {
+    Object.keys(params).forEach((key) => {
       if (params[key as keyof OutsourceOrderReceiptListParams] === undefined) {
         delete params[key as keyof OutsourceOrderReceiptListParams];
       }
@@ -85,28 +85,42 @@ export function useOutsourceOrderReceiptFilters(initialFilters?: Partial<Outsour
   // Check if any filters are active (non-default)
   const hasActiveFilters = useMemo(() => {
     return (
-      filters.search !== defaultFilters.search ||
-      filters.outsourceOrderDetailId !== defaultFilters.outsourceOrderDetailId ||
-      filters.qualityStatus !== defaultFilters.qualityStatus ||
-      filters.status !== defaultFilters.status ||
-      filters.receivedByUserId !== defaultFilters.receivedByUserId ||
-      filters.batchNumber !== defaultFilters.batchNumber ||
-      filters.dateRange !== defaultFilters.dateRange ||
-      filters.sortBy !== defaultFilters.sortBy ||
-      filters.sortOrder !== defaultFilters.sortOrder
+      filters.search !== defaultFilters.search
+      || filters.outsourceOrderDetailId !== defaultFilters.outsourceOrderDetailId
+      || filters.qualityStatus !== defaultFilters.qualityStatus
+      || filters.status !== defaultFilters.status
+      || filters.receivedByUserId !== defaultFilters.receivedByUserId
+      || filters.batchNumber !== defaultFilters.batchNumber
+      || filters.dateRange !== defaultFilters.dateRange
+      || filters.sortBy !== defaultFilters.sortBy
+      || filters.sortOrder !== defaultFilters.sortOrder
     );
   }, [filters]);
 
   // Get count of active filters
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.search && filters.search !== defaultFilters.search) count++;
-    if (filters.outsourceOrderDetailId !== defaultFilters.outsourceOrderDetailId) count++;
-    if (filters.qualityStatus !== defaultFilters.qualityStatus) count++;
-    if (filters.status !== defaultFilters.status) count++;
-    if (filters.receivedByUserId !== defaultFilters.receivedByUserId) count++;
-    if (filters.batchNumber !== defaultFilters.batchNumber) count++;
-    if (filters.dateRange !== defaultFilters.dateRange) count++;
+    if (filters.search && filters.search !== defaultFilters.search) {
+      count++;
+    }
+    if (filters.outsourceOrderDetailId !== defaultFilters.outsourceOrderDetailId) {
+      count++;
+    }
+    if (filters.qualityStatus !== defaultFilters.qualityStatus) {
+      count++;
+    }
+    if (filters.status !== defaultFilters.status) {
+      count++;
+    }
+    if (filters.receivedByUserId !== defaultFilters.receivedByUserId) {
+      count++;
+    }
+    if (filters.batchNumber !== defaultFilters.batchNumber) {
+      count++;
+    }
+    if (filters.dateRange !== defaultFilters.dateRange) {
+      count++;
+    }
     return count;
   }, [filters]);
 
@@ -158,7 +172,7 @@ export function useOutsourceOrderReceiptFilters(initialFilters?: Partial<Outsour
     toApiParams,
     hasActiveFilters,
     activeFiltersCount,
-    
+
     // Quick actions
     filterByQualityStatus,
     filterByStatus,

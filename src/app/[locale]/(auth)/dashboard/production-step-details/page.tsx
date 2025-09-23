@@ -11,9 +11,9 @@ import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { PriceImportModal } from '@/features/productionStep/PriceImportModal';
 import { ProductionStepDetailForm } from '@/features/productionStepDetail/ProductionStepDetailForm';
 import { ProductionStepDetailList } from '@/features/productionStepDetail/ProductionStepDetailList';
-import { PriceImportModal } from '@/features/productionStep/PriceImportModal';
 import { useProductionStepDetailMutations } from '@/hooks/useProductionStepDetailMutations';
 import type { ProductionStepDetail } from '@/types/productionStepDetail';
 
@@ -56,7 +56,7 @@ function ProductionStepDetailModal({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
@@ -71,7 +71,7 @@ function ProductionStepDetailModal({
       />
 
       {/* Modal content - Wider and scrollable */}
-      <div className="relative z-10 w-full max-w-6xl rounded-lg bg-white p-6 shadow-xl my-8 max-h-[90vh] overflow-y-auto">
+      <div className="relative z-10 my-8 max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-xl font-semibold">
             {modal.mode === 'create' ? t('title') : t('edit_title')}
@@ -181,9 +181,11 @@ export default function ProductionStepDetailsPage(): JSX.Element {
               onClick={() => setShowImportModal(true)}
               variant="outline"
               size={isMobile ? 'sm' : 'default'}
-              className="w-full sm:w-auto bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
+              className="w-full border-green-200 bg-green-50 text-green-600 hover:bg-green-100 sm:w-auto"
             >
-              📊 {isMobile ? 'Import giá' : 'Import đơn giá'}
+              📊
+              {' '}
+              {isMobile ? 'Import giá' : 'Import đơn giá'}
             </Button>
           </div>
         </div>

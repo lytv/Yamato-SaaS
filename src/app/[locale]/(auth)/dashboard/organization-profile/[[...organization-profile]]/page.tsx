@@ -38,6 +38,7 @@ const OrganizationProfilePage = (props: { params: { locale: string } }) => {
       />
       <div className="mb-2 flex justify-end gap-2">
         <button
+          type="button"
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-60"
           onClick={handleSync}
           disabled={syncing}

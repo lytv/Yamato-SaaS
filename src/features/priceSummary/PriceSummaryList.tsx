@@ -6,15 +6,15 @@
 
 'use client';
 
-import { 
-  Download, 
-  Package, 
-  DollarSign, 
-  Hash,
+import {
+  BarChart3,
   Calculator,
+  DollarSign,
+  Download,
+  Hash,
+  Package,
   RefreshCw,
   Settings,
-  BarChart3,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useMemo } from 'react';
@@ -24,11 +24,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PriceSummarySkeleton } from '@/features/priceSummary/PriceSummarySkeleton';
 import { usePriceSummaryExport } from '@/hooks/usePriceSummaryExport';
-import type { 
-  PriceSummaryItem,
-  PriceSummaryColumn,
+import type {
   DynamicPriceColumn,
+  PriceSummaryColumn,
   PriceSummaryFilterState,
+  PriceSummaryItem,
 } from '@/types/priceSummary';
 import { PRICE_TYPE_OPTIONS } from '@/types/priceSummary';
 
@@ -71,18 +71,20 @@ export function PriceSummaryList({
 
   // Get current price type label
   const currentPriceTypeLabel = PRICE_TYPE_OPTIONS.find(
-    option => option.value === filters.price_type
+    option => option.value === filters.price_type,
   )?.label || 'Đơn giá';
 
   // Helper function to get dynamic step columns from data
   const getDynamicStepColumns = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    
+    if (!data || data.length === 0) {
+      return [];
+    }
+
     const stepColumns: DynamicPriceColumn[] = [];
-    
+
     // Collect ALL unique steps from ALL records
     const allSteps = new Map<string, { stepCode: string; stepName: string; sequenceNumber: number }>();
-    
+
     data.forEach((item) => {
       Object.entries(item.step_data).forEach(([stepCode, stepInfo]) => {
         if (stepCode && stepInfo) {
@@ -94,7 +96,7 @@ export function PriceSummaryList({
         }
       });
     });
-    
+
     // Sort steps by sequence number, then by code
     const sortedSteps = Array.from(allSteps.values()).sort((a, b) => {
       if (a.sequenceNumber !== b.sequenceNumber) {
@@ -103,11 +105,11 @@ export function PriceSummaryList({
       // Fallback to numeric sorting by code
       const getNumericPart = (code: string) => {
         const match = code.match(/\d+/);
-        return match ? parseInt(match[0], 10) : 0;
+        return match ? Number.parseInt(match[0], 10) : 0;
       };
       return getNumericPart(a.stepCode) - getNumericPart(b.stepCode);
     });
-    
+
     // Create columns in the correct sorted order
     sortedSteps.forEach((step) => {
       stepColumns.push({
@@ -117,7 +119,7 @@ export function PriceSummaryList({
         price: 0, // Will be filled per row
       });
     });
-    
+
     return stepColumns;
   }, [data]);
 
@@ -201,24 +203,38 @@ export function PriceSummaryList({
 
   // Get price level color for visualization
   const getPriceColor = (price: number, maxPrice: number) => {
-    if (maxPrice === 0) return 'bg-gray-200';
+    if (maxPrice === 0) {
+      return 'bg-gray-200';
+    }
     const percentage = (price / maxPrice) * 100;
-    if (percentage >= 80) return 'bg-emerald-400';
-    if (percentage >= 60) return 'bg-blue-400';
-    if (percentage >= 40) return 'bg-yellow-400';
-    if (percentage >= 20) return 'bg-orange-400';
+    if (percentage >= 80) {
+      return 'bg-emerald-400';
+    }
+    if (percentage >= 60) {
+      return 'bg-blue-400';
+    }
+    if (percentage >= 40) {
+      return 'bg-yellow-400';
+    }
+    if (percentage >= 20) {
+      return 'bg-orange-400';
+    }
     return 'bg-red-400';
   };
 
   // Get badge color for price values
   const getPriceBadgeVariant = (price: number) => {
-    if (price === 0) return 'secondary';
+    if (price === 0) {
+      return 'secondary';
+    }
     return 'default';
   };
 
   // Get badge background color for better visibility
   const getPriceBadgeClass = (price: number) => {
-    if (price === 0) return 'bg-gray-100 text-gray-600 border-gray-300';
+    if (price === 0) {
+      return 'bg-gray-100 text-gray-600 border-gray-300';
+    }
     return 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100';
   };
 
@@ -227,11 +243,11 @@ export function PriceSummaryList({
     switch (column.key) {
       case 'product_name':
         return (
-          <div className="flex items-center gap-3 min-w-0">
-            <Package className="h-4 w-4 text-blue-600 flex-shrink-0" />
+          <div className="flex min-w-0 items-center gap-3">
+            <Package className="size-4 shrink-0 text-blue-600" />
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{item.product_name}</div>
-              <div className="text-xs text-gray-500 truncate font-mono">{item.product_code}</div>
+              <div className="truncate font-medium text-gray-900">{item.product_name}</div>
+              <div className="truncate font-mono text-xs text-gray-500">{item.product_code}</div>
             </div>
           </div>
         );
@@ -239,9 +255,9 @@ export function PriceSummaryList({
       case 'total_steps':
         return (
           <div className="flex items-center justify-center gap-2">
-            <Settings className="h-4 w-4 text-purple-600" />
-            <Badge 
-              variant="outline" 
+            <Settings className="size-4 text-purple-600" />
+            <Badge
+              variant="outline"
               className={`font-mono ${getPriceBadgeClass(item.total_steps)}`}
             >
               {item.total_steps}
@@ -249,15 +265,15 @@ export function PriceSummaryList({
           </div>
         );
 
-      case 'total_price':
+      case 'total_price': {
         const maxTotalPrice = Math.max(...data.map(d => d.total_price));
         const pricePercentage = maxTotalPrice > 0 ? (item.total_price / maxTotalPrice) * 100 : 0;
-        
+
         return (
           <div className="space-y-2">
             <div className="flex items-center justify-end gap-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <Badge 
+              <DollarSign className="size-4 text-green-600" />
+              <Badge
                 variant={getPriceBadgeVariant(item.total_price)}
                 className={`font-mono ${getPriceBadgeClass(item.total_price)}`}
               >
@@ -265,8 +281,8 @@ export function PriceSummaryList({
               </Badge>
             </div>
             {item.total_price > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-1">
-                <div 
+              <div className="h-1 w-full rounded-full bg-gray-200">
+                <div
                   className={`h-1 rounded-full transition-all duration-300 ${getPriceColor(item.total_price, maxTotalPrice)}`}
                   style={{ width: `${Math.min(pricePercentage, 100)}%` }}
                 />
@@ -274,20 +290,23 @@ export function PriceSummaryList({
             )}
           </div>
         );
+      }
 
-      case 'dynamic_step':
-        if (!column.stepCode) return '-';
-        
+      case 'dynamic_step': {
+        if (!column.stepCode) {
+          return '-';
+        }
+
         const stepData = item.step_data[column.stepCode];
         const stepPrice = stepData?.price || 0;
         const maxStepPrice = Math.max(...data.map(d => d.step_data[column.stepCode!]?.price || 0));
         const stepPercentage = maxStepPrice > 0 ? (stepPrice / maxStepPrice) * 100 : 0;
-        
+
         return (
           <div className="space-y-1">
             <div className="flex items-center justify-end gap-1">
-              <Calculator className="h-3 w-3 text-orange-600" />
-              <Badge 
+              <Calculator className="size-3 text-orange-600" />
+              <Badge
                 variant={getPriceBadgeVariant(stepPrice)}
                 className={`font-mono text-xs ${getPriceBadgeClass(stepPrice)}`}
               >
@@ -295,8 +314,8 @@ export function PriceSummaryList({
               </Badge>
             </div>
             {stepPrice > 0 && maxStepPrice > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-1">
-                <div 
+              <div className="h-1 w-full rounded-full bg-gray-200">
+                <div
                   className={`h-1 rounded-full transition-all duration-300 ${getPriceColor(stepPrice, maxStepPrice)}`}
                   style={{ width: `${Math.min(stepPercentage, 100)}%` }}
                 />
@@ -304,6 +323,7 @@ export function PriceSummaryList({
             )}
           </div>
         );
+      }
 
       default:
         return (
@@ -343,12 +363,12 @@ export function PriceSummaryList({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Package className="h-5 w-5 text-white" />
+              <div className="rounded-lg bg-blue-500 p-2">
+                <Package className="size-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-blue-700">Sản phẩm</p>
@@ -360,11 +380,11 @@ export function PriceSummaryList({
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+        <Card className="border-green-200 bg-gradient-to-r from-green-50 to-green-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500 rounded-lg">
-                <Settings className="h-5 w-5 text-white" />
+              <div className="rounded-lg bg-green-500 p-2">
+                <Settings className="size-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-green-700">Công đoạn có giá</p>
@@ -376,11 +396,11 @@ export function PriceSummaryList({
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+        <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <Calculator className="h-5 w-5 text-white" />
+              <div className="rounded-lg bg-purple-500 p-2">
+                <Calculator className="size-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-purple-700">Giá TB/Sản phẩm</p>
@@ -392,15 +412,15 @@ export function PriceSummaryList({
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+        <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-500 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-white" />
+              <div className="rounded-lg bg-orange-500 p-2">
+                <BarChart3 className="size-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-orange-700">Cao nhất</p>
-                <p className="text-sm font-bold text-orange-900 truncate">
+                <p className="truncate text-sm font-bold text-orange-900">
                   {summary.highest_priced_product || 'N/A'}
                 </p>
               </div>
@@ -411,25 +431,31 @@ export function PriceSummaryList({
 
       {/* Data Table */}
       <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <DollarSign className="h-6 w-6 text-blue-600" />
+              <div className="rounded-lg bg-white p-2 shadow-sm">
+                <DollarSign className="size-6 text-blue-600" />
               </div>
               <div>
                 <CardTitle className="text-xl text-gray-900">
                   {t('title', { defaultValue: 'Tổng Hợp Đơn Giá' })}
                 </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  Hiển thị {currentPriceTypeLabel} theo công đoạn • 📌 Cột sản phẩm & tổng giá trị cố định
+                <p className="mt-1 text-sm text-gray-600">
+                  Hiển thị
+                  {' '}
+                  {currentPriceTypeLabel}
+                  {' '}
+                  theo công đoạn • 📌 Cột sản phẩm & tổng giá trị cố định
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="px-3 py-1">
-                <Hash className="h-3 w-3 mr-1" />
-                {data?.length || 0} sản phẩm
+                <Hash className="mr-1 size-3" />
+                {data?.length || 0}
+                {' '}
+                sản phẩm
               </Badge>
               <Button
                 variant="outline"
@@ -439,7 +465,7 @@ export function PriceSummaryList({
                 className="bg-white hover:bg-gray-50"
                 title="Làm mới dữ liệu"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`mr-2 size-4 ${isLoading ? 'animate-spin' : ''}`} />
                 {t('refresh', { defaultValue: 'Làm mới' })}
               </Button>
               <Button
@@ -449,7 +475,7 @@ export function PriceSummaryList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.excel', { defaultValue: 'Excel' })}
               </Button>
               <Button
@@ -459,112 +485,124 @@ export function PriceSummaryList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.csv', { defaultValue: 'CSV' })}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-6">
-              <PriceSummarySkeleton />
-            </div>
-          ) : (
-            <div className="overflow-x-auto shadow-inner">
-              <table className="w-full text-sm min-w-max">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    {columns.map((col, index) => {
-                      const getHeaderIcon = () => {
-                        switch (col.key) {
-                          case 'product_name':
-                            return <Package className="h-4 w-4 text-blue-600" />;
-                          case 'total_steps':
-                            return <Settings className="h-4 w-4 text-purple-600" />;
-                          case 'total_price':
-                            return <DollarSign className="h-4 w-4 text-green-600" />;
-                          case 'dynamic_step':
-                            return <Calculator className="h-4 w-4 text-orange-600" />;
-                          default:
-                            return null;
-                        }
-                      };
+          {isLoading
+            ? (
+                <div className="p-6">
+                  <PriceSummarySkeleton />
+                </div>
+              )
+            : (
+                <div className="overflow-x-auto shadow-inner">
+                  <table className="w-full min-w-max text-sm">
+                    <thead className="border-b bg-gray-50">
+                      <tr>
+                        {columns.map((col, index) => {
+                          const getHeaderIcon = () => {
+                            switch (col.key) {
+                              case 'product_name':
+                                return <Package className="size-4 text-blue-600" />;
+                              case 'total_steps':
+                                return <Settings className="size-4 text-purple-600" />;
+                              case 'total_price':
+                                return <DollarSign className="size-4 text-green-600" />;
+                              case 'dynamic_step':
+                                return <Calculator className="size-4 text-orange-600" />;
+                              default:
+                                return null;
+                            }
+                          };
 
-                      const isFirstColumn = index === 0;
-                      const isSecondColumn = index === 1;
-                      const isStickyColumn = col.sticky;
-                      
-                      const getStickyStyle = () => {
-                        if (isFirstColumn) return 'left-0';
-                        if (isSecondColumn && isStickyColumn) return 'left-[150px]'; // Width của cột đầu tiên
-                        return '';
-                      };
+                          const isFirstColumn = index === 0;
+                          const isSecondColumn = index === 1;
+                          const isStickyColumn = col.sticky;
 
-                      const headerClass = `
+                          const getStickyStyle = () => {
+                            if (isFirstColumn) {
+                              return 'left-0';
+                            }
+                            if (isSecondColumn && isStickyColumn) {
+                              return 'left-[150px]';
+                            } // Width của cột đầu tiên
+                            return '';
+                          };
+
+                          const headerClass = `
                         px-4 py-3 font-semibold text-gray-700 
                         ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
                         ${isStickyColumn ? `sticky ${getStickyStyle()} bg-gray-50 hover:bg-blue-100 z-10 border-r border-gray-200 transition-colors duration-200` : ''}
                       `.trim();
 
-                      return (
-                        <th 
-                          key={col.key === 'dynamic_step' ? `step_${col.stepCode}` : String(col.key)}
-                          className={headerClass}
-                          style={{ width: col.width }}
-                        >
-                          <div className={`flex items-center gap-2 ${
-                            col.align === 'right' ? 'justify-end' : 
-                            col.align === 'center' ? 'justify-center' : 'justify-start'
-                          }`}>
-                            {getHeaderIcon()}
-                            <span>{col.label}</span>
-                          </div>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {data.map((item, rowIndex) => (
-                    <tr key={`${item.product_code}-${rowIndex}`} className="hover:bg-gray-50">
-                      {columns.map((col, colIndex) => {
-                        const isFirstColumn = colIndex === 0;
-                        const isSecondColumn = colIndex === 1;
-                        const isStickyColumn = col.sticky;
-                        
-                        const getStickyStyle = () => {
-                          if (isFirstColumn) return 'left-0';
-                          if (isSecondColumn && isStickyColumn) return 'left-[150px]'; // Width của cột đầu tiên
-                          return '';
-                        };
+                          return (
+                            <th
+                              key={col.key === 'dynamic_step' ? `step_${col.stepCode}` : String(col.key)}
+                              className={headerClass}
+                              style={{ width: col.width }}
+                            >
+                              <div className={`flex items-center gap-2 ${
+                                col.align === 'right'
+                                  ? 'justify-end'
+                                  : col.align === 'center' ? 'justify-center' : 'justify-start'
+                              }`}
+                              >
+                                {getHeaderIcon()}
+                                <span>{col.label}</span>
+                              </div>
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {data.map((item, rowIndex) => (
+                        <tr key={`${item.product_code}-${rowIndex}`} className="hover:bg-gray-50">
+                          {columns.map((col, colIndex) => {
+                            const isFirstColumn = colIndex === 0;
+                            const isSecondColumn = colIndex === 1;
+                            const isStickyColumn = col.sticky;
 
-                        const cellClass = `
+                            const getStickyStyle = () => {
+                              if (isFirstColumn) {
+                                return 'left-0';
+                              }
+                              if (isSecondColumn && isStickyColumn) {
+                                return 'left-[150px]';
+                              } // Width của cột đầu tiên
+                              return '';
+                            };
+
+                            const cellClass = `
                           px-4 py-3 
                           ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
                           ${isStickyColumn ? `sticky ${getStickyStyle()} bg-white hover:bg-blue-50 z-10 border-r border-gray-200 transition-colors duration-200` : ''}
                         `.trim();
 
-                        return (
-                          <td 
-                            key={col.key === 'dynamic_step' ? `step_${col.stepCode}` : String(col.key)}
-                            className={cellClass}
-                          >
-                            {renderCell(item, col)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {data.length === 0 && (
-                <div className="p-8 text-center text-gray-500">
-                  Không có dữ liệu để hiển thị
+                            return (
+                              <td
+                                key={col.key === 'dynamic_step' ? `step_${col.stepCode}` : String(col.key)}
+                                className={cellClass}
+                              >
+                                {renderCell(item, col)}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {data.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      Không có dữ liệu để hiển thị
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

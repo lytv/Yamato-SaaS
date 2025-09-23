@@ -65,36 +65,35 @@ export async function GET() {
 
     // Start with default locations
     const locationMap = new Map<string, { locationCode: string; tableName: string }>();
-    defaultLocations.forEach(item => {
+    defaultLocations.forEach((item) => {
       locationMap.set(item.locationCode, item);
     });
 
     // Override with database data if available
     type LocationItem = { locationCode: string | null; tableName: string | null };
-    
+
     // Use primary locationOptions first, fallback to alternative if empty
     const primaryDataUsed = locationOptions.length > 0;
     const dataToUse = primaryDataUsed ? locationOptions : alternativeLocationOptions;
-    
-    (dataToUse as LocationItem[]).forEach(item => {
+
+    (dataToUse as LocationItem[]).forEach((item) => {
       if (item.locationCode && item.tableName) {
         locationMap.set(item.locationCode, {
           locationCode: item.locationCode,
-          tableName: item.tableName
+          tableName: item.tableName,
         });
       }
     });
 
     const filteredLocationOptions = Array.from(locationMap.values()).sort((a, b) => {
       // Sort numerically for number codes, then alphabetically
-      const aNum = parseInt(a.locationCode);
-      const bNum = parseInt(b.locationCode);
-      if (!isNaN(aNum) && !isNaN(bNum)) {
+      const aNum = Number.parseInt(a.locationCode);
+      const bNum = Number.parseInt(b.locationCode);
+      if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
         return aNum - bNum;
       }
       return a.locationCode.localeCompare(b.locationCode);
     });
-    
 
     // Get product sub codes
     const productSubOptions = await db.select({

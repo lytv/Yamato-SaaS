@@ -53,7 +53,7 @@ export function usePlanDetailImport(): UsePlanDetailImportReturn {
         errors: [error instanceof Error ? error.message : 'Import failed'],
         plandetails: [],
       };
-      
+
       setImportResult(errorResult);
       throw error;
     } finally {

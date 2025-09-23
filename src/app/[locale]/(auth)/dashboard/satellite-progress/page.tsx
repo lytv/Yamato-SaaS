@@ -16,7 +16,7 @@ import { SatelliteProgressSkeleton } from '@/features/satelliteProgress/Satellit
 export default function SatelliteProgressPage(): JSX.Element {
   return (
     <SatelliteProgressProvider>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto space-y-6 p-6">
         <Suspense fallback={<SatelliteProgressSkeleton />}>
           <SatelliteProgressFilter />
           <SatelliteProgressList />

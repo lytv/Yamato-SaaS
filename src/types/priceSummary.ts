@@ -207,7 +207,7 @@ export const PRICE_TYPE_OPTIONS: readonly PriceTypeOption[] = [
     description: 'Giá sản xuất tại xưởng',
   },
   {
-    value: 'calculated_price', 
+    value: 'calculated_price',
     label: 'Đơn giá về tính',
     description: 'Giá tính toán chi phí',
   },

@@ -3,7 +3,7 @@
  * Following Yamato-SaaS patterns for export functionality
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import type {
   ProductionProgressReportExportParams,
@@ -26,21 +26,37 @@ export function useProductionProgressReportExport(): UseProductionProgressReport
 
     try {
       const searchParams = new URLSearchParams();
-      
+
       // Add export parameters to search params
-      if (params.search) searchParams.set('search', params.search);
-      if (params.plan_code) searchParams.set('plan_code', params.plan_code);
-      if (params.product_code) searchParams.set('product_code', params.product_code);
-      if (params.production_step_code) searchParams.set('production_step_code', params.production_step_code);
-      if (params.report_type && params.report_type !== 'ALL') searchParams.set('report_type', params.report_type);
-      if (params.format) searchParams.set('format', params.format);
-      if (params.includeHeaders !== undefined) searchParams.set('includeHeaders', params.includeHeaders.toString());
-      if (params.filename) searchParams.set('filename', params.filename);
+      if (params.search) {
+        searchParams.set('search', params.search);
+      }
+      if (params.plan_code) {
+        searchParams.set('plan_code', params.plan_code);
+      }
+      if (params.product_code) {
+        searchParams.set('product_code', params.product_code);
+      }
+      if (params.production_step_code) {
+        searchParams.set('production_step_code', params.production_step_code);
+      }
+      if (params.report_type && params.report_type !== 'ALL') {
+        searchParams.set('report_type', params.report_type);
+      }
+      if (params.format) {
+        searchParams.set('format', params.format);
+      }
+      if (params.includeHeaders !== undefined) {
+        searchParams.set('includeHeaders', params.includeHeaders.toString());
+      }
+      if (params.filename) {
+        searchParams.set('filename', params.filename);
+      }
 
       setExportProgress(25);
 
       const response = await fetch(`/api/production-progress-report/export?${searchParams.toString()}`);
-      
+
       setExportProgress(50);
 
       if (!response.ok) {
@@ -53,7 +69,7 @@ export function useProductionProgressReportExport(): UseProductionProgressReport
       // Get the filename from the Content-Disposition header
       const contentDisposition = response.headers.get('Content-Disposition');
       let filename = 'production_progress_report';
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch && filenameMatch[1]) {

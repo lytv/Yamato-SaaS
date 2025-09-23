@@ -4,13 +4,14 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { getSatelliteProgress } from '@/libs/queries/satelliteProgress';
 import { validateSatelliteProgressFiltersWithOwner } from '@/libs/validations/satelliteProgress';
 import type {
-  SatelliteProgressResponse,
   SatelliteProgressErrorResponse,
+  SatelliteProgressResponse,
 } from '@/types/satelliteProgress';
 
 /**
@@ -37,8 +38,8 @@ export async function GET(request: NextRequest) {
       plan_code: searchParams.get('plan_code') || undefined,
       product_code: searchParams.get('product_code') || undefined,
       assigned_user_id: searchParams.get('assigned_user_id') || undefined,
-      page: parseInt(searchParams.get('page') || '1', 10),
-      limit: parseInt(searchParams.get('limit') || '20', 10),
+      page: Number.parseInt(searchParams.get('page') || '1', 10),
+      limit: Number.parseInt(searchParams.get('limit') || '20', 10),
       sortBy: searchParams.get('sortBy') || 'product_code',
       sortOrder: searchParams.get('sortOrder') || 'asc',
       ownerId: userId,
@@ -60,7 +61,6 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('Satellite progress API error:', error);
 

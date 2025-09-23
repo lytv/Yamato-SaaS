@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useProductionStepDetailPriceImport, type PriceType } from '@/hooks/useProductionStepDetailPriceImport';
+import { type PriceType, useProductionStepDetailPriceImport } from '@/hooks/useProductionStepDetailPriceImport';
 
-interface PriceImportModalProps {
+type PriceImportModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-}
+};
 
 export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [priceType, setPriceType] = useState<PriceType>('factory_price');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { importPrices, isImporting, importResult, clearResult } = useProductionStepDetailPriceImport();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,10 +28,12 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
   };
 
   const handleImport = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      return;
+    }
 
     const result = await importPrices(selectedFile, priceType);
-    
+
     if (result.success && onSuccess) {
       onSuccess();
     }
@@ -61,49 +63,78 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
 
         <div className="space-y-6">
           {/* Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-medium text-blue-800 mb-2">📋 Hướng dẫn format file Excel:</h3>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• <strong>Dòng đầu tiên:</strong> Mã công đoạn (stepCode) từ cột B, C, D...</li>
-              <li>• <strong>Cột đầu tiên:</strong> Mã hàng (productCode) từ dòng 2 trở đi</li>
-              <li>• <strong>Các ô giao nhau:</strong> Giá trị đơn giá (số)</li>
-              <li>• <strong>Ô trống:</strong> Sẽ được bỏ qua, không cập nhật</li>
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <h3 className="mb-2 font-medium text-blue-800">📋 Hướng dẫn format file Excel:</h3>
+            <ul className="space-y-1 text-sm text-blue-700">
+              <li>
+                •
+                <strong>Dòng đầu tiên:</strong>
+                {' '}
+                Mã công đoạn (stepCode) từ cột B, C, D...
+              </li>
+              <li>
+                •
+                <strong>Cột đầu tiên:</strong>
+                {' '}
+                Mã hàng (productCode) từ dòng 2 trở đi
+              </li>
+              <li>
+                •
+                <strong>Các ô giao nhau:</strong>
+                {' '}
+                Giá trị đơn giá (số)
+              </li>
+              <li>
+                •
+                <strong>Ô trống:</strong>
+                {' '}
+                Sẽ được bỏ qua, không cập nhật
+              </li>
             </ul>
           </div>
 
           {/* File Upload */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="file-input" className="block text-sm font-medium text-gray-700">
               📎 Chọn file Excel
             </label>
             <input
+              id="file-input"
               ref={fileInputRef}
               type="file"
               accept=".xlsx,.xls"
               onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
               disabled={isImporting}
             />
             {selectedFile && (
               <p className="text-sm text-green-600">
-                ✅ Đã chọn: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                ✅ Đã chọn:
+                {' '}
+                {selectedFile.name}
+                {' '}
+                (
+                {(selectedFile.size / 1024).toFixed(1)}
+                {' '}
+                KB)
               </p>
             )}
           </div>
 
           {/* Price Type Selection */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <h3 className="block text-sm font-medium text-gray-700">
               💰 Loại đơn giá cần cập nhật
-            </label>
+            </h3>
             <div className="grid grid-cols-3 gap-3">
-              <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <label htmlFor="factory-price" className="flex cursor-pointer items-center space-x-2 rounded-lg border p-3 hover:bg-gray-50" aria-label="Factory Price">
                 <input
+                  id="factory-price"
                   type="radio"
                   name="priceType"
                   value="factory_price"
                   checked={priceType === 'factory_price'}
-                  onChange={(e) => setPriceType(e.target.value as PriceType)}
+                  onChange={e => setPriceType(e.target.value as PriceType)}
                   disabled={isImporting}
                   className="text-blue-600"
                 />
@@ -112,14 +143,15 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                   <div className="text-sm text-gray-500">Factory Price</div>
                 </div>
               </label>
-              
-              <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+
+              <label htmlFor="calculated-price" className="flex cursor-pointer items-center space-x-2 rounded-lg border p-3 hover:bg-gray-50" aria-label="Calculated Price">
                 <input
+                  id="calculated-price"
                   type="radio"
                   name="priceType"
                   value="calculated_price"
                   checked={priceType === 'calculated_price'}
-                  onChange={(e) => setPriceType(e.target.value as PriceType)}
+                  onChange={e => setPriceType(e.target.value as PriceType)}
                   disabled={isImporting}
                   className="text-blue-600"
                 />
@@ -129,13 +161,14 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                 </div>
               </label>
 
-              <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <label htmlFor="retail-price" className="flex cursor-pointer items-center space-x-2 rounded-lg border p-3 hover:bg-gray-50" aria-label="Retail Price">
                 <input
+                  id="retail-price"
                   type="radio"
                   name="priceType"
                   value="retail_price"
                   checked={priceType === 'retail_price'}
-                  onChange={(e) => setPriceType(e.target.value as PriceType)}
+                  onChange={e => setPriceType(e.target.value as PriceType)}
                   disabled={isImporting}
                   className="text-blue-600"
                 />
@@ -149,21 +182,24 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
 
           {/* Import Result */}
           {importResult && (
-            <div className={`p-4 rounded-lg border ${
-              importResult.success 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-red-50 border-red-200'
-            }`}>
+            <div className={`rounded-lg border p-4 ${
+              importResult.success
+                ? 'border-green-200 bg-green-50'
+                : 'border-red-200 bg-red-50'
+            }`}
+            >
               <div className={`font-medium ${
                 importResult.success ? 'text-green-800' : 'text-red-800'
-              }`}>
+              }`}
+              >
                 {importResult.success ? '✅ Import thành công!' : '❌ Import thất bại'}
               </div>
-              
+
               {importResult.message && (
-                <p className={`text-sm mt-1 ${
+                <p className={`mt-1 text-sm ${
                   importResult.success ? 'text-green-700' : 'text-red-700'
-                }`}>
+                }`}
+                >
                   {importResult.message}
                 </p>
               )}
@@ -190,11 +226,16 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
               {importResult.errors && importResult.errors.length > 0 && (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-sm font-medium text-red-800">
-                    Xem chi tiết lỗi ({importResult.errors.length})
+                    Xem chi tiết lỗi (
+                    {importResult.errors.length}
+                    )
                   </summary>
-                  <div className="mt-2 text-sm text-red-700 bg-red-100 rounded p-2 max-h-32 overflow-y-auto">
+                  <div className="mt-2 max-h-32 overflow-y-auto rounded bg-red-100 p-2 text-sm text-red-700">
                     {importResult.errors.map((error, index) => (
-                      <div key={index} className="mb-1">• {error}</div>
+                      <div key={index} className="mb-1">
+                        •
+                        {error}
+                      </div>
                     ))}
                   </div>
                 </details>
@@ -214,22 +255,24 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                 </Button>
               )}
             </div>
-            
-            <Button 
+
+            <Button
               onClick={handleImport}
               disabled={!selectedFile || isImporting}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              {isImporting ? (
-                <>
-                  <span className="animate-spin mr-2">⚙️</span>
-                  Đang import...
-                </>
-              ) : (
-                <>
-                  📊 Import đơn giá
-                </>
-              )}
+              {isImporting
+                ? (
+                    <>
+                      <span className="mr-2 animate-spin">⚙️</span>
+                      Đang import...
+                    </>
+                  )
+                : (
+                    <>
+                      📊 Import đơn giá
+                    </>
+                  )}
             </Button>
           </div>
         </div>

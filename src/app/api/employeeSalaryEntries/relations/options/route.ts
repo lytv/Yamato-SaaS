@@ -18,7 +18,7 @@ export async function GET() {
 
     const relationOptions = await getEmployeeSalaryEntryRelationOptions(orgId || userId);
 
-    console.log(`🔍 [relation-options] ownerId: ${orgId || userId}, plans: ${relationOptions.plans.length}, products: ${relationOptions.products.length}`);
+    // Xóa dòng: console.log(`🔍 [relation-options] ownerId: ${orgId || userId}, plans: ${relationOptions.plans.length}, products: ${relationOptions.products.length}`);
 
     return NextResponse.json({
       success: true,
@@ -28,8 +28,8 @@ export async function GET() {
         lastUpdated: new Date().toISOString(),
       },
     });
-  } catch (error) {
-    console.error('Error fetching relation options:', error);
+  } catch {
+    // Xóa dòng: console.error('Error fetching relation options:', error);
     return NextResponse.json(
       { error: 'Failed to fetch relation options' },
       { status: 500 },

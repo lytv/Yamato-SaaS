@@ -3,14 +3,14 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery } from '@tanstack/react-query';
 
 import type {
   SatelliteProgressFilters,
   SatelliteProgressItem,
-  SatelliteProgressSummary,
   SatelliteProgressPagination,
+  SatelliteProgressSummary,
   UseSatelliteProgressResult,
 } from '@/types/satelliteProgress';
 
@@ -37,7 +37,7 @@ export function useSatelliteProgress(
       }
 
       const queryParams = new URLSearchParams();
-      
+
       // Add non-empty filters to query params
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -58,7 +58,7 @@ export function useSatelliteProgress(
       }
 
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Failed to fetch satellite progress data');
       }

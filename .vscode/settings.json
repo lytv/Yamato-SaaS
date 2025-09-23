@@ -1,7 +1,6 @@
 {
   "typescript.preferences.includePackageJsonAutoImports": "on",
   "typescript.suggest.autoImports": true,
-  "typescript.preferences.includePackageJsonAutoImports": "on",
   "eslint.validate": [
     "javascript",
     "javascriptreact",
@@ -12,7 +11,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "typescript.preferences.includePackageJsonAutoImports": "on",
   "problems.decorations.enabled": true,
   "problems.showNearbyOutlineSymbols": true,
   "i18n-ally.localesPaths": [

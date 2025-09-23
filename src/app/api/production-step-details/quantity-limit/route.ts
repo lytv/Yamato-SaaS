@@ -4,9 +4,9 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
+import { eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
 import { productionStepDetailSchema } from '@/models/Schema';
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (!productionStepDetailId) {
       return NextResponse.json(
         { error: 'productionStepDetailId is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,12 +44,12 @@ export async function GET(request: NextRequest) {
 
     if (!quantityLimitData || quantityLimitData.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: `No production step detail found with ID ${productionStepDetailId}`,
-          data: null
-        }, 
-        { status: 404 }
+          data: null,
+        },
+        { status: 404 },
       );
     }
 
@@ -74,12 +74,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching production step detail quantity limit:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch quantity limit',
-        data: null 
+        data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

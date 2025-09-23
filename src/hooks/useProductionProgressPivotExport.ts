@@ -49,7 +49,7 @@ export function useProductionProgressPivotExport(): UseProductionProgressPivotEx
       // Handle file download
       const blob = await response.blob();
       const contentDisposition = response.headers.get('Content-Disposition');
-      
+
       let filename = params.filename || 'production_progress_pivot';
       if (contentDisposition) {
         const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);

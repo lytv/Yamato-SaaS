@@ -14,8 +14,8 @@ import {
   Search,
   Trash2,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -93,8 +93,8 @@ export function OutsourceOrderList() {
     try {
       await deleteMutation.mutateAsync(id);
       setDeleteId(null);
-    } catch (error) {
-      console.error('Delete error:', error);
+    } catch {
+      // Xóa dòng: console.error('Delete error:', error);
     }
   };
 
@@ -215,12 +215,17 @@ export function OutsourceOrderList() {
                         </TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.applyRetailPrice === 3 
-                              ? 'bg-blue-100 text-blue-800' 
+                            item.applyRetailPrice === 3
+                              ? 'bg-blue-100 text-blue-800'
                               : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          }`}
+                          >
                             {/* Debug display */}
-                            [{item.applyRetailPrice}] {item.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
+                            [
+                            {item.applyRetailPrice}
+                            ]
+                            {' '}
+                            {item.applyRetailPrice === 3 ? t('price_type_retail') : t('price_type_normal')}
                           </span>
                         </TableCell>
                         <TableCell>

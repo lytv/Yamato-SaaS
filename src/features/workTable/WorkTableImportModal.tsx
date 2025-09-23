@@ -108,7 +108,9 @@ export function WorkTableImportModal({ isOpen, onClose, onSuccess }: WorkTableIm
           {/* Import Info */}
           <div className="mb-4 rounded-md bg-blue-50 p-3">
             <p className="text-sm text-blue-700">
-              <strong>Import Format:</strong> The system will read work table data from column D starting from row 4.
+              <strong>Import Format:</strong>
+              {' '}
+              The system will read work table data from column D starting from row 4.
               Table codes will be extracted from column D and table names will be generated as "Bàn [code]".
             </p>
           </div>

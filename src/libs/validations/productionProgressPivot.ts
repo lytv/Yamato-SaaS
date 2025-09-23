@@ -54,12 +54,12 @@ export const productionProgressPivotListParamsSchema = z.object({
   page: z
     .string()
     .optional()
-    .transform((val) => (val ? parseInt(val, 10) : 1))
+    .transform(val => (val ? Number.parseInt(val, 10) : 1))
     .pipe(z.number().int().min(1).default(1)),
   limit: z
     .string()
     .optional()
-    .transform((val) => (val ? parseInt(val, 10) : 20))
+    .transform(val => (val ? Number.parseInt(val, 10) : 20))
     .pipe(z.number().int().min(1).max(100).default(20)),
   sortBy: z.string().optional().default('product_code'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),

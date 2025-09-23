@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { planSchema } from '@/models/Schema';
 import type {
   CreatePlanInput,
@@ -15,6 +14,8 @@ import type {
   PlanStats,
   UpdatePlanInput,
 } from '@/types/plan';
+
+import { db } from '../DB';
 
 /**
  * Create a new plan

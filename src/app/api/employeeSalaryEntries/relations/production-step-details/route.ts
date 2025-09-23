@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { getProductionStepDetailsByProduct, getAllProductionSteps } from '@/libs/queries/employeeSalaryEntry';
+import { getAllProductionSteps, getProductionStepDetailsByProduct } from '@/libs/queries/employeeSalaryEntry';
 
 // GET /api/employeeSalaryEntries/relations/production-step-details?productId=X
 export async function GET(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const loadAll = searchParams.get('loadAll') === 'true';
 
     let productionStepDetails;
-    let metadata: any = {
+    const metadata: any = {
       lastUpdated: new Date().toISOString(),
     };
 

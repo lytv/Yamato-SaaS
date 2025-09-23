@@ -48,7 +48,7 @@ export function EmployeeDeliveryReceiptInventorySkeleton({
           <div className="grid grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="rounded-lg border border-gray-200 bg-white p-4">
-                <div className="h-4 w-20 animate-pulse rounded bg-gray-200 mb-2" />
+                <div className="mb-2 h-4 w-20 animate-pulse rounded bg-gray-200" />
                 <div className="h-6 w-16 animate-pulse rounded bg-gray-200" />
               </div>
             ))}
@@ -94,7 +94,7 @@ export function EmployeeDeliveryReceiptInventorySkeleton({
       {/* Filter Skeleton */}
       {showFilter && (
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-          <div className="p-4 border-b border-gray-200">
+          <div className="border-b border-gray-200 p-4">
             <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div className="h-10 w-full max-w-md animate-pulse rounded bg-gray-200" />
               <div className="flex items-center space-x-2">
@@ -112,7 +112,7 @@ export function EmployeeDeliveryReceiptInventorySkeleton({
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center">
-                <div className="h-8 w-8 animate-pulse rounded bg-gray-200 mr-3" />
+                <div className="mr-3 size-8 animate-pulse rounded bg-gray-200" />
                 <div className="space-y-2">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
                   <div className="h-6 w-16 animate-pulse rounded bg-gray-200" />
@@ -149,31 +149,31 @@ export function EmployeeDeliveryReceiptInventorySkeleton({
           >
             {/* Employee Name */}
             <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-            
+
             {/* Plan Code */}
             <div className="h-4 w-16 animate-pulse rounded bg-gray-200" />
-            
+
             {/* Product */}
             <div className="space-y-1">
               <div className="h-3 w-20 animate-pulse rounded bg-gray-200" />
               <div className="h-3 w-32 animate-pulse rounded bg-gray-200" />
             </div>
-            
+
             {/* Step */}
             <div className="space-y-1">
               <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
               <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
             </div>
-            
+
             {/* Assigned */}
             <div className="h-4 w-12 animate-pulse rounded bg-gray-200" />
-            
+
             {/* Received */}
             <div className="h-4 w-12 animate-pulse rounded bg-gray-200" />
-            
+
             {/* Inventory */}
             <div className="h-4 w-12 animate-pulse rounded bg-gray-200" />
-            
+
             {/* Completion Rate */}
             <div className="flex items-center space-x-2">
               <div className="h-4 w-16 animate-pulse rounded bg-gray-200" />
@@ -187,10 +187,10 @@ export function EmployeeDeliveryReceiptInventorySkeleton({
       <div className="flex items-center justify-between">
         <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
-          <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
-          <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
-          <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
+          <div className="size-8 animate-pulse rounded bg-gray-200" />
+          <div className="size-8 animate-pulse rounded bg-gray-200" />
+          <div className="size-8 animate-pulse rounded bg-gray-200" />
+          <div className="size-8 animate-pulse rounded bg-gray-200" />
         </div>
       </div>
     </div>

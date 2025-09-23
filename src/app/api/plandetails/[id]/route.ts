@@ -27,7 +27,7 @@ export async function GET(
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Use orgId for organization plandetails, fallback to userId for personal plandetails
     const ownerId = orgId || userId;
 
@@ -67,7 +67,7 @@ export async function PUT(
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Use orgId for organization plandetails, fallback to userId for personal plandetails
     const ownerId = orgId || userId;
 
@@ -104,7 +104,7 @@ export async function DELETE(
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Use orgId for organization plandetails, fallback to userId for personal plandetails
     const ownerId = orgId || userId;
 

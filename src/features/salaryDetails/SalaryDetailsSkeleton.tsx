@@ -7,7 +7,7 @@ export function SalaryDetailsSkeleton() {
   return (
     <div className="space-y-6">
       {/* Filter Section Skeleton */}
-      <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-4">
+      <div className="space-y-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-48" />
           <div className="flex gap-2">
@@ -15,8 +15,8 @@ export function SalaryDetailsSkeleton() {
             <Skeleton className="h-8 w-24" />
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-10 w-full" />
@@ -43,7 +43,7 @@ export function SalaryDetailsSkeleton() {
               <Skeleton className="h-8 w-20" />
             </div>
             <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-4" />
+              <Skeleton className="size-4" />
               <Skeleton className="h-4 w-24" />
             </div>
           </div>
@@ -51,7 +51,7 @@ export function SalaryDetailsSkeleton() {
       </div>
 
       {/* Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
@@ -70,9 +70,9 @@ export function SalaryDetailsSkeleton() {
           <Skeleton className="h-6 w-40" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="p-4 border rounded-lg space-y-2">
+              <div key={i} className="space-y-2 rounded-lg border p-4">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-6 w-24" />
@@ -106,7 +106,7 @@ export function SalaryDetailsSkeleton() {
             ))}
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4">
+            <div className="mt-4 flex items-center justify-between">
               <Skeleton className="h-4 w-48" />
               <div className="flex items-center gap-2">
                 <Skeleton className="h-8 w-16" />

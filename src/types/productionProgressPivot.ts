@@ -6,8 +6,8 @@
 
 // ✅ Helper type for dynamic step fields
 type DynamicStepFields = {
-  [K in `step_code_${number}` | `step_name_${number}` | `step_quantity_${number}`]: 
-    K extends `step_quantity_${number}` ? number : string | null;
+  [K in `step_code_${number}` | `step_name_${number}` | `step_quantity_${number}`]:
+  K extends `step_quantity_${number}` ? number : string | null;
 };
 
 // ✅ Core data type returned from stored procedure (now supports up to 20 dynamic steps)

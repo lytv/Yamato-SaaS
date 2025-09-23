@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { productionStepSchema } from '@/models/Schema';
 import type {
   CreateProductionStepInput,
@@ -15,6 +14,8 @@ import type {
   ProductionStepStats,
   UpdateProductionStepInput,
 } from '@/types/productionStep';
+
+import { db } from '../DB';
 
 /**
  * Create a new production step

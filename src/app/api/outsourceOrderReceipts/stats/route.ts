@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -24,15 +24,15 @@ export async function GET(request: NextRequest) {
     const ownerId = orgId || userId;
 
     const { searchParams } = new URL(request.url);
-    const outsourceOrderDetailId = searchParams.get('outsourceOrderDetailId') 
-      ? Number(searchParams.get('outsourceOrderDetailId')) 
+    const outsourceOrderDetailId = searchParams.get('outsourceOrderDetailId')
+      ? Number(searchParams.get('outsourceOrderDetailId'))
       : undefined;
 
     // Validate outsourceOrderDetailId if provided
-    if (outsourceOrderDetailId !== undefined && (isNaN(outsourceOrderDetailId) || outsourceOrderDetailId <= 0)) {
+    if (outsourceOrderDetailId !== undefined && (Number.isNaN(outsourceOrderDetailId) || outsourceOrderDetailId <= 0)) {
       return NextResponse.json(
         { success: false, error: 'Invalid outsourceOrderDetailId format', code: 'VALIDATION_ERROR' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
       success: true,
       data: stats,
     });
-
   } catch (error) {
     console.error('GET /api/outsourceOrderReceipts/stats error:', error);
 
@@ -50,21 +49,21 @@ export async function GET(request: NextRequest) {
       if (error.message.includes('not found') || error.message.includes('access denied')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'NOT_FOUND' },
-          { status: 404 }
+          { status: 404 },
         );
       }
-      
+
       if (error.message.includes('validation') || error.message.includes('invalid')) {
         return NextResponse.json(
           { success: false, error: error.message, code: 'VALIDATION_ERROR' },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { and, eq } from 'drizzle-orm';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
-import { eq, and } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
-import { productSchema, productionStepSchema, productionStepDetailSchema } from '@/models/Schema';
+import { productionStepDetailSchema, productionStepSchema, productSchema } from '@/models/Schema';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized access', code: 'UNAUTHORIZED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,14 +28,14 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No file uploaded' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!priceType || !['factory_price', 'calculated_price', 'retail_price'].includes(priceType)) {
       return NextResponse.json(
         { success: false, error: 'Invalid price type. Must be factory_price, calculated_price, or retail_price' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,26 +46,26 @@ export async function POST(request: NextRequest) {
     if (!firstSheetName) {
       return NextResponse.json(
         { success: false, error: 'No worksheets found in Excel file' },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const worksheet = workbook.Sheets[firstSheetName];
     if (!worksheet) {
       return NextResponse.json(
         { success: false, error: 'Worksheet not found' },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-      header: 1, 
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
       defval: null,
-      range: 0 
+      range: 0,
     }) as any[][];
 
     if (jsonData.length < 2) {
       return NextResponse.json(
         { success: false, error: 'Excel file must have at least 2 rows (header + data)' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,25 +74,25 @@ export async function POST(request: NextRequest) {
     if (!firstRow) {
       return NextResponse.json(
         { success: false, error: 'No data found in first row' },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const stepCodes = firstRow.slice(1).filter(code => code && code.toString().trim());
-    
+
     if (stepCodes.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No step codes found in first row' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Extract product codes and prices from subsequent rows
     const productRows = jsonData.slice(1).filter(row => row[0] && row[0].toString().trim());
-    
+
     if (productRows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No product codes found in first column' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
         .where(eq(productSchema.ownerId, ownerId!)),
       db.select({ id: productionStepSchema.id, stepCode: productionStepSchema.stepCode })
         .from(productionStepSchema)
-        .where(eq(productionStepSchema.ownerId, ownerId!))
+        .where(eq(productionStepSchema.ownerId, ownerId!)),
     ]);
 
     // Create lookup maps
@@ -140,14 +141,14 @@ export async function POST(request: NextRequest) {
         }
 
         const priceValue = row[colIndex + 1]; // +1 because first column is product code
-        
+
         if (priceValue === null || priceValue === undefined || priceValue === '') {
           continue; // Skip empty cells
         }
 
-        const price = parseFloat(priceValue.toString());
-        
-        if (isNaN(price) || price < 0) {
+        const price = Number.parseFloat(priceValue.toString());
+
+        if (Number.isNaN(price) || price < 0) {
           errors.push(`Row ${rowIndex + 2}, Col ${colIndex + 2}: Invalid price value '${priceValue}'`);
           continue;
         }
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
           productionStepId,
           price,
           productCode,
-          stepCode: stepCodeStr
+          stepCode: stepCodeStr,
         });
         processedCount++;
       }
@@ -172,8 +173,8 @@ export async function POST(request: NextRequest) {
           processed: 0,
           updated: 0,
           created: 0,
-          errors: errors.length
-        }
+          errors: errors.length,
+        },
       }, { status: 400 });
     }
 
@@ -184,7 +185,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < updates.length; i += batchSize) {
       const batch = updates.slice(i, i + batchSize);
-      
+
       for (const update of batch) {
         try {
           // Check if production_step_detail exists
@@ -194,30 +195,30 @@ export async function POST(request: NextRequest) {
               and(
                 eq(productionStepDetailSchema.productId, update.productId),
                 eq(productionStepDetailSchema.productionStepId, update.productionStepId),
-                eq(productionStepDetailSchema.ownerId, ownerId!)
-              )
+                eq(productionStepDetailSchema.ownerId, ownerId!),
+              ),
             )
             .limit(1);
 
-          const updateData = priceType === 'factory_price' 
+          const updateData = priceType === 'factory_price'
             ? { factoryPrice: update.price.toString() }
             : priceType === 'calculated_price'
-            ? { calculatedPrice: update.price.toString() }
-            : { retailPrice: update.price.toString() };
+              ? { calculatedPrice: update.price.toString() }
+              : { retailPrice: update.price.toString() };
 
           if (existing.length > 0) {
             // Update existing record
             await db.update(productionStepDetailSchema)
               .set({
                 ...updateData,
-                updatedAt: new Date()
+                updatedAt: new Date(),
               })
               .where(
                 and(
                   eq(productionStepDetailSchema.productId, update.productId),
                   eq(productionStepDetailSchema.productionStepId, update.productionStepId),
-                  eq(productionStepDetailSchema.ownerId, ownerId!)
-                )
+                  eq(productionStepDetailSchema.ownerId, ownerId!),
+                ),
               );
             updatedCount++;
           } else {
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest) {
               retailPrice: priceType === 'retail_price' ? update.price.toString() : null,
               isFinalStep: false,
               isVtStep: false,
-              isParkingStep: false
+              isParkingStep: false,
             });
             createdCount++;
           }
@@ -250,19 +251,18 @@ export async function POST(request: NextRequest) {
         processed: processedCount,
         updated: updatedCount,
         created: createdCount,
-        errors: errors.length
+        errors: errors.length,
       },
-      errors: errors.length > 0 ? errors.slice(0, 10) : [] // Return first 10 errors
+      errors: errors.length > 0 ? errors.slice(0, 10) : [], // Return first 10 errors
     });
-
   } catch (error) {
     console.error('Import prices error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Internal server error' 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Internal server error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

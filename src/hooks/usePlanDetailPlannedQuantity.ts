@@ -40,15 +40,15 @@ export const usePlanDetailPlannedQuantity = () => {
 
     try {
       const response = await fetch(
-        `/api/plan-details/planned-quantity?planId=${planId}&productId=${productId}`
+        `/api/plan-details/planned-quantity?planId=${planId}&productId=${productId}`,
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch planned quantity: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         const plannedData: PlanDetailPlannedQuantity = {
           planId: data.data.planId,
@@ -59,7 +59,7 @@ export const usePlanDetailPlannedQuantity = () => {
           remainingQuantity: data.data.remainingQuantity,
           details: data.data.details,
         };
-        
+
         setPlannedQuantity(plannedData);
         return plannedData;
       } else {

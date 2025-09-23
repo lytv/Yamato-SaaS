@@ -3,15 +3,16 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { useEmployeeSalaryEntryPreviousQuantity } from '../useEmployeeSalaryEntryPreviousQuantity';
 
 // Mock fetch
-global.fetch = jest.fn();
+globalThis.fetch = vi.fn();
 
 describe('useEmployeeSalaryEntryPreviousQuantity', () => {
   beforeEach(() => {
-    (fetch as jest.Mock).mockClear();
+    (fetch as vi.Mock).mockClear();
   });
 
   it('should return null initially', () => {
@@ -56,7 +57,7 @@ describe('useEmployeeSalaryEntryPreviousQuantity', () => {
     expect(previousData).toEqual(mockData.data);
 
     expect(fetch).toHaveBeenCalledWith(
-      '/api/employee-salary-entries/previous-quantity?planId=1&productId=2&productionStepDetailId=3'
+      '/api/employee-salary-entries/previous-quantity?planId=1&productId=2&productionStepDetailId=3',
     );
   });
 
@@ -82,7 +83,7 @@ describe('useEmployeeSalaryEntryPreviousQuantity', () => {
     const previousData = await result.current.fetchPreviousQuantity(1, 2, 3, 5);
 
     expect(fetch).toHaveBeenCalledWith(
-      '/api/employee-salary-entries/previous-quantity?planId=1&productId=2&productionStepDetailId=3&excludeId=5'
+      '/api/employee-salary-entries/previous-quantity?planId=1&productId=2&productionStepDetailId=3&excludeId=5',
     );
 
     expect(previousData?.excludedId).toBe(5);

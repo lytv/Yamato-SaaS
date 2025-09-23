@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { db } from '@/libs/DB';
 import { sql } from 'drizzle-orm';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
+import { db } from '@/libs/DB';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,22 +19,22 @@ export async function GET(request: NextRequest) {
     const search = url.searchParams.get('search') || '';
     const sortBy = url.searchParams.get('sortBy') || 'work_date';
     const sortOrder = url.searchParams.get('sortOrder') || 'desc';
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const page = Number.parseInt(url.searchParams.get('page') || '1');
+    const limit = Number.parseInt(url.searchParams.get('limit') || '50');
     const showAll = url.searchParams.get('showAll') === 'true';
 
     // Validate required dates
     if (!startDate || !endDate) {
-      return NextResponse.json({ 
-        error: 'Start date and end date are required' 
+      return NextResponse.json({
+        error: 'Start date and end date are required',
       }, { status: 400 });
     }
 
     // Call the stored procedure
     const userIdsArray = userIds ? `{${userIds.join(',')}}` : null;
-    
+
     const result = await db.execute(
-      sql`SELECT * FROM calculate_user_salary_details(${userIdsArray}::TEXT[], ${startDate}::DATE, ${endDate}::DATE)`
+      sql`SELECT * FROM calculate_user_salary_details(${userIdsArray}::TEXT[], ${startDate}::DATE, ${endDate}::DATE)`,
     );
 
     let salaryDetails = result.rows.map((row: any) => ({
@@ -44,20 +46,20 @@ export async function GET(request: NextRequest) {
       product_name: row.product_name,
       step_code: row.step_code,
       step_name: row.step_name,
-      quantity: parseInt(row.quantity),
-      unit_price: parseFloat(row.unit_price),
-      line_total: parseFloat(row.line_total)
+      quantity: Number.parseInt(row.quantity),
+      unit_price: Number.parseFloat(row.unit_price),
+      line_total: Number.parseFloat(row.line_total),
     }));
 
     // Apply search filter
     if (search) {
       const searchLower = search.toLowerCase();
       salaryDetails = salaryDetails.filter((item: any) =>
-        item.full_name.toLowerCase().includes(searchLower) ||
-        item.product_code.toLowerCase().includes(searchLower) ||
-        item.product_name.toLowerCase().includes(searchLower) ||
-        item.step_code.toLowerCase().includes(searchLower) ||
-        item.step_name.toLowerCase().includes(searchLower)
+        item.full_name.toLowerCase().includes(searchLower)
+        || item.product_code.toLowerCase().includes(searchLower)
+        || item.product_name.toLowerCase().includes(searchLower)
+        || item.step_code.toLowerCase().includes(searchLower)
+        || item.step_name.toLowerCase().includes(searchLower),
       );
     }
 
@@ -65,12 +67,12 @@ export async function GET(request: NextRequest) {
     salaryDetails.sort((a: any, b: any) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-      
+
       if (sortBy === 'work_date') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
-      
+
       if (sortOrder === 'desc') {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
       } else {
@@ -81,14 +83,14 @@ export async function GET(request: NextRequest) {
     // Calculate totals and statistics
     const totalRecords = salaryDetails.length;
     const totalAmount = salaryDetails.reduce((sum: number, item: any) => sum + item.line_total, 0);
-    
+
     const userSummary = salaryDetails.reduce((acc: any, item: any) => {
       if (!acc[item.user_id]) {
         acc[item.user_id] = {
           user_id: item.user_id,
           full_name: item.full_name,
           total_amount: 0,
-          record_count: 0
+          record_count: 0,
         };
       }
       acc[item.user_id].total_amount += item.line_total;
@@ -99,17 +101,17 @@ export async function GET(request: NextRequest) {
     // Apply pagination if not showing all
     let paginatedData = salaryDetails;
     let pagination = null;
-    
+
     if (!showAll) {
       const offset = (page - 1) * limit;
       paginatedData = salaryDetails.slice(offset, offset + limit);
-      
+
       pagination = {
         page,
         limit,
         total: totalRecords,
         hasMore: offset + limit < totalRecords,
-        totalPages: Math.ceil(totalRecords / limit)
+        totalPages: Math.ceil(totalRecords / limit),
       };
     }
 
@@ -121,15 +123,14 @@ export async function GET(request: NextRequest) {
         total_records: totalRecords,
         total_amount: totalAmount,
         user_summary: Object.values(userSummary),
-        date_range: { start_date: startDate, end_date: endDate }
-      }
+        date_range: { start_date: startDate, end_date: endDate },
+      },
     });
-
   } catch (error) {
     console.error('Error fetching salary details:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

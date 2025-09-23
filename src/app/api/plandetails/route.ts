@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Use orgId for organization plandetails, fallback to userId for personal plandetails
     const ownerId = orgId || userId;
 
@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
       sortOrder: searchParams.get('sortOrder') || 'desc',
       includeRelations: searchParams.get('includeRelations') === 'true',
     });
-
 
     const plandetails = await getPlanDetailsByOwner({
       ...params,
@@ -80,7 +79,7 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Use orgId for organization plandetails, fallback to userId for personal plandetails
     const ownerId = orgId || userId;
 
@@ -99,7 +98,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating plandetail:', error);
-    
+
     // Check if it's a unique constraint violation
     if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
       return NextResponse.json(
@@ -110,7 +109,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to create plandetail',

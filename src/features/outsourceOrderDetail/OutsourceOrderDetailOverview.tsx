@@ -366,8 +366,12 @@ export function OutsourceOrderDetailOverview() {
                   <SelectItem value="all">Tất cả</SelectItem>
                   {relationOptions?.assignedUsers
                     ?.filter(user =>
-                      !tempFilters.assignedUserSearch
-                      || searchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
+                      // Only show users with shortcut starting with 'vt' or 'VT'
+                      user.shortcut && (user.shortcut.toLowerCase().startsWith('vt'))
+                      && (
+                        !tempFilters.assignedUserSearch
+                        || searchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || '')
+                      ),
                     )
                     ?.map(user => (
                       <SelectItem key={user.id} value={user.id}>
@@ -405,7 +409,7 @@ export function OutsourceOrderDetailOverview() {
                     ?.map(product => (
                       <SelectItem key={product.id} value={product.id.toString()}>
                         {product.productName}
-                        {product.productCode && ` (${product.productCode})`}
+                        {product.category && ` (${product.category})`}
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -438,7 +442,7 @@ export function OutsourceOrderDetailOverview() {
                     ?.map(step => (
                       <SelectItem key={step.id} value={step.id.toString()}>
                         {step.stepName}
-                        {step.stepCode && ` (${step.stepCode})`}
+                        {step.filmSequence && ` (${step.filmSequence})`}
                       </SelectItem>
                     ))}
                 </SelectContent>

@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 // Nếu dùng supertest hoặc fetch, import ở đây
 // import request from 'supertest';
 // import app from '@/app'; // Nếu có app express/next handler
 
 // Giả lập fetch nếu cần
 
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 const API = '/api/work-tables';
 
@@ -25,6 +25,7 @@ describe('WorkTable API', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await res.json();
+
     expect(res.ok).toBe(true);
     expect(data.success).toBe(true);
     expect(data.data.tableCode).toBe('T1');
@@ -37,6 +38,7 @@ describe('WorkTable API', () => {
     });
     const res = await fetch(API);
     const data = await res.json();
+
     expect(res.ok).toBe(true);
     expect(data.success).toBe(true);
     expect(Array.isArray(data.data)).toBe(true);
@@ -53,6 +55,7 @@ describe('WorkTable API', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await res.json();
+
     expect(res.ok).toBe(true);
     expect(data.success).toBe(true);
     expect(data.data.tableCode).toBe('T2');
@@ -65,6 +68,7 @@ describe('WorkTable API', () => {
     });
     const res = await fetch(`${API}/1`, { method: 'DELETE' });
     const data = await res.json();
+
     expect(res.ok).toBe(true);
     expect(data.success).toBe(true);
   });
@@ -80,8 +84,9 @@ describe('WorkTable API', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await res.json();
+
     expect(res.ok).toBe(false);
     expect(data.success).toBe(false);
     expect(data.error).toBe('Validation error');
   });
-}); 
+});

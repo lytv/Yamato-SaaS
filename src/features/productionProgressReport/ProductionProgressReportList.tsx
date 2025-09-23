@@ -6,19 +6,19 @@
  * Following Yamato-SaaS patterns with responsive design
  */
 
-import { 
-  Download, 
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Download,
+  Factory,
+  Hash,
+  Package,
+  RefreshCw,
+  Settings,
+  Target,
   TrendingUp,
   Users,
-  Package,
-  Calendar,
-  Settings,
-  CheckCircle2,
-  AlertCircle,
-  Target,
-  Hash,
-  Factory,
-  RefreshCw
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useMemo } from 'react';
@@ -31,9 +31,9 @@ import { ProductionProgressReportSkeleton } from '@/features/productionProgressR
 import { useProductionProgressReport } from '@/hooks/useProductionProgressReport';
 import { useProductionProgressReportExport } from '@/hooks/useProductionProgressReportExport';
 import { useProductionProgressReportFilters } from '@/hooks/useProductionProgressReportFilters';
-import type { 
-  ProductionProgressReportItem,
+import type {
   ProductionProgressReportColumn,
+  ProductionProgressReportItem,
 } from '@/types/productionProgressReport';
 
 type ProductionProgressReportListProps = {
@@ -155,11 +155,13 @@ export function ProductionProgressReportList({
       case 'report_type':
         return (
           <div className="flex items-center justify-center gap-2">
-            {value === 'EMPLOYEE_SUMMARY' ? (
-              <Users className="h-4 w-4 text-blue-600" />
-            ) : (
-              <Factory className="h-4 w-4 text-purple-600" />
-            )}
+            {value === 'EMPLOYEE_SUMMARY'
+              ? (
+                  <Users className="size-4 text-blue-600" />
+                )
+              : (
+                  <Factory className="size-4 text-purple-600" />
+                )}
             <Badge variant={getReportTypeVariant(String(value))} className="font-mono text-xs">
               {value === 'EMPLOYEE_SUMMARY' ? 'Employee' : 'Outsource'}
             </Badge>
@@ -168,15 +170,17 @@ export function ProductionProgressReportList({
 
       case 'entity_name':
         return (
-          <div className="flex items-center gap-2 min-w-0">
-            {item.report_type === 'EMPLOYEE_SUMMARY' ? (
-              <Users className="h-4 w-4 text-blue-600 flex-shrink-0" />
-            ) : (
-              <Factory className="h-4 w-4 text-purple-600 flex-shrink-0" />
-            )}
+          <div className="flex min-w-0 items-center gap-2">
+            {item.report_type === 'EMPLOYEE_SUMMARY'
+              ? (
+                  <Users className="size-4 shrink-0 text-blue-600" />
+                )
+              : (
+                  <Factory className="size-4 shrink-0 text-purple-600" />
+                )}
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{String(value)}</div>
-              <div className="text-xs text-gray-500 truncate">
+              <div className="truncate font-medium text-gray-900">{String(value)}</div>
+              <div className="truncate text-xs text-gray-500">
                 {item.report_type === 'EMPLOYEE_SUMMARY' ? 'Nhân viên' : 'Gia công'}
               </div>
             </div>
@@ -186,7 +190,7 @@ export function ProductionProgressReportList({
       case 'plan_code':
         return (
           <div className="flex items-center justify-center gap-2">
-            <Calendar className="h-4 w-4 text-green-600" />
+            <Calendar className="size-4 text-green-600" />
             <Badge variant="outline" className="font-mono text-xs">
               {String(value)}
             </Badge>
@@ -196,9 +200,9 @@ export function ProductionProgressReportList({
       case 'product_code':
         return (
           <div className="flex items-center justify-center gap-2">
-            <Package className="h-4 w-4 text-orange-600" />
+            <Package className="size-4 text-orange-600" />
             <div className="text-center">
-              <div className="font-medium text-gray-900 text-sm">{item.product_name || String(value)}</div>
+              <div className="text-sm font-medium text-gray-900">{item.product_name || String(value)}</div>
               <div className="text-xs text-gray-500">{String(value)}</div>
             </div>
           </div>
@@ -207,9 +211,9 @@ export function ProductionProgressReportList({
       case 'step_code':
         return (
           <div className="flex items-center justify-center gap-2">
-            <Settings className="h-4 w-4 text-indigo-600" />
+            <Settings className="size-4 text-indigo-600" />
             <div className="text-center">
-              <div className="font-medium text-gray-900 text-sm">{item.step_name || String(value)}</div>
+              <div className="text-sm font-medium text-gray-900">{item.step_name || String(value)}</div>
               <div className="text-xs text-gray-500">{String(value)}</div>
             </div>
           </div>
@@ -218,7 +222,7 @@ export function ProductionProgressReportList({
       case 'total_assigned':
         return (
           <div className="flex items-center justify-end gap-2">
-            <Target className="h-4 w-4 text-blue-600" />
+            <Target className="size-4 text-blue-600" />
             <Badge variant="secondary" className="font-mono">
               {formatCellValue(item, column)}
             </Badge>
@@ -228,7 +232,7 @@ export function ProductionProgressReportList({
       case 'total_made':
         return (
           <div className="flex items-center justify-end gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <CheckCircle2 className="size-4 text-green-600" />
             <Badge variant="secondary" className="font-mono">
               {formatCellValue(item, column)}
             </Badge>
@@ -238,19 +242,19 @@ export function ProductionProgressReportList({
       case 'total_received':
         return (
           <div className="flex items-center justify-end gap-2">
-            <Package className="h-4 w-4 text-indigo-600" />
+            <Package className="size-4 text-indigo-600" />
             <Badge variant="secondary" className="font-mono">
               {formatCellValue(item, column)}
             </Badge>
           </div>
         );
 
-      case 'remaining_quantity':
+      case 'remaining_quantity': {
         const remaining = typeof value === 'number' ? value : 0;
         return (
           <div className="flex items-center justify-end gap-2">
-            <AlertCircle className={`h-4 w-4 ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`} />
-            <Badge 
+            <AlertCircle className={`size-4 ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`} />
+            <Badge
               variant={remaining > 0 ? 'destructive' : 'default'}
               className="font-mono"
             >
@@ -258,7 +262,7 @@ export function ProductionProgressReportList({
             </Badge>
           </div>
         );
-
+      }
 
       default:
         return (
@@ -271,22 +275,24 @@ export function ProductionProgressReportList({
 
   // Calculate summary metrics (must be before any conditional returns)
   const summaryMetrics = useMemo(() => {
-    if (!data || data.length === 0) return null;
+    if (!data || data.length === 0) {
+      return null;
+    }
 
     const totalAssigned = data.reduce((sum, item) => sum + (item.total_assigned || 0), 0);
     const totalMade = data.reduce((sum, item) => sum + (item.total_made || 0), 0);
     const totalReceived = data.reduce((sum, item) => sum + (item.total_received || 0), 0);
     const totalRemaining = data.reduce((sum, item) => sum + (item.remaining_quantity || 0), 0);
     const averageCompletion = totalAssigned > 0 ? (totalReceived / totalAssigned) * 100 : 0;
-    
+
     const employeeRecords = data.filter(item => item.report_type === 'EMPLOYEE_SUMMARY');
     const outsourceRecords = data.filter(item => item.report_type === 'OUTSOURCE_DETAIL');
-    
-    const onTimeItems = data.filter(item => 
-      (item.completion_rate || 0) >= 80
+
+    const onTimeItems = data.filter(item =>
+      (item.completion_rate || 0) >= 80,
     );
-    const delayedItems = data.filter(item => 
-      (item.completion_rate || 0) < 50
+    const delayedItems = data.filter(item =>
+      (item.completion_rate || 0) < 50,
     );
 
     return {
@@ -331,12 +337,12 @@ export function ProductionProgressReportList({
     <div className={`space-y-6 ${className}`}>
       {/* Summary Cards */}
       {summaryMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <Target className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-blue-500 p-2">
+                  <Target className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-blue-700">Đã giao</p>
@@ -348,11 +354,11 @@ export function ProductionProgressReportList({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="border-green-200 bg-gradient-to-r from-green-50 to-green-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-500 rounded-lg">
-                  <CheckCircle2 className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-green-500 p-2">
+                  <CheckCircle2 className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-green-700">Đã hoàn thành</p>
@@ -364,27 +370,28 @@ export function ProductionProgressReportList({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+          <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-purple-500 p-2">
+                  <TrendingUp className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-700">Tỷ lệ TB</p>
                   <p className="text-2xl font-bold text-purple-900">
-                    {summaryMetrics.averageCompletion.toFixed(1)}%
+                    {summaryMetrics.averageCompletion.toFixed(1)}
+                    %
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+          <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-orange-500 p-2">
+                  <AlertCircle className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-orange-700">Chậm tiến độ</p>
@@ -400,25 +407,27 @@ export function ProductionProgressReportList({
 
       {/* Data Table */}
       <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Factory className="h-6 w-6 text-blue-600" />
+              <div className="rounded-lg bg-white p-2 shadow-sm">
+                <Factory className="size-6 text-blue-600" />
               </div>
               <div>
                 <CardTitle className="text-xl text-gray-900">
                   {t('title', { defaultValue: 'Báo cáo Tiến độ Sản xuất - Chi tiết' })}
                 </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="mt-1 text-sm text-gray-600">
                   Theo dõi chi tiết tiến độ theo từng nhân viên và đơn vị gia công
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="px-3 py-1">
-                <Hash className="h-3 w-3 mr-1" />
-                {data?.length || 0} bản ghi
+                <Hash className="mr-1 size-3" />
+                {data?.length || 0}
+                {' '}
+                bản ghi
               </Badge>
               <Button
                 variant="outline"
@@ -428,7 +437,7 @@ export function ProductionProgressReportList({
                 className="bg-white hover:bg-gray-50"
                 title="Làm mới dữ liệu"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`mr-2 size-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Làm mới
               </Button>
               <Button
@@ -438,7 +447,7 @@ export function ProductionProgressReportList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.excel', { defaultValue: 'Excel' })}
               </Button>
               <Button
@@ -448,69 +457,74 @@ export function ProductionProgressReportList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.csv', { defaultValue: 'CSV' })}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <ProductionProgressReportSkeleton />
-          ) : (
-            <DataTable
-              columns={columns.map(col => ({
-                id: col.key,
-                header: ({ column }: any) => {
-                  const getHeaderIcon = () => {
-                    switch (col.key) {
-                      case 'report_type':
-                        return <Users className="h-4 w-4 text-blue-600" />;
-                      case 'entity_name':
-                        return <Factory className="h-4 w-4 text-purple-600" />;
-                      case 'plan_code':
-                        return <Calendar className="h-4 w-4 text-green-600" />;
-                      case 'product_code':
-                        return <Package className="h-4 w-4 text-orange-600" />;
-                      case 'step_code':
-                        return <Settings className="h-4 w-4 text-indigo-600" />;
-                      case 'total_assigned':
-                        return <Target className="h-4 w-4 text-blue-600" />;
-                      case 'total_made':
-                        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-                      case 'total_received':
-                        return <Package className="h-4 w-4 text-indigo-600" />;
-                      case 'remaining_quantity':
-                        return <AlertCircle className="h-4 w-4 text-orange-600" />;
-                      default:
-                        return null;
-                    }
-                  };
+          {isLoading
+            ? (
+                <ProductionProgressReportSkeleton />
+              )
+            : (
+                <DataTable
+                  columns={columns.map(col => ({
+                    id: col.key,
+                    header: ({ column }: any) => {
+                      const getHeaderIcon = () => {
+                        switch (col.key) {
+                          case 'report_type':
+                            return <Users className="size-4 text-blue-600" />;
+                          case 'entity_name':
+                            return <Factory className="size-4 text-purple-600" />;
+                          case 'plan_code':
+                            return <Calendar className="size-4 text-green-600" />;
+                          case 'product_code':
+                            return <Package className="size-4 text-orange-600" />;
+                          case 'step_code':
+                            return <Settings className="size-4 text-indigo-600" />;
+                          case 'total_assigned':
+                            return <Target className="size-4 text-blue-600" />;
+                          case 'total_made':
+                            return <CheckCircle2 className="size-4 text-green-600" />;
+                          case 'total_received':
+                            return <Package className="size-4 text-indigo-600" />;
+                          case 'remaining_quantity':
+                            return <AlertCircle className="size-4 text-orange-600" />;
+                          default:
+                            return null;
+                        }
+                      };
 
-                  return (
-                    <div className={`flex items-center gap-2 font-semibold text-gray-700 ${
-                      col.align === 'right' ? 'justify-end' : 
-                      col.align === 'center' ? 'justify-center' : 'justify-start'
-                    }`}>
-                      {getHeaderIcon()}
-                      <span>{col.label}</span>
-                      {col.sortable && (
-                        <button
-                          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                          className="ml-1 hover:bg-gray-100 rounded p-1"
+                      return (
+                        <div className={`flex items-center gap-2 font-semibold text-gray-700 ${
+                          col.align === 'right'
+                            ? 'justify-end'
+                            : col.align === 'center' ? 'justify-center' : 'justify-start'
+                        }`}
                         >
-                          <TrendingUp className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                },
-                accessorKey: col.key,
-                cell: ({ row }: { row: { original: ProductionProgressReportItem } }) => renderCell(row.original, col),
-              }))}
-              data={data as any[]}
-            />
-          )}
+                          {getHeaderIcon()}
+                          <span>{col.label}</span>
+                          {col.sortable && (
+                            <button
+                              type="button"
+                              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                              className="ml-1 rounded p-1 hover:bg-gray-100"
+                            >
+                              <TrendingUp className="size-3" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    },
+                    accessorKey: col.key,
+                    cell: ({ row }: { row: { original: ProductionProgressReportItem } }) => renderCell(row.original, col),
+                  }))}
+                  data={data as any[]}
+                />
+              )}
         </CardContent>
       </Card>
     </div>

@@ -87,16 +87,16 @@ export function OutsourceOrderDetailBulkForm({
   const [stepFilter, setStepFilter] = useState('');
 
   const createBulkMutation = useCreateOutsourceOrderDetailBulk();
-  
+
   // Get basic options (plans, production steps, product subs) - not dependent on plan/product sub selection
   const { data: basicOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId);
-  
+
   // Get products filtered by selected plan
   const { data: planFilteredOptions, isLoading: isLoadingOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId, selectedPlan?.id);
-  
+
   // Get work tables filtered by selected plan and product sub
   const { data: locationFilteredOptions } = useOutsourceOrderDetailRelationOptions(outsourceOrderId, selectedPlan?.id, selectedProductSub?.productSubCode);
-  
+
   // Combine options - use appropriate filtered data
   const relationOptions = {
     outsourceOrders: basicOptions?.outsourceOrders || [],
@@ -140,7 +140,7 @@ export function OutsourceOrderDetailBulkForm({
           ...step,
           selected: false,
           orderedQuantity: 1,
-        }))
+        })),
       );
     }
   }, [basicOptions]);
@@ -150,11 +150,11 @@ export function OutsourceOrderDetailBulkForm({
     if (plan) {
       setSelectedPlan(plan);
       form.setValue('planId', plan.id);
-      
+
       // Reset product when plan changes since products will be filtered by new plan
       setSelectedProduct(null);
       form.setValue('productId', 0);
-      
+
       // Also reset product sub since it depends on product
       setSelectedProductSub(null);
       form.setValue('productSubCode', '');
@@ -166,7 +166,7 @@ export function OutsourceOrderDetailBulkForm({
     if (product) {
       setSelectedProduct(product);
       form.setValue('productId', product.id);
-      
+
       // Reset product sub and location when product changes
       setSelectedProductSub(null);
       form.setValue('productSubCode', '');
@@ -188,7 +188,7 @@ export function OutsourceOrderDetailBulkForm({
     if (productSub) {
       setSelectedProductSub(productSub);
       form.setValue('productSubCode', productSub.productSubCode);
-      
+
       // Reset location when product sub changes since locations will be filtered by new product sub
       setSelectedWorkTable(null);
       form.setValue('locationCode', '');
@@ -196,12 +196,12 @@ export function OutsourceOrderDetailBulkForm({
   };
 
   const handleStepToggle = (stepId: number) => {
-    setProductionSteps(prev => 
-      prev.map(step => 
-        step.id === stepId 
+    setProductionSteps(prev =>
+      prev.map(step =>
+        step.id === stepId
           ? { ...step, selected: !step.selected }
-          : step
-      )
+          : step,
+      ),
     );
 
     const step = productionSteps.find(s => s.id === stepId);
@@ -224,12 +224,12 @@ export function OutsourceOrderDetailBulkForm({
   };
 
   const handleQuantityChange = (stepId: number, quantity: number) => {
-    setProductionSteps(prev => 
-      prev.map(step => 
-        step.id === stepId 
+    setProductionSteps(prev =>
+      prev.map(step =>
+        step.id === stepId
           ? { ...step, orderedQuantity: quantity }
-          : step
-      )
+          : step,
+      ),
     );
 
     // Update form field
@@ -239,14 +239,13 @@ export function OutsourceOrderDetailBulkForm({
     }
   };
 
-
   const handleNotesChange = (stepId: number, notes: string) => {
-    setProductionSteps(prev => 
-      prev.map(step => 
-        step.id === stepId 
+    setProductionSteps(prev =>
+      prev.map(step =>
+        step.id === stepId
           ? { ...step, itemNotes: notes }
-          : step
-      )
+          : step,
+      ),
     );
 
     // Update form field
@@ -259,7 +258,7 @@ export function OutsourceOrderDetailBulkForm({
   const onSubmit = async (data: BulkFormData) => {
     try {
       // Prepare bulk creation data
-      const bulkData = data.selectedSteps.map(step => {
+      const bulkData = data.selectedSteps.map((step) => {
         const stepInfo = productionSteps.find(s => s.id === step.productionStepId);
         return {
           outsourceOrderId: data.outsourceOrderId,
@@ -289,12 +288,14 @@ export function OutsourceOrderDetailBulkForm({
   };
 
   // Filter production steps based on search
-  const filteredProductionSteps = productionSteps.filter(step => {
-    if (!stepFilter) return true;
+  const filteredProductionSteps = productionSteps.filter((step) => {
+    if (!stepFilter) {
+      return true;
+    }
     const searchTerm = stepFilter.toLowerCase();
     return (
-      step.stepCode.toLowerCase().includes(searchTerm) ||
-      step.stepName.toLowerCase().includes(searchTerm)
+      step.stepCode.toLowerCase().includes(searchTerm)
+      || step.stepName.toLowerCase().includes(searchTerm)
     );
   });
 
@@ -325,7 +326,9 @@ export function OutsourceOrderDetailBulkForm({
             render={() => (
               <FormItem className="flex flex-row items-center gap-x-2">
                 <FormLabel className="min-w-[120px]">
-                  {t('plan')} <span className="text-red-500">*</span>
+                  {t('plan')}
+                  {' '}
+                  <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select
                   onValueChange={handlePlanChange}
@@ -340,7 +343,10 @@ export function OutsourceOrderDetailBulkForm({
                   <SelectContent>
                     {relationOptions?.plans.map(plan => (
                       <SelectItem key={plan.id} value={plan.id.toString()}>
-                        {plan.planCode} - {plan.planName}
+                        {plan.planCode}
+                        {' '}
+                        -
+                        {plan.planName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -357,7 +363,9 @@ export function OutsourceOrderDetailBulkForm({
             render={() => (
               <FormItem className="flex flex-row items-center gap-x-2">
                 <FormLabel className="min-w-[120px]">
-                  {t('product')} <span className="text-red-500">*</span>
+                  {t('product')}
+                  {' '}
+                  <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select
                   onValueChange={handleProductChange}
@@ -372,7 +380,10 @@ export function OutsourceOrderDetailBulkForm({
                   <SelectContent>
                     {relationOptions?.products.map(product => (
                       <SelectItem key={product.id} value={product.id.toString()}>
-                        {product.productCode} - {product.productName}
+                        {product.productCode}
+                        {' '}
+                        -
+                        {product.productName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -455,7 +466,9 @@ export function OutsourceOrderDetailBulkForm({
             render={({ field }) => (
               <FormItem className="hidden">
                 <FormLabel className="min-w-[120px]">
-                  {t('expected_completion_date')} <span className="text-red-500">*</span>
+                  {t('expected_completion_date')}
+                  {' '}
+                  <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
@@ -469,60 +482,76 @@ export function OutsourceOrderDetailBulkForm({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">
-                {t('select_production_steps')} <span className="text-red-500">*</span>
+                {t('select_production_steps')}
+                {' '}
+                <span className="text-red-500">*</span>
               </h3>
               <div className="text-sm text-gray-600">
-                {selectedStepsCount} {t('steps_selected')} • {totalQuantity} {t('total_quantity')}
+                {selectedStepsCount}
+                {' '}
+                {t('steps_selected')}
+                {' '}
+                •
+                {' '}
+                {totalQuantity}
+                {' '}
+                {t('total_quantity')}
               </div>
             </div>
 
             {/* Search/Filter Bar with Action Buttons */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
                   placeholder={t('search_production_steps')}
                   value={stepFilter}
-                  onChange={(e) => setStepFilter(e.target.value)}
-                  className="pl-10 pr-10"
+                  onChange={e => setStepFilter(e.target.value)}
+                  className="px-10"
                 />
                 {stepFilter && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 p-0"
+                    className="absolute right-1 top-1/2 size-6 -translate-y-1/2 p-0"
                     onClick={() => setStepFilter('')}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="size-4" />
                   </Button>
                 )}
               </div>
               <div className="text-sm text-gray-500">
-                {filteredProductionSteps.length} / {productionSteps.length} {t('production_steps')}
+                {filteredProductionSteps.length}
+                {' '}
+                /
+                {productionSteps.length}
+                {' '}
+                {t('production_steps')}
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex gap-2">
                 {createBulkMutation.error && (
                   <div className="text-sm text-red-500">
-                    Error: {createBulkMutation.error.message}
+                    Error:
+                    {' '}
+                    {createBulkMutation.error.message}
                   </div>
                 )}
-                
+
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} size="sm">
                   {t('cancel')}
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isLoading || selectedStepsCount === 0 || !form.formState.isValid}
                   size="sm"
                 >
                   {isLoading
                     ? t('creating_bulk')
-                    : `${t('create')} ${selectedStepsCount} ${t('items')}`
-                  }
+                    : `${t('create')} ${selectedStepsCount} ${t('items')}`}
                 </Button>
               </div>
             </div>
@@ -535,7 +564,7 @@ export function OutsourceOrderDetailBulkForm({
                       <Checkbox
                         checked={filteredProductionSteps.length > 0 && filteredProductionSteps.every(step => step.selected)}
                         onCheckedChange={(checked) => {
-                          filteredProductionSteps.forEach(step => {
+                          filteredProductionSteps.forEach((step) => {
                             if (checked !== step.selected) {
                               handleStepToggle(step.id);
                             }
@@ -549,8 +578,8 @@ export function OutsourceOrderDetailBulkForm({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProductionSteps.map((step) => (
-                    <TableRow 
+                  {filteredProductionSteps.map(step => (
+                    <TableRow
                       key={step.id}
                       className={step.selected ? 'bg-blue-50' : ''}
                     >
@@ -570,18 +599,18 @@ export function OutsourceOrderDetailBulkForm({
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="size-8 p-0"
                             disabled={!step.selected}
                             onClick={() => handleQuantityChange(step.id, Math.max(1, step.orderedQuantity - 1))}
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="size-4" />
                           </Button>
                           <Input
                             type="number"
                             min="1"
                             value={step.orderedQuantity}
-                            onChange={(e) => handleQuantityChange(step.id, Math.max(1, Number(e.target.value) || 1))}
-                            className="h-8 w-16 mx-1 text-center"
+                            onChange={e => handleQuantityChange(step.id, Math.max(1, Number(e.target.value) || 1))}
+                            className="mx-1 h-8 w-16 text-center"
                             disabled={!step.selected}
                             placeholder={t('ordered_quantity_placeholder')}
                           />
@@ -589,19 +618,19 @@ export function OutsourceOrderDetailBulkForm({
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="size-8 p-0"
                             disabled={!step.selected}
                             onClick={() => handleQuantityChange(step.id, step.orderedQuantity + 1)}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="size-4" />
                           </Button>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Textarea
                           value={step.itemNotes || ''}
-                          onChange={(e) => handleNotesChange(step.id, e.target.value)}
-                          className="min-h-8 h-8 resize-none"
+                          onChange={e => handleNotesChange(step.id, e.target.value)}
+                          className="h-8 min-h-8 resize-none"
                           disabled={!step.selected}
                           placeholder={t('notes_placeholder')}
                           rows={1}

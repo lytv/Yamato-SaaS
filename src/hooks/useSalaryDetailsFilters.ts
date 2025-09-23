@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { SalaryDetailsFilters } from '@/types/salaryDetails';
+import { useCallback, useState } from 'react';
+
+import type { SalaryDetailsFilters } from '@/types/salaryDetails';
 
 const today = new Date();
 const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -17,7 +18,7 @@ export function useSalaryDetailsFilters() {
 
   const updateFilter = useCallback(<K extends keyof SalaryDetailsFilters>(
     key: K,
-    value: SalaryDetailsFilters[K]
+    value: SalaryDetailsFilters[K],
   ) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   }, []);

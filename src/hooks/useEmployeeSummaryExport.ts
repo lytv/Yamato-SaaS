@@ -1,5 +1,5 @@
 /**
- * useEmployeeSummaryExport Hook  
+ * useEmployeeSummaryExport Hook
  * Manages employee summary export functionality
  * Following established patterns from other export hooks
  */

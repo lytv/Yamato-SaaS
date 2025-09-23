@@ -11,13 +11,12 @@ const productCodeValidation = z
   .string()
   .min(1, 'Product code is required')
   .max(50, 'Product code must be less than 50 characters')
-  .regex(/^[A-Za-z0-9._-]+$/, 'Product code can contain letters, numbers, dots, underscores, and hyphens');
+  .regex(/^[\w.-]+$/, 'Product code can contain letters, numbers, dots, underscores, and hyphens');
 
 const planCodeValidation = z
   .string()
   .min(1, 'Plan code is required')
   .max(50, 'Plan code must be less than 50 characters');
-
 
 const searchValidation = z
   .string()
@@ -258,7 +257,9 @@ export const DEFAULT_SATELLITE_PROGRESS_FILTER_STATE = satelliteProgressFilterSt
 export function getSatelliteProgressValidationErrors(error: z.ZodError) {
   return error.errors.reduce((acc, err) => {
     const field = err.path.join('.');
-    if (!acc[field]) acc[field] = [];
+    if (!acc[field]) {
+      acc[field] = [];
+    }
     acc[field].push(err.message);
     return acc;
   }, {} as Record<string, string[]>);

@@ -17,7 +17,7 @@ export function OutsourceOrderSkeleton() {
   return (
     <div className="space-y-4">
       {/* Header skeleton */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-10 w-32" />
       </div>

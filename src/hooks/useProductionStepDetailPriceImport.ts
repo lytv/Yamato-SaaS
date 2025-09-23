@@ -2,19 +2,19 @@ import { useState } from 'react';
 
 export type PriceType = 'factory_price' | 'calculated_price' | 'retail_price';
 
-export interface ImportSummary {
+export type ImportSummary = {
   processed: number;
   updated: number;
   created: number;
   errors: number;
-}
+};
 
-export interface ImportResult {
+export type ImportResult = {
   success: boolean;
   message?: string;
   summary: ImportSummary;
   errors?: string[];
-}
+};
 
 export const useProductionStepDetailPriceImport = () => {
   const [isImporting, setIsImporting] = useState(false);
@@ -50,11 +50,11 @@ export const useProductionStepDetailPriceImport = () => {
           processed: 0,
           updated: 0,
           created: 0,
-          errors: 1
+          errors: 1,
         },
-        errors: [error instanceof Error ? error.message : 'Unknown error occurred']
+        errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
       };
-      
+
       setImportResult(errorResult);
       return errorResult;
     } finally {
@@ -70,6 +70,6 @@ export const useProductionStepDetailPriceImport = () => {
     importPrices,
     isImporting,
     importResult,
-    clearResult
+    clearResult,
   };
 };

@@ -52,7 +52,7 @@ export function OutsourceOrderDetailSkeleton() {
             </TableCell>
             <TableCell>
               <div className="space-y-1">
-                <div className="h-4 w-18 animate-pulse rounded bg-gray-200" />
+                <div className="w-18 h-4 animate-pulse rounded bg-gray-200" />
                 <div className="h-3 w-28 animate-pulse rounded bg-gray-100" />
               </div>
             </TableCell>
@@ -76,8 +76,8 @@ export function OutsourceOrderDetailSkeleton() {
             </TableCell>
             <TableCell>
               <div className="flex justify-center gap-1">
-                <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
-                <div className="h-8 w-8 animate-pulse rounded bg-gray-200" />
+                <div className="size-8 animate-pulse rounded bg-gray-200" />
+                <div className="size-8 animate-pulse rounded bg-gray-200" />
               </div>
             </TableCell>
           </TableRow>

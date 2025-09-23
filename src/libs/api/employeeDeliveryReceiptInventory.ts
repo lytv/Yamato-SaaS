@@ -77,14 +77,14 @@ export async function exportEmployeeDeliveryReceiptInventory(
 
   try {
     const response = await fetch(`/api/employeeDeliveryReceiptInventory/export?${queryParams.toString()}`);
-    
+
     if (response.ok) {
       // For successful exports, create a download URL from the blob
       const blob = await response.blob();
       const downloadUrl = URL.createObjectURL(blob);
       const contentDisposition = response.headers.get('Content-Disposition');
       const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || 'export.xlsx';
-      
+
       return {
         success: true,
         filename,

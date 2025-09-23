@@ -23,13 +23,13 @@ export function MultiAssignPreview({
   existingAssignments,
 }: MultiAssignPreviewProps) {
   const t = useTranslations('MultiAssignPreview');
-  const assignments = existingAssignments === undefined ? [] : existingAssignments;
   const totalCombinations = selectedProducts.length * selectedSteps.length;
 
   // Build a Set for fast conflict lookup
   const existingSet = React.useMemo(() => {
+    const assignments = existingAssignments === undefined ? [] : existingAssignments;
     return new Set(assignments.map(a => `${a.productId}|${a.productionStepId}`));
-  }, [assignments]);
+  }, [existingAssignments]);
 
   // Find conflicts
   const conflicts = React.useMemo(() => {

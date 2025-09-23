@@ -219,8 +219,8 @@ export const updateOutsourceOrderReceiptSchema = z.object({
   isPartialReceipt: z.boolean().optional(),
 }).refine((data) => {
   // Ensure defectQuantity doesn't exceed receiptQuantity (if both provided)
-  if (data.defectQuantity !== undefined && data.receiptQuantity !== undefined && 
-      data.defectQuantity > data.receiptQuantity) {
+  if (data.defectQuantity !== undefined && data.receiptQuantity !== undefined
+    && data.defectQuantity > data.receiptQuantity) {
     return false;
   }
   return true;
@@ -229,8 +229,8 @@ export const updateOutsourceOrderReceiptSchema = z.object({
   path: ['defectQuantity'],
 }).refine((data) => {
   // Ensure reworkQuantity doesn't exceed receiptQuantity (if both provided)
-  if (data.reworkQuantity !== undefined && data.receiptQuantity !== undefined && 
-      data.reworkQuantity > data.receiptQuantity) {
+  if (data.reworkQuantity !== undefined && data.receiptQuantity !== undefined
+    && data.reworkQuantity > data.receiptQuantity) {
     return false;
   }
   return true;
@@ -255,7 +255,7 @@ export const outsourceOrderReceiptListParamsSchema = z.object({
   batchNumber: z.string().trim().optional(),
 });
 
-// Export parameters validation  
+// Export parameters validation
 export const outsourceOrderReceiptExportParamsSchema = outsourceOrderReceiptListParamsSchema.extend({
   format: z.enum(['xlsx', 'csv']).default('xlsx'),
   includeHeaders: z.boolean().default(true),

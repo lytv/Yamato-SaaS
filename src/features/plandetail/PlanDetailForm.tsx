@@ -5,18 +5,18 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, CalendarDays, FileText, MapPin, Package, RefreshCw, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, MapPin, Package, Settings, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { usePlanDetailMutations } from '@/hooks/usePlanDetailMutations';
 import { plandetailFormSchema } from '@/libs/validations/plandetail';
 import type {
@@ -103,10 +103,10 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
         result = await createPlanDetail(createData);
       }
       onSuccess(result);
-    } catch (error) {
-      console.error('Form submission error:', error);
-      if (error && typeof error === 'object' && 'message' in error) {
-        setSubmitError(error.message as string);
+    } catch (_error) {
+      // Xóa dòng: console.error('Form submission error:', error);
+      if (_error && typeof _error === 'object' && 'message' in _error) {
+        setSubmitError(_error.message as string);
       } else {
         setSubmitError('Có lỗi xảy ra khi lưu dữ liệu');
       }
@@ -118,12 +118,12 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     const loadRelationOptions = async () => {
       try {
         const response = await fetch('/api/plandetails/relations/options');
-        
+
         if (response.ok) {
           const data = await response.json();
           setRelationOptions(data.data);
         }
-      } catch (error) {
+      } catch {
         // Handle errors silently
       }
     };
@@ -131,508 +131,518 @@ export function PlanDetailForm({ plandetail, onSuccess, onCancel, isLoading }: P
     loadRelationOptions();
   }, []);
 
-
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
+    <div className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Form Header */}
-        <div className="text-center pb-6 border-b border-gray-200">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CalendarDays className="w-8 h-8 text-white" />
+        <div className="border-b border-gray-200 pb-6 text-center">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600">
+            <CalendarDays className="size-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
             {plandetail ? (t('form.updatePlanDetail') || 'Edit Plan Detail') : (t('form.createPlanDetail') || 'Create Plan Detail')}
           </h2>
           <p className="text-gray-600">
-            {plandetail 
-              ? (t('form.updatePlanDetailDescription') || 'Update plan detail configuration and progress') 
+            {plandetail
+              ? (t('form.updatePlanDetailDescription') || 'Update plan detail configuration and progress')
               : (t('form.planDetailDescription') || 'Create a new plan detail with product allocation and schedule')}
           </p>
         </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          {submitError && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <p className="text-sm font-medium text-red-800">Lỗi</p>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            {submitError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="size-4 text-red-600" />
+                  <p className="text-sm font-medium text-red-800">Lỗi</p>
+                </div>
+                <p className="mt-1 text-sm text-red-700">{submitError}</p>
               </div>
-              <p className="mt-1 text-sm text-red-700">{submitError}</p>
-            </div>
-          )}
-          <Tabs defaultValue="required" className="w-full relative">
-            <TabsList className="grid w-full grid-cols-4 h-12">
-              <TabsTrigger value="required" className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                {t('tabs.required')}
-              </TabsTrigger>
-              <TabsTrigger value="location" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                {t('tabs.location')}
-              </TabsTrigger>
-              <TabsTrigger value="dates" className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />
-                {t('tabs.dates')}
-              </TabsTrigger>
-              <TabsTrigger value="other" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                {t('tabs.other')}
-              </TabsTrigger>
-            </TabsList>
+            )}
+            <Tabs defaultValue="required" className="relative w-full">
+              <TabsList className="grid h-12 w-full grid-cols-4">
+                <TabsTrigger value="required" className="flex items-center gap-2">
+                  <AlertCircle className="size-4" />
+                  {t('tabs.required')}
+                </TabsTrigger>
+                <TabsTrigger value="location" className="flex items-center gap-2">
+                  <MapPin className="size-4" />
+                  {t('tabs.location')}
+                </TabsTrigger>
+                <TabsTrigger value="dates" className="flex items-center gap-2">
+                  <CalendarDays className="size-4" />
+                  {t('tabs.dates')}
+                </TabsTrigger>
+                <TabsTrigger value="other" className="flex items-center gap-2">
+                  <Settings className="size-4" />
+                  {t('tabs.other')}
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Tab 1: Required Fields */}
-            <TabsContent value="required" className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="planId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('form.plan')}
-                        {' '}
-                        *
-                      </FormLabel>
-                      <Select
-                        onValueChange={value => field.onChange(Number(value))}
-                        value={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('form.selectPlan')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {relationOptions.plans?.map(option => (
-                            <SelectItem key={option.id} value={option.id.toString()}>
-                              {option.planCode}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="locationCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('form.locationCode')}
-                        {' '}
-                        *
-                      </FormLabel>
-                      <Select
-                        onValueChange={value => field.onChange(value)}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('form.selectLocation')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {relationOptions.locationCodes?.map(option => (
-                            <SelectItem key={option.locationCode} value={option.locationCode}>
-                              {option.locationCode}
-                              {option.tableName && ` - ${option.tableName}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="productCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        {t('form.productCode')}
-                        {' '}
-                        *
-                      </FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // Clear productSubCode when product changes
-                          form.setValue('productSubCode', '');
-                        }}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('form.selectProduct')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {relationOptions.products?.length > 0 ? (
-                            relationOptions.products.map(option => (
-                              <SelectItem 
-                                key={option.productCode} 
-                                value={option.productCode}
-                              >
-                                {option.productCode} - {option.productName}
+              {/* Tab 1: Required Fields */}
+              <TabsContent value="required" className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="planId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('form.plan')}
+                          {' '}
+                          *
+                        </FormLabel>
+                        <Select
+                          onValueChange={value => field.onChange(Number(value))}
+                          value={field.value?.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('form.selectPlan')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {relationOptions.plans?.map(option => (
+                              <SelectItem key={option.id} value={option.id.toString()}>
+                                {option.planCode}
                               </SelectItem>
-                            ))
-                          ) : (
-                            <div className="px-2 py-1.5 text-sm text-gray-500">
-                              Đang tải sản phẩm...
-                            </div>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="productSubCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        {t('form.productSubCode')}
-                        {!productCode ? (
-                          <Badge variant="outline" className="text-xs">
-                            Chọn sản phẩm trước
-                          </Badge>
-                        ) : filteredProductSubCodes?.length === 0 ? (
-                          <Badge variant="secondary" className="text-xs">
-                            Tùy chọn
-                          </Badge>
-                        ) : null}
-                      </FormLabel>
-                      <Select
-                        onValueChange={value => field.onChange(value)}
-                        value={field.value}
-                        disabled={!productCode}
-                      >
-                        <FormControl>
-                          <SelectTrigger className={!productCode ? "bg-muted text-muted-foreground" : ""}>
-                            <SelectValue 
-                              placeholder={
-                                !productCode 
-                                  ? "Vui lòng chọn sản phẩm trước" 
-                                  : filteredProductSubCodes?.length > 0
-                                    ? "Chọn phân loại sản phẩm..."
-                                    : "Không có phân loại"
-                              } 
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {filteredProductSubCodes?.length > 0
-                            ? (
-                                filteredProductSubCodes.map(option => (
-                                  <SelectItem key={option.productSubCode} value={option.productSubCode}>
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">{option.productSubCode}</span>
-                                      <span className="text-xs text-muted-foreground">{option.productSubDetail}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))
-                              )
-                            : productCode ? (
-                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                  Không có phân loại sản phẩm
-                                </div>
-                              ) : (
-                                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                  Vui lòng chọn sản phẩm trước
-                                </div>
-                              )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                      {productCode && filteredProductSubCodes?.length === 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          💡 Sản phẩm này không có phân loại con
-                        </p>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="plannedQuantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('form.plannedQuantity')}
-                        {' '}
-                        *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder={t('form.enterPlannedQuantity')}
-                          {...field}
-                          onChange={e => field.onChange(Number(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </TabsContent>
-
-            {/* Tab 2: Location Type & Actual Quantity */}
-            <TabsContent value="location" className="space-y-6">
-              <Card className="border-green-200 dark:border-green-800">
-                <CardHeader className="bg-green-50 dark:bg-green-950/20">
-                  <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
-                    <MapPin className="h-5 w-5" />
-                    {t('tabs.location')}
-                    <Badge variant="secondary" className="ml-auto">Optional</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="locationType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.locationType')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t('form.enterLocationType')}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="actualQuantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.actualQuantity')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder={t('form.enterActualQuantity')}
-                        {...field}
-                        onChange={e => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Tab 3: Date Fields */}
-            <TabsContent value="dates" className="space-y-6">
-              <Card className="border-blue-200 dark:border-blue-800">
-                <CardHeader className="bg-blue-50 dark:bg-blue-950/20">
-                  <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
-                    <CalendarDays className="h-5 w-5" />
-                    {t('tabs.dates')}
-                    <Badge variant="secondary" className="ml-auto">Planning</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="plannedStartDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.plannedStartDate')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={typeof field.value === 'string' ? field.value : ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="plannedEndDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.plannedEndDate')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={typeof field.value === 'string' ? field.value : ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="actualStartDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.actualStartDate')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={typeof field.value === 'string' ? field.value : ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="actualEndDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.actualEndDate')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={typeof field.value === 'string' ? field.value : ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Tab 4: Other Fields */}
-            <TabsContent value="other" className="space-y-6">
-              <Card className="border-purple-200 dark:border-purple-800">
-                <CardHeader className="bg-purple-50 dark:bg-purple-950/20">
-                  <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
-                    <Settings className="h-5 w-5" />
-                    {t('tabs.other')}
-                    <Badge variant="secondary" className="ml-auto">Additional</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.status')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t('form.enterStatus')}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('form.priority')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder={t('form.enterPriority')}
-                        min="1"
-                        max="10"
-                        {...field}
-                        onChange={e => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-                  </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
-                    name="note"
+                    name="locationCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('form.locationCode')}
+                          {' '}
+                          *
+                        </FormLabel>
+                        <Select
+                          onValueChange={value => field.onChange(value)}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('form.selectLocation')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {relationOptions.locationCodes?.map(option => (
+                              <SelectItem key={option.locationCode} value={option.locationCode}>
+                                {option.locationCode}
+                                {option.tableName && ` - ${option.tableName}`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="productCode"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          {t('form.note')}
+                          <Package className="size-4" />
+                          {t('form.productCode')}
+                          {' '}
+                          *
+                        </FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Clear productSubCode when product changes
+                            form.setValue('productSubCode', '');
+                          }}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('form.selectProduct')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {relationOptions.products?.length > 0
+                              ? (
+                                  relationOptions.products.map(option => (
+                                    <SelectItem
+                                      key={option.productCode}
+                                      value={option.productCode}
+                                    >
+                                      {option.productCode}
+                                      {' '}
+                                      -
+                                      {option.productName}
+                                    </SelectItem>
+                                  ))
+                                )
+                              : (
+                                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                                    Đang tải sản phẩm...
+                                  </div>
+                                )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="productSubCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Package className="size-4" />
+                          {t('form.productSubCode')}
+                          {!productCode
+                            ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Chọn sản phẩm trước
+                                </Badge>
+                              )
+                            : filteredProductSubCodes?.length === 0
+                              ? (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Tùy chọn
+                                  </Badge>
+                                )
+                              : null}
+                        </FormLabel>
+                        <Select
+                          onValueChange={value => field.onChange(value)}
+                          value={field.value}
+                          disabled={!productCode}
+                        >
+                          <FormControl>
+                            <SelectTrigger className={!productCode ? 'bg-muted text-muted-foreground' : ''}>
+                              <SelectValue
+                                placeholder={
+                                  !productCode
+                                    ? 'Vui lòng chọn sản phẩm trước'
+                                    : filteredProductSubCodes?.length > 0
+                                      ? 'Chọn phân loại sản phẩm...'
+                                      : 'Không có phân loại'
+                                }
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {filteredProductSubCodes?.length > 0
+                              ? (
+                                  filteredProductSubCodes.map(option => (
+                                    <SelectItem key={option.productSubCode} value={option.productSubCode}>
+                                      <div className="flex flex-col">
+                                        <span className="font-medium">{option.productSubCode}</span>
+                                        <span className="text-xs text-muted-foreground">{option.productSubDetail}</span>
+                                      </div>
+                                    </SelectItem>
+                                  ))
+                                )
+                              : productCode
+                                ? (
+                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                      Không có phân loại sản phẩm
+                                    </div>
+                                  )
+                                : (
+                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                      Vui lòng chọn sản phẩm trước
+                                    </div>
+                                  )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        {productCode && filteredProductSubCodes?.length === 0 && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            💡 Sản phẩm này không có phân loại con
+                          </p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="plannedQuantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('form.plannedQuantity')}
+                          {' '}
+                          *
                         </FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder={t('form.enterNote')}
-                            className="min-h-[100px] resize-none"
+                          <Input
+                            type="text"
+                            placeholder={t('form.enterPlannedQuantity')}
                             {...field}
+                            onChange={e => field.onChange(Number(e.target.value) || 0)}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </div>
+              </TabsContent>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isLoading}
-              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
-            >
-              {t('form.cancel') || 'Cancel'}
-            </button>
+              {/* Tab 2: Location Type & Actual Quantity */}
+              <TabsContent value="location" className="space-y-6">
+                <Card className="border-green-200 dark:border-green-800">
+                  <CardHeader className="bg-green-50 dark:bg-green-950/20">
+                    <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                      <MapPin className="size-5" />
+                      {t('tabs.location')}
+                      <Badge variant="secondary" className="ml-auto">Optional</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="locationType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.locationType')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t('form.enterLocationType')}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoading && (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              )}
-              {isLoading
-                ? (t('form.saving') || 'Saving...')
-                : plandetail
-                  ? (t('form.updatePlanDetail') || 'Update Plan Detail')
-                  : (t('form.createPlanDetail') || 'Create Plan Detail')}
-            </button>
-          </div>
-        </form>
-      </Form>
+                      <FormField
+                        control={form.control}
+                        name="actualQuantity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.actualQuantity')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={t('form.enterActualQuantity')}
+                                {...field}
+                                onChange={e => field.onChange(Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab 3: Date Fields */}
+              <TabsContent value="dates" className="space-y-6">
+                <Card className="border-blue-200 dark:border-blue-800">
+                  <CardHeader className="bg-blue-50 dark:bg-blue-950/20">
+                    <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+                      <CalendarDays className="size-5" />
+                      {t('tabs.dates')}
+                      <Badge variant="secondary" className="ml-auto">Planning</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="plannedStartDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.plannedStartDate')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                value={typeof field.value === 'string' ? field.value : ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="plannedEndDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.plannedEndDate')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                value={typeof field.value === 'string' ? field.value : ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="actualStartDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.actualStartDate')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                value={typeof field.value === 'string' ? field.value : ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="actualEndDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.actualEndDate')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                value={typeof field.value === 'string' ? field.value : ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab 4: Other Fields */}
+              <TabsContent value="other" className="space-y-6">
+                <Card className="border-purple-200 dark:border-purple-800">
+                  <CardHeader className="bg-purple-50 dark:bg-purple-950/20">
+                    <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
+                      <Settings className="size-5" />
+                      {t('tabs.other')}
+                      <Badge variant="secondary" className="ml-auto">Additional</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.status')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t('form.enterStatus')}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="priority"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('form.priority')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={t('form.enterPriority')}
+                                min="1"
+                                max="10"
+                                {...field}
+                                onChange={e => field.onChange(Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="note"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <FileText className="size-4" />
+                            {t('form.note')}
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={t('form.enterNote')}
+                              className="min-h-[100px] resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 border-t border-gray-200 pt-6">
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={isLoading}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50"
+              >
+                {t('form.cancel') || 'Cancel'}
+              </button>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="inline-flex items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLoading && (
+                  <RefreshCw className="mr-2 size-4 animate-spin" />
+                )}
+                {isLoading
+                  ? (t('form.saving') || 'Saving...')
+                  : plandetail
+                    ? (t('form.updatePlanDetail') || 'Update Plan Detail')
+                    : (t('form.createPlanDetail') || 'Create Plan Detail')}
+              </button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

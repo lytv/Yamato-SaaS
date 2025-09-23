@@ -57,13 +57,13 @@ export async function GET(request: NextRequest): Promise<Response> {
     if (validatedParams.format === 'csv') {
       // Generate CSV
       let csvContent = '';
-      
+
       if (validatedParams.includeHeaders) {
         csvContent += 'Report Type,Entity ID,Entity Name,Plan Code,Product Code,Product Name,Step Code,Step Name,Total Planned,Total Actual,Total Assigned,Total Received,Total Defect,Total Made,Completion Rate,Remaining Quantity\n';
       }
 
-      data.forEach(item => {
-        csvContent += [
+      data.forEach((item) => {
+        csvContent += `${[
           item.report_type,
           item.entity_id,
           `"${item.entity_name}"`,
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           item.total_made,
           item.completion_rate,
           item.remaining_quantity,
-        ].join(',') + '\n';
+        ].join(',')}\n`;
       });
 
       return new Response(csvContent, {
@@ -92,11 +92,11 @@ export async function GET(request: NextRequest): Promise<Response> {
     } else {
       // Generate Excel
       const worksheetData = [];
-      
+
       if (validatedParams.includeHeaders) {
         worksheetData.push([
           'Report Type',
-          'Entity ID', 
+          'Entity ID',
           'Entity Name',
           'Plan Code',
           'Product Code',
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest): Promise<Response> {
         ]);
       }
 
-      data.forEach(item => {
+      data.forEach((item) => {
         worksheetData.push([
           item.report_type,
           item.entity_id,
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Production Progress Report');
-      
+
       const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
       return new Response(excelBuffer, {

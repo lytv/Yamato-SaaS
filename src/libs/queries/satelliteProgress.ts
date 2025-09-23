@@ -7,9 +7,9 @@
 import { sql } from 'drizzle-orm';
 
 import {
+  validateSatelliteProgressFilterOptions,
   validateSatelliteProgressItem,
   validateSatelliteProgressSummary,
-  validateSatelliteProgressFilterOptions,
 } from '@/libs/validations/satelliteProgress';
 import type {
   SatelliteProgressFilterOptions,
@@ -20,7 +20,6 @@ import type {
 
 import { db } from '../DB';
 
-
 /**
  * Get satellite progress pivot data using stored procedure
  * @param params - Query parameters including filters and pagination
@@ -29,15 +28,15 @@ import { db } from '../DB';
 export async function getSatelliteProgress(
   params: SatelliteProgressFiltersWithOwner,
 ): Promise<{
-  data: SatelliteProgressItem[];
-  summary: SatelliteProgressSummary;
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    hasMore: boolean;
-  };
-}> {
+    data: SatelliteProgressItem[];
+    summary: SatelliteProgressSummary;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      hasMore: boolean;
+    };
+  }> {
   const {
     product_code,
     plan_code,
@@ -67,17 +66,17 @@ export async function getSatelliteProgress(
       validatedData = rawResults.rows.map((row: any) => {
         // Parse JSON step data and convert to fixed format for backward compatibility
         const stepData = row.step_data || {};
-        
+
         // Sort step codes by numeric value after 'cd' prefix for proper ordering (cd01, cd02, cd10, cd20)
         const stepKeys = Object.keys(stepData).sort((a, b) => {
           // Extract numeric part from step codes like 'cd01', 'cd02', etc.
           const getNumericPart = (code: string) => {
             const match = code.match(/\d+/);
-            return match ? parseInt(match[0], 10) : 0;
+            return match ? Number.parseInt(match[0], 10) : 0;
           };
           return getNumericPart(a) - getNumericPart(b);
         });
-        
+
         // Create the item with base data
         const item: any = {
           product_code: row.product_code,
@@ -117,13 +116,13 @@ export async function getSatelliteProgress(
     // Apply search filter if provided
     if (search && search.trim() !== '') {
       const searchTerm = search.toLowerCase().trim();
-      validatedData = validatedData.filter(item => {
+      validatedData = validatedData.filter((item) => {
         // Search in basic fields
-        if (item.product_code.toLowerCase().includes(searchTerm) ||
-            item.product_name.toLowerCase().includes(searchTerm) ||
-            item.plan_code.toLowerCase().includes(searchTerm) ||
-            item.plan_name.toLowerCase().includes(searchTerm) ||
-            item.assigned_user_name.toLowerCase().includes(searchTerm)) {
+        if (item.product_code.toLowerCase().includes(searchTerm)
+          || item.product_name.toLowerCase().includes(searchTerm)
+          || item.plan_code.toLowerCase().includes(searchTerm)
+          || item.plan_name.toLowerCase().includes(searchTerm)
+          || item.assigned_user_name.toLowerCase().includes(searchTerm)) {
           return true;
         }
 
@@ -243,12 +242,12 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
         if (row.product_code && row.product_name) {
           products.set(row.product_code, row.product_name);
         }
-        
+
         // Extract plans
         if (row.plan_code && row.plan_name) {
           plans.set(row.plan_code, row.plan_name);
         }
-        
+
         // Extract users - we'll need to get user_id from a lookup
         if (row.assigned_user_name) {
           users.set(row.assigned_user_name, row.assigned_user_name);
@@ -265,7 +264,7 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
         ORDER BY full_name
         LIMIT 100
       `);
-      
+
       if (usersResult.rows) {
         users.clear(); // Clear the users from stored procedure
         usersResult.rows.forEach((row: any) => {
@@ -284,7 +283,7 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
         // Simple direct queries as fallback
         const [productsResult, plansResult] = await Promise.all([
           db.execute(sql`SELECT DISTINCT "productCode" as product_code, "productName" as product_name FROM product WHERE "productCode" IS NOT NULL LIMIT 100`),
-          db.execute(sql`SELECT DISTINCT "planCode" as plan_code, "planName" as plan_name FROM plan WHERE "planCode" IS NOT NULL LIMIT 100`)
+          db.execute(sql`SELECT DISTINCT "planCode" as plan_code, "planName" as plan_name FROM plan WHERE "planCode" IS NOT NULL LIMIT 100`),
         ]);
 
         // Process fallback results
@@ -303,7 +302,6 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
             }
           });
         }
-
       } catch (fallbackError) {
         console.warn('Fallback queries also failed:', fallbackError);
       }
@@ -317,7 +315,7 @@ export async function getSatelliteProgressFilterOptions(_ownerId?: string): Prom
     });
   } catch (error) {
     console.error('Error fetching satellite progress filter options:', error);
-    
+
     // Last resort: return empty structure to prevent UI crash
     return validateSatelliteProgressFilterOptions({
       plans: [],

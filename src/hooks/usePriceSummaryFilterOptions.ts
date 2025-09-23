@@ -6,9 +6,9 @@
 import { useEffect, useState } from 'react';
 
 import type {
+  PriceSummaryErrorResponse,
   PriceSummaryFilterOptions,
   PriceSummaryFilterOptionsResponse,
-  PriceSummaryErrorResponse,
 } from '@/types/priceSummary';
 import { PRICE_SUMMARY_ENDPOINTS } from '@/types/priceSummary';
 
@@ -37,7 +37,7 @@ export function usePriceSummaryFilterOptions(): UsePriceSummaryFilterOptionsResu
 
     try {
       const response = await fetch(PRICE_SUMMARY_ENDPOINTS.FILTER_OPTIONS);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -55,7 +55,7 @@ export function usePriceSummaryFilterOptions(): UsePriceSummaryFilterOptionsResu
       console.error('Error fetching price summary filter options:', err);
       setIsError(true);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-      
+
       // Reset data on error
       setFilterOptions({
         products: [],

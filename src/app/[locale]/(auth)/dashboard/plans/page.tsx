@@ -14,11 +14,11 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { PlanForm } from '@/features/plan/PlanForm';
-import { PlanList } from '@/features/plan/PlanList';
 import { PlanImportModal } from '@/features/plan/PlanImportModal';
+import { PlanList } from '@/features/plan/PlanList';
 import { usePlanMutations } from '@/hooks/usePlanMutations';
-import type { Plan } from '@/types/plan';
 import type { ImportResult } from '@/types/import';
+import type { Plan } from '@/types/plan';
 
 type ModalState = {
   isOpen: boolean;
@@ -57,7 +57,7 @@ function PlanModal({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm duration-300 animate-in fade-in"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
@@ -72,8 +72,8 @@ function PlanModal({
       />
 
       {/* Modal content */}
-      <div className="relative mx-4 w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-        <div className="bg-white rounded-xl shadow-2xl">
+      <div className="relative mx-4 max-h-[90vh] w-full max-w-5xl overflow-y-auto duration-300 animate-in zoom-in-95 slide-in-from-bottom-4">
+        <div className="rounded-xl bg-white shadow-2xl">
           <Button
             variant="ghost"
             size="sm"
@@ -173,29 +173,29 @@ export default function PlansPage(): JSX.Element {
   return (
     <main className="container mx-auto max-w-7xl space-y-8 p-6">
       {/* Hero Header */}
-      <header className="bg-gradient-to-r from-green-600 to-emerald-700 rounded-xl p-8 text-white shadow-lg" data-testid="plans-header">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+      <header className="rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 p-8 text-white shadow-lg" data-testid="plans-header">
+        <div className="flex flex-col items-start justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold tracking-tight mb-2">
+            <h1 className="mb-2 text-4xl font-bold tracking-tight">
               {t('plan.pageTitle', { default: 'Production Plans' })}
             </h1>
-            <p className="text-green-100 text-lg">
+            <p className="text-lg text-green-100">
               {t('plan.pageDescription', {
                 default: 'Quản lý kế hoạch sản xuất và lịch trình với công cụ hiện đại',
               })}
             </p>
             {/* Feature indicators */}
-            <div className="flex items-center space-x-6 mt-4 text-sm text-green-100">
+            <div className="mt-4 flex items-center space-x-6 text-sm text-green-100">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
+                <div className="mr-2 size-2 rounded-full bg-yellow-400"></div>
                 Production Planning
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                <div className="mr-2 size-2 rounded-full bg-blue-400"></div>
                 Schedule Management
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                <div className="mr-2 size-2 rounded-full bg-purple-400"></div>
                 Progress Tracking
               </div>
             </div>
@@ -206,16 +206,16 @@ export default function PlansPage(): JSX.Element {
             <Button
               onClick={handleCreatePlan}
               disabled={isCreating}
-              className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 w-full lg:w-auto"
+              className="w-full rounded-lg bg-white px-6 py-3 font-semibold text-green-600 shadow-md transition-all duration-200 hover:scale-105 hover:bg-green-50 lg:w-auto"
             >
-              <CalendarDays className="w-5 h-5 mr-2" />
+              <CalendarDays className="mr-2 size-5" />
               {t('plan.createNew', { default: 'Create Plan' })}
             </Button>
             <Button
               onClick={handleImportClick}
-              className="bg-green-500 text-white hover:bg-green-400 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 w-full lg:w-auto lg:ml-3"
+              className="w-full rounded-lg bg-green-500 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-green-400 lg:ml-3 lg:w-auto"
             >
-              <Upload className="w-5 h-5 mr-2" />
+              <Upload className="mr-2 size-5" />
               Import từ YMT Plan
             </Button>
           </div>
@@ -223,7 +223,7 @@ export default function PlansPage(): JSX.Element {
       </header>
 
       {/* Main Content */}
-      <div className="space-y-8 bg-gradient-to-br from-slate-50 to-green-50 p-6 rounded-xl">
+      <div className="space-y-8 rounded-xl bg-gradient-to-br from-slate-50 to-green-50 p-6">
         {/* Responsive Layout Indicators */}
         {isMobile
           ? (

@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or, type SQL } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { planDetailSchema, planSchema, productSchema, productSubSchema, workTableSchema } from '@/models/Schema';
 import type {
   CreatePlanDetailInput,
@@ -16,6 +15,8 @@ import type {
   PlanDetailWithRelations,
   UpdatePlanDetailInput,
 } from '@/types/plandetail';
+
+import { db } from '../DB';
 
 /**
  * Create a new plandetail with proper date and relation handling

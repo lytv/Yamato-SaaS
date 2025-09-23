@@ -18,12 +18,12 @@ const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvw
 function generateBase58String(length: number): string {
   let result = '';
   const alphabetLength = BASE58_ALPHABET.length;
-  
+
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * alphabetLength);
     result += BASE58_ALPHABET[randomIndex];
   }
-  
+
   return result;
 }
 
@@ -47,19 +47,19 @@ export function isValidUserId(userId: string): boolean {
   if (!userId.startsWith('user_')) {
     return false;
   }
-  
+
   const randomPart = userId.slice(5); // Remove 'user_' prefix
   if (randomPart.length < 20) {
     return false;
   }
-  
+
   // Check if all characters are valid base58
   for (const char of randomPart) {
     if (!BASE58_ALPHABET.includes(char)) {
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -76,7 +76,7 @@ export function generateUniqueUserId(existingIds: string[] = [], maxRetries: num
       return newId;
     }
   }
-  
+
   // Fallback: thêm timestamp nếu vẫn trùng
   const timestamp = Date.now().toString(36);
   const randomPart = generateBase58String(20);

@@ -68,11 +68,11 @@ function NoteItem({
           </div>
         )}
       </div>
-      
-      <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+
+      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
         {note.content}
       </p>
-      
+
       <div className="mt-3 text-xs text-muted-foreground">
         {formatDate(note.createdAt)}
       </div>
@@ -198,7 +198,15 @@ export function NoteList({
               {/* Pagination Info */}
               {pagination && pagination.total > 0 && (
                 <div className="mt-6 text-center text-sm text-muted-foreground">
-                  Showing {notes.length} of {pagination.total} notes
+                  Showing
+                  {' '}
+                  {notes.length}
+                  {' '}
+                  of
+                  {' '}
+                  {pagination.total}
+                  {' '}
+                  notes
                   {pagination.hasMore && ' (more available)'}
                 </div>
               )}

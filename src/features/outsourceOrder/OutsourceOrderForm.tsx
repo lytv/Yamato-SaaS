@@ -110,8 +110,6 @@ export function OutsourceOrderForm({
       actualCompletionDate: toDate(data.actualCompletionDate),
     };
 
-
-
     try {
       if (isEditing && outsourceOrder && 'id' in outsourceOrder) {
         await updateMutation.mutateAsync({
@@ -124,8 +122,8 @@ export function OutsourceOrderForm({
 
       reset();
       onSuccess?.();
-    } catch (error) {
-      console.error('Form submission error:', error);
+    } catch {
+      // Xóa dòng: console.error('Form submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -244,8 +242,8 @@ export function OutsourceOrderForm({
           <Label htmlFor="applyRetailPrice">{t('apply_retail_price')}</Label>
           <Select
             value={watch('applyRetailPrice')?.toString() || '2'}
-            onValueChange={value => {
-              const numericValue = parseInt(value, 10);
+            onValueChange={(value) => {
+              const numericValue = Number.parseInt(value, 10);
               setValue('applyRetailPrice', numericValue, { shouldValidate: true });
             }}
           >

@@ -4,12 +4,13 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { getPriceSummaryFilterOptions } from '@/libs/queries/priceSummary';
 import type {
-  PriceSummaryFilterOptionsResponse,
   PriceSummaryErrorResponse,
+  PriceSummaryFilterOptionsResponse,
 } from '@/types/priceSummary';
 
 /**
@@ -40,7 +41,6 @@ export async function GET(_request: NextRequest) {
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('Price summary filter options API error:', error);
 

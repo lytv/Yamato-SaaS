@@ -43,7 +43,7 @@ const DEFAULT_PARAMS: Required<
 export function usePlanDetails({
   search = DEFAULT_PARAMS.search,
   planCode = DEFAULT_PARAMS.planCode,
-  productCode = DEFAULT_PARAMS.productCode,  
+  productCode = DEFAULT_PARAMS.productCode,
   productName = DEFAULT_PARAMS.productName,
   sortBy = DEFAULT_PARAMS.sortBy,
   sortOrder = DEFAULT_PARAMS.sortOrder,

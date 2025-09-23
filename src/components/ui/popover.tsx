@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
+import * as React from 'react';
 
 import { cn } from '@/components/ui/calendar'; // dùng lại hàm cn đơn giản
 
@@ -18,7 +18,7 @@ const PopoverContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(
         'z-50 w-auto rounded-md border bg-white p-4 text-black shadow-md outline-none',
-        className
+        className,
       )}
       {...props}
     />
@@ -26,4 +26,4 @@ const PopoverContent = React.forwardRef<
 ));
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverTrigger, PopoverContent }; 
+export { Popover, PopoverContent, PopoverTrigger };

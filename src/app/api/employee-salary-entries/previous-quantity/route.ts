@@ -4,9 +4,9 @@
  */
 
 import { currentUser } from '@clerk/nextjs/server';
+import { and, eq, ne, sum } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { eq, and, sum, ne } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
 import { employeeSalaryEntrySchema } from '@/models/Schema';
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!planId || !productId || !productionStepDetailId) {
       return NextResponse.json(
         { error: 'planId, productId, and productionStepDetailId are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching previous entered quantity:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch previous quantity',
-        data: null 
+        data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

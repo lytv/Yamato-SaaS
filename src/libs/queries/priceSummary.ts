@@ -7,17 +7,17 @@
 import { sql } from 'drizzle-orm';
 
 import {
+  validatePriceSummaryFilterOptions,
   validatePriceSummaryItem,
   validatePriceSummarySummary,
-  validatePriceSummaryFilterOptions,
   validatePriceType,
 } from '@/libs/validations/priceSummary';
 import type {
+  PriceStepData,
   PriceSummaryFilterOptions,
   PriceSummaryFiltersWithOwner,
   PriceSummaryItem,
   PriceSummarySummary,
-  PriceStepData,
   PriceType,
 } from '@/types/priceSummary';
 import { PRICE_TYPE_OPTIONS } from '@/types/priceSummary';
@@ -32,15 +32,15 @@ import { db } from '../DB';
 export async function getPriceSummary(
   params: PriceSummaryFiltersWithOwner,
 ): Promise<{
-  data: PriceSummaryItem[];
-  summary: PriceSummarySummary;
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    hasMore: boolean;
-  };
-}> {
+    data: PriceSummaryItem[];
+    summary: PriceSummarySummary;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      hasMore: boolean;
+    };
+  }> {
   const {
     product_code,
     price_type = 'factory_price',
@@ -52,7 +52,7 @@ export async function getPriceSummary(
     sortOrder = 'asc',
   } = params;
 
-  console.log('getPriceSummary called with params:', { show_only_with_pricing, price_type, search, product_code });
+  // Xóa dòng: console.log('getPriceSummary called with params:', { show_only_with_pricing, price_type, search, product_code });
 
   try {
     // Validate price type
@@ -74,7 +74,7 @@ export async function getPriceSummary(
       validatedData = rawResults.rows.map((row: any) => {
         // Convert JSONB step_data to proper format
         const stepData: Record<string, PriceStepData> = {};
-        
+
         if (row.step_data && typeof row.step_data === 'object') {
           Object.entries(row.step_data).forEach(([stepCode, stepInfo]: [string, any]) => {
             if (stepInfo && typeof stepInfo === 'object') {
@@ -108,29 +108,26 @@ export async function getPriceSummary(
     // Apply search filter if provided
     if (search && search.trim() !== '') {
       const searchTerm = search.toLowerCase().trim();
-      validatedData = validatedData.filter(item => {
+      validatedData = validatedData.filter((item) => {
         // Search in basic fields
         if (
-          item.product_code.toLowerCase().includes(searchTerm) ||
-          item.product_name.toLowerCase().includes(searchTerm)
+          item.product_code.toLowerCase().includes(searchTerm)
+          || item.product_name.toLowerCase().includes(searchTerm)
         ) {
           return true;
         }
 
         // Search in step data
-        return Object.values(item.step_data).some(step => 
-          step.step_code.toLowerCase().includes(searchTerm) ||
-          step.step_name.toLowerCase().includes(searchTerm)
+        return Object.values(item.step_data).some(step =>
+          step.step_code.toLowerCase().includes(searchTerm)
+          || step.step_name.toLowerCase().includes(searchTerm),
         );
       });
     }
 
     // Apply pricing filter if requested
     if (show_only_with_pricing) {
-      const beforeCount = validatedData.length;
       validatedData = validatedData.filter(item => item.has_pricing);
-      const afterCount = validatedData.length;
-      console.log(`Pricing filter applied: ${beforeCount} -> ${afterCount} items (removed ${beforeCount - afterCount} items without pricing)`);
     }
 
     // Apply sorting
@@ -189,8 +186,8 @@ export async function getPriceSummary(
         hasMore,
       },
     };
-  } catch (error) {
-    console.error('Error fetching price summary:', error);
+  } catch {
+    // Xóa dòng: console.error('Error fetching price summary:', error);
     throw new Error('Failed to fetch price summary data');
   }
 }
@@ -225,7 +222,7 @@ function calculateSummaryStatistics(
   let maxPrice = 0;
   let minPrice = Infinity;
 
-  productsWithPricing.forEach(item => {
+  productsWithPricing.forEach((item) => {
     if (item.total_price > maxPrice) {
       maxPrice = item.total_price;
       highestPricedProduct = item.product_name;
@@ -236,8 +233,8 @@ function calculateSummaryStatistics(
     }
   });
 
-  const averagePrice = totalPrices.length > 0 
-    ? totalPrices.reduce((sum, price) => sum + price, 0) / totalPrices.length 
+  const averagePrice = totalPrices.length > 0
+    ? totalPrices.reduce((sum, price) => sum + price, 0) / totalPrices.length
     : 0;
 
   return validatePriceSummarySummary({
@@ -284,7 +281,7 @@ export async function getPriceSummaryFilterOptions(_ownerId?: string): Promise<P
         ORDER BY step_code
         LIMIT 200
       `);
-      
+
       if (stepsResult.rows) {
         stepsResult.rows.forEach((row: any) => {
           if (row.step_code && row.step_name) {
@@ -292,8 +289,8 @@ export async function getPriceSummaryFilterOptions(_ownerId?: string): Promise<P
           }
         });
       }
-    } catch (stepsError) {
-      console.warn('Failed to fetch steps:', stepsError);
+    } catch {
+      // Xóa dòng: console.warn('Failed to fetch steps:', stepsError);
     }
 
     return validatePriceSummaryFilterOptions({
@@ -301,9 +298,9 @@ export async function getPriceSummaryFilterOptions(_ownerId?: string): Promise<P
       price_types: [...PRICE_TYPE_OPTIONS],
       steps: Array.from(steps.entries()).map(([code, name]) => ({ code, name })),
     });
-  } catch (error) {
-    console.error('Error fetching price summary filter options:', error);
-    
+  } catch {
+    // Xóa dòng: console.error('Error fetching price summary filter options:', error);
+
     // Return safe default structure
     return validatePriceSummaryFilterOptions({
       products: [],
@@ -359,9 +356,9 @@ export async function getPriceTypes(): Promise<Array<{
       price_label: option.label,
       description: option.description,
     }));
-  } catch (error) {
-    console.error('Error fetching price types:', error);
-    
+  } catch {
+    // Xóa dòng: console.error('Error fetching price types:', error);
+
     // Fallback to constants
     return PRICE_TYPE_OPTIONS.map(option => ({
       price_type: option.value,

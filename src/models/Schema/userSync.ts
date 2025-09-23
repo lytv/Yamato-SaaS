@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 export const userSyncSchema = pgTable('user_sync', {
   id: serial('id').primaryKey(),

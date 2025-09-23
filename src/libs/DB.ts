@@ -54,13 +54,6 @@ async function initializeDb() {
 }
 
 // Fix for build-time module resolution
-let db: any;
-
-if (typeof window === 'undefined') {
-  db = await initializeDb();
-} else {
-  // Client-side fallback
-  db = null;
-}
+const db = typeof window === 'undefined' ? await initializeDb() : null;
 
 export { db };

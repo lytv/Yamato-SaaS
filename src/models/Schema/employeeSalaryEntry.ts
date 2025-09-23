@@ -19,12 +19,12 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
+// 🆕 Import productSchema for new foreign key
+import { productSchema } from '../Schema';
 import { planSchema } from './plan';
 import { productionStepDetailSchema } from './productionStepDetail';
 // Import related schemas
 import { userSyncSchema } from './userSync';
-// 🆕 Import productSchema for new foreign key
-import { productSchema } from '../Schema';
 
 export const employeeSalaryEntrySchema = pgTable('employee_salary_entry', {
   id: serial('id').primaryKey(),

@@ -3,8 +3,11 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
+import { Buffer } from 'node:buffer';
+
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 
 import { exportSatelliteProgress } from '@/libs/queries/satelliteProgress';
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare export data
-    const exportData = data.map(item => {
+    const exportData = data.map((item) => {
       const baseData = {
         'Mã sản phẩm': item.product_code,
         'Tên sản phẩm': item.product_name,
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
         const stepCode = (item as any)[`step_code_${i}`];
         const stepName = (item as any)[`step_name_${i}`];
         const stepQuantity = (item as any)[`step_quantity_${i}`];
-        
+
         if (stepCode && stepName && stepQuantity > 0) {
           stepData[`${stepName} (${stepCode})`] = stepQuantity;
         }
@@ -90,15 +93,15 @@ export async function POST(request: NextRequest) {
       const headers = Object.keys(exportData[0] || {});
       const csvContent = [
         exportParams.includeHeaders ? headers.join(',') : '',
-        ...exportData.map(row => 
-          headers.map(header => {
+        ...exportData.map(row =>
+          headers.map((header) => {
             const value = row[header as keyof typeof row];
             // Escape quotes and wrap in quotes if contains comma
             const stringValue = String(value || '');
-            return stringValue.includes(',') || stringValue.includes('"') 
-              ? `"${stringValue.replace(/"/g, '""')}"` 
+            return stringValue.includes(',') || stringValue.includes('"')
+              ? `"${stringValue.replace(/"/g, '""')}"`
               : stringValue;
-          }).join(',')
+          }).join(','),
         ),
       ].filter(Boolean).join('\n');
 
@@ -110,13 +113,13 @@ export async function POST(request: NextRequest) {
       const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Satellite Progress');
-      
+
       // Set column widths
       const maxWidths = Object.keys(exportData[0] || {}).map(key => ({
         wch: Math.max(
           key.length,
-          ...exportData.map(row => String(row[key as keyof typeof row] || '').length)
-        )
+          ...exportData.map(row => String(row[key as keyof typeof row] || '').length),
+        ),
       }));
       worksheet['!cols'] = maxWidths;
 
@@ -132,7 +135,6 @@ export async function POST(request: NextRequest) {
     response.headers.set('Content-Length', buffer.length.toString());
 
     return response;
-
   } catch (error) {
     console.error('Satellite progress export API error:', error);
 

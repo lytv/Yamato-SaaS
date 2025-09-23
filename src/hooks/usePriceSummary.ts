@@ -6,12 +6,12 @@
 import { useEffect, useState } from 'react';
 
 import type {
-  PriceSummaryItem,
+  PriceSummaryErrorResponse,
   PriceSummaryFilters,
-  PriceSummarySummary,
+  PriceSummaryItem,
   PriceSummaryPagination,
   PriceSummaryResponse,
-  PriceSummaryErrorResponse,
+  PriceSummarySummary,
   UsePriceSummaryResult,
 } from '@/types/priceSummary';
 import { PRICE_SUMMARY_ENDPOINTS } from '@/types/priceSummary';
@@ -53,7 +53,9 @@ export function usePriceSummary(params: UsePriceSummaryParams): UsePriceSummaryR
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = async () => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
 
     setIsLoading(true);
     setIsError(false);
@@ -61,21 +63,35 @@ export function usePriceSummary(params: UsePriceSummaryParams): UsePriceSummaryR
 
     try {
       const searchParams = new URLSearchParams();
-      
-      if (search) searchParams.append('search', search);
-      if (product_code) searchParams.append('product_code', product_code);
-      if (price_type) searchParams.append('price_type', price_type);
+
+      if (search) {
+        searchParams.append('search', search);
+      }
+      if (product_code) {
+        searchParams.append('product_code', product_code);
+      }
+      if (price_type) {
+        searchParams.append('price_type', price_type);
+      }
       if (show_only_with_pricing !== undefined) {
         searchParams.append('show_only_with_pricing', show_only_with_pricing.toString());
       }
-      if (page) searchParams.append('page', page.toString());
-      if (limit) searchParams.append('limit', limit.toString());
-      if (sortBy) searchParams.append('sortBy', sortBy);
-      if (sortOrder) searchParams.append('sortOrder', sortOrder);
+      if (page) {
+        searchParams.append('page', page.toString());
+      }
+      if (limit) {
+        searchParams.append('limit', limit.toString());
+      }
+      if (sortBy) {
+        searchParams.append('sortBy', sortBy);
+      }
+      if (sortOrder) {
+        searchParams.append('sortOrder', sortOrder);
+      }
 
       const url = `${PRICE_SUMMARY_ENDPOINTS.LIST}?${searchParams.toString()}`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -95,7 +111,7 @@ export function usePriceSummary(params: UsePriceSummaryParams): UsePriceSummaryR
       console.error('Error fetching price summary:', err);
       setIsError(true);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-      
+
       // Reset data on error
       setData([]);
       setSummary({
@@ -123,7 +139,7 @@ export function usePriceSummary(params: UsePriceSummaryParams): UsePriceSummaryR
 
   useEffect(() => {
     fetchData();
-  }, [search, product_code, price_type, show_only_with_pricing, page, limit, sortBy, sortOrder, enabled]);
+  }, [fetchData, search, product_code, price_type, show_only_with_pricing, page, limit, sortBy, sortOrder, enabled]);
 
   return {
     data,

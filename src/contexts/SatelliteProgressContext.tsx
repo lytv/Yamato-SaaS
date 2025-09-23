@@ -5,19 +5,19 @@
 
 'use client';
 
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, { createContext, type ReactNode, useContext, useMemo } from 'react';
 
 import { useSatelliteProgress } from '@/hooks/useSatelliteProgress';
-import { useSatelliteProgressFilters } from '@/hooks/useSatelliteProgressFilters';
-import { useSatelliteProgressFilterOptions } from '@/hooks/useSatelliteProgressFilterOptions';
 import { useSatelliteProgressExport } from '@/hooks/useSatelliteProgressExport';
+import { useSatelliteProgressFilterOptions } from '@/hooks/useSatelliteProgressFilterOptions';
+import { useSatelliteProgressFilters } from '@/hooks/useSatelliteProgressFilters';
 import type {
-  SatelliteProgressItem,
-  SatelliteProgressSummary,
-  SatelliteProgressPagination,
-  SatelliteProgressFilterState,
-  SatelliteProgressFilterOptions,
   SatelliteProgressExportParams,
+  SatelliteProgressFilterOptions,
+  SatelliteProgressFilterState,
+  SatelliteProgressItem,
+  SatelliteProgressPagination,
+  SatelliteProgressSummary,
 } from '@/types/satelliteProgress';
 
 // ✅ Context type definition
@@ -100,7 +100,7 @@ export function SatelliteProgressProvider({ children }: SatelliteProgressProvide
     exportProgress,
   } = useSatelliteProgressExport();
 
-  const contextValue: SatelliteProgressContextValue = {
+  const contextValue: SatelliteProgressContextValue = useMemo(() => ({
     // Data state
     data,
     summary,
@@ -128,7 +128,7 @@ export function SatelliteProgressProvider({ children }: SatelliteProgressProvide
     isExporting,
     exportError,
     exportProgress,
-  };
+  }), [data, summary, pagination, isLoading, isError, error, refetch, filters, setFilters, applyFilters, resetFilters, hasActiveFilters, activeFilterCount, filterOptions, isLoadingFilterOptions, filterOptionsError, exportData, isExporting, exportError, exportProgress]);
 
   return (
     <SatelliteProgressContext.Provider value={contextValue}>
@@ -144,11 +144,11 @@ export function SatelliteProgressProvider({ children }: SatelliteProgressProvide
  */
 export function useSatelliteProgressContext(): SatelliteProgressContextValue {
   const context = useContext(SatelliteProgressContext);
-  
+
   if (context === undefined) {
     throw new Error('useSatelliteProgressContext must be used within a SatelliteProgressProvider');
   }
-  
+
   return context;
 }
 

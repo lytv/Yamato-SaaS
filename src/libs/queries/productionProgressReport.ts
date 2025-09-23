@@ -281,24 +281,24 @@ export async function exportProductionProgressReport(
 export async function getProductionProgressReportStats(
   params: ProductionProgressReportFiltersWithOwner,
 ): Promise<{
-  totalRecords: number;
-  totalEntities: number;
-  totalPlanned: number;
-  totalActual: number;
-  totalAssigned: number;
-  totalReceived: number;
-  totalDefect: number;
-  totalMade: number;
-  averageCompletionRate: number;
-  employeeCount: number;
-  outsourceCount: number;
-  completionRateDistribution: {
-    excellent: number;
-    good: number;
-    average: number;
-    poor: number;
-  };
-}> {
+    totalRecords: number;
+    totalEntities: number;
+    totalPlanned: number;
+    totalActual: number;
+    totalAssigned: number;
+    totalReceived: number;
+    totalDefect: number;
+    totalMade: number;
+    averageCompletionRate: number;
+    employeeCount: number;
+    outsourceCount: number;
+    completionRateDistribution: {
+      excellent: number;
+      good: number;
+      average: number;
+      poor: number;
+    };
+  }> {
   const { data } = await getProductionProgressReport({
     ...params,
     page: 1,
@@ -338,8 +338,8 @@ export async function getProductionProgressReportStats(
     totalReceived: data.reduce((sum, item) => sum + item.total_received, 0),
     totalDefect: data.reduce((sum, item) => sum + item.total_defect, 0),
     totalMade: data.reduce((sum, item) => sum + item.total_made, 0),
-    averageCompletionRate: data.length > 0 
-      ? Math.round((data.reduce((sum, item) => sum + item.completion_rate, 0) / data.length) * 100) / 100 
+    averageCompletionRate: data.length > 0
+      ? Math.round((data.reduce((sum, item) => sum + item.completion_rate, 0) / data.length) * 100) / 100
       : 0,
     employeeCount: uniqueEmployees.size,
     outsourceCount: uniqueOutsources.size,

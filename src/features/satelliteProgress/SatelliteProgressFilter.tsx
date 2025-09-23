@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Search, Filter, RotateCcw, Users } from 'lucide-react';
+import { Filter, RotateCcw, Search, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -57,14 +57,14 @@ export function SatelliteProgressFilter({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Filter className="h-5 w-5 text-blue-600" />
+            <div className="rounded-lg bg-blue-100 p-2">
+              <Filter className="size-5 text-blue-600" />
             </div>
             <div>
               <CardTitle className="text-lg">
                 {t('title', { defaultValue: 'Bộ lọc' })}
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="mt-1 text-sm text-gray-600">
                 {t('description', { defaultValue: 'Lọc dữ liệu tiến độ vệ tinh' })}
               </p>
             </div>
@@ -72,8 +72,10 @@ export function SatelliteProgressFilter({
           <div className="flex items-center gap-2">
             {hasActiveFilters && (
               <Badge variant="secondary" className="px-3 py-1">
-                <Filter className="h-3 w-3 mr-1" />
-                {activeFilterCount} bộ lọc
+                <Filter className="mr-1 size-3" />
+                {activeFilterCount}
+                {' '}
+                bộ lọc
               </Badge>
             )}
             <Button
@@ -81,7 +83,7 @@ export function SatelliteProgressFilter({
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="mr-2 size-4" />
               {isExpanded ? 'Thu gọn' : 'Mở rộng'}
             </Button>
           </div>
@@ -95,13 +97,13 @@ export function SatelliteProgressFilter({
             {t('search.label', { defaultValue: 'Tìm kiếm' })}
           </Label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <Input
               id="search"
               type="text"
               placeholder={t('search.placeholder', { defaultValue: 'Tìm kiếm sản phẩm, kế hoạch, nhân viên...' })}
               value={filters.search}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              onChange={e => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -109,7 +111,7 @@ export function SatelliteProgressFilter({
 
         {/* Expandable Filters */}
         {isExpanded && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
+          <div className="grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Plan Filter */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
@@ -117,7 +119,7 @@ export function SatelliteProgressFilter({
               </Label>
               <Select
                 value={filters.plan_code || 'all'}
-                onValueChange={(value) => handleFilterChange('plan_code', value)}
+                onValueChange={value => handleFilterChange('plan_code', value)}
                 disabled={isLoadingFilterOptions}
               >
                 <SelectTrigger>
@@ -127,9 +129,13 @@ export function SatelliteProgressFilter({
                   <SelectItem value="all">
                     {t('plan.all', { defaultValue: 'Tất cả kế hoạch' })}
                   </SelectItem>
-                  {filterOptions?.plans.map((plan) => (
+                  {filterOptions?.plans.map(plan => (
                     <SelectItem key={plan.code} value={plan.code}>
-                      {plan.name} ({plan.code})
+                      {plan.name}
+                      {' '}
+                      (
+                      {plan.code}
+                      )
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -143,7 +149,7 @@ export function SatelliteProgressFilter({
               </Label>
               <Select
                 value={filters.product_code || 'all'}
-                onValueChange={(value) => handleFilterChange('product_code', value)}
+                onValueChange={value => handleFilterChange('product_code', value)}
                 disabled={isLoadingFilterOptions}
               >
                 <SelectTrigger>
@@ -153,9 +159,13 @@ export function SatelliteProgressFilter({
                   <SelectItem value="all">
                     {t('product.all', { defaultValue: 'Tất cả sản phẩm' })}
                   </SelectItem>
-                  {filterOptions?.products.map((product) => (
+                  {filterOptions?.products.map(product => (
                     <SelectItem key={product.code} value={product.code}>
-                      {product.name} ({product.code})
+                      {product.name}
+                      {' '}
+                      (
+                      {product.code}
+                      )
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -165,12 +175,12 @@ export function SatelliteProgressFilter({
             {/* User Filter */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                <Users className="h-4 w-4 inline mr-1" />
+                <Users className="mr-1 inline size-4" />
                 {t('user.label', { defaultValue: 'Nhân viên vệ tinh' })}
               </Label>
               <Select
                 value={filters.assigned_user_id || 'all'}
-                onValueChange={(value) => handleFilterChange('assigned_user_id', value)}
+                onValueChange={value => handleFilterChange('assigned_user_id', value)}
                 disabled={isLoadingFilterOptions}
               >
                 <SelectTrigger>
@@ -180,7 +190,7 @@ export function SatelliteProgressFilter({
                   <SelectItem value="all">
                     {t('user.all', { defaultValue: 'Tất cả nhân viên' })}
                   </SelectItem>
-                  {filterOptions?.users.map((user) => (
+                  {filterOptions?.users.map(user => (
                     <SelectItem key={user.user_id} value={user.user_id}>
                       {user.user_name}
                     </SelectItem>
@@ -197,7 +207,7 @@ export function SatelliteProgressFilter({
               <div className="grid grid-cols-2 gap-2">
                 <Select
                   value={filters.sortBy}
-                  onValueChange={(value) => handleFilterChange('sortBy', value)}
+                  onValueChange={value => handleFilterChange('sortBy', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -211,7 +221,7 @@ export function SatelliteProgressFilter({
                 </Select>
                 <Select
                   value={filters.sortOrder}
-                  onValueChange={(value) => handleFilterChange('sortOrder', value)}
+                  onValueChange={value => handleFilterChange('sortOrder', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -228,14 +238,14 @@ export function SatelliteProgressFilter({
 
         {/* Action Buttons */}
         {hasActiveFilters && (
-          <div className="flex items-center justify-end pt-4 border-t">
+          <div className="flex items-center justify-end border-t pt-4">
             <Button
               variant="outline"
               size="sm"
               onClick={handleReset}
               className="flex items-center gap-2"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="size-4" />
               {t('reset', { defaultValue: 'Xóa bộ lọc' })}
             </Button>
           </div>

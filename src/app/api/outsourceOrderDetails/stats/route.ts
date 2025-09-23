@@ -16,24 +16,24 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { searchParams } = new URL(request.url);
-    const outsourceOrderId = searchParams.get('outsourceOrderId') 
-      ? Number(searchParams.get('outsourceOrderId')) 
+    const outsourceOrderId = searchParams.get('outsourceOrderId')
+      ? Number(searchParams.get('outsourceOrderId'))
       : undefined;
 
     // Validate outsourceOrderId if provided
-    if (outsourceOrderId && (isNaN(outsourceOrderId) || outsourceOrderId <= 0)) {
+    if (outsourceOrderId && (Number.isNaN(outsourceOrderId) || outsourceOrderId <= 0)) {
       return NextResponse.json(
         {
           success: false,
           error: 'Invalid outsourceOrderId parameter',
           code: 'VALIDATION_ERROR',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

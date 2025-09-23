@@ -70,11 +70,11 @@ export function PlanDetailImportModal({ onSuccess, onError }: PlanDetailImportMo
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="text-white hover:bg-white/20 font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105"
+        <Button
+          variant="ghost"
+          className="rounded-lg px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-white/20"
         >
-          <Upload className="mr-2 w-5 h-5" />
+          <Upload className="mr-2 size-5" />
           Import from YMT Plan
         </Button>
       </DialogTrigger>

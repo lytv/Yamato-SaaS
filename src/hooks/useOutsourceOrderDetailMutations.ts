@@ -3,16 +3,17 @@
  * Generated based on existing pattern from useOutsourceOrderMutations
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import type {
-  OutsourceOrderDetailWithRelations,
   CreateOutsourceOrderDetailInput,
-  UpdateOutsourceOrderDetailInput,
   OutsourceOrderDetailResponse,
+  OutsourceOrderDetailWithRelations,
+  UpdateOutsourceOrderDetailInput,
 } from '@/types/outsourceOrderDetail';
+
 import { outsourceOrderDetailKeys } from './useOutsourceOrderDetails';
 import { outsourceOrderKeys } from './useOutsourceOrders';
 
@@ -27,7 +28,9 @@ export function useCreateOutsourceOrderDetail() {
 
   return useMutation({
     mutationFn: async (data: Omit<CreateOutsourceOrderDetailInput, 'ownerId'>): Promise<OutsourceOrderDetailWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await fetch(API_BASE, {
         method: 'POST',
@@ -48,14 +51,16 @@ export function useCreateOutsourceOrderDetail() {
     onSuccess: (newOutsourceOrderDetail) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
-      
+
       // Optimistically update lists
       queryClient.setQueriesData(
         { queryKey: outsourceOrderDetailKeys.lists() },
         (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-          if (!oldData) return [newOutsourceOrderDetail];
+          if (!oldData) {
+            return [newOutsourceOrderDetail];
+          }
           return [newOutsourceOrderDetail, ...oldData];
-        }
+        },
       );
 
       // Update specific order details list
@@ -63,17 +68,19 @@ export function useCreateOutsourceOrderDetail() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId: newOutsourceOrderDetail.outsourceOrderId }) },
           (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-            if (!oldData) return [newOutsourceOrderDetail];
+            if (!oldData) {
+              return [newOutsourceOrderDetail];
+            }
             return [newOutsourceOrderDetail, ...oldData];
-          }
+          },
         );
       }
 
       // Invalidate parent order stats
       queryClient.invalidateQueries({ queryKey: outsourceOrderKeys.stats() });
       if (newOutsourceOrderDetail.outsourceOrderId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderDetailKeys.statsByOrder(newOutsourceOrderDetail.outsourceOrderId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderDetailKeys.statsByOrder(newOutsourceOrderDetail.outsourceOrderId),
         });
       }
 
@@ -93,14 +100,16 @@ export function useUpdateOutsourceOrderDetail() {
   const { userId } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: number; 
-      data: UpdateOutsourceOrderDetailInput 
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: UpdateOutsourceOrderDetailInput;
     }): Promise<OutsourceOrderDetailWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await fetch(`${API_BASE}/${id}`, {
         method: 'PUT',
@@ -122,18 +131,20 @@ export function useUpdateOutsourceOrderDetail() {
       // Update specific item in cache
       queryClient.setQueryData(
         outsourceOrderDetailKeys.detail(id),
-        updatedOutsourceOrderDetail
+        updatedOutsourceOrderDetail,
       );
 
       // Update item in lists
       queryClient.setQueriesData(
         { queryKey: outsourceOrderDetailKeys.lists() },
         (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-          if (!oldData) return oldData;
-          return oldData.map(item => 
-            item.id === id ? { ...item, ...updatedOutsourceOrderDetail } : item
+          if (!oldData) {
+            return oldData;
+          }
+          return oldData.map(item =>
+            item.id === id ? { ...item, ...updatedOutsourceOrderDetail } : item,
           );
-        }
+        },
       );
 
       // Update specific order details list
@@ -141,11 +152,13 @@ export function useUpdateOutsourceOrderDetail() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId: updatedOutsourceOrderDetail.outsourceOrderId }) },
           (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(item => 
-              item.id === id ? { ...item, ...updatedOutsourceOrderDetail } : item
+            if (!oldData) {
+              return oldData;
+            }
+            return oldData.map(item =>
+              item.id === id ? { ...item, ...updatedOutsourceOrderDetail } : item,
             );
-          }
+          },
         );
       }
 
@@ -153,8 +166,8 @@ export function useUpdateOutsourceOrderDetail() {
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.stats() });
       queryClient.invalidateQueries({ queryKey: outsourceOrderKeys.stats() });
       if (updatedOutsourceOrderDetail.outsourceOrderId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderDetailKeys.statsByOrder(updatedOutsourceOrderDetail.outsourceOrderId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderDetailKeys.statsByOrder(updatedOutsourceOrderDetail.outsourceOrderId),
         });
       }
 
@@ -175,7 +188,9 @@ export function useCreateOutsourceOrderDetailBulk() {
 
   return useMutation({
     mutationFn: async (data: Omit<CreateOutsourceOrderDetailInput, 'ownerId'>[]): Promise<OutsourceOrderDetailWithRelations[]> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await fetch(`${API_BASE}/bulk`, {
         method: 'POST',
@@ -200,14 +215,16 @@ export function useCreateOutsourceOrderDetailBulk() {
     onSuccess: (newOutsourceOrderDetails) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
-      
+
       // Optimistically update lists
       queryClient.setQueriesData(
         { queryKey: outsourceOrderDetailKeys.lists() },
         (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-          if (!oldData) return newOutsourceOrderDetails;
+          if (!oldData) {
+            return newOutsourceOrderDetails;
+          }
           return [...newOutsourceOrderDetails, ...oldData];
-        }
+        },
       );
 
       // Update specific order details list
@@ -218,9 +235,11 @@ export function useCreateOutsourceOrderDetailBulk() {
           queryClient.setQueriesData(
             { queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId }) },
             (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-              if (!oldData) return newOutsourceOrderDetails;
+              if (!oldData) {
+                return newOutsourceOrderDetails;
+              }
               return [...newOutsourceOrderDetails, ...oldData];
-            }
+            },
           );
         }
       }
@@ -230,8 +249,8 @@ export function useCreateOutsourceOrderDetailBulk() {
       if (newOutsourceOrderDetails.length > 0) {
         const firstItem = newOutsourceOrderDetails[0];
         if (firstItem?.outsourceOrderId) {
-          queryClient.invalidateQueries({ 
-            queryKey: outsourceOrderDetailKeys.statsByOrder(firstItem.outsourceOrderId) 
+          queryClient.invalidateQueries({
+            queryKey: outsourceOrderDetailKeys.statsByOrder(firstItem.outsourceOrderId),
           });
         }
       }
@@ -253,11 +272,13 @@ export function useDeleteOutsourceOrderDetail() {
 
   return useMutation({
     mutationFn: async (id: number): Promise<{ id: number; outsourceOrderId?: number }> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       // Get current data to remember outsourceOrderId for cache invalidation
       const currentData = queryClient.getQueryData<OutsourceOrderDetailWithRelations>(
-        outsourceOrderDetailKeys.detail(id)
+        outsourceOrderDetailKeys.detail(id),
       );
 
       const response = await fetch(`${API_BASE}/${id}`, {
@@ -281,9 +302,11 @@ export function useDeleteOutsourceOrderDetail() {
       queryClient.setQueriesData(
         { queryKey: outsourceOrderDetailKeys.lists() },
         (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-          if (!oldData) return oldData;
+          if (!oldData) {
+            return oldData;
+          }
           return oldData.filter(item => item.id !== deletedId);
-        }
+        },
       );
 
       // Remove from specific order details list
@@ -291,9 +314,11 @@ export function useDeleteOutsourceOrderDetail() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderDetailKeys.list({ outsourceOrderId }) },
           (oldData: OutsourceOrderDetailWithRelations[] | undefined) => {
-            if (!oldData) return oldData;
+            if (!oldData) {
+              return oldData;
+            }
             return oldData.filter(item => item.id !== deletedId);
-          }
+          },
         );
       }
 
@@ -301,8 +326,8 @@ export function useDeleteOutsourceOrderDetail() {
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.stats() });
       queryClient.invalidateQueries({ queryKey: outsourceOrderKeys.stats() });
       if (outsourceOrderId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderDetailKeys.statsByOrder(outsourceOrderId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderDetailKeys.statsByOrder(outsourceOrderId),
         });
       }
 

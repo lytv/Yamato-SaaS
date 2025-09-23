@@ -6,18 +6,18 @@
 
 'use client';
 
-import { 
-  Download, 
-  Package, 
-  Calendar, 
-  Target, 
-  CheckCircle2, 
-  AlertCircle, 
-  TrendingUp,
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Download,
   Hash,
-  Users,
+  Package,
+  RefreshCw,
   Settings,
-  RefreshCw
+  Target,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useMemo } from 'react';
@@ -26,12 +26,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
-import { SatelliteProgressSkeleton } from '@/features/satelliteProgress/SatelliteProgressSkeleton';
 import { useSatelliteProgressContext } from '@/contexts/SatelliteProgressContext';
-import type { 
-  SatelliteProgressItem,
-  SatelliteProgressColumn,
+import { SatelliteProgressSkeleton } from '@/features/satelliteProgress/SatelliteProgressSkeleton';
+import type {
   DynamicStepColumn,
+  SatelliteProgressColumn,
+  SatelliteProgressItem,
 } from '@/types/satelliteProgress';
 
 type SatelliteProgressListProps = {
@@ -42,7 +42,7 @@ export function SatelliteProgressList({
   className = '',
 }: SatelliteProgressListProps): JSX.Element {
   const t = useTranslations('satelliteProgress.list');
-  
+
   const {
     data,
     isLoading,
@@ -54,40 +54,42 @@ export function SatelliteProgressList({
 
   // Helper function to get dynamic step columns from data
   const getDynamicStepColumns = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    
+    if (!data || data.length === 0) {
+      return [];
+    }
+
     const stepColumns: DynamicStepColumn[] = [];
-    
+
     // Collect ALL unique steps from ALL records first
     const allSteps = new Map<string, { stepCode: string; stepName: string; positions: Set<number> }>();
-    
+
     data.forEach((item) => {
       for (let i = 1; i <= 150; i++) {
         const stepCode = item[`step_code_${i}` as keyof SatelliteProgressItem] as string | null;
         const stepName = item[`step_name_${i}` as keyof SatelliteProgressItem] as string | null;
-        
+
         if (stepCode && stepName) {
           if (!allSteps.has(stepCode)) {
             allSteps.set(stepCode, {
               stepCode,
               stepName,
-              positions: new Set()
+              positions: new Set(),
             });
           }
           allSteps.get(stepCode)!.positions.add(i);
         }
       }
     });
-    
+
     // Sort steps by their numeric value for correct ordering (cd01, cd02, cd10, cd20)
     const sortedSteps = Array.from(allSteps.values()).sort((a, b) => {
       const getNumericPart = (code: string) => {
         const match = code.match(/\d+/);
-        return match ? parseInt(match[0], 10) : 0;
+        return match ? Number.parseInt(match[0], 10) : 0;
       };
       return getNumericPart(a.stepCode) - getNumericPart(b.stepCode);
     });
-    
+
     // Create columns in the correct sorted order
     sortedSteps.forEach((step, index) => {
       stepColumns.push({
@@ -97,9 +99,9 @@ export function SatelliteProgressList({
         quantity: 0, // Will be filled per row
       });
     });
-    
+
     return stepColumns;
-  }, [data, data?.length]);
+  }, [data]);
 
   // Define table columns with dynamic steps
   const columns = useMemo(() => {
@@ -189,26 +191,42 @@ export function SatelliteProgressList({
   };
 
   const getProgressColor = (current: number, planned: number) => {
-    if (planned === 0) return 'bg-gray-200';
+    if (planned === 0) {
+      return 'bg-gray-200';
+    }
     const percentage = (current / planned) * 100;
-    if (percentage >= 100) return 'bg-green-500';
-    if (percentage >= 80) return 'bg-blue-500';
-    if (percentage >= 50) return 'bg-yellow-500';
+    if (percentage >= 100) {
+      return 'bg-green-500';
+    }
+    if (percentage >= 80) {
+      return 'bg-blue-500';
+    }
+    if (percentage >= 50) {
+      return 'bg-yellow-500';
+    }
     return 'bg-red-500';
   };
 
   const getCompletionBadgeVariant = (current: number, planned: number) => {
-    if (planned === 0) return 'secondary';
+    if (planned === 0) {
+      return 'secondary';
+    }
     const percentage = (current / planned) * 100;
-    if (percentage >= 100) return 'default';
-    if (percentage >= 80) return 'secondary';
-    if (percentage >= 50) return 'outline';
+    if (percentage >= 100) {
+      return 'default';
+    }
+    if (percentage >= 80) {
+      return 'secondary';
+    }
+    if (percentage >= 50) {
+      return 'outline';
+    }
     return 'destructive';
   };
 
   const renderCell = (item: SatelliteProgressItem, column: SatelliteProgressColumn) => {
     let value: any;
-    
+
     if (column.key === 'dynamic_step' && typeof column.stepIndex === 'number') {
       // Find the step quantity by matching stepCode, not by stepIndex position
       const targetStepCode = getDynamicStepColumns[column.stepIndex]?.stepCode;
@@ -230,11 +248,11 @@ export function SatelliteProgressList({
     switch (column.key) {
       case 'product_name':
         return (
-          <div className="flex items-center gap-2 min-w-0">
-            <Package className="h-4 w-4 text-blue-600 flex-shrink-0" />
+          <div className="flex min-w-0 items-center gap-2">
+            <Package className="size-4 shrink-0 text-blue-600" />
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{item.product_name}</div>
-              <div className="text-xs text-gray-500 truncate">{item.product_code}</div>
+              <div className="truncate font-medium text-gray-900">{item.product_name}</div>
+              <div className="truncate text-xs text-gray-500">{item.product_code}</div>
             </div>
           </div>
         );
@@ -242,7 +260,7 @@ export function SatelliteProgressList({
       case 'plan_code':
         return (
           <div className="flex items-center justify-center gap-2">
-            <Calendar className="h-4 w-4 text-green-600" />
+            <Calendar className="size-4 text-green-600" />
             <Badge variant="outline" className="font-mono text-xs">
               {item.plan_code}
             </Badge>
@@ -251,11 +269,11 @@ export function SatelliteProgressList({
 
       case 'assigned_user_name':
         return (
-          <div className="flex items-center gap-2 min-w-0">
-            <Users className="h-4 w-4 text-purple-600 flex-shrink-0" />
+          <div className="flex min-w-0 items-center gap-2">
+            <Users className="size-4 shrink-0 text-purple-600" />
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{item.assigned_user_name}</div>
-              <div className="text-xs text-gray-500 truncate">Nhân viên vệ tinh</div>
+              <div className="truncate font-medium text-gray-900">{item.assigned_user_name}</div>
+              <div className="truncate text-xs text-gray-500">Nhân viên vệ tinh</div>
             </div>
           </div>
         );
@@ -263,51 +281,53 @@ export function SatelliteProgressList({
       case 'planned_quantity':
         return (
           <div className="flex items-center justify-end gap-2">
-            <Target className="h-4 w-4 text-orange-600" />
+            <Target className="size-4 text-orange-600" />
             <Badge variant="secondary" className="font-mono">
               {(typeof value === 'number' ? value : 0).toLocaleString()}
             </Badge>
           </div>
         );
 
-      case 'total_completed':
+      case 'total_completed': {
         const planned = item.planned_quantity;
         const completed = typeof value === 'number' ? value : 0;
         const percentage = planned > 0 ? (completed / planned) * 100 : 0;
-        
+
         return (
           <div className="space-y-1">
             <div className="flex items-center justify-end gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <Badge 
+              <CheckCircle2 className="size-4 text-green-600" />
+              <Badge
                 variant={getCompletionBadgeVariant(completed, planned)}
                 className="font-mono"
               >
                 {completed.toLocaleString()}
               </Badge>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1">
-              <div 
+            <div className="h-1 w-full rounded-full bg-gray-200">
+              <div
                 className={`h-1 rounded-full transition-all duration-300 ${getProgressColor(completed, planned)}`}
                 style={{ width: `${Math.min(percentage, 100)}%` }}
               />
             </div>
-            <div className="text-xs text-gray-500 text-right">
-              {percentage.toFixed(1)}%
+            <div className="text-right text-xs text-gray-500">
+              {percentage.toFixed(1)}
+              %
             </div>
           </div>
         );
+      }
 
-      case 'dynamic_step':
+      case 'dynamic_step': {
         const stepQuantity = typeof value === 'number' ? value : 0;
         const stepPlanned = item.planned_quantity;
         const stepPercentage = stepPlanned > 0 ? (stepQuantity / stepPlanned) * 100 : 0;
-        
+
         return (
           <div className="space-y-1">
             <div className="flex items-center justify-end gap-1">
-              <Settings className="h-3 w-3 text-purple-600" />
-              <Badge 
+              <Settings className="size-3 text-purple-600" />
+              <Badge
                 variant={stepQuantity > 0 ? 'default' : 'secondary'}
                 className="font-mono text-xs"
               >
@@ -315,8 +335,8 @@ export function SatelliteProgressList({
               </Badge>
             </div>
             {stepQuantity > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-1">
-                <div 
+              <div className="h-1 w-full rounded-full bg-gray-200">
+                <div
                   className={`h-1 rounded-full transition-all duration-300 ${getProgressColor(stepQuantity, stepPlanned)}`}
                   style={{ width: `${Math.min(stepPercentage, 100)}%` }}
                 />
@@ -324,6 +344,7 @@ export function SatelliteProgressList({
             )}
           </div>
         );
+      }
 
       default:
         return (
@@ -336,17 +357,19 @@ export function SatelliteProgressList({
 
   // Calculate summary metrics (must be before any conditional returns)
   const summaryMetrics = useMemo(() => {
-    if (!data || data.length === 0) return null;
+    if (!data || data.length === 0) {
+      return null;
+    }
 
     const totalPlanned = data.reduce((sum, item) => sum + item.planned_quantity, 0);
     const totalCompleted = data.reduce((sum, item) => sum + item.total_completed, 0);
     const averageCompletion = totalPlanned > 0 ? (totalCompleted / totalPlanned) * 100 : 0;
-    
-    const onTimeItems = data.filter(item => 
-      item.planned_quantity > 0 && (item.total_completed / item.planned_quantity) >= 0.8
+
+    const onTimeItems = data.filter(item =>
+      item.planned_quantity > 0 && (item.total_completed / item.planned_quantity) >= 0.8,
     );
-    const delayedItems = data.filter(item => 
-      item.planned_quantity > 0 && (item.total_completed / item.planned_quantity) < 0.5
+    const delayedItems = data.filter(item =>
+      item.planned_quantity > 0 && (item.total_completed / item.planned_quantity) < 0.5,
     );
 
     return {
@@ -387,12 +410,12 @@ export function SatelliteProgressList({
     <div className={`space-y-6 ${className}`}>
       {/* Summary Cards */}
       {summaryMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <Target className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-blue-500 p-2">
+                  <Target className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-blue-700">Kế hoạch</p>
@@ -404,11 +427,11 @@ export function SatelliteProgressList({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="border-green-200 bg-gradient-to-r from-green-50 to-green-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-500 rounded-lg">
-                  <CheckCircle2 className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-green-500 p-2">
+                  <CheckCircle2 className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-green-700">Hoàn thành</p>
@@ -420,11 +443,11 @@ export function SatelliteProgressList({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+          <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500 rounded-lg">
-                  <Users className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-purple-500 p-2">
+                  <Users className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-700">Nhân viên</p>
@@ -436,11 +459,11 @@ export function SatelliteProgressList({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+          <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-white" />
+                <div className="rounded-lg bg-orange-500 p-2">
+                  <AlertCircle className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-orange-700">Chậm tiến độ</p>
@@ -456,25 +479,27 @@ export function SatelliteProgressList({
 
       {/* Data Table */}
       <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="rounded-lg bg-white p-2 shadow-sm">
+                <Users className="size-6 text-blue-600" />
               </div>
               <div>
                 <CardTitle className="text-xl text-gray-900">
                   {t('title', { defaultValue: 'Báo cáo Tiến độ Vệ tinh' })}
                 </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="mt-1 text-sm text-gray-600">
                   Theo dõi tiến độ sản xuất theo nhân viên vệ tinh
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="px-3 py-1">
-                <Hash className="h-3 w-3 mr-1" />
-                {data?.length || 0} bản ghi
+                <Hash className="mr-1 size-3" />
+                {data?.length || 0}
+                {' '}
+                bản ghi
               </Badge>
               <Button
                 variant="outline"
@@ -484,7 +509,7 @@ export function SatelliteProgressList({
                 className="bg-white hover:bg-gray-50"
                 title="Làm mới dữ liệu và cột động"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`mr-2 size-4 ${isLoading ? 'animate-spin' : ''}`} />
                 {t('refresh', { defaultValue: 'Làm mới' })}
               </Button>
               <Button
@@ -494,7 +519,7 @@ export function SatelliteProgressList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.excel', { defaultValue: 'Excel' })}
               </Button>
               <Button
@@ -504,63 +529,68 @@ export function SatelliteProgressList({
                 disabled={isExporting || isLoading}
                 className="bg-white hover:bg-gray-50"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 size-4" />
                 {t('export.csv', { defaultValue: 'CSV' })}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <SatelliteProgressSkeleton />
-          ) : (
-            <DataTable
-              columns={columns.map(col => ({
-                id: col.key === 'dynamic_step' ? `step_${col.stepIndex}` : String(col.key),
-                header: ({ column }: any) => {
-                  const getHeaderIcon = () => {
-                    switch (col.key) {
-                      case 'product_name':
-                        return <Package className="h-4 w-4 text-blue-600" />;
-                      case 'plan_code':
-                        return <Calendar className="h-4 w-4 text-green-600" />;
-                      case 'assigned_user_name':
-                        return <Users className="h-4 w-4 text-purple-600" />;
-                      case 'planned_quantity':
-                        return <Target className="h-4 w-4 text-orange-600" />;
-                      case 'total_completed':
-                        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-                      case 'dynamic_step':
-                        return <Settings className="h-4 w-4 text-purple-600" />;
-                      default:
-                        return null;
-                    }
-                  };
+          {isLoading
+            ? (
+                <SatelliteProgressSkeleton />
+              )
+            : (
+                <DataTable
+                  columns={columns.map(col => ({
+                    id: col.key === 'dynamic_step' ? `step_${col.stepIndex}` : String(col.key),
+                    header: ({ column }: any) => {
+                      const getHeaderIcon = () => {
+                        switch (col.key) {
+                          case 'product_name':
+                            return <Package className="size-4 text-blue-600" />;
+                          case 'plan_code':
+                            return <Calendar className="size-4 text-green-600" />;
+                          case 'assigned_user_name':
+                            return <Users className="size-4 text-purple-600" />;
+                          case 'planned_quantity':
+                            return <Target className="size-4 text-orange-600" />;
+                          case 'total_completed':
+                            return <CheckCircle2 className="size-4 text-green-600" />;
+                          case 'dynamic_step':
+                            return <Settings className="size-4 text-purple-600" />;
+                          default:
+                            return null;
+                        }
+                      };
 
-                  return (
-                    <div className={`flex items-center gap-2 font-semibold text-gray-700 ${
-                      col.align === 'right' ? 'justify-end' : 
-                      col.align === 'center' ? 'justify-center' : 'justify-start'
-                    }`}>
-                      {getHeaderIcon()}
-                      <span>{col.label}</span>
-                      {col.sortable && (
-                        <button
-                          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                          className="ml-1 hover:bg-gray-100 rounded p-1"
+                      return (
+                        <div className={`flex items-center gap-2 font-semibold text-gray-700 ${
+                          col.align === 'right'
+                            ? 'justify-end'
+                            : col.align === 'center' ? 'justify-center' : 'justify-start'
+                        }`}
                         >
-                          <TrendingUp className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                },
-                accessorKey: col.key === 'dynamic_step' ? `step_quantity_${(col.stepIndex || 0) + 1}` : String(col.key),
-                cell: ({ row }: { row: { original: SatelliteProgressItem } }) => renderCell(row.original, col),
-              }))}
-              data={data as any[]}
-            />
-          )}
+                          {getHeaderIcon()}
+                          <span>{col.label}</span>
+                          {col.sortable && (
+                            <button
+                              type="button"
+                              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                              className="ml-1 rounded p-1 hover:bg-gray-100"
+                            >
+                              <TrendingUp className="size-3" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    },
+                    accessorKey: col.key === 'dynamic_step' ? `step_quantity_${(col.stepIndex || 0) + 1}` : String(col.key),
+                    cell: ({ row }: { row: { original: SatelliteProgressItem } }) => renderCell(row.original, col),
+                  }))}
+                  data={data as any[]}
+                />
+              )}
         </CardContent>
       </Card>
     </div>

@@ -1,4 +1,4 @@
-export interface SalaryDetail {
+export type SalaryDetail = {
   user_id: string;
   full_name: string;
   work_date: string;
@@ -10,16 +10,16 @@ export interface SalaryDetail {
   quantity: number;
   unit_price: number;
   line_total: number;
-}
+};
 
-export interface UserSummary {
+export type UserSummary = {
   user_id: string;
   full_name: string;
   total_amount: number;
   record_count: number;
-}
+};
 
-export interface SalaryDetailsResponse {
+export type SalaryDetailsResponse = {
   success: boolean;
   data: SalaryDetail[];
   pagination?: {
@@ -38,9 +38,9 @@ export interface SalaryDetailsResponse {
       end_date: string;
     };
   };
-}
+};
 
-export interface SalaryDetailsFilters {
+export type SalaryDetailsFilters = {
   search: string;
   userIds: string[];
   startDate: string;
@@ -48,9 +48,9 @@ export interface SalaryDetailsFilters {
   sortBy: 'work_date' | 'full_name' | 'product_code' | 'step_code' | 'quantity' | 'unit_price' | 'line_total';
   sortOrder: 'asc' | 'desc';
   showAll: boolean;
-}
+};
 
-export interface SalaryDetailsParams {
+export type SalaryDetailsParams = {
   search?: string;
   userIds?: string;
   startDate: string;
@@ -60,4 +60,4 @@ export interface SalaryDetailsParams {
   page?: number;
   limit?: number;
   showAll?: boolean;
-}
+};

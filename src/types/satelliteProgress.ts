@@ -14,7 +14,7 @@ export type SatelliteProgressItem = {
   readonly planned_quantity: number;
   readonly total_completed: number;
   readonly completion_rate: number;
-  
+
   // Dynamic step columns (supporting unlimited steps)
   readonly step_code_1?: string | null;
   readonly step_name_1?: string | null;
@@ -46,7 +46,7 @@ export type SatelliteProgressItem = {
   readonly step_code_10?: string | null;
   readonly step_name_10?: string | null;
   readonly step_quantity_10?: number;
-  
+
   // Add more steps up to 150 as needed
   readonly [key: string]: string | number | null | undefined;
 };

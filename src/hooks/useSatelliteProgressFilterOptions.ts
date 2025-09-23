@@ -3,8 +3,8 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery } from '@tanstack/react-query';
 
 import type { SatelliteProgressFilterOptions } from '@/types/satelliteProgress';
 
@@ -35,7 +35,7 @@ export function useSatelliteProgressFilterOptions() {
       }
 
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Failed to fetch satellite progress filter options');
       }

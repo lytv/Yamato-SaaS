@@ -4,14 +4,14 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { pgTable, serial, text, integer, timestamp, date } from 'drizzle-orm/pg-core';
+import { date, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 // Import related schemas
 import { planSchema } from '../Schema';
 
 export const plandetailSchema = pgTable('plan_detail', {
   id: serial('id').primaryKey(),
-  
+
   // Regular fields
   locationCode: text('locationCode').notNull(),
   locationType: text('locationType'),

@@ -109,7 +109,9 @@ export function ProductSubImportModal({ isOpen, onClose, onSuccess }: ProductSub
           {/* Import Info */}
           <div className="mb-4 rounded-md bg-blue-50 p-3">
             <p className="text-sm text-blue-700">
-              <strong>Import Format:</strong> The system will read product sub data from YMT Plan format.
+              <strong>Import Format:</strong>
+              {' '}
+              The system will read product sub data from YMT Plan format.
               Product names will be matched with existing products in the database.
               Product sub codes will be auto-generated.
             </p>

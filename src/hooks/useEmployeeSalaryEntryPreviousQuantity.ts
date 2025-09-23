@@ -19,10 +19,10 @@ export const useEmployeeSalaryEntryPreviousQuantity = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchPreviousQuantity = useCallback(async (
-    planId: number, 
-    productId: number, 
+    planId: number,
+    productId: number,
     productionStepDetailId: number,
-    excludeId?: number
+    excludeId?: number,
   ) => {
     if (!planId || !productId || !productionStepDetailId) {
       setPreviousQuantity(null);
@@ -45,15 +45,15 @@ export const useEmployeeSalaryEntryPreviousQuantity = () => {
       }
 
       const response = await fetch(
-        `/api/employee-salary-entries/previous-quantity?${params.toString()}`
+        `/api/employee-salary-entries/previous-quantity?${params.toString()}`,
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch previous quantity: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         const previousData: EmployeeSalaryEntryPreviousQuantity = {
           planId: data.data.planId,
@@ -62,7 +62,7 @@ export const useEmployeeSalaryEntryPreviousQuantity = () => {
           totalPreviousQuantity: data.data.totalPreviousQuantity,
           excludedId: data.data.excludedId,
         };
-        
+
         setPreviousQuantity(previousData);
         return previousData;
       } else {

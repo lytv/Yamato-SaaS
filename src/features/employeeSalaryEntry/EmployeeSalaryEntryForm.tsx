@@ -13,15 +13,15 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEmployeeSalaryEntryPreviousQuantity } from '@/hooks/useEmployeeSalaryEntryPreviousQuantity';
+import { usePlanDetailPlannedQuantity } from '@/hooks/usePlanDetailPlannedQuantity';
+import { useProductionStepDetailQuantityLimit } from '@/hooks/useProductionStepDetailQuantityLimit';
 import { employeeSalaryEntryFormSchema } from '@/libs/validations/employeeSalaryEntry';
 import type {
   EmployeeSalaryEntryFormData,
   EmployeeSalaryEntryRelationOptions,
   EmployeeSalaryEntryWithRelations,
 } from '@/types/employeeSalaryEntry';
-import { useProductionStepDetailQuantityLimit } from '@/hooks/useProductionStepDetailQuantityLimit';
-import { usePlanDetailPlannedQuantity } from '@/hooks/usePlanDetailPlannedQuantity';
-import { useEmployeeSalaryEntryPreviousQuantity } from '@/hooks/useEmployeeSalaryEntryPreviousQuantity';
 
 type EmployeeSalaryEntryFormProps = {
   employeeSalaryEntry?: EmployeeSalaryEntryWithRelations;
@@ -136,18 +136,16 @@ export function EmployeeSalaryEntryForm({
         if (response.ok) {
           const data = await response.json();
           setRelationOptions(data.data);
-          
+
           // 🆕 Auto-select current month plan if not editing
           if (mode === 'create' && !employeeSalaryEntry?.planId && data.data.plans && data.data.plans.length > 0) {
             const currentMonthPlanName = getCurrentMonthPlanName();
-            console.log('Current month plan name:', currentMonthPlanName);
-            console.log('Available plans:', data.data.plans.map((p: any) => p.planName));
-            
+
             // Try to find exact match first
             let currentMonthPlan = data.data.plans.find(
-              (plan: any) => plan.planName === currentMonthPlanName
+              (plan: any) => plan.planName === currentMonthPlanName,
             );
-            
+
             // If not found, try with different formats
             if (!currentMonthPlan) {
               // Try format: 08/2025 or 08-2025
@@ -157,22 +155,21 @@ export function EmployeeSalaryEntryForm({
                 `${month}/${year}`,
                 `${month}-${year}`,
                 `${month}.${year}`,
-                `${month}${year}` // Already tried above but keep for completeness
+                `${month}${year}`, // Already tried above but keep for completeness
               ];
-              
+
               for (const format of alternativeFormats) {
                 currentMonthPlan = data.data.plans.find(
-                  (plan: any) => plan.planName === format
+                  (plan: any) => plan.planName === format,
                 );
-                if (currentMonthPlan) break;
+                if (currentMonthPlan) {
+                  break;
+                }
               }
             }
-            
+
             if (currentMonthPlan) {
-              console.log('Auto-selecting plan:', currentMonthPlan.planName);
               form.setValue('planId', currentMonthPlan.id);
-            } else {
-              console.log('No matching plan found for current month');
             }
           }
         } else {
@@ -184,7 +181,7 @@ export function EmployeeSalaryEntryForm({
     };
 
     loadRelationOptions();
-  }, []);
+  }, [employeeSalaryEntry?.planId, form, mode]);
 
   // 🆕 Function to handle shortcut search
   const handleShortcutSearch = useCallback((shortcut: string) => {
@@ -267,7 +264,7 @@ export function EmployeeSalaryEntryForm({
       } else {
         setCategoryError(`❌ No product found with category: "${category}"`);
       }
-    } catch (error) {
+    } catch {
       setCategoryError('❌ Error searching for product');
     }
   }, [planId, form]);
@@ -278,7 +275,7 @@ export function EmployeeSalaryEntryForm({
 
   // 🆕 Watch for productId changes to load filtered production step details
   const productId = useWatch({ control: form.control, name: 'productId' });
-  
+
   // 🆕 Watch for productionStepDetailId changes to update limit quantity
   const productionStepDetailId = useWatch({ control: form.control, name: 'productionStepDetailId' });
 
@@ -329,24 +326,28 @@ export function EmployeeSalaryEntryForm({
           // Sort by filmSequence as number, then by stepName if filmSequence is null/empty
           const sortedSteps = data.data.sort((a: any, b: any) => {
             // Convert filmSequence to numbers
-            const filmSeqA = a.filmSequence ? parseFloat(a.filmSequence) : null;
-            const filmSeqB = b.filmSequence ? parseFloat(b.filmSequence) : null;
-            
+            const filmSeqA = a.filmSequence ? Number.parseFloat(a.filmSequence) : null;
+            const filmSeqB = b.filmSequence ? Number.parseFloat(b.filmSequence) : null;
+
             // If both have valid filmSequence numbers, sort by number
-            if (filmSeqA !== null && filmSeqB !== null && !isNaN(filmSeqA) && !isNaN(filmSeqB)) {
+            if (filmSeqA !== null && filmSeqB !== null && !Number.isNaN(filmSeqA) && !Number.isNaN(filmSeqB)) {
               return filmSeqA - filmSeqB;
             }
-            
+
             // If only one has valid filmSequence, prioritize it
-            if (filmSeqA !== null && !isNaN(filmSeqA) && (filmSeqB === null || isNaN(filmSeqB))) return -1;
-            if (filmSeqB !== null && !isNaN(filmSeqB) && (filmSeqA === null || isNaN(filmSeqA))) return 1;
-            
+            if (filmSeqA !== null && !Number.isNaN(filmSeqA) && (filmSeqB === null || Number.isNaN(filmSeqB))) {
+              return -1;
+            }
+            if (filmSeqB !== null && !Number.isNaN(filmSeqB) && (filmSeqA === null || Number.isNaN(filmSeqA))) {
+              return 1;
+            }
+
             // If neither has valid filmSequence, sort by stepName
             const stepNameA = a.stepName || `Step ${a.id}`;
             const stepNameB = b.stepName || `Step ${b.id}`;
             return stepNameA.localeCompare(stepNameB);
           });
-          
+
           setFilteredProductionStepDetails(sortedSteps);
         } else {
           console.error('Failed to load production step details:', response.statusText);
@@ -430,10 +431,10 @@ export function EmployeeSalaryEntryForm({
         // Pass the current record ID to exclude it from calculation if editing
         const currentId = employeeSalaryEntry?.id;
         const previousData = await fetchPreviousQuantity(
-          planId, 
-          productId, 
+          planId,
+          productId,
           productionStepDetailId,
-          currentId
+          currentId,
         );
         if (previousData) {
           // Automatically set the previous entered quantity
@@ -535,25 +536,26 @@ export function EmployeeSalaryEntryForm({
             })()}
           </div>
         )}
-        <div className="grid grid-cols-1 gap-4 max-h-[85vh] overflow-hidden">
-          
+        <div className="grid max-h-[85vh] grid-cols-1 gap-4 overflow-hidden">
+
           {/* Main Content Grid - 2 columns layout */}
           <div className="grid grid-cols-2 gap-6">
-            
+
             {/* Left Column */}
             <div className="space-y-4">
-              
+
               {/* Employee Section - Compact */}
               <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-3">
                 <h3 className="mb-3 text-lg font-bold text-blue-900">👤 NHÂN VIÊN</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-blue-800">Mã NV</label>
+                    <label htmlFor="shortcut-input" className="mb-1 block text-sm font-semibold text-blue-800">Mã NV</label>
                     <Input
+                      id="shortcut-input"
                       placeholder="Nhập mã..."
                       value={shortcutValue}
                       onChange={e => handleShortcutSearch(e.target.value)}
-                      className="h-12 text-lg font-bold border-2 border-blue-300"
+                      className="h-12 border-2 border-blue-300 text-lg font-bold"
                     />
                     {shortcutMessage && (
                       <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
@@ -578,14 +580,18 @@ export function EmployeeSalaryEntryForm({
                             value={formField.value?.toString()}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-12 text-lg border-2 border-blue-300">
+                              <SelectTrigger className="h-12 border-2 border-blue-300 text-lg">
                                 <SelectValue placeholder="Chọn..." />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {relationOptions.userSyncs?.map(option => (
                                 <SelectItem key={option.userId} value={option.userId.toString()}>
-                                  <span className="text-lg">{option.fullName} {option.shortcut ? `(${option.shortcut})` : ''}</span>
+                                  <span className="text-lg">
+                                    {option.fullName}
+                                    {' '}
+                                    {option.shortcut ? `(${option.shortcut})` : ''}
+                                  </span>
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -597,14 +603,16 @@ export function EmployeeSalaryEntryForm({
                   </div>
                 </div>
                 {/* Selected Employee Display */}
-                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-blue-300">
+                <div className="mt-2 flex min-h-[40px] items-center justify-center rounded border-2 border-blue-300 bg-white">
                   {(() => {
                     const selected = relationOptions.userSyncs.find(u => u.userId.toString() === form.watch('userId'));
-                    return selected ? (
-                      <span className="text-xl font-bold text-blue-900">{selected.fullName}</span>
-                    ) : (
-                      <span className="text-gray-400">Chưa chọn nhân viên</span>
-                    );
+                    return selected
+                      ? (
+                          <span className="text-xl font-bold text-blue-900">{selected.fullName}</span>
+                        )
+                      : (
+                          <span className="text-gray-400">Chưa chọn nhân viên</span>
+                        );
                   })()}
                 </div>
               </div>
@@ -614,12 +622,13 @@ export function EmployeeSalaryEntryForm({
                 <h3 className="mb-3 text-lg font-bold text-green-900">📦 SẢN PHẨM</h3>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-green-800">Danh mục</label>
+                    <label htmlFor="category-input" className="mb-1 block text-sm font-semibold text-green-800">Danh mục</label>
                     <Input
+                      id="category-input"
                       placeholder="Nhập danh mục..."
                       value={categoryValue}
                       onChange={e => handleCategorySearch(e.target.value)}
-                      className="h-12 text-lg font-bold border-2 border-green-300"
+                      className="h-12 border-2 border-green-300 text-lg font-bold"
                     />
                     {categoryMessage && (
                       <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
@@ -629,12 +638,13 @@ export function EmployeeSalaryEntryForm({
                     )}
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-green-800">Mã SP</label>
+                    <label htmlFor="product-code-input" className="mb-1 block text-sm font-semibold text-green-800">Mã SP</label>
                     <Input
+                      id="product-code-input"
                       placeholder="Nhập mã..."
                       value={productCodeValue}
                       onChange={e => handleProductCodeSearch(e.target.value)}
-                      className="h-12 text-lg font-bold border-2 border-green-300"
+                      className="h-12 border-2 border-green-300 text-lg font-bold"
                     />
                     {productCodeMessage && (
                       <p className="mt-1 text-xs font-medium text-green-600">✅ Tìm thấy</p>
@@ -662,18 +672,27 @@ export function EmployeeSalaryEntryForm({
                             disabled={!planId}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-12 text-lg border-2 border-green-300">
+                              <SelectTrigger className="h-12 border-2 border-green-300 text-lg">
                                 <SelectValue placeholder={
-                                  !planId ? "Chọn kế hoạch trước" : 
-                                  filteredProducts.length === 0 ? "Không có sản phẩm" : 
-                                  "Chọn sản phẩm..."
-                                } />
+                                  !planId
+                                    ? 'Chọn kế hoạch trước'
+                                    : filteredProducts.length === 0
+                                      ? 'Không có sản phẩm'
+                                      : 'Chọn sản phẩm...'
+                                }
+                                />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {filteredProducts.map(option => (
                                 <SelectItem key={option.id} value={option.id.toString()}>
-                                  <span className="text-lg">{option.productName} ({option.productCode})</span>
+                                  <span className="text-lg">
+                                    {option.productName}
+                                    {' '}
+                                    (
+                                    {option.productCode}
+                                    )
+                                  </span>
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -684,14 +703,16 @@ export function EmployeeSalaryEntryForm({
                     />
                   </div>
                 </div>
-                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-green-300">
+                <div className="mt-2 flex min-h-[40px] items-center justify-center rounded border-2 border-green-300 bg-white">
                   {(() => {
                     const selected = filteredProducts.find(p => p.id === form.watch('productId'));
-                    return selected ? (
-                      <span className="text-xl font-bold text-green-900">{selected.productName}</span>
-                    ) : (
-                      <span className="text-gray-400">Chưa chọn sản phẩm</span>
-                    );
+                    return selected
+                      ? (
+                          <span className="text-xl font-bold text-green-900">{selected.productName}</span>
+                        )
+                      : (
+                          <span className="text-gray-400">Chưa chọn sản phẩm</span>
+                        );
                   })()}
                 </div>
               </div>
@@ -699,7 +720,7 @@ export function EmployeeSalaryEntryForm({
 
             {/* Right Column */}
             <div className="space-y-4">
-              
+
               {/* Plan Section */}
               <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-3">
                 <h3 className="mb-3 text-lg font-bold text-purple-900">📋 KẾ HOẠCH</h3>
@@ -710,11 +731,11 @@ export function EmployeeSalaryEntryForm({
                     <FormItem>
                       <FormLabel className="text-sm font-semibold text-purple-800">Chọn kế hoạch</FormLabel>
                       <Select
-                        onValueChange={(value) => formField.onChange(Number(value))}
+                        onValueChange={value => formField.onChange(Number(value))}
                         value={formField.value?.toString()}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 text-lg border-2 border-purple-300">
+                          <SelectTrigger className="h-12 border-2 border-purple-300 text-lg">
                             <SelectValue placeholder="Chọn kế hoạch..." />
                           </SelectTrigger>
                         </FormControl>
@@ -730,14 +751,16 @@ export function EmployeeSalaryEntryForm({
                     </FormItem>
                   )}
                 />
-                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-purple-300">
+                <div className="mt-2 flex min-h-[40px] items-center justify-center rounded border-2 border-purple-300 bg-white">
                   {(() => {
                     const selected = relationOptions.plans.find(p => p.id === form.watch('planId'));
-                    return selected ? (
-                      <span className="text-xl font-bold text-purple-900">{selected.planName}</span>
-                    ) : (
-                      <span className="text-gray-400">Chưa chọn kế hoạch</span>
-                    );
+                    return selected
+                      ? (
+                          <span className="text-xl font-bold text-purple-900">{selected.planName}</span>
+                        )
+                      : (
+                          <span className="text-gray-400">Chưa chọn kế hoạch</span>
+                        );
                   })()}
                 </div>
               </div>
@@ -752,17 +775,20 @@ export function EmployeeSalaryEntryForm({
                     <FormItem>
                       <FormLabel className="text-sm font-semibold text-yellow-800">Chọn công đoạn</FormLabel>
                       <Select
-                        onValueChange={(value) => formField.onChange(Number(value))}
+                        onValueChange={value => formField.onChange(Number(value))}
                         value={formField.value?.toString()}
                         disabled={!productId}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 text-lg border-2 border-yellow-300">
+                          <SelectTrigger className="h-12 border-2 border-yellow-300 text-lg">
                             <SelectValue placeholder={
-                              !productId ? "Chọn sản phẩm trước" : 
-                              filteredProductionStepDetails.length === 0 ? "Không có công đoạn" : 
-                              "Chọn công đoạn..."
-                            } />
+                              !productId
+                                ? 'Chọn sản phẩm trước'
+                                : filteredProductionStepDetails.length === 0
+                                  ? 'Không có công đoạn'
+                                  : 'Chọn công đoạn...'
+                            }
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -780,17 +806,19 @@ export function EmployeeSalaryEntryForm({
                     </FormItem>
                   )}
                 />
-                <div className="mt-2 min-h-[40px] flex items-center justify-center bg-white rounded border-2 border-yellow-300">
+                <div className="mt-2 flex min-h-[40px] items-center justify-center rounded border-2 border-yellow-300 bg-white">
                   {(() => {
                     const selected = filteredProductionStepDetails.find(p => p.id === form.watch('productionStepDetailId'));
-                    return selected ? (
-                      <span className="text-xl font-bold text-yellow-900">
-                        {selected.stepName}
-                        {selected.filmSequence && ` : ${selected.filmSequence}`}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">Chưa chọn công đoạn</span>
-                    );
+                    return selected
+                      ? (
+                          <span className="text-xl font-bold text-yellow-900">
+                            {selected.stepName}
+                            {selected.filmSequence && ` : ${selected.filmSequence}`}
+                          </span>
+                        )
+                      : (
+                          <span className="text-gray-400">Chưa chọn công đoạn</span>
+                        );
                   })()}
                 </div>
               </div>
@@ -801,8 +829,8 @@ export function EmployeeSalaryEntryForm({
           <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
             <h3 className="mb-4 text-lg font-bold text-orange-900">🔢 SỐ LƯỢNG</h3>
             <div className="grid grid-cols-4 gap-4">
-              
-              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+
+              <div className="rounded-lg border-2 border-orange-300 bg-white p-3">
                 <FormField
                   control={form.control}
                   name="actualQuantity"
@@ -814,10 +842,10 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className="h-12 text-2xl font-bold text-center border-2 border-orange-400"
+                          className="h-12 border-2 border-orange-400 text-center text-2xl font-bold"
                           {...formField}
-                          onChange={e => {
-                            const value = e.target.value.replace(/[^0-9]/g, '');
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
@@ -827,26 +855,45 @@ export function EmployeeSalaryEntryForm({
                     </FormItem>
                   )}
                 />
-                
+
                 {/* Quantity validation info */}
                 {(actualQuantity || 0) > 0 && (watchedPlannedQuantity || watchedLimitQuantity || watchedPreviousQuantity) && (
-                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                    <div className="font-semibold text-blue-800 mb-1">📊 Kiểm tra số lượng:</div>
+                  <div className="mt-2 rounded border border-blue-200 bg-blue-50 p-2 text-xs">
+                    <div className="mb-1 font-semibold text-blue-800">📊 Kiểm tra số lượng:</div>
                     <div className="text-blue-700">
-                      <div>• Thực tế: {actualQuantity || 0}</div>
-                      <div>• Trước đó: {watchedPreviousQuantity || 0}</div>
-                      <div>• Tổng sử dụng: {(actualQuantity || 0) + (watchedPreviousQuantity || 0)}</div>
-                      <div className="border-t border-blue-300 mt-1 pt-1">
-                        • Kế hoạch: {watchedPlannedQuantity || 0}</div>
-                      <div>• Giới hạn: {watchedLimitQuantity || 0}</div>
-                      <div>• Tổng cho phép: {(watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)}</div>
-                      <div className={`font-semibold mt-1 ${
+                      <div>
+                        • Thực tế:
+                        {actualQuantity || 0}
+                      </div>
+                      <div>
+                        • Trước đó:
+                        {watchedPreviousQuantity || 0}
+                      </div>
+                      <div>
+                        • Tổng sử dụng:
+                        {(actualQuantity || 0) + (watchedPreviousQuantity || 0)}
+                      </div>
+                      <div className="mt-1 border-t border-blue-300 pt-1">
+                        • Kế hoạch:
+                        {' '}
+                        {watchedPlannedQuantity || 0}
+                      </div>
+                      <div>
+                        • Giới hạn:
+                        {watchedLimitQuantity || 0}
+                      </div>
+                      <div>
+                        • Tổng cho phép:
+                        {(watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)}
+                      </div>
+                      <div className={`mt-1 font-semibold ${
                         (actualQuantity || 0) + (watchedPreviousQuantity || 0) <= (watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)
-                          ? 'text-green-600' 
+                          ? 'text-green-600'
                           : 'text-red-600'
-                      }`}>
+                      }`}
+                      >
                         {(actualQuantity || 0) + (watchedPreviousQuantity || 0) <= (watchedPlannedQuantity || 0) + (watchedLimitQuantity || 0)
-                          ? '✅ Hợp lệ' 
+                          ? '✅ Hợp lệ'
                           : '❌ Vượt quá giới hạn'}
                       </div>
                     </div>
@@ -854,18 +901,18 @@ export function EmployeeSalaryEntryForm({
                 )}
               </div>
 
-              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+              <div className="rounded-lg border-2 border-orange-300 bg-white p-3">
                 <FormField
                   control={form.control}
                   name="plannedQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-1 text-sm font-bold text-orange-800">
                           🔒 Kế hoạch
                         </FormLabel>
                         {plannedQuantity && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">
                             📋 Tự động
                           </span>
                         )}
@@ -875,17 +922,17 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                          className={`h-12 cursor-not-allowed border-2 text-center text-2xl font-bold ${
                             plannedQuantity ? 'border-blue-400 bg-blue-100 text-blue-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
-                          onChange={e => {
-                            const value = e.target.value.replace(/[^0-9]/g, '');
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                          readOnly={true}
-                          disabled={true}
+                          readOnly
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
@@ -894,18 +941,18 @@ export function EmployeeSalaryEntryForm({
                 />
               </div>
 
-              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+              <div className="rounded-lg border-2 border-orange-300 bg-white p-3">
                 <FormField
                   control={form.control}
                   name="limitQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-1 text-sm font-bold text-orange-800">
                           🔒 Giới hạn
                         </FormLabel>
                         {quantityLimit && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          <span className="rounded bg-green-100 px-2 py-1 text-xs text-green-700">
                             🔄 Tự động
                           </span>
                         )}
@@ -915,17 +962,17 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                          className={`h-12 cursor-not-allowed border-2 text-center text-2xl font-bold ${
                             quantityLimit ? 'border-green-400 bg-green-100 text-green-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
-                          onChange={e => {
-                            const value = e.target.value.replace(/[^0-9]/g, '');
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                          readOnly={true}
-                          disabled={true}
+                          readOnly
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
@@ -934,18 +981,18 @@ export function EmployeeSalaryEntryForm({
                 />
               </div>
 
-              <div className="rounded-lg bg-white border-2 border-orange-300 p-3">
+              <div className="rounded-lg border-2 border-orange-300 bg-white p-3">
                 <FormField
                   control={form.control}
                   name="previousEnteredQuantity"
                   render={({ field: formField }) => (
                     <FormItem>
-                      <div className="flex items-center gap-2 mb-2">
-                        <FormLabel className="text-sm font-bold text-orange-800 flex items-center gap-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-1 text-sm font-bold text-orange-800">
                           🔒 Trước đó
                         </FormLabel>
                         {previousQuantityData && (
-                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                          <span className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-700">
                             📊 Tự động
                           </span>
                         )}
@@ -955,17 +1002,17 @@ export function EmployeeSalaryEntryForm({
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className={`h-12 text-2xl font-bold text-center border-2 cursor-not-allowed ${
+                          className={`h-12 cursor-not-allowed border-2 text-center text-2xl font-bold ${
                             previousQuantityData ? 'border-purple-400 bg-purple-100 text-purple-800' : 'border-gray-300 bg-gray-100 text-gray-600'
                           }`}
                           {...formField}
-                          onChange={e => {
-                            const value = e.target.value.replace(/[^0-9]/g, '');
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
                             formField.onChange(value ? Number(value) : undefined);
                           }}
                           value={formField.value !== undefined && formField.value !== null ? formField.value : ''}
-                          readOnly={true}
-                          disabled={true}
+                          readOnly
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
@@ -975,8 +1022,6 @@ export function EmployeeSalaryEntryForm({
               </div>
             </div>
           </div>
-
-
 
         </div>
 
@@ -988,7 +1033,7 @@ export function EmployeeSalaryEntryForm({
             type="button"
             variant="outline"
             size="lg"
-            className="h-14 px-8 text-lg font-bold border-2 border-gray-400 hover:bg-gray-100"
+            className="h-14 border-2 border-gray-400 px-8 text-lg font-bold hover:bg-gray-100"
             onClick={() => {
               form.reset({
                 workDate: new Date().toISOString().split('T')[0],
@@ -1017,17 +1062,17 @@ export function EmployeeSalaryEntryForm({
           >
             🔄 XÓA HẾT
           </Button>
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             disabled={isLoading}
             size="lg"
-            className="h-14 px-12 text-xl font-bold bg-green-600 hover:bg-green-700 text-white border-2 border-green-700"
+            className="h-14 border-2 border-green-700 bg-green-600 px-12 text-xl font-bold text-white hover:bg-green-700"
           >
             {isLoading
               ? (
                   <>
-                    <div className="mr-2 size-6 animate-spin rounded-full border-3 border-white border-t-transparent" />
+                    <div className="border-3 mr-2 size-6 animate-spin rounded-full border-white border-t-transparent" />
                     ⏳ ĐANG LƯU...
                   </>
                 )
@@ -1035,13 +1080,13 @@ export function EmployeeSalaryEntryForm({
                   mode === 'create' ? '💾 LƯU MỚI' : '💾 CẬP NHẬT'
                 )}
           </Button>
-          
+
           {onCancel && (
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               size="lg"
-              className="h-14 px-8 text-lg font-bold border-2 border-red-400 text-red-600 hover:bg-red-50"
+              className="h-14 border-2 border-red-400 px-8 text-lg font-bold text-red-600 hover:bg-red-50"
               onClick={onCancel}
             >
               ❌ HỦY BỎ

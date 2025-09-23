@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { todoSchema } from '@/models/Schema';
 import type {
   CreateTodoInput,
@@ -15,6 +14,8 @@ import type {
   TodoStats,
   UpdateTodoInput,
 } from '@/types/todo';
+
+import { db } from '../DB';
 
 /**
  * Create a new todo

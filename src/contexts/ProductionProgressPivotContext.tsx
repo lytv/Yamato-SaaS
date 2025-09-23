@@ -6,7 +6,7 @@
  * Following Yamato-SaaS patterns
  */
 
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, type ReactNode, useContext, useMemo, useState } from 'react';
 
 import type {
   ProductionProgressPivotFilterState,
@@ -21,15 +21,15 @@ const DEFAULT_FILTERS: ProductionProgressPivotFilterState = {
   sortOrder: 'asc',
 };
 
-interface ProductionProgressPivotContextValue extends UseProductionProgressPivotFiltersResult {
+type ProductionProgressPivotContextValue = {
   // Additional context methods can be added here
-}
+} & UseProductionProgressPivotFiltersResult;
 
 const ProductionProgressPivotContext = createContext<ProductionProgressPivotContextValue | undefined>(undefined);
 
-interface ProductionProgressPivotProviderProps {
+type ProductionProgressPivotProviderProps = {
   children: ReactNode;
-}
+};
 
 export function ProductionProgressPivotProvider({ children }: ProductionProgressPivotProviderProps) {
   const [filters, setFilters] = useState<ProductionProgressPivotFilterState>(DEFAULT_FILTERS);
@@ -50,11 +50,11 @@ export function ProductionProgressPivotProvider({ children }: ProductionProgress
   }, []);
 
   const hasActiveFilters = Boolean(
-    filters.search ||
-    filters.product_code ||
-    filters.plan_code ||
-    filters.sortBy !== DEFAULT_FILTERS.sortBy ||
-    filters.sortOrder !== DEFAULT_FILTERS.sortOrder,
+    filters.search
+    || filters.product_code
+    || filters.plan_code
+    || filters.sortBy !== DEFAULT_FILTERS.sortBy
+    || filters.sortOrder !== DEFAULT_FILTERS.sortOrder,
   );
 
   const activeFilterCount = [
@@ -63,14 +63,14 @@ export function ProductionProgressPivotProvider({ children }: ProductionProgress
     filters.plan_code,
   ].filter(Boolean).length;
 
-  const contextValue: ProductionProgressPivotContextValue = {
+  const contextValue: ProductionProgressPivotContextValue = useMemo(() => ({
     filters,
     setFilters: updateFilters,
     applyFilters,
     resetFilters,
     hasActiveFilters,
     activeFilterCount,
-  };
+  }), [filters, updateFilters, applyFilters, resetFilters, hasActiveFilters, activeFilterCount]);
 
   return (
     <ProductionProgressPivotContext.Provider value={contextValue}>

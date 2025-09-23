@@ -6,7 +6,6 @@
 
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { processSchema } from '@/models/Schema';
 import type {
   CreateProcessInput,
@@ -15,6 +14,8 @@ import type {
   ProcessStats,
   UpdateProcessInput,
 } from '@/types/process';
+
+import { db } from '../DB';
 
 /**
  * Create a new process

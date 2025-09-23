@@ -26,13 +26,13 @@ export function PriceSummarySkeleton({
     <div className={`space-y-6 ${className}`}>
       {/* Summary Cards Skeleton */}
       {showSummaryCards && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Card key={index} className="bg-gradient-to-r from-gray-50 to-gray-100">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-200 rounded-lg">
-                    <Skeleton className="h-5 w-5" />
+                  <div className="rounded-lg bg-gray-200 p-2">
+                    <Skeleton className="size-5" />
                   </div>
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-16" />
@@ -47,14 +47,14 @@ export function PriceSummarySkeleton({
 
       {/* Table Skeleton */}
       <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Skeleton className="h-6 w-6" />
+              <div className="rounded-lg bg-white p-2 shadow-sm">
+                <Skeleton className="size-6" />
               </div>
               <div>
-                <Skeleton className="h-6 w-48 mb-2" />
+                <Skeleton className="mb-2 h-6 w-48" />
                 <Skeleton className="h-4 w-64" />
               </div>
             </div>
@@ -70,7 +70,7 @@ export function PriceSummarySkeleton({
           <div className="overflow-x-auto">
             <table className="w-full">
               {/* Table Header */}
-              <thead className="bg-gray-50 border-b">
+              <thead className="border-b bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left">
                     <Skeleton className="h-4 w-24" />
@@ -92,36 +92,36 @@ export function PriceSummarySkeleton({
                   </th>
                 </tr>
               </thead>
-              
+
               {/* Table Body */}
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {Array.from({ length: rows }).map((_, rowIndex) => (
                   <tr key={rowIndex} className="hover:bg-gray-50">
                     {/* Product Name */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Skeleton className="h-4 w-4 flex-shrink-0" />
+                        <Skeleton className="size-4 shrink-0" />
                         <div className="min-w-0">
-                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="mb-1 h-4 w-32" />
                           <Skeleton className="h-3 w-20" />
                         </div>
                       </div>
                     </td>
-                    
+
                     {/* Plan Code */}
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="size-4" />
                         <Skeleton className="h-5 w-16 rounded-full" />
                       </div>
                     </td>
 
                     {/* Dynamic Step Columns */}
                     {Array.from({ length: 6 }).map((_, colIndex) => (
-                      <td key={colIndex} className="px-4 py-4 text-center">
+                      <td key={colIndex} className="p-4 text-center">
                         <div className="space-y-1">
                           <div className="flex items-center justify-center gap-1">
-                            <Skeleton className="h-3 w-3" />
+                            <Skeleton className="size-3" />
                             <Skeleton className="h-5 w-12 rounded-full" />
                           </div>
                           <Skeleton className="h-1 w-full rounded-full" />
@@ -132,7 +132,7 @@ export function PriceSummarySkeleton({
                     {/* Total Steps */}
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="size-4" />
                         <Skeleton className="h-5 w-8 rounded-full" />
                       </div>
                     </td>
@@ -141,11 +141,11 @@ export function PriceSummarySkeleton({
                     <td className="px-6 py-4 text-right">
                       <div className="space-y-1">
                         <div className="flex items-center justify-end gap-2">
-                          <Skeleton className="h-4 w-4" />
+                          <Skeleton className="size-4" />
                           <Skeleton className="h-5 w-16 rounded-full" />
                         </div>
                         <Skeleton className="h-1 w-full rounded-full" />
-                        <Skeleton className="h-3 w-8 ml-auto" />
+                        <Skeleton className="ml-auto h-3 w-8" />
                       </div>
                     </td>
                   </tr>
@@ -163,9 +163,9 @@ export function PriceSummarySkeleton({
         </div>
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
+          <Skeleton className="size-8" />
+          <Skeleton className="size-8" />
+          <Skeleton className="size-8" />
           <Skeleton className="h-8 w-20" />
         </div>
       </div>
@@ -196,7 +196,7 @@ export function PriceSummaryCompactSkeleton({
           {Array.from({ length: rows }).map((_, index) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-3 w-3" />
+                <Skeleton className="size-3" />
                 <Skeleton className="h-4 w-24" />
               </div>
               <Skeleton className="h-4 w-16" />

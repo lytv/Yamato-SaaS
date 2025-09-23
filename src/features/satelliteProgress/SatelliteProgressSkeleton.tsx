@@ -18,12 +18,12 @@ export function SatelliteProgressSkeleton({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index} className="bg-gradient-to-r from-gray-50 to-gray-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="size-10 rounded-lg" />
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-6 w-20" />
@@ -36,10 +36,10 @@ export function SatelliteProgressSkeleton({
 
       {/* Main Table Skeleton */}
       <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-lg" />
+              <Skeleton className="size-10 rounded-lg" />
               <div className="space-y-2">
                 <Skeleton className="h-6 w-48" />
                 <Skeleton className="h-4 w-64" />
@@ -54,15 +54,15 @@ export function SatelliteProgressSkeleton({
         </CardHeader>
         <CardContent className="p-6">
           {/* Table Header Skeleton */}
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-50 border-b">
+          <div className="overflow-hidden rounded-lg border">
+            <div className="border-b bg-gray-50">
               <div className="grid grid-cols-8 gap-4 p-4">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <Skeleton key={index} className="h-4 w-full" />
                 ))}
               </div>
             </div>
-            
+
             {/* Table Rows Skeleton */}
             {Array.from({ length: 5 }).map((_, rowIndex) => (
               <div key={rowIndex} className="border-b last:border-b-0">

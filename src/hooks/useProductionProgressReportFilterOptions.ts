@@ -19,7 +19,7 @@ export function useProductionProgressReportFilterOptions() {
     queryKey: ['production-progress-report-filter-options'],
     queryFn: async (): Promise<ProductionProgressReportFilterOptions> => {
       const response = await fetch('/api/production-progress-report/filter-options');
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch filter options');

@@ -5,7 +5,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarDays, FileText, Target, Clock, Calendar, Users, StickyNote, CheckCircle, RefreshCw } from 'lucide-react';
+import { Calendar, CalendarDays, CheckCircle, Clock, FileText, RefreshCw, StickyNote, Target, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -118,38 +118,41 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-green-50 p-6 rounded-xl">
+    <div className="rounded-xl bg-gradient-to-br from-slate-50 to-green-50 p-6">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Form Header */}
-        <div className="text-center pb-6 border-b border-gray-200">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CalendarDays className="w-8 h-8 text-white" />
+        <div className="border-b border-gray-200 pb-6 text-center">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-600">
+            <CalendarDays className="size-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
             {isEditing ? (t('edit_plan') || 'Edit Plan') : (t('create_plan') || 'Create Plan')}
           </h2>
           <p className="text-gray-600">
-            {isEditing 
-              ? (t('update_plan_description') || 'Update production plan configuration') 
+            {isEditing
+              ? (t('update_plan_description') || 'Update production plan configuration')
               : (t('create_plan_description') || 'Create a new production plan and schedule')}
           </p>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-            <div className="text-sm text-red-700">Error: {error}</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <div className="text-sm text-red-700">
+              Error:
+              {error}
+            </div>
           </div>
         )}
 
         {/* Form Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Plan Code Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <FileText className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <FileText className="mr-2 size-4 text-green-500" />
               {t('plan_code') || 'Plan Code'}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="planCode"
@@ -157,18 +160,18 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planCode')}
               aria-required="true"
               aria-describedby={errors.planCode ? 'planCode-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planCode 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planCode
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('plan_code_placeholder') || 'e.g., 012025'}
               onBlur={handlePlanCodeBlur}
             />
             {errors.planCode && (
-              <p id="planCode-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planCode-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planCode.message}
               </p>
@@ -176,11 +179,11 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Plan Name Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <CalendarDays className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <CalendarDays className="mr-2 size-4 text-green-500" />
               {t('plan_name') || 'Plan Name'}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="planName"
@@ -188,17 +191,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planName')}
               aria-required="true"
               aria-describedby={errors.planName ? 'planName-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planName 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planName
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('plan_name_placeholder') || 'Enter plan name'}
             />
             {errors.planName && (
-              <p id="planName-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planName-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planName.message}
               </p>
@@ -206,11 +209,11 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Plan Year Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Calendar className="mr-2 size-4 text-green-500" />
               {t('plan_year') || 'Plan Year'}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="planYear"
@@ -218,17 +221,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planYear', { valueAsNumber: true })}
               aria-required="true"
               aria-describedby={errors.planYear ? 'planYear-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planYear 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planYear
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('plan_year_placeholder') || '2025'}
             />
             {errors.planYear && (
-              <p id="planYear-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planYear-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planYear.message}
               </p>
@@ -236,11 +239,11 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Plan Month Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Clock className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Clock className="mr-2 size-4 text-green-500" />
               {t('plan_month') || 'Plan Month'}
-              <span className="text-red-500 ml-1">*</span>
+              <span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="planMonth"
@@ -248,17 +251,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               {...register('planMonth', { valueAsNumber: true })}
               aria-required="true"
               aria-describedby={errors.planMonth ? 'planMonth-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planMonth 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planMonth
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('plan_month_placeholder') || '1-12'}
             />
             {errors.planMonth && (
-              <p id="planMonth-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planMonth-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planMonth.message}
               </p>
@@ -266,9 +269,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Total Target Quantity Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Target className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Target className="mr-2 size-4 text-green-500" />
               {t('total_target_quantity') || 'Target Quantity'}
             </label>
             <input
@@ -276,17 +279,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="number"
               {...register('totalTargetQuantity', { valueAsNumber: true })}
               aria-describedby={errors.totalTargetQuantity ? 'totalTargetQuantity-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.totalTargetQuantity 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.totalTargetQuantity
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('total_target_quantity_placeholder') || 'e.g., 1000'}
             />
             {errors.totalTargetQuantity && (
-              <p id="totalTargetQuantity-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="totalTargetQuantity-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.totalTargetQuantity.message}
               </p>
@@ -294,9 +297,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Total Actual Quantity Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <CheckCircle className="mr-2 size-4 text-green-500" />
               {t('total_actual_quantity') || 'Actual Quantity'}
             </label>
             <input
@@ -304,17 +307,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="number"
               {...register('totalActualQuantity', { valueAsNumber: true })}
               aria-describedby={errors.totalActualQuantity ? 'totalActualQuantity-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.totalActualQuantity 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.totalActualQuantity
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('total_actual_quantity_placeholder') || 'e.g., 850'}
             />
             {errors.totalActualQuantity && (
-              <p id="totalActualQuantity-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="totalActualQuantity-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.totalActualQuantity.message}
               </p>
@@ -322,9 +325,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Status Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <CheckCircle className="mr-2 size-4 text-green-500" />
               {t('status') || 'Status'}
             </label>
             <input
@@ -332,17 +335,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="text"
               {...register('status')}
               aria-describedby={errors.status ? 'status-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.status 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.status
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('status_placeholder') || 'e.g., In Progress, Completed'}
             />
             {errors.status && (
-              <p id="status-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="status-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.status.message}
               </p>
@@ -350,9 +353,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Plan Start Date Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Calendar className="mr-2 size-4 text-green-500" />
               {t('plan_start_date') || 'Start Date'}
             </label>
             <input
@@ -360,16 +363,16 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="date"
               {...register('planStartDate')}
               aria-describedby={errors.planStartDate ? 'planStartDate-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planStartDate 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planStartDate
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
             />
             {errors.planStartDate && (
-              <p id="planStartDate-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planStartDate-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planStartDate.message}
               </p>
@@ -377,9 +380,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Plan End Date Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Calendar className="mr-2 size-4 text-green-500" />
               {t('plan_end_date') || 'End Date'}
             </label>
             <input
@@ -387,16 +390,16 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="date"
               {...register('planEndDate')}
               aria-describedby={errors.planEndDate ? 'planEndDate-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.planEndDate 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.planEndDate
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
             />
             {errors.planEndDate && (
-              <p id="planEndDate-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="planEndDate-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.planEndDate.message}
               </p>
@@ -404,9 +407,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Approved By Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Users className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Users className="mr-2 size-4 text-green-500" />
               {t('approved_by') || 'Approved By'}
             </label>
             <input
@@ -414,17 +417,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="text"
               {...register('approvedBy')}
               aria-describedby={errors.approvedBy ? 'approvedBy-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.approvedBy 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.approvedBy
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('approved_by_placeholder') || 'Enter approver name'}
             />
             {errors.approvedBy && (
-              <p id="approvedBy-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="approvedBy-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.approvedBy.message}
               </p>
@@ -432,9 +435,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Approved At Field */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <Calendar className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <Calendar className="mr-2 size-4 text-green-500" />
               {t('approved_at') || 'Approved Date'}
             </label>
             <input
@@ -442,16 +445,16 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               type="date"
               {...register('approvedAt')}
               aria-describedby={errors.approvedAt ? 'approvedAt-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.approvedAt 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.approvedAt
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
             />
             {errors.approvedAt && (
-              <p id="approvedAt-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="approvedAt-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.approvedAt.message}
               </p>
@@ -459,9 +462,9 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           </div>
 
           {/* Notes Field - Full Width */}
-          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <label className="flex items-center text-sm font-semibold text-gray-800 mb-3">
-              <StickyNote className="w-4 h-4 mr-2 text-green-500" />
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:col-span-2">
+            <label className="mb-3 flex items-center text-sm font-semibold text-gray-800">
+              <StickyNote className="mr-2 size-4 text-green-500" />
               {t('note') || 'Notes'}
             </label>
             <textarea
@@ -469,17 +472,17 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
               rows={4}
               {...register('note')}
               aria-describedby={errors.note ? 'note-error' : undefined}
-              className={`block w-full rounded-lg border py-3 px-4 text-sm placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none ${
-                errors.note 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300'
+              className={`block w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all duration-200 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                errors.note
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
               }`}
               placeholder={t('note_placeholder') || 'Additional notes about the plan...'}
             />
             {errors.note && (
-              <p id="note-error" className="mt-2 text-sm text-red-600 flex items-center">
-                <span className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 text-xs">!</span>
+              <p id="note-error" className="mt-2 flex items-center text-sm text-red-600">
+                <span className="mr-2 flex size-4 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs text-red-600">!</span>
                 </span>
                 {errors.note.message}
               </p>
@@ -488,11 +491,11 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 border-t border-gray-200 pt-6">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50"
           >
             {t('cancel') || 'Cancel'}
           </button>
@@ -500,7 +503,7 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+            className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50"
           >
             {t('reset') || 'Reset'}
           </button>
@@ -508,10 +511,10 @@ export function PlanForm({ plan, onSuccess, onCancel }: PlanFormProps): JSX.Elem
           <button
             type="submit"
             disabled={isSubmitting || !isValid}
-            className="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:from-green-700 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting && (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              <RefreshCw className="mr-2 size-4 animate-spin" />
             )}
             {isSubmitting
               ? isEditing

@@ -5,13 +5,14 @@
 
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { EmployeeSalaryEntryForm } from './EmployeeSalaryEntryForm';
+import type { EmployeeSalaryEntryFormData, EmployeeSalaryEntryWithRelations } from '@/types/employeeSalaryEntry';
+
 import { EmployeeSalaryEntryBulkForm } from './EmployeeSalaryEntryBulkForm';
-import type { EmployeeSalaryEntryWithRelations, EmployeeSalaryEntryFormData } from '@/types/employeeSalaryEntry';
+import { EmployeeSalaryEntryForm } from './EmployeeSalaryEntryForm';
 
 type FormMode = 'single' | 'bulk';
 
@@ -39,13 +40,15 @@ export function EmployeeSalaryEntryFormWithBulk({
       <div className="p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold">
-            ✏️ {t('edit_title')}
+            ✏️
+            {' '}
+            {t('edit_title')}
           </h2>
         </div>
         <EmployeeSalaryEntryForm
           employeeSalaryEntry={employeeSalaryEntry}
-          onSubmit={onSubmit || (async (data) => {
-            console.log('Single form data:', data);
+          onSubmit={onSubmit || (async (_data) => {
+            // Single form submission
           })}
           mode="edit"
           onSuccess={onSuccess}
@@ -58,53 +61,59 @@ export function EmployeeSalaryEntryFormWithBulk({
   // Create mode - show mode selector
   return (
     <div className="max-h-[95vh] overflow-hidden">
-      {formMode === 'single' ? (
-        <div className="p-6">
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold">
-                📝 {t('create_title')}
-              </h2>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setFormMode('bulk')}
-                className="bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
-              >
-                🔢 {t('bulk.createSalaryEntry')}
-              </Button>
+      {formMode === 'single'
+        ? (
+            <div className="p-6">
+              <div className="mb-6">
+                <div className="mb-2 flex items-center justify-between">
+                  <h2 className="text-xl font-bold">
+                    📝
+                    {' '}
+                    {t('create_title')}
+                  </h2>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFormMode('bulk')}
+                    className="border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  >
+                    🔢
+                    {' '}
+                    {t('bulk.createSalaryEntry')}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {t('create_desc')}
+                </p>
+              </div>
+
+              <EmployeeSalaryEntryForm
+                employeeSalaryEntry={employeeSalaryEntry}
+                onSubmit={onSubmit || (async (_data) => {
+                  // Single form submission
+                })}
+                mode="create"
+                onSuccess={onSuccess}
+                onCancel={onCancel}
+              />
             </div>
-            <p className="text-sm text-gray-600">
-              {t('create_desc')}
-            </p>
-          </div>
-          
-          <EmployeeSalaryEntryForm
-            employeeSalaryEntry={employeeSalaryEntry}
-            onSubmit={onSubmit || (async (data) => {
-              console.log('Single form data:', data);
-            })}
-            mode="create"
-            onSuccess={onSuccess}
-            onCancel={onCancel}
-          />
-        </div>
-      ) : (
-        <div className="relative">          
-          <EmployeeSalaryEntryBulkForm
-            onSuccess={() => {
-              if (onSuccess) {
-                onSuccess();
-              }
-            }}
-            onCancel={() => {
-              if (onCancel) {
-                onCancel();
-              }
-            }}
-          />
-        </div>
-      )}
+          )
+        : (
+            <div className="relative">
+              <EmployeeSalaryEntryBulkForm
+                onSuccess={() => {
+                  if (onSuccess) {
+                    onSuccess();
+                  }
+                }}
+                onCancel={() => {
+                  if (onCancel) {
+                    onCancel();
+                  }
+                }}
+              />
+            </div>
+          )}
     </div>
   );
 }

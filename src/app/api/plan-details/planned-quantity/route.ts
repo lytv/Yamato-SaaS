@@ -4,9 +4,9 @@
  */
 
 import { currentUser } from '@clerk/nextjs/server';
+import { and, eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { eq, and } from 'drizzle-orm';
 
 import { db } from '@/libs/DB';
 import { planDetailSchema, productSchema } from '@/models/Schema';
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     if (!planId || !productId) {
       return NextResponse.json(
         { error: 'Both planId and productId are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,12 +41,12 @@ export async function GET(request: NextRequest) {
 
     if (!productData || productData.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: `No product found with ID ${productId}`,
-          data: null
-        }, 
-        { status: 404 }
+          data: null,
+        },
+        { status: 404 },
       );
     }
 
@@ -67,29 +67,27 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(planDetailSchema.planId, Number(planId)),
-          eq(planDetailSchema.productCode, productCode)
-        )
+          eq(planDetailSchema.productCode, productCode),
+        ),
       );
 
     if (!plannedQuantityData || plannedQuantityData.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: `No plan detail found for plan ${planId} and product ${productCode}`,
-          data: null
-        }, 
-        { status: 404 }
+          data: null,
+        },
+        { status: 404 },
       );
     }
 
     // Calculate total planned quantity if there are multiple locations
-    const totalPlannedQuantity = plannedQuantityData.reduce((sum: number, item: any) => 
-      sum + (item.plannedQuantity || 0), 0
-    );
+    const totalPlannedQuantity = plannedQuantityData.reduce((sum: number, item: any) =>
+      sum + (item.plannedQuantity || 0), 0);
 
-    const totalActualQuantity = plannedQuantityData.reduce((sum: number, item: any) => 
-      sum + (item.actualQuantity || 0), 0
-    );
+    const totalActualQuantity = plannedQuantityData.reduce((sum: number, item: any) =>
+      sum + (item.actualQuantity || 0), 0);
 
     return NextResponse.json({
       success: true,
@@ -112,12 +110,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching plan detail planned quantity:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch planned quantity',
-        data: null 
+        data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

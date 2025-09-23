@@ -9,8 +9,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { useEmployeeDeliveryReceiptInventory } from '../useEmployeeDeliveryReceiptInventory';
 
 // Mock the API function
+const mockFetchEmployeeDeliveryReceiptInventory = vi.fn();
 vi.mock('@/libs/api/employeeDeliveryReceiptInventory', () => ({
-  fetchEmployeeDeliveryReceiptInventory: vi.fn(),
+  fetchEmployeeDeliveryReceiptInventory: mockFetchEmployeeDeliveryReceiptInventory,
 }));
 
 describe('useEmployeeDeliveryReceiptInventory', () => {
@@ -64,8 +65,7 @@ describe('useEmployeeDeliveryReceiptInventory', () => {
       },
     };
 
-    const { fetchEmployeeDeliveryReceiptInventory } = require('@/libs/api/employeeDeliveryReceiptInventory');
-    fetchEmployeeDeliveryReceiptInventory.mockResolvedValue(mockResponse);
+    mockFetchEmployeeDeliveryReceiptInventory.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useEmployeeDeliveryReceiptInventory());
 
@@ -86,8 +86,7 @@ describe('useEmployeeDeliveryReceiptInventory', () => {
       code: 'API_ERROR',
     };
 
-    const { fetchEmployeeDeliveryReceiptInventory } = require('@/libs/api/employeeDeliveryReceiptInventory');
-    fetchEmployeeDeliveryReceiptInventory.mockResolvedValue(mockError);
+    mockFetchEmployeeDeliveryReceiptInventory.mockResolvedValue(mockError);
 
     const { result } = renderHook(() => useEmployeeDeliveryReceiptInventory());
 
@@ -102,8 +101,7 @@ describe('useEmployeeDeliveryReceiptInventory', () => {
   });
 
   it('should handle network error', async () => {
-    const { fetchEmployeeDeliveryReceiptInventory } = require('@/libs/api/employeeDeliveryReceiptInventory');
-    fetchEmployeeDeliveryReceiptInventory.mockRejectedValue(new Error('Network Error'));
+    mockFetchEmployeeDeliveryReceiptInventory.mockRejectedValue(new Error('Network Error'));
 
     const { result } = renderHook(() => useEmployeeDeliveryReceiptInventory());
 
@@ -118,8 +116,7 @@ describe('useEmployeeDeliveryReceiptInventory', () => {
   });
 
   it('should refetch data when refresh is called', async () => {
-    const { fetchEmployeeDeliveryReceiptInventory } = require('@/libs/api/employeeDeliveryReceiptInventory');
-    fetchEmployeeDeliveryReceiptInventory.mockResolvedValue({
+    mockFetchEmployeeDeliveryReceiptInventory.mockResolvedValue({
       success: true,
       data: [],
       summary: null,
@@ -135,6 +132,6 @@ describe('useEmployeeDeliveryReceiptInventory', () => {
     // Call refresh
     result.current.refresh();
 
-    expect(fetchEmployeeDeliveryReceiptInventory).toHaveBeenCalledTimes(2);
+    expect(mockFetchEmployeeDeliveryReceiptInventory).toHaveBeenCalledTimes(2);
   });
 });

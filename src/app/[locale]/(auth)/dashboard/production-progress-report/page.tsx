@@ -10,12 +10,12 @@ import { Suspense, useState } from 'react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductionProgressPivotProvider } from '@/contexts/ProductionProgressPivotContext';
-import { ProductionProgressReportFilter } from '@/features/productionProgressReport/ProductionProgressReportFilter';
-import { ProductionProgressReportList } from '@/features/productionProgressReport/ProductionProgressReportList';
-import { ProductionProgressReportSkeleton } from '@/features/productionProgressReport/ProductionProgressReportSkeleton';
 import { ProductionProgressPivotFilter } from '@/features/productionProgressPivot/ProductionProgressPivotFilter';
 import { ProductionProgressPivotList } from '@/features/productionProgressPivot/ProductionProgressPivotList';
 import { ProductionProgressPivotSkeleton } from '@/features/productionProgressPivot/ProductionProgressPivotSkeleton';
+import { ProductionProgressReportFilter } from '@/features/productionProgressReport/ProductionProgressReportFilter';
+import { ProductionProgressReportList } from '@/features/productionProgressReport/ProductionProgressReportList';
+import { ProductionProgressReportSkeleton } from '@/features/productionProgressReport/ProductionProgressReportSkeleton';
 
 export default function ProductionProgressReportPage(): JSX.Element {
   const t = useTranslations('productionProgressReport.page');

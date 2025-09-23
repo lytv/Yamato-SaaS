@@ -75,7 +75,6 @@ export function EmployeeDeliveryReceiptInventoryList({
     return `${rate.toFixed(2)}%`;
   }, []);
 
-
   // Loading state
   if (isLoading && data.length === 0) {
     return (

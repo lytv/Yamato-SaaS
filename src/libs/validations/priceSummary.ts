@@ -7,14 +7,14 @@
 import { z } from 'zod';
 
 import type {
-  PriceSummaryItem,
+  PriceStepData,
+  PriceSummaryExportParams,
+  PriceSummaryFilterOptions,
   PriceSummaryFilters,
   PriceSummaryFiltersWithOwner,
-  PriceSummaryFilterOptions,
+  PriceSummaryItem,
   PriceSummarySummary,
-  PriceStepData,
   PriceType,
-  PriceSummaryExportParams,
 } from '@/types/priceSummary';
 
 // ✅ Price type validation
@@ -180,13 +180,15 @@ export function normalizeSortOrder(order?: string): 'asc' | 'desc' {
 }
 
 export function validatePageNumber(page?: number | string): number {
-  const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
-  return !pageNum || isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
+  const pageNum = typeof page === 'string' ? Number.parseInt(page, 10) : page;
+  return !pageNum || Number.isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
 }
 
 export function validatePageLimit(limit?: number | string): number {
-  const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
-  if (!limitNum || isNaN(limitNum) || limitNum < 1) return 20;
+  const limitNum = typeof limit === 'string' ? Number.parseInt(limit, 10) : limit;
+  if (!limitNum || Number.isNaN(limitNum) || limitNum < 1) {
+    return 20;
+  }
   return Math.min(limitNum, 100); // Cap at 100
 }
 
@@ -201,7 +203,7 @@ export function createValidationError(field: string, message: string, code = 'VA
 
 export function formatValidationErrors(errors: z.ZodError): Record<string, string[]> {
   const formatted: Record<string, string[]> = {};
-  
+
   errors.errors.forEach((error) => {
     const field = error.path.join('.');
     if (!formatted[field]) {
@@ -209,7 +211,7 @@ export function formatValidationErrors(errors: z.ZodError): Record<string, strin
     }
     formatted[field].push(error.message);
   });
-  
+
   return formatted;
 }
 

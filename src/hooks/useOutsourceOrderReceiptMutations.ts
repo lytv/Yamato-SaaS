@@ -3,18 +3,19 @@
  * Generated based on existing pattern from useOutsourceOrderDetailMutations
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import type {
-  OutsourceOrderReceiptWithRelations,
   CreateOutsourceOrderReceiptInput,
-  UpdateOutsourceOrderReceiptInput,
   OutsourceOrderReceiptResponse,
+  OutsourceOrderReceiptWithRelations,
+  UpdateOutsourceOrderReceiptInput,
 } from '@/types/outsourceOrderReceipt';
-import { outsourceOrderReceiptKeys } from './useOutsourceOrderReceipts';
+
 import { outsourceOrderDetailKeys } from './useOutsourceOrderDetails';
+import { outsourceOrderReceiptKeys } from './useOutsourceOrderReceipts';
 
 const API_BASE = '/api/outsourceOrderReceipts';
 
@@ -27,7 +28,9 @@ export function useCreateOutsourceOrderReceipt() {
 
   return useMutation({
     mutationFn: async (data: Omit<CreateOutsourceOrderReceiptInput, 'ownerId'>): Promise<OutsourceOrderReceiptWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await fetch(API_BASE, {
         method: 'POST',
@@ -48,14 +51,16 @@ export function useCreateOutsourceOrderReceipt() {
     onSuccess: (newOutsourceOrderReceipt) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: outsourceOrderReceiptKeys.all });
-      
+
       // Optimistically update lists
       queryClient.setQueriesData(
         { queryKey: outsourceOrderReceiptKeys.lists() },
         (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-          if (!oldData) return [newOutsourceOrderReceipt];
+          if (!oldData) {
+            return [newOutsourceOrderReceipt];
+          }
           return [newOutsourceOrderReceipt, ...oldData];
-        }
+        },
       );
 
       // Update specific detail receipts list
@@ -63,17 +68,19 @@ export function useCreateOutsourceOrderReceipt() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderReceiptKeys.list({ outsourceOrderDetailId: newOutsourceOrderReceipt.outsourceOrderDetailId }) },
           (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-            if (!oldData) return [newOutsourceOrderReceipt];
+            if (!oldData) {
+              return [newOutsourceOrderReceipt];
+            }
             return [newOutsourceOrderReceipt, ...oldData];
-          }
+          },
         );
       }
 
       // Invalidate related data (parent detail stats)
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
       if (newOutsourceOrderReceipt.outsourceOrderDetailId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderReceiptKeys.statsByDetail(newOutsourceOrderReceipt.outsourceOrderDetailId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderReceiptKeys.statsByDetail(newOutsourceOrderReceipt.outsourceOrderDetailId),
         });
       }
 
@@ -93,14 +100,16 @@ export function useUpdateOutsourceOrderReceipt() {
   const { userId } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: number; 
-      data: UpdateOutsourceOrderReceiptInput 
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: UpdateOutsourceOrderReceiptInput;
     }): Promise<OutsourceOrderReceiptWithRelations> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await fetch(`${API_BASE}/${id}`, {
         method: 'PUT',
@@ -122,18 +131,20 @@ export function useUpdateOutsourceOrderReceipt() {
       // Update specific item in cache
       queryClient.setQueryData(
         outsourceOrderReceiptKeys.detail(id),
-        updatedOutsourceOrderReceipt
+        updatedOutsourceOrderReceipt,
       );
 
       // Update item in lists
       queryClient.setQueriesData(
         { queryKey: outsourceOrderReceiptKeys.lists() },
         (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-          if (!oldData) return oldData;
-          return oldData.map(item => 
-            item.id === id ? { ...item, ...updatedOutsourceOrderReceipt } : item
+          if (!oldData) {
+            return oldData;
+          }
+          return oldData.map(item =>
+            item.id === id ? { ...item, ...updatedOutsourceOrderReceipt } : item,
           );
-        }
+        },
       );
 
       // Update specific detail receipts list
@@ -141,11 +152,13 @@ export function useUpdateOutsourceOrderReceipt() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderReceiptKeys.list({ outsourceOrderDetailId: updatedOutsourceOrderReceipt.outsourceOrderDetailId }) },
           (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(item => 
-              item.id === id ? { ...item, ...updatedOutsourceOrderReceipt } : item
+            if (!oldData) {
+              return oldData;
+            }
+            return oldData.map(item =>
+              item.id === id ? { ...item, ...updatedOutsourceOrderReceipt } : item,
             );
-          }
+          },
         );
       }
 
@@ -153,8 +166,8 @@ export function useUpdateOutsourceOrderReceipt() {
       queryClient.invalidateQueries({ queryKey: outsourceOrderReceiptKeys.stats() });
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
       if (updatedOutsourceOrderReceipt.outsourceOrderDetailId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderReceiptKeys.statsByDetail(updatedOutsourceOrderReceipt.outsourceOrderDetailId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderReceiptKeys.statsByDetail(updatedOutsourceOrderReceipt.outsourceOrderDetailId),
         });
       }
 
@@ -175,11 +188,13 @@ export function useDeleteOutsourceOrderReceipt() {
 
   return useMutation({
     mutationFn: async (id: number): Promise<{ id: number; outsourceOrderDetailId?: number }> => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
       // Get current data to remember outsourceOrderDetailId for cache invalidation
       const currentData = queryClient.getQueryData<OutsourceOrderReceiptWithRelations>(
-        outsourceOrderReceiptKeys.detail(id)
+        outsourceOrderReceiptKeys.detail(id),
       );
 
       const response = await fetch(`${API_BASE}/${id}`, {
@@ -203,9 +218,11 @@ export function useDeleteOutsourceOrderReceipt() {
       queryClient.setQueriesData(
         { queryKey: outsourceOrderReceiptKeys.lists() },
         (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-          if (!oldData) return oldData;
+          if (!oldData) {
+            return oldData;
+          }
           return oldData.filter(item => item.id !== deletedId);
-        }
+        },
       );
 
       // Remove from specific detail receipts list
@@ -213,9 +230,11 @@ export function useDeleteOutsourceOrderReceipt() {
         queryClient.setQueriesData(
           { queryKey: outsourceOrderReceiptKeys.list({ outsourceOrderDetailId }) },
           (oldData: OutsourceOrderReceiptWithRelations[] | undefined) => {
-            if (!oldData) return oldData;
+            if (!oldData) {
+              return oldData;
+            }
             return oldData.filter(item => item.id !== deletedId);
-          }
+          },
         );
       }
 
@@ -223,8 +242,8 @@ export function useDeleteOutsourceOrderReceipt() {
       queryClient.invalidateQueries({ queryKey: outsourceOrderReceiptKeys.stats() });
       queryClient.invalidateQueries({ queryKey: outsourceOrderDetailKeys.all });
       if (outsourceOrderDetailId) {
-        queryClient.invalidateQueries({ 
-          queryKey: outsourceOrderReceiptKeys.statsByDetail(outsourceOrderDetailId) 
+        queryClient.invalidateQueries({
+          queryKey: outsourceOrderReceiptKeys.statsByDetail(outsourceOrderDetailId),
         });
       }
 

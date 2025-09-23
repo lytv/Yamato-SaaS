@@ -101,16 +101,16 @@ export function ProductionProgressReportFilter({
   }, []);
 
   return (
-    <div className={`bg-white rounded-lg border shadow-sm ${className}`}>
+    <div className={`rounded-lg border bg-white shadow-sm ${className}`}>
       {/* Filter Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-2">
-          <Filter className="h-5 w-5 text-gray-500" />
+          <Filter className="size-5 text-gray-500" />
           <h3 className="font-medium text-gray-900">
             {t('title', { defaultValue: 'Filters' })}
           </h3>
           {hasActiveFilters && (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
               {activeFilterCount}
             </span>
           )}
@@ -124,7 +124,7 @@ export function ProductionProgressReportFilter({
               onClick={handleResetFilters}
               className="h-8 px-2 text-gray-500 hover:text-gray-700"
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
               {t('clear', { defaultValue: 'Clear' })}
             </Button>
           )}
@@ -135,21 +135,21 @@ export function ProductionProgressReportFilter({
             className="h-8 px-2"
           >
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              className={`size-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             />
           </Button>
         </div>
       </div>
 
       {/* Quick Search */}
-      <div className="p-4 border-b">
+      <div className="border-b p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
           <Input
             type="text"
             placeholder={t('search.placeholder', { defaultValue: 'Search entities, plans, products...' })}
             value={localFilters.search}
-            onChange={(e) => handleLocalFilterChange('search', e.target.value)}
+            onChange={e => handleLocalFilterChange('search', e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleApplyFilters();
@@ -162,8 +162,8 @@ export function ProductionProgressReportFilter({
 
       {/* Advanced Filters */}
       {isExpanded && (
-        <div className="p-4 space-y-4 bg-gray-50">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4 bg-gray-50 p-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Plan Filter */}
             <div className="space-y-2">
               <Label htmlFor="plan-filter">
@@ -171,7 +171,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.plan_code}
-                onValueChange={(value) => handleLocalFilterChange('plan_code', value)}
+                onValueChange={value => handleLocalFilterChange('plan_code', value)}
                 disabled={isLoadingOptions}
               >
                 <SelectTrigger id="plan-filter">
@@ -179,7 +179,7 @@ export function ProductionProgressReportFilter({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">{t('plan.all', { defaultValue: 'All Plans' })}</SelectItem>
-                  {options?.plans.map((plan) => (
+                  {options?.plans.map(plan => (
                     <SelectItem key={plan.code} value={plan.code}>
                       {plan.name}
                     </SelectItem>
@@ -195,7 +195,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.product_code}
-                onValueChange={(value) => handleLocalFilterChange('product_code', value)}
+                onValueChange={value => handleLocalFilterChange('product_code', value)}
                 disabled={isLoadingOptions}
               >
                 <SelectTrigger id="product-filter">
@@ -203,7 +203,7 @@ export function ProductionProgressReportFilter({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">{t('product.all', { defaultValue: 'All Products' })}</SelectItem>
-                  {options?.products.map((product) => (
+                  {options?.products.map(product => (
                     <SelectItem key={product.code} value={product.code}>
                       {product.name}
                     </SelectItem>
@@ -219,7 +219,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.production_step_code}
-                onValueChange={(value) => handleLocalFilterChange('production_step_code', value)}
+                onValueChange={value => handleLocalFilterChange('production_step_code', value)}
                 disabled={isLoadingOptions}
               >
                 <SelectTrigger id="step-filter">
@@ -227,7 +227,7 @@ export function ProductionProgressReportFilter({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">{t('step.all', { defaultValue: 'All Steps' })}</SelectItem>
-                  {options?.productionSteps.map((step) => (
+                  {options?.productionSteps.map(step => (
                     <SelectItem key={step.code} value={step.code}>
                       {step.name}
                     </SelectItem>
@@ -243,7 +243,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.report_type}
-                onValueChange={(value) => handleLocalFilterChange('report_type', value)}
+                onValueChange={value => handleLocalFilterChange('report_type', value)}
               >
                 <SelectTrigger id="report-type-filter">
                   <SelectValue placeholder={t('reportType.placeholder', { defaultValue: 'Select type...' })} />
@@ -263,7 +263,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.sortBy}
-                onValueChange={(value) => handleLocalFilterChange('sortBy', value)}
+                onValueChange={value => handleLocalFilterChange('sortBy', value)}
               >
                 <SelectTrigger id="sort-filter">
                   <SelectValue placeholder={t('sortBy.placeholder', { defaultValue: 'Select field...' })} />
@@ -285,7 +285,7 @@ export function ProductionProgressReportFilter({
               </Label>
               <Select
                 value={localFilters.sortOrder}
-                onValueChange={(value) => handleLocalFilterChange('sortOrder', value)}
+                onValueChange={value => handleLocalFilterChange('sortOrder', value)}
               >
                 <SelectTrigger id="sort-order-filter">
                   <SelectValue placeholder={t('sortOrder.placeholder', { defaultValue: 'Select order...' })} />
@@ -299,7 +299,7 @@ export function ProductionProgressReportFilter({
           </div>
 
           {/* Filter Actions */}
-          <div className="flex items-center justify-end gap-2 pt-4 border-t">
+          <div className="flex items-center justify-end gap-2 border-t pt-4">
             <Button
               variant="outline"
               size="sm"

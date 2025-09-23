@@ -30,7 +30,9 @@ export const NoteIdSchema = z.object({
 export const NoteListParamsSchema = z.object({
   page: z.union([z.string(), z.number(), z.undefined(), z.null()])
     .transform((val) => {
-      if (val === undefined || val === null) return 1;
+      if (val === undefined || val === null) {
+        return 1;
+      }
       const num = typeof val === 'string' ? Number.parseInt(val, 10) : val;
       return Number.isNaN(num) ? 1 : num;
     })
@@ -38,7 +40,9 @@ export const NoteListParamsSchema = z.object({
 
   limit: z.union([z.string(), z.number(), z.undefined(), z.null()])
     .transform((val) => {
-      if (val === undefined || val === null) return 10;
+      if (val === undefined || val === null) {
+        return 10;
+      }
       const num = typeof val === 'string' ? Number.parseInt(val, 10) : val;
       return Number.isNaN(num) ? 10 : num;
     })

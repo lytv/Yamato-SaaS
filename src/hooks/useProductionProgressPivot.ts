@@ -42,7 +42,6 @@ export function useProductionProgressPivot(
 ): UseProductionProgressPivotResult {
   const queryKey = ['production-progress-pivot', params];
 
-
   const {
     data,
     isLoading,
@@ -57,7 +56,7 @@ export function useProductionProgressPivot(
     refetchOnWindowFocus: true, // Refetch when user comes back to window
     refetchOnReconnect: true, // Refetch when network reconnects
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const handleRefetch = useCallback(() => {

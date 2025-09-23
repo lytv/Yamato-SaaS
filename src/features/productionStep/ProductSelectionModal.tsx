@@ -7,13 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types/product';
 
-interface ProductSelectionModalProps {
+type ProductSelectionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedProducts: Product[];
   onConfirm: (products: Product[]) => void;
   ownerId: string;
-}
+};
 
 export function ProductSelectionModal({
   isOpen,
@@ -60,7 +60,7 @@ export function ProductSelectionModal({
   }, [isOpen, selectedProducts, loadAllProducts]);
 
   const handleToggleProduct = (product: Product) => {
-    setLocalSelected(prev => {
+    setLocalSelected((prev) => {
       const isSelected = prev.some(p => p.id === product.id);
       if (isSelected) {
         return prev.filter(p => p.id !== product.id);
@@ -94,23 +94,28 @@ export function ProductSelectionModal({
     onClose();
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const searchLower = search.toLowerCase();
-    const matchesSearch = product.productName.toLowerCase().includes(searchLower) ||
-      product.productCode.toLowerCase().includes(searchLower);
+    const matchesSearch = product.productName.toLowerCase().includes(searchLower)
+      || product.productCode.toLowerCase().includes(searchLower);
     const matchesCategory = !category || product.category === category;
     return matchesSearch && matchesCategory;
   });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[80vh] max-w-4xl flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Chọn sản phẩm ({localSelected.length} đã chọn)</DialogTitle>
+          <DialogTitle>
+            Chọn sản phẩm (
+            {localSelected.length}
+            {' '}
+            đã chọn)
+          </DialogTitle>
         </DialogHeader>
-        
+
         {/* Search and Filters */}
-        <div className="flex gap-2 mb-4">
+        <div className="mb-4 flex gap-2">
           <input
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
@@ -119,7 +124,7 @@ export function ProductSelectionModal({
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="flex-1 px-3 py-2 border rounded-md"
+            className="flex-1 rounded-md border px-3 py-2"
           />
           <select
             value={category}
@@ -127,7 +132,7 @@ export function ProductSelectionModal({
               setCategory(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-2 border rounded-md"
+            className="rounded-md border px-3 py-2"
           >
             <option value="">Tất cả danh mục</option>
             {/* Add category options dynamically if needed */}
@@ -135,7 +140,7 @@ export function ProductSelectionModal({
         </div>
 
         {/* Bulk Actions */}
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="mb-4 flex flex-wrap gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -156,7 +161,9 @@ export function ProductSelectionModal({
             size="sm"
             onClick={handleSelectVisible}
           >
-            Chọn trang này ({filteredProducts.length})
+            Chọn trang này (
+            {filteredProducts.length}
+            )
           </Button>
           <Button
             variant="outline"
@@ -168,47 +175,75 @@ export function ProductSelectionModal({
         </div>
 
         {/* Product List */}
-        <div className="flex-1 overflow-y-auto border rounded-lg">
-          {isLoading ? (
-            <div className="p-4 text-center">Đang tải...</div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">Không tìm thấy sản phẩm</div>
-          ) : (
-            <div className="divide-y">
-              {filteredProducts.map((product) => {
-                const isSelected = localSelected.some(p => p.id === product.id);
-                return (
-                  <div
-                    key={product.id}
-                    className={`p-3 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${
-                      isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                    }`}
-                    onClick={() => handleToggleProduct(product)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleToggleProduct(product)}
-                      className="h-4 w-4"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">{product.productName}</div>
-                      <div className="text-sm text-gray-500 flex gap-4">
-                        <span>Mã: {product.productCode}</span>
-                        {product.category && <span>Danh mục: {product.category}</span>}
-                      </div>
-                    </div>
+        <div className="flex-1 overflow-y-auto rounded-lg border">
+          {isLoading
+            ? (
+                <div className="p-4 text-center">Đang tải...</div>
+              )
+            : filteredProducts.length === 0
+              ? (
+                  <div className="p-4 text-center text-gray-500">Không tìm thấy sản phẩm</div>
+                )
+              : (
+                  <div className="divide-y">
+                    {filteredProducts.map((product) => {
+                      const isSelected = localSelected.some(p => p.id === product.id);
+                      return (
+                        <div
+                          key={product.id}
+                          className={`flex cursor-pointer items-center gap-3 p-3 hover:bg-gray-50 ${
+                            isSelected ? 'border-l-4 border-blue-500 bg-blue-50' : ''
+                          }`}
+                          onClick={() => handleToggleProduct(product)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleToggleProduct(product);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleProduct(product)}
+                            className="size-4"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium">{product.productName}</div>
+                            <div className="flex gap-4 text-sm text-gray-500">
+                              <span>
+                                Mã:
+                                {product.productCode}
+                              </span>
+                              {product.category && (
+                                <span>
+                                  Danh mục:
+                                  {product.category}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Trang {page} - Hiển thị {filteredProducts.length} sản phẩm
+            Trang
+            {' '}
+            {page}
+            {' '}
+            - Hiển thị
+            {' '}
+            {filteredProducts.length}
+            {' '}
+            sản phẩm
             {pagination && ` (Tổng: ${pagination.total})`}
           </div>
           <div className="flex gap-2">
@@ -232,12 +267,15 @@ export function ProductSelectionModal({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+        <div className="mt-4 flex justify-end gap-2 border-t pt-4">
           <Button variant="outline" onClick={onClose}>
             Hủy
           </Button>
           <Button onClick={handleConfirm} className="bg-blue-600 text-white">
-            Xác nhận ({localSelected.length} sản phẩm)
+            Xác nhận (
+            {localSelected.length}
+            {' '}
+            sản phẩm)
           </Button>
         </div>
       </DialogContent>

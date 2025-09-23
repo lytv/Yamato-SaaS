@@ -82,7 +82,7 @@ export function NoteForm({ mode, note, onSuccess }: NoteFormProps): JSX.Element 
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" role="form">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">{t('note.form.title')}</Label>
           <Controller

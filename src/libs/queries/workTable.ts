@@ -1,6 +1,5 @@
 import { and, asc, avg, count, desc, eq, gte, ilike, lte, or, sum } from 'drizzle-orm';
 
-import { db } from '../DB';
 import { workTableSchema } from '@/models/Schema';
 import type {
   CreateWorkTableInput,
@@ -10,6 +9,8 @@ import type {
   WorkTableListParams,
   WorkTableMetrics,
 } from '@/types/workTable';
+
+import { db } from '../DB';
 
 export async function createWorkTable(data: CreateWorkTableInput): Promise<WorkTableDb> {
   const existingTable = await getWorkTableByCode(data.tableCode, data.ownerId);
@@ -60,7 +61,7 @@ export async function getWorkTablesByOwner(params: WorkTableListParams & { userI
     maxEfficiencyRating,
   } = params;
   const offset = (page - 1) * limit;
-  
+
   // Support both org-level and user-level access
   // Include data created with orgId (new) and userId (legacy)
   let whereConditions: any;
@@ -68,7 +69,7 @@ export async function getWorkTablesByOwner(params: WorkTableListParams & { userI
     // If we have both orgId and userId, include both in query
     whereConditions = or(
       eq(workTableSchema.ownerId, ownerId), // New org-level data
-      eq(workTableSchema.ownerId, userId)   // Legacy user-level data
+      eq(workTableSchema.ownerId, userId), // Legacy user-level data
     );
   } else {
     // Fallback to simple ownerId filter
@@ -76,18 +77,18 @@ export async function getWorkTablesByOwner(params: WorkTableListParams & { userI
   }
   if (search && search.trim() !== '') {
     const searchTerm = `%${search.trim()}%`;
-    
+
     // Build search condition based on our whereConditions
     let ownerCondition;
     if (userId && userId !== ownerId) {
       ownerCondition = or(
         eq(workTableSchema.ownerId, ownerId),
-        eq(workTableSchema.ownerId, userId)
+        eq(workTableSchema.ownerId, userId),
       );
     } else {
       ownerCondition = eq(workTableSchema.ownerId, ownerId);
     }
-    
+
     const searchCondition = and(
       ownerCondition,
       or(
@@ -210,14 +211,14 @@ export async function getWorkTableById(id: number, ownerId: string, userId?: str
       eq(workTableSchema.id, id),
       or(
         eq(workTableSchema.ownerId, ownerId), // New org-level data
-        eq(workTableSchema.ownerId, userId)   // Legacy user-level data
-      )
+        eq(workTableSchema.ownerId, userId), // Legacy user-level data
+      ),
     );
   } else {
     // Fallback to simple ownerId filter
     whereCondition = and(eq(workTableSchema.id, id), eq(workTableSchema.ownerId, ownerId));
   }
-  
+
   const [workTable] = await db
     .select()
     .from(workTableSchema)

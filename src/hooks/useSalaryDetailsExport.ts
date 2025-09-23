@@ -1,5 +1,5 @@
 /**
- * useSalaryDetailsExport Hook  
+ * useSalaryDetailsExport Hook
  * Manages salary details export functionality
  * Following established patterns from other export hooks
  */

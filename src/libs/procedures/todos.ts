@@ -7,13 +7,14 @@
 
 import { sql } from 'drizzle-orm';
 
-import { db } from '../DB';
 import {
   validateStoredProcedurePaginated,
   validateStoredProcedureStats,
   validateStoredProcedureTodo,
 } from '@/libs/validations/stored-procedures';
 import type { Todo, TodoStats } from '@/types/todo';
+
+import { db } from '../DB';
 
 // Types for function parameters
 export type CreateTodoData = {

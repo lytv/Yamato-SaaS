@@ -7,7 +7,7 @@
 import { useCallback, useState } from 'react';
 
 import { createEmployeeSalaryEntry, deleteEmployeeSalaryEntry, updateEmployeeSalaryEntry } from '@/libs/api/employeeSalaryEntries';
-import type { EmployeeSalaryEntry, EmployeeSalaryEntryFormData, UpdateEmployeeSalaryEntryInput, CreateEmployeeSalaryEntryInput } from '@/types/employeeSalaryEntry';
+import type { CreateEmployeeSalaryEntryInput, EmployeeSalaryEntry, EmployeeSalaryEntryFormData, UpdateEmployeeSalaryEntryInput } from '@/types/employeeSalaryEntry';
 
 type MutationState = {
   isCreating: boolean;

@@ -65,7 +65,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('Error fetching plans:', error);
+    // Xóa dòng: console.error('Error fetching plans:', error);
 
     if (error instanceof ZodError) {
       return Response.json(
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       message: 'Plan created successfully',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating plan:', error);
+    // Xóa dòng: console.error('Error creating plan:', error);
 
     if (error instanceof ZodError) {
       return Response.json(

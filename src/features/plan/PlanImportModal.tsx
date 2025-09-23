@@ -109,7 +109,9 @@ export function PlanImportModal({ isOpen, onClose, onSuccess }: PlanImportModalP
           {/* Import Info */}
           <div className="mb-4 rounded-md bg-blue-50 p-3">
             <p className="text-sm text-blue-700">
-              <strong>Import Format:</strong> The system will read plan data from row 1 column B.
+              <strong>Import Format:</strong>
+              {' '}
+              The system will read plan data from row 1 column B.
               Plan information will be extracted from "CẮT THÁNG MM.YYYY" format to create plan code, name, year and month.
             </p>
           </div>

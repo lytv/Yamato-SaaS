@@ -3,12 +3,12 @@
  * Following Yamato-SaaS patterns and TypeScript Type Safety Standards
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type {
   PriceSummaryFilterState,
-  UsePriceSummaryFiltersResult,
   PriceType,
+  UsePriceSummaryFiltersResult,
 } from '@/types/priceSummary';
 import { PRICE_SUMMARY_DEFAULTS } from '@/types/priceSummary';
 
@@ -41,19 +41,27 @@ export function usePriceSummaryFilters(): UsePriceSummaryFiltersResult {
 
   const hasActiveFilters = useMemo(() => {
     return (
-      filters.search !== initialFilterState.search ||
-      filters.product_code !== initialFilterState.product_code ||
-      filters.price_type !== initialFilterState.price_type ||
-      filters.show_only_with_pricing !== initialFilterState.show_only_with_pricing
+      filters.search !== initialFilterState.search
+      || filters.product_code !== initialFilterState.product_code
+      || filters.price_type !== initialFilterState.price_type
+      || filters.show_only_with_pricing !== initialFilterState.show_only_with_pricing
     );
   }, [filters]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.search !== initialFilterState.search && filters.search.trim() !== '') count++;
-    if (filters.product_code !== initialFilterState.product_code && filters.product_code.trim() !== '') count++;
-    if (filters.price_type !== initialFilterState.price_type) count++;
-    if (filters.show_only_with_pricing !== initialFilterState.show_only_with_pricing) count++;
+    if (filters.search !== initialFilterState.search && filters.search.trim() !== '') {
+      count++;
+    }
+    if (filters.product_code !== initialFilterState.product_code && filters.product_code.trim() !== '') {
+      count++;
+    }
+    if (filters.price_type !== initialFilterState.price_type) {
+      count++;
+    }
+    if (filters.show_only_with_pricing !== initialFilterState.show_only_with_pricing) {
+      count++;
+    }
     return count;
   }, [filters]);
 
@@ -77,10 +85,12 @@ export function usePriceSummaryFiltersWithUrl(): UsePriceSummaryFiltersResult & 
   const baseHook = usePriceSummaryFilters();
 
   const updateUrl = useCallback((filters: PriceSummaryFilterState) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     // Update URL parameters
     if (filters.search && filters.search.trim() !== '') {
       searchParams.set('search', filters.search);
@@ -123,10 +133,12 @@ export function usePriceSummaryFiltersWithUrl(): UsePriceSummaryFiltersResult & 
   }, []);
 
   const loadFromUrl = useCallback((): PriceSummaryFilterState => {
-    if (typeof window === 'undefined') return initialFilterState;
+    if (typeof window === 'undefined') {
+      return initialFilterState;
+    }
 
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     return {
       search: searchParams.get('search') || '',
       product_code: searchParams.get('product_code') || '',

@@ -3,9 +3,9 @@
  * Generated based on existing pattern from useOutsourceOrderDetailExport
  */
 
+import { useAuth } from '@clerk/nextjs';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from '@clerk/nextjs';
 
 import type { OutsourceOrderReceiptExportParams } from '@/types/outsourceOrderReceipt';
 
@@ -22,7 +22,7 @@ export function useOutsourceOrderReceiptExport() {
     }
 
     setIsExporting(true);
-    
+
     try {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -32,7 +32,7 @@ export function useOutsourceOrderReceiptExport() {
       });
 
       const response = await fetch(`${API_BASE}/export?${searchParams}`);
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Export failed');
@@ -41,7 +41,7 @@ export function useOutsourceOrderReceiptExport() {
       // Get filename from response headers or use default
       const contentDisposition = response.headers.get('Content-Disposition');
       let filename = params.filename || 'outsource_order_receipts_export';
-      
+
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
         if (match) {
@@ -63,11 +63,11 @@ export function useOutsourceOrderReceiptExport() {
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success(`Export completed: ${filename}`);
     } catch (error) {
       console.error('Export error:', error);

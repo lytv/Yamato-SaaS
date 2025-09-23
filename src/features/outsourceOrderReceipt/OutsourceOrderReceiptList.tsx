@@ -100,7 +100,7 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
       await deleteMutation.mutateAsync(id);
       setEditingItem(null);
       refetch();
-    } catch (error) {
+    } catch {
       // Xoá dòng: console.error('Delete error:', error);
     }
   };
@@ -308,165 +308,165 @@ export function OutsourceOrderReceiptList({ outsourceOrderDetailId }: OutsourceO
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredReceipts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="py-8 text-center">
-                  <div className="text-muted-foreground">
-                    {search || qualityFilter || statusFilter
-                      ? t('noReceiptsMatchFilters')
-                      : t('noReceiptsFound')}
-                  </div>
-                  {(!search && !qualityFilter && !statusFilter) && (
-                    <Button
-                      variant="outline"
-                      className="mt-2"
-                      onClick={() => setIsFormOpen(true)}
-                    >
-                      <Plus className="mr-2 size-4" />
-                      {t('createFirstReceipt')}
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredReceipts.map(receipt => (
-                <TableRow key={receipt.id} className="hover:bg-muted/50">
-                  {/* Receipt Info */}
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium">{receipt.receiptNumber}</div>
-                      {receipt.receiptTitle && (
-                        <div className="text-sm text-muted-foreground">{receipt.receiptTitle}</div>
-                      )}
-                      <div className="text-xs text-muted-foreground">
-                        {t('receivedOn')}
-                        :
-                        {' '}
-                        {formatDate(receipt.receiptDate)}
+            {filteredReceipts.length === 0
+              ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-8 text-center">
+                      <div className="text-muted-foreground">
+                        {search || qualityFilter || statusFilter
+                          ? t('noReceiptsMatchFilters')
+                          : t('noReceiptsFound')}
                       </div>
-                      {receipt.batchNumber && (
-                        <div className="text-xs">
-                          <Badge variant="outline" className="text-xs">
-                            {receipt.batchNumber}
-                          </Badge>
-                        </div>
+                      {(!search && !qualityFilter && !statusFilter) && (
+                        <Button
+                          variant="outline"
+                          className="mt-2"
+                          onClick={() => setIsFormOpen(true)}
+                        >
+                          <Plus className="mr-2 size-4" />
+                          {t('createFirstReceipt')}
+                        </Button>
                       )}
-                    </div>
-                  </TableCell>
-
-                  {/* Quantities */}
-                  <TableCell>
-                    <div className="space-y-1 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">
-                          {t('receivedQuantity')}
-                          :
-                        </span>
-                        <span className="ml-1 font-medium">{receipt.receiptQuantity}</span>
-                      </div>
-                      {(receipt.defectQuantity || 0) > 0 && (
-                        <div>
-                          <span className="text-muted-foreground">
-                            {t('defects')}
+                    </TableCell>
+                  </TableRow>
+                )
+              : (
+                  filteredReceipts.map(receipt => (
+                    <TableRow key={receipt.id} className="hover:bg-muted/50">
+                      {/* Receipt Info */}
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium">{receipt.receiptNumber}</div>
+                          {receipt.receiptTitle && (
+                            <div className="text-sm text-muted-foreground">{receipt.receiptTitle}</div>
+                          )}
+                          <div className="text-xs text-muted-foreground">
+                            {t('receivedOn')}
                             :
-                          </span>
-                          <span className="ml-1 font-medium text-red-600">{receipt.defectQuantity}</span>
+                            {' '}
+                            {formatDate(receipt.receiptDate)}
+                          </div>
+                          {receipt.batchNumber && (
+                            <div className="text-xs">
+                              <Badge variant="outline" className="text-xs">
+                                {receipt.batchNumber}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {(receipt.reworkQuantity || 0) > 0 && (
-                        <div>
-                          <span className="text-muted-foreground">
-                            {t('rework')}
-                            :
-                          </span>
-                          <span className="ml-1 font-medium text-yellow-600">{receipt.reworkQuantity}</span>
+                      </TableCell>
+
+                      {/* Quantities */}
+                      <TableCell>
+                        <div className="space-y-1 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">
+                              {t('receivedQuantity')}
+                              :
+                            </span>
+                            <span className="ml-1 font-medium">{receipt.receiptQuantity}</span>
+                          </div>
+                          {(receipt.defectQuantity || 0) > 0 && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                {t('defects')}
+                                :
+                              </span>
+                              <span className="ml-1 font-medium text-red-600">{receipt.defectQuantity}</span>
+                            </div>
+                          )}
+                          {(receipt.reworkQuantity || 0) > 0 && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                {t('rework')}
+                                :
+                              </span>
+                              <span className="ml-1 font-medium text-yellow-600">{receipt.reworkQuantity}</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-muted-foreground">
+                              {t('goodQuantity')}
+                              :
+                            </span>
+                            <span className="ml-1 font-medium text-green-600">
+                              {receipt.receiptQuantity - (receipt.defectQuantity || 0) - (receipt.reworkQuantity || 0)}
+                            </span>
+                          </div>
                         </div>
-                      )}
-                      <div>
-                        <span className="text-muted-foreground">
-                          {t('goodQuantity')}
-                          :
-                        </span>
-                        <span className="ml-1 font-medium text-green-600">
-                          {receipt.receiptQuantity - (receipt.defectQuantity || 0) - (receipt.reworkQuantity || 0)}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
+                      </TableCell>
 
-
-                  {/* People */}
-                  <TableCell>
-                    <div className="space-y-1 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">
-                          {t('receivedBy')}
-                          :
-                        </span>
-                        <div className="font-medium">{receipt.receivedByUser?.fullName || t('unknown')}</div>
-                      </div>
-                      {receipt.inspectedByUser && (
-                        <div>
-                          <span className="text-muted-foreground">
-                            {t('inspectedBy')}
-                            :
-                          </span>
-                          <div className="font-medium">{receipt.inspectedByUser.fullName}</div>
+                      {/* People */}
+                      <TableCell>
+                        <div className="space-y-1 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">
+                              {t('receivedBy')}
+                              :
+                            </span>
+                            <div className="font-medium">{receipt.receivedByUser?.fullName || t('unknown')}</div>
+                          </div>
+                          {receipt.inspectedByUser && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                {t('inspectedBy')}
+                                :
+                              </span>
+                              <div className="font-medium">{receipt.inspectedByUser.fullName}</div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </TableCell>
+                      </TableCell>
 
-
-                  {/* Actions */}
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          // Navigate to receipt detail view if needed
-                          console.log('View receipt:', receipt.id);
-                        }}
-                        className="size-8 p-0"
-                      >
-                        <Eye className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(receipt)}
-                        className="size-8 p-0"
-                      >
-                        <Edit className="size-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      {/* Actions */}
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="size-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                            onClick={() => {
+                              // Navigate to receipt detail view if needed
+                              // View receipt functionality to be implemented
+                            }}
+                            className="size-8 p-0"
                           >
-                            <Trash2 className="size-4" />
+                            <Eye className="size-4" />
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogTitle>{t('deleteReceipt')}</AlertDialogTitle>
-                          <div>
-                            {t('confirmDeleteReceipt', { receiptNumber: receipt.receiptNumber })}
-                            {t('deleteReceiptWarning')}
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="btn btn-outline">{t('cancel')}</button>
-                            <button type="button" onClick={() => handleDelete(receipt.id)} className="btn btn-destructive">{t('delete')}</button>
-                          </div>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(receipt)}
+                            className="size-8 p-0"
+                          >
+                            <Edit className="size-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="size-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogTitle>{t('deleteReceipt')}</AlertDialogTitle>
+                              <div>
+                                {t('confirmDeleteReceipt', { receiptNumber: receipt.receiptNumber })}
+                                {t('deleteReceiptWarning')}
+                              </div>
+                              <div className="flex justify-end gap-2">
+                                <button type="button" onClick={() => setIsFormOpen(false)} className="btn btn-outline">{t('cancel')}</button>
+                                <button type="button" onClick={() => handleDelete(receipt.id)} className="btn btn-destructive">{t('delete')}</button>
+                              </div>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
           </TableBody>
         </Table>
       </div>

@@ -4,11 +4,12 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
+import { sql } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
+
 import { db } from '@/libs/DB';
-import { sql } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,16 +28,16 @@ export async function GET(request: NextRequest) {
 
     // Validate required dates
     if (!startDate || !endDate) {
-      return NextResponse.json({ 
-        error: 'Start date and end date are required' 
+      return NextResponse.json({
+        error: 'Start date and end date are required',
       }, { status: 400 });
     }
 
     // Call the stored procedure
     const userIdsArray = userIds ? `{${userIds.join(',')}}` : null;
-    
+
     const result = await db.execute(
-      sql`SELECT * FROM calculate_user_salary_details(${userIdsArray}::TEXT[], ${startDate}::DATE, ${endDate}::DATE)`
+      sql`SELECT * FROM calculate_user_salary_details(${userIdsArray}::TEXT[], ${startDate}::DATE, ${endDate}::DATE)`,
     );
 
     let salaryDetails = result.rows.map((row: any) => ({
@@ -48,21 +49,21 @@ export async function GET(request: NextRequest) {
       product_name: row.product_name,
       step_code: row.step_code,
       step_name: row.step_name,
-      quantity: parseInt(row.quantity),
-      unit_price: parseFloat(row.unit_price),
-      total_amount: parseFloat(row.line_total),
-      created_at: row.created_at
+      quantity: Number.parseInt(row.quantity),
+      unit_price: Number.parseFloat(row.unit_price),
+      total_amount: Number.parseFloat(row.line_total),
+      created_at: row.created_at,
     }));
 
     // Apply search filter if provided
     if (search) {
       const searchLower = search.toLowerCase();
       salaryDetails = salaryDetails.filter((item: any) =>
-        item.full_name.toLowerCase().includes(searchLower) ||
-        item.product_code.toLowerCase().includes(searchLower) ||
-        item.product_name.toLowerCase().includes(searchLower) ||
-        item.step_code.toLowerCase().includes(searchLower) ||
-        item.step_name.toLowerCase().includes(searchLower)
+        item.full_name.toLowerCase().includes(searchLower)
+        || item.product_code.toLowerCase().includes(searchLower)
+        || item.product_name.toLowerCase().includes(searchLower)
+        || item.step_code.toLowerCase().includes(searchLower)
+        || item.step_name.toLowerCase().includes(searchLower),
       );
     }
 
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
 
     // Create workbook with employee summary only
     const workbook = XLSX.utils.book_new();
-    
+
     // Employee summary sheet
     const summaryWorksheet = XLSX.utils.json_to_sheet(summaryExportData);
     const summaryColumnWidths = [
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
     console.error('Error exporting employee summary:', error);
     return NextResponse.json(
       { error: 'Failed to export employee summary' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

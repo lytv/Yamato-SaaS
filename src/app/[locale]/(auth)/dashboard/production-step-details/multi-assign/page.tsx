@@ -174,7 +174,7 @@ export default function MultiAssignPage() {
               variant="outline"
               size="sm"
               onClick={() => setShowProductModal(true)}
-              className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+              className="border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
             >
               📋 Chọn từ danh sách đầy đủ
             </Button>
@@ -203,11 +203,17 @@ export default function MultiAssignPage() {
           <div className="mb-2 flex items-center justify-between">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllProducts} onChange={handleSelectAllProducts} />
-              {t('selectAllProducts')} (trang hiện tại)
+              {t('selectAllProducts')}
+              {' '}
+              (trang hiện tại)
             </label>
             {selectedProducts.length > 0 && (
-              <span className="text-sm text-blue-600 font-medium">
-                ✅ {selectedProducts.length} sản phẩm đã chọn
+              <span className="text-sm font-medium text-blue-600">
+                ✅
+                {' '}
+                {selectedProducts.length}
+                {' '}
+                sản phẩm đã chọn
               </span>
             )}
           </div>
@@ -262,7 +268,7 @@ export default function MultiAssignPage() {
               variant="outline"
               size="sm"
               onClick={() => setShowStepModal(true)}
-              className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
+              className="border-green-200 bg-green-50 text-green-600 hover:bg-green-100"
             >
               🔧 Chọn từ danh sách đầy đủ
             </Button>
@@ -291,11 +297,17 @@ export default function MultiAssignPage() {
           <div className="mb-2 flex items-center justify-between">
             <label className="flex cursor-pointer items-center gap-2">
               <input type="checkbox" checked={selectAllSteps} onChange={handleSelectAllSteps} />
-              {t('selectAllSteps')} (trang hiện tại)
+              {t('selectAllSteps')}
+              {' '}
+              (trang hiện tại)
             </label>
             {selectedSteps.length > 0 && (
-              <span className="text-sm text-green-600 font-medium">
-                ✅ {selectedSteps.length} công đoạn đã chọn
+              <span className="text-sm font-medium text-green-600">
+                ✅
+                {' '}
+                {selectedSteps.length}
+                {' '}
+                công đoạn đã chọn
               </span>
             )}
           </div>

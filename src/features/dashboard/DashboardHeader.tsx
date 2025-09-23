@@ -109,10 +109,10 @@ export const DashboardHeader = (props: {
                   {props.menu.flatMap(item =>
                     item.submenu
                       ? item.submenu.map(subitem => (
-                        <DropdownMenuItem key={subitem.href} asChild>
-                          <Link href={subitem.href}>{subitem.label}</Link>
-                        </DropdownMenuItem>
-                      ))
+                          <DropdownMenuItem key={subitem.href} asChild>
+                            <Link href={subitem.href}>{subitem.label}</Link>
+                          </DropdownMenuItem>
+                        ))
                       : item.href
                         ? [
                             <DropdownMenuItem key={item.href} asChild>

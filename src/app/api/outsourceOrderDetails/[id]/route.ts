@@ -34,7 +34,7 @@ export async function GET(
     const ownerId = orgId || userId;
 
     const id = Number.parseInt(params.id);
-    if (isNaN(id)) {
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid ID format', code: 'VALIDATION_ERROR' },
         { status: 400 },
@@ -88,7 +88,7 @@ export async function PUT(
     const ownerId = orgId || userId;
 
     const id = Number.parseInt(params.id);
-    if (isNaN(id)) {
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid ID format', code: 'VALIDATION_ERROR' },
         { status: 400 },
@@ -186,7 +186,7 @@ export async function DELETE(
     const ownerId = orgId || userId;
 
     const id = Number.parseInt(params.id);
-    if (isNaN(id)) {
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { success: false, error: 'Invalid ID format', code: 'VALIDATION_ERROR' },
         { status: 400 },

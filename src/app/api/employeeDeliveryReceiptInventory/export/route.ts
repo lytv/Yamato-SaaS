@@ -6,8 +6,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
-import { ZodError } from 'zod';
 import * as XLSX from 'xlsx';
+import { ZodError } from 'zod';
 
 import { exportEmployeeDeliveryReceiptInventory } from '@/libs/queries/employeeDeliveryReceiptInventory';
 import { validateEmployeeDeliveryReceiptInventoryExportParams } from '@/libs/validations/employeeDeliveryReceiptInventory';
@@ -157,17 +157,19 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     if (error instanceof ZodError) {
       return Response.json(
-        { 
-          success: false, 
-          error: 'Invalid export parameters', 
-          code: 'VALIDATION_ERROR', 
+        {
+          success: false,
+          error: 'Invalid export parameters',
+          code: 'VALIDATION_ERROR',
           details: error.errors,
           validationErrors: error.errors.reduce((acc, err) => {
             const field = err.path.join('.');
-            if (!acc[field]) acc[field] = [];
+            if (!acc[field]) {
+              acc[field] = [];
+            }
             acc[field].push(err.message);
             return acc;
-          }, {} as Record<string, string[]>)
+          }, {} as Record<string, string[]>),
         },
         { status: 400 },
       );

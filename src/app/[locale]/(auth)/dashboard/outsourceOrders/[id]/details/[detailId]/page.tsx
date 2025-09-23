@@ -24,10 +24,11 @@ export default function OutsourceOrderDetailOverviewPage({
 }: OutsourceOrderDetailOverviewPageProps) {
   const outsourceOrderId = Number.parseInt(params.id);
   const outsourceOrderDetailId = Number.parseInt(params.detailId);
+  const t = useTranslations('OutsourceOrderReceiptTabs');
 
   // Validate IDs
-  if (isNaN(outsourceOrderId) || outsourceOrderId <= 0
-    || isNaN(outsourceOrderDetailId) || outsourceOrderDetailId <= 0) {
+  if (Number.isNaN(outsourceOrderId) || outsourceOrderId <= 0
+    || Number.isNaN(outsourceOrderDetailId) || outsourceOrderDetailId <= 0) {
     return (
       <div className="container mx-auto py-6">
         <div className="rounded-lg border border-red-200 bg-red-50 p-6">
@@ -45,8 +46,6 @@ export default function OutsourceOrderDetailOverviewPage({
       </div>
     );
   }
-
-  const t = useTranslations('OutsourceOrderReceiptTabs');
 
   return (
     <div className="container mx-auto py-6">

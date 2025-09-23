@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           code: 'VALIDATION_ERROR',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -102,12 +102,12 @@ export async function POST(request: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const body = await request.json();
-    
+
     // Check if body is valid object
     if (!body || typeof body !== 'object') {
       return NextResponse.json(
@@ -116,16 +116,16 @@ export async function POST(request: NextRequest) {
           error: 'Invalid request body',
           code: 'VALIDATION_ERROR',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    
+
     // Use orgId for organization outsource orders, fallback to userId for personal outsource orders
     const ownerId = orgId || userId;
-    
+
     const validationInput = { ...body, ownerId, status: body.status || 'draft' };
     const validation = validateCreateOutsourceOrder(validationInput);
-    
+
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
           code: 'VALIDATION_ERROR',
           details: validation.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (error) {
     console.error('POST /api/outsourceOrders error:', error);
-    
+
     // Handle specific database errors
     if (error instanceof Error) {
       if (error.message.includes('unique constraint')) {
@@ -157,10 +157,10 @@ export async function POST(request: NextRequest) {
             error: 'A outsourceOrder with this code already exists',
             code: 'DUPLICATE_ERROR',
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
-      
+
       if (error.message.includes('foreign key constraint')) {
         return NextResponse.json(
           {
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
             error: 'Referenced entity not found',
             code: 'REFERENCE_ERROR',
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -179,8 +179,7 @@ export async function POST(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

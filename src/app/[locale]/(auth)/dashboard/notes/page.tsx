@@ -87,7 +87,14 @@ export default function NotesPage(): JSX.Element {
       {/* Modal */}
       {modal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={handleCloseModal} />
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={handleCloseModal}
+            onKeyDown={e => e.key === 'Escape' && handleCloseModal()}
+            role="button"
+            tabIndex={0}
+            aria-label="Close modal"
+          />
           <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold">

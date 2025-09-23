@@ -5,23 +5,23 @@
 
 import { OutsourceOrderDetailList } from '@/features/outsourceOrderDetail/OutsourceOrderDetailList';
 
-interface OutsourceOrderDetailsPageProps {
+type OutsourceOrderDetailsPageProps = {
   params: {
     id: string;
   };
-}
+};
 
-export default function OutsourceOrderDetailsPage({ 
-  params 
+export default function OutsourceOrderDetailsPage({
+  params,
 }: OutsourceOrderDetailsPageProps) {
-  const outsourceOrderId = parseInt(params.id);
+  const outsourceOrderId = Number.parseInt(params.id);
 
   // Validate ID
-  if (isNaN(outsourceOrderId) || outsourceOrderId <= 0) {
+  if (Number.isNaN(outsourceOrderId) || outsourceOrderId <= 0) {
     return (
       <div className="container mx-auto py-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h1 className="text-xl font-bold text-red-800 mb-2">Invalid Order ID</h1>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+          <h1 className="mb-2 text-xl font-bold text-red-800">Invalid Order ID</h1>
           <p className="text-red-600">
             The order ID provided is not valid. Please check the URL and try again.
           </p>

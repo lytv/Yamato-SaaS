@@ -1,22 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { useSalaryDetails } from '@/hooks/useSalaryDetails';
-import { useSalaryDetailsFilters } from '@/hooks/useSalaryDetailsFilters';
-import { useSalaryDetailsUsers } from '@/hooks/useSalaryDetailsUsers';
-import { useSalaryDetailsExport } from '@/hooks/useSalaryDetailsExport';
-import { useEmployeeSummaryExport } from '@/hooks/useEmployeeSummaryExport';
-import { SalaryDetailsFilter } from './SalaryDetailsFilter';
-import { SalaryDetailsSkeleton } from './SalaryDetailsSkeleton';
-import { DataTable } from '@/components/ui/data-table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ColumnDef } from '@tanstack/react-table';
-import { SalaryDetail, UserSummary } from '@/types/salaryDetails';
+import type { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
+import { useEmployeeSummaryExport } from '@/hooks/useEmployeeSummaryExport';
+import { useSalaryDetails } from '@/hooks/useSalaryDetails';
+import { useSalaryDetailsExport } from '@/hooks/useSalaryDetailsExport';
+import { useSalaryDetailsFilters } from '@/hooks/useSalaryDetailsFilters';
+import { useSalaryDetailsUsers } from '@/hooks/useSalaryDetailsUsers';
+import type { SalaryDetail, UserSummary } from '@/types/salaryDetails';
+
+import { SalaryDetailsFilter } from './SalaryDetailsFilter';
+import { SalaryDetailsSkeleton } from './SalaryDetailsSkeleton';
 
 // Utility function to safely format numbers
 const formatNumber = (value: number | null | undefined): string => {
@@ -32,7 +34,7 @@ export function SalaryDetailsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const { exportSalaryDetails, isExporting } = useSalaryDetailsExport();
   const { exportEmployeeSummary, isExporting: isExportingSummary } = useEmployeeSummaryExport();
-  
+
   // Fetch user options from API
   const { data: userOptions = [], isLoading: isLoadingUsers } = useSalaryDetailsUsers();
 
@@ -108,7 +110,7 @@ export function SalaryDetailsList() {
       ),
       cell: ({ row }) => (
         <div>
-          <div className="font-medium text-xs">{row.getValue('product_code')}</div>
+          <div className="text-xs font-medium">{row.getValue('product_code')}</div>
           <div className="text-xs text-muted-foreground">{row.original.product_name}</div>
         </div>
       ),
@@ -126,7 +128,7 @@ export function SalaryDetailsList() {
       ),
       cell: ({ row }) => (
         <div>
-          <div className="font-medium text-xs">{row.getValue('step_code')}</div>
+          <div className="text-xs font-medium">{row.getValue('step_code')}</div>
           <div className="text-xs text-muted-foreground">{row.original.step_name}</div>
         </div>
       ),
@@ -137,7 +139,7 @@ export function SalaryDetailsList() {
         <Button
           variant="ghost"
           onClick={() => toggleSort('quantity')}
-          className="h-8 px-2 justify-end"
+          className="h-8 justify-end px-2"
         >
           Số lượng
         </Button>
@@ -154,7 +156,7 @@ export function SalaryDetailsList() {
         <Button
           variant="ghost"
           onClick={() => toggleSort('unit_price')}
-          className="h-8 px-2 justify-end"
+          className="h-8 justify-end px-2"
         >
           Đơn giá
         </Button>
@@ -171,7 +173,7 @@ export function SalaryDetailsList() {
         <Button
           variant="ghost"
           onClick={() => toggleSort('line_total')}
-          className="h-8 px-2 justify-end"
+          className="h-8 justify-end px-2"
         >
           Thành tiền
         </Button>
@@ -221,11 +223,14 @@ export function SalaryDetailsList() {
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Lỗi khi tải dữ liệu: {error.message}</p>
-        <Button 
-          variant="outline" 
-          onClick={() => window.location.reload()} 
+      <div className="py-8 text-center">
+        <p className="text-red-500">
+          Lỗi khi tải dữ liệu:
+          {error.message}
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
           className="mt-4"
         >
           Thử lại
@@ -249,7 +254,7 @@ export function SalaryDetailsList() {
 
       {/* Summary Cards */}
       {data?.summary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -297,7 +302,10 @@ export function SalaryDetailsList() {
             </CardHeader>
             <CardContent>
               <div className="text-sm">
-                {format(new Date(data.summary.date_range.start_date), 'dd/MM/yyyy', { locale: vi })} - {' '}
+                {format(new Date(data.summary.date_range.start_date), 'dd/MM/yyyy', { locale: vi })}
+                {' '}
+                -
+                {' '}
                 {format(new Date(data.summary.date_range.end_date), 'dd/MM/yyyy', { locale: vi })}
               </div>
             </CardContent>
@@ -316,7 +324,7 @@ export function SalaryDetailsList() {
               onClick={handleEmployeeSummaryExport}
               disabled={isExportingSummary}
             >
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="mr-2 size-4" />
               {isExportingSummary ? 'Đang xuất...' : 'Xuất Excel'}
             </Button>
           </CardHeader>
@@ -325,8 +333,8 @@ export function SalaryDetailsList() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-2 font-semibold">Nhân viên</th>
-                    <th className="text-right p-2 font-semibold">Tổng tiền</th>
+                    <th className="p-2 text-left font-semibold">Nhân viên</th>
+                    <th className="p-2 text-right font-semibold">Tổng tiền</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,9 +378,17 @@ export function SalaryDetailsList() {
 
           {/* Pagination */}
           {data?.pagination && !filters.showAll && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Hiển thị {data.data.length} trong tổng số {data.pagination.total} bản ghi
+                Hiển thị
+                {' '}
+                {data.data.length}
+                {' '}
+                trong tổng số
+                {' '}
+                {data.pagination.total}
+                {' '}
+                bản ghi
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -381,11 +397,17 @@ export function SalaryDetailsList() {
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="size-4" />
                   Trước
                 </Button>
                 <span className="text-sm">
-                  Trang {currentPage} / {data.pagination.totalPages}
+                  Trang
+                  {' '}
+                  {currentPage}
+                  {' '}
+                  /
+                  {' '}
+                  {data.pagination.totalPages}
                 </span>
                 <Button
                   variant="outline"
@@ -394,7 +416,7 @@ export function SalaryDetailsList() {
                   disabled={!data.pagination.hasMore}
                 >
                   Sau
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="size-4" />
                 </Button>
               </div>
             </div>

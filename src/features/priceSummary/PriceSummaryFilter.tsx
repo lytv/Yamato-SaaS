@@ -6,17 +6,17 @@
 
 'use client';
 
-import { 
-  Search, 
-  Package, 
-  DollarSign, 
+import {
+  DollarSign,
   Filter,
-  X,
+  Package,
   RefreshCw,
+  Search,
   Settings,
+  X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { usePriceSummaryFilterOptions } from '@/hooks/usePriceSummaryFilterOptions';
-import type { 
+import type {
   PriceSummaryFilterState,
   PriceType,
 } from '@/types/priceSummary';
@@ -96,8 +96,8 @@ export function PriceSummaryFilter({
 
   // Handle sort order toggle
   const handleSortOrderToggle = () => {
-    onFiltersChange({ 
-      sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc' 
+    onFiltersChange({
+      sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc',
     });
   };
 
@@ -111,7 +111,7 @@ export function PriceSummaryFilter({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-blue-600" />
+            <Filter className="size-5 text-blue-600" />
             <CardTitle className="text-lg">
               {t('title', { defaultValue: 'Bộ lọc' })}
             </CardTitle>
@@ -128,7 +128,7 @@ export function PriceSummaryFilter({
               onClick={() => setIsExpanded(!isExpanded)}
               className="lg:hidden"
             >
-              <Settings className={`h-4 w-4 ${isExpanded ? 'rotate-90' : ''} transition-transform`} />
+              <Settings className={`size-4 ${isExpanded ? 'rotate-90' : ''} transition-transform`} />
             </Button>
             {hasActiveFilters && (
               <Button
@@ -138,20 +138,20 @@ export function PriceSummaryFilter({
                 disabled={isLoading}
                 className="text-red-600 hover:text-red-700"
               >
-                <X className="h-4 w-4 mr-1" />
+                <X className="mr-1 size-4" />
                 {t('reset', { defaultValue: 'Reset' })}
               </Button>
             )}
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className={`space-y-4 ${isExpanded ? 'block' : 'hidden lg:block'}`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
           {/* Search Input */}
           <div className="space-y-2">
-            <Label htmlFor="search" className="text-sm font-medium flex items-center gap-2">
-              <Search className="h-4 w-4 text-gray-500" />
+            <Label htmlFor="search" className="flex items-center gap-2 text-sm font-medium">
+              <Search className="size-4 text-gray-500" />
               {t('search.label', { defaultValue: 'Tìm kiếm' })}
             </Label>
             <div className="relative">
@@ -162,8 +162,8 @@ export function PriceSummaryFilter({
                 onChange={handleSearchInputChange}
                 onBlur={handleSearchApply}
                 onKeyDown={handleSearchKeyDown}
-                placeholder={t('search.placeholder', { 
-                  defaultValue: 'Tìm theo mã, tên sản phẩm...' 
+                placeholder={t('search.placeholder', {
+                  defaultValue: 'Tìm theo mã, tên sản phẩm...',
                 })}
                 className="pr-8"
                 disabled={isLoading}
@@ -173,10 +173,10 @@ export function PriceSummaryFilter({
                   variant="ghost"
                   size="sm"
                   onClick={handleSearchApply}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  className="absolute right-1 top-1/2 size-6 -translate-y-1/2 p-0"
                   title="Áp dụng tìm kiếm"
                 >
-                  <RefreshCw className="h-3 w-3" />
+                  <RefreshCw className="size-3" />
                 </Button>
               )}
             </div>
@@ -184,8 +184,8 @@ export function PriceSummaryFilter({
 
           {/* Product Filter */}
           <div className="space-y-2">
-            <Label htmlFor="product" className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-blue-500" />
+            <Label htmlFor="product" className="flex items-center gap-2 text-sm font-medium">
+              <Package className="size-4 text-blue-500" />
               {t('product.label', { defaultValue: 'Sản phẩm' })}
             </Label>
             <Select
@@ -194,15 +194,16 @@ export function PriceSummaryFilter({
               disabled={isLoading || isLoadingOptions}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t('product.placeholder', { 
-                  defaultValue: 'Chọn sản phẩm' 
-                })} />
+                <SelectValue placeholder={t('product.placeholder', {
+                  defaultValue: 'Chọn sản phẩm',
+                })}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
                   {t('product.all', { defaultValue: 'Tất cả sản phẩm' })}
                 </SelectItem>
-                {filterOptions.products.map((product) => (
+                {filterOptions.products.map(product => (
                   <SelectItem key={product.code} value={product.code}>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-gray-500">
@@ -218,8 +219,8 @@ export function PriceSummaryFilter({
 
           {/* Price Type Filter */}
           <div className="space-y-2">
-            <Label htmlFor="priceType" className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-500" />
+            <Label htmlFor="priceType" className="flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="size-4 text-green-500" />
               {t('priceType.label', { defaultValue: 'Loại đơn giá' })}
             </Label>
             <Select
@@ -231,7 +232,7 @@ export function PriceSummaryFilter({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PRICE_TYPE_OPTIONS.map((option) => (
+                {PRICE_TYPE_OPTIONS.map(option => (
                   <SelectItem key={option.value} value={option.value}>
                     <div className="space-y-1">
                       <div className="font-medium">{option.label}</div>
@@ -245,8 +246,8 @@ export function PriceSummaryFilter({
 
           {/* Sort Controls */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Settings className="h-4 w-4 text-purple-500" />
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <Settings className="size-4 text-purple-500" />
               {t('sort.label', { defaultValue: 'Sắp xếp' })}
             </Label>
             <div className="flex gap-2">
@@ -288,20 +289,20 @@ export function PriceSummaryFilter({
 
           {/* Pricing Filter Toggle */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-orange-500" />
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="size-4 text-orange-500" />
               {t('pricing.label', { defaultValue: 'Hiển thị' })}
             </Label>
-            <div className="flex items-center space-x-2 p-3 border rounded-lg">
+            <div className="flex items-center space-x-2 rounded-lg border p-3">
               <Switch
                 id="show_only_with_pricing"
                 checked={filters.show_only_with_pricing}
                 onCheckedChange={handlePricingFilterToggle}
                 disabled={isLoading}
               />
-              <Label 
-                htmlFor="show_only_with_pricing" 
-                className="text-sm cursor-pointer"
+              <Label
+                htmlFor="show_only_with_pricing"
+                className="cursor-pointer text-sm"
               >
                 {t('pricing.onlyWithPricing', { defaultValue: 'Chỉ có đơn giá' })}
               </Label>
@@ -311,59 +312,63 @@ export function PriceSummaryFilter({
 
         {/* Active Filters Display */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2 pt-2 border-t">
-            <span className="text-sm text-gray-500 mr-2">
+          <div className="flex flex-wrap gap-2 border-t pt-2">
+            <span className="mr-2 text-sm text-gray-500">
               {t('activeFilters', { defaultValue: 'Bộ lọc đang áp dụng:' })}
             </span>
-            
+
             {filters.search && (
               <Badge variant="outline" className="gap-1">
-                <Search className="h-3 w-3" />
+                <Search className="size-3" />
                 {filters.search}
                 <button
+                  type="button"
                   onClick={() => onFiltersChange({ search: '' })}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="size-2" />
                 </button>
               </Badge>
             )}
-            
+
             {filters.product_code && (
               <Badge variant="outline" className="gap-1">
-                <Package className="h-3 w-3" />
+                <Package className="size-3" />
                 {filterOptions.products.find(p => p.code === filters.product_code)?.name || filters.product_code}
                 <button
+                  type="button"
                   onClick={() => onFiltersChange({ product_code: '' })}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="size-2" />
                 </button>
               </Badge>
             )}
-            
+
             {filters.price_type !== 'factory_price' && (
               <Badge variant="outline" className="gap-1">
-                <DollarSign className="h-3 w-3" />
+                <DollarSign className="size-3" />
                 {PRICE_TYPE_OPTIONS.find(p => p.value === filters.price_type)?.label}
                 <button
+                  type="button"
                   onClick={() => onFiltersChange({ price_type: 'factory_price' })}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="size-2" />
                 </button>
               </Badge>
             )}
 
             {filters.show_only_with_pricing && (
               <Badge variant="outline" className="gap-1">
-                <DollarSign className="h-3 w-3" />
+                <DollarSign className="size-3" />
                 {t('pricing.onlyWithPricing', { defaultValue: 'Chỉ có đơn giá' })}
                 <button
+                  type="button"
                   onClick={() => onFiltersChange({ show_only_with_pricing: false })}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="size-2" />
                 </button>
               </Badge>
             )}

@@ -3,6 +3,8 @@
  * Following TDD Workflow Standards and Yamato-SaaS patterns
  */
 
+import { Buffer } from 'node:buffer';
+
 import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import * as XLSX from 'xlsx';
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     // Prepare export data with dynamic step columns
-    const exportData = data.map(item => {
+    const exportData = data.map((item) => {
       const baseData = {
         'Tên sản phẩm': item.product_name,
         'Mã kế hoạch': item.plan_code,
@@ -64,7 +66,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       for (let i = 1; i <= 5; i++) {
         const stepName = item[`step_name_${i}` as keyof typeof item] as string | null;
         const stepQuantity = item[`step_quantity_${i}` as keyof typeof item] as number;
-        
+
         if (stepName) {
           stepData[stepName] = stepQuantity;
         }
@@ -85,14 +87,14 @@ export async function GET(request: NextRequest): Promise<Response> {
       const headers = Object.keys(exportData[0] || {});
       const csvContent = [
         validatedParams.includeHeaders ? headers.join(',') : '',
-        ...exportData.map(row => 
-          headers.map(header => {
+        ...exportData.map(row =>
+          headers.map((header) => {
             const value = (row as Record<string, any>)[header];
             // Escape commas and quotes in CSV
             return typeof value === 'string' && (value.includes(',') || value.includes('"'))
-              ? `"${value.replace(/"/g, '""')}"` 
+              ? `"${value.replace(/"/g, '""')}"`
               : value;
-          }).join(',')
+          }).join(','),
         ),
       ].filter(Boolean).join('\n');
 

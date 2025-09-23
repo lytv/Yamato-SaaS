@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < body.length; i++) {
       const item = body[i];
-      
+
       if (!item || typeof item !== 'object') {
         validationErrors.push(`Item ${i + 1}: Invalid item format`);
         continue;
@@ -104,13 +104,15 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < validatedItems.length; i++) {
       try {
         const item = validatedItems[i];
-        if (!item) continue;
-        
+        if (!item) {
+          continue;
+        }
+
         const created = await createEmployeeSalaryEntry(item);
         createdItems.push(created);
       } catch (error) {
         console.error(`Error creating salary entry ${i + 1}:`, error);
-        
+
         if (error instanceof Error) {
           if (error.message.includes('unique constraint')) {
             errors.push(`Item ${i + 1}: A salary entry with this combination already exists`);
@@ -158,7 +160,6 @@ export async function POST(request: NextRequest) {
       data: createdItems,
       message: `Successfully created ${createdItems.length} salary entries`,
     }, { status: 201 });
-
   } catch (error) {
     console.error('POST /api/employeeSalaryEntries/bulk error:', error);
 
