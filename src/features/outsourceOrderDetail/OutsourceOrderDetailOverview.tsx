@@ -41,7 +41,7 @@ import type {
   OutsourceOrderDetailFormData,
   OutsourceOrderDetailWithRelations,
 } from '@/types/outsourceOrderDetail';
-import { exactMatchVietnameseText, searchVietnameseText } from '@/utils/Helpers';
+import { searchVietnameseText } from '@/utils/Helpers';
 
 import { OutsourceOrderBulkForm } from '../outsourceOrder/OutsourceOrderBulkForm';
 import { OutsourceOrderReceiptForm } from '../outsourceOrderReceipt/OutsourceOrderReceiptForm';
@@ -87,6 +87,8 @@ export function OutsourceOrderDetailOverview() {
   const [showCreateReceiptForm, setShowCreateReceiptForm] = useState(false);
   const [selectedItemForReceipt, setSelectedItemForReceipt] = useState<OutsourceOrderDetailWithRelations | null>(null);
   const [showSummaryView, setShowSummaryView] = useState(false);
+
+  // Auto-select related state temporarily removed for testing
 
   // Group by options state - default all enabled
   const [groupByOptions, setGroupByOptions] = useState({
@@ -179,42 +181,11 @@ export function OutsourceOrderDetailOverview() {
 
   const summaryData = groupSummaryData();
 
-  // Auto-select logic for quick search
-  useEffect(() => {
-    if (!relationOptions) {
-      return;
-    }
+  // Create typing handlers temporarily disabled for testing
 
-    // Auto-select assigned user only when exact match (with Vietnamese support)
-    if (tempFilters.assignedUserSearch) {
-      const matchedUser = relationOptions.assignedUsers?.find(
-        user => exactMatchVietnameseText(user, ['shortcut', 'fullName'], tempFilters.assignedUserSearch || ''),
-      );
-      if (matchedUser && tempFilters.assignedToUserId !== matchedUser.id) {
-        setTempAssignedToUserId(matchedUser.id);
-      }
-    }
+  // Auto-select logic temporarily disabled for testing
 
-    // Auto-select product only when exact match (with Vietnamese support)
-    if (tempFilters.productSearch) {
-      const matchedProduct = relationOptions.products?.find(
-        product => exactMatchVietnameseText(product, ['productName', 'productCode', 'category'], tempFilters.productSearch || ''),
-      );
-      if (matchedProduct && tempFilters.productId !== matchedProduct.id) {
-        setTempProductId(matchedProduct.id);
-      }
-    }
-
-    // Auto-select production step only when exact match (with Vietnamese support)
-    if (tempFilters.productionStepSearch) {
-      const matchedStep = relationOptions.productionSteps?.find(
-        step => exactMatchVietnameseText(step, ['stepName', 'stepCode', 'filmSequence'], tempFilters.productionStepSearch || ''),
-      );
-      if (matchedStep && tempFilters.productionStepId !== matchedStep.id) {
-        setTempProductionStepId(matchedStep.id);
-      }
-    }
-  }, [tempFilters.assignedUserSearch, tempFilters.productSearch, tempFilters.productionStepSearch, relationOptions, tempFilters.assignedToUserId, tempFilters.productId, tempFilters.productionStepId, setTempAssignedToUserId, setTempProductId, setTempProductionStepId]);
+  // Cleanup typing timeouts temporarily disabled for testing
 
   const handleCreateReceipt = (item: OutsourceOrderDetailWithRelations) => {
     setSelectedItemForReceipt(item);
